@@ -1,0 +1,30 @@
+{
+ "id": "chk-aiagvda-onesided-b",
+ "module": "B",
+ "kind": "capability",
+ "title": "AIAG & VDA SPC Manual Fig. 7-6, location near the tolerance limit",
+ "source": "S-A2 AIAG & VDA SPC Manual (2026) p. 48: xbar 0.250, s 0.0292, Cp* 2.28, Cpk 1.71",
+ "setting": "n = 100 constructed values standardized to xbar = 0.250 mm, s = 0.0292 mm",
+ "params": {
+  "usl": 0.4,
+  "lsl": null,
+  "natural_lower": 0.0,
+  "subgroup_size": 1,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "expected": {
+  "overall.Ppk": [
+   1.71,
+   0.005
+  ],
+  "overall.Pp_natural": [
+   2.28,
+   0.005
+  ]
+ },
+ "n_rows": 100
+}

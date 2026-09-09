@@ -1,0 +1,49 @@
+{
+ "id": "chk-nist-capability",
+ "module": "B",
+ "kind": "capability",
+ "title": "NIST 6.1.6 capability example",
+ "source": "S-B1 NIST/SEMATECH e-Handbook 6.1.6 (USL 20, LSL 8, xbar 16, s 2)",
+ "setting": "n = 100 constructed values standardized to xbar = 16, s = 2 exactly",
+ "params": {
+  "usl": 20.0,
+  "lsl": 8.0,
+  "target": 14.0,
+  "subgroup_size": 1
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "expected": {
+  "overall.mean": [
+   16.0,
+   1e-09
+  ],
+  "overall.s": [
+   2.0,
+   1e-09
+  ],
+  "overall.Pp": [
+   1.0,
+   1e-09
+  ],
+  "overall.Ppk": [
+   0.6667,
+   5e-05
+  ],
+  "overall.Ppu": [
+   0.6667,
+   5e-05
+  ],
+  "overall.Ppl": [
+   1.3333,
+   5e-05
+  ],
+  "overall.k": [
+   0.3333,
+   5e-05
+  ]
+ },
+ "n_rows": 100
+}

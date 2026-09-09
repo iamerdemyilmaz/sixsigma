@@ -1,0 +1,19 @@
+{
+ "id": "hb-ewma",
+ "module": "B",
+ "kind": "ewma",
+ "title": "harness: EWMA, lambda 0.2, exact limits",
+ "source": "constructed",
+ "setting": "cycle time s",
+ "params": {
+  "lambda": 0.2,
+  "L": 2.7,
+  "limits": "exact",
+  "baseline": 20
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

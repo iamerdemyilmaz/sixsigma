@@ -1,0 +1,46 @@
+{
+ "id": "chk-nist-ewma",
+ "module": "B",
+ "kind": "ewma",
+ "title": "NIST 6.3.2.4 EWMA chart example",
+ "source": "S-B4 NIST/SEMATECH e-Handbook 6.3.2.4 (20 values, lambda 0.3, EWMA0 50, s 2.0539)",
+ "setting": "textbook data",
+ "params": {
+  "lambda": 0.3,
+  "target": 50.0,
+  "sigma": 2.0539,
+  "L": 3.0,
+  "limits": "asymptotic"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "expected": {
+  "ucl": [
+   52.5884,
+   5e-05
+  ],
+  "lcl": [
+   47.4115,
+   0.0001
+  ],
+  "ewma[0]": [
+   50.6,
+   0.005
+  ],
+  "ewma[1]": [
+   49.52,
+   0.005
+  ],
+  "ewma[19]": [
+   51.99,
+   0.005
+  ],
+  "ewma[18]": [
+   51.94,
+   0.005
+  ]
+ },
+ "n_rows": 20
+}

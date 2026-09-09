@@ -1,0 +1,24 @@
+{
+ "id": "hb-factorial-2",
+ "module": "B",
+ "kind": "factorial",
+ "title": "harness: 2^2, 3 replicates",
+ "source": "constructed",
+ "setting": "pull strength N",
+ "params": {
+  "k": 2,
+  "replicates": 3,
+  "factors": [
+   "A",
+   "B"
+  ]
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "y"
+ ],
+ "n_rows": 12
+}

@@ -1,0 +1,18 @@
+{
+ "id": "hb-cusum",
+ "module": "B",
+ "kind": "cusum",
+ "title": "harness: tabular CUSUM, k 0.5, h 4",
+ "source": "constructed",
+ "setting": "cycle time s",
+ "params": {
+  "k": 0.5,
+  "h": 4.0,
+  "baseline": 20
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

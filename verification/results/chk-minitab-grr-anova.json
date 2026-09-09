@@ -1,0 +1,240 @@
+{
+ "id": "chk-minitab-grr-anova",
+ "kind": "grr_summary",
+ "params": {
+  "parts": 10,
+  "operators": 3,
+  "replicates": 3,
+  "tolerance": 8.0,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "ms_full": {
+   "part": 9.81799,
+   "operator": 1.58363,
+   "interaction": 0.01994,
+   "repeatability": 0.04598
+  },
+  "df_full": {
+   "part": 9,
+   "operator": 2,
+   "interaction": 18,
+   "repeatability": 60
+  },
+  "ms_reduced": {
+   "part": 9.81799,
+   "operator": 1.58363,
+   "repeatability": 0.03997
+  },
+  "df_reduced": {
+   "part": 9,
+   "operator": 2,
+   "repeatability": 78
+  }
+ },
+ "source": "Minitab Statistical Software help, 'Example of Crossed Gage R&R Study' (10 parts, 3 operators, 3 replicates, tolerance 8); ANOVA table as published",
+ "results": {
+  "interaction_F": 0.43366681165724225,
+  "interaction_p": 0.9741230187708225,
+  "interaction_removed": true,
+  "alpha_remove": 0.05,
+  "anova_used": "reduced (interaction pooled into repeatability)",
+  "F_operator": 39.62046534901176,
+  "F_part": 245.63397548161123,
+  "p_operator": 1.335459992649663e-12,
+  "p_part": 2.0148211377258893e-53,
+  "varcomp": {
+   "repeatability": 0.03997,
+   "reproducibility": 0.05145533333333333,
+   "operator": 0.05145533333333333,
+   "interaction": 0.0,
+   "grr": 0.09142533333333333,
+   "part": 1.0864466666666666,
+   "total": 1.1778719999999998
+  },
+  "pct_contribution": {
+   "repeatability": 3.3934077726612064,
+   "reproducibility": 4.368499576637642,
+   "operator": 4.368499576637642,
+   "interaction": 0.0,
+   "grr": 7.761907349298849,
+   "part": 92.23809265070115,
+   "total": 100.0
+  },
+  "sd": {
+   "repeatability": 0.19992498593222408,
+   "reproducibility": 0.2268376805853325,
+   "operator": 0.2268376805853325,
+   "interaction": 0.0,
+   "grr": 0.3023662238632704,
+   "part": 1.0423275237019631,
+   "total": 1.0852981157267343
+  },
+  "study_var_k": 6.0,
+  "study_var": {
+   "repeatability": 1.1995499155933445,
+   "reproducibility": 1.361026083511995,
+   "operator": 1.361026083511995,
+   "interaction": 0.0,
+   "grr": 1.8141973431796223,
+   "part": 6.253965142211779,
+   "total": 6.511788694360406
+  },
+  "pct_study_var": {
+   "repeatability": 18.42120455524341,
+   "reproducibility": 20.900955903110372,
+   "operator": 20.900955903110372,
+   "interaction": 0.0,
+   "grr": 27.860199836503057,
+   "part": 96.0406646430048,
+   "total": 100.0
+  },
+  "tolerance": 8.0,
+  "pct_tolerance": {
+   "repeatability": 14.994373944916806,
+   "reproducibility": 17.01282604389994,
+   "operator": 17.01282604389994,
+   "interaction": 0.0,
+   "grr": 22.677466789745278,
+   "part": 78.17456427764724,
+   "total": 81.39735867950507
+  },
+  "ndc": 4,
+  "ndc_exact": 4.860601788261761
+ },
+ "expected_checks": [
+  {
+   "key": "interaction_p",
+   "expected": 0.974,
+   "got": 0.9741230187708225,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "key": "interaction_F",
+   "expected": 0.434,
+   "got": 0.43366681165724225,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "key": "varcomp.grr",
+   "expected": 0.09143,
+   "got": 0.09142533333333333,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "varcomp.repeatability",
+   "expected": 0.03997,
+   "got": 0.03997,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "varcomp.reproducibility",
+   "expected": 0.05146,
+   "got": 0.05145533333333333,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "varcomp.part",
+   "expected": 1.08645,
+   "got": 1.0864466666666666,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "varcomp.total",
+   "expected": 1.17788,
+   "got": 1.1778719999999998,
+   "tol": 1e-05,
+   "ok": true
+  },
+  {
+   "key": "pct_contribution.grr",
+   "expected": 7.76,
+   "got": 7.761907349298849,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_contribution.part",
+   "expected": 92.24,
+   "got": 92.23809265070115,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "sd.grr",
+   "expected": 0.30237,
+   "got": 0.3023662238632704,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "sd.part",
+   "expected": 1.04233,
+   "got": 1.0423275237019631,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "sd.total",
+   "expected": 1.0853,
+   "got": 1.0852981157267343,
+   "tol": 5e-06,
+   "ok": true
+  },
+  {
+   "key": "pct_study_var.grr",
+   "expected": 27.86,
+   "got": 27.860199836503057,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_study_var.repeatability",
+   "expected": 18.42,
+   "got": 18.42120455524341,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_study_var.reproducibility",
+   "expected": 20.9,
+   "got": 20.900955903110372,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_study_var.part",
+   "expected": 96.04,
+   "got": 96.0406646430048,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_tolerance.grr",
+   "expected": 22.68,
+   "got": 22.677466789745278,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "pct_tolerance.part",
+   "expected": 78.17,
+   "got": 78.17456427764724,
+   "tol": 0.005,
+   "ok": true
+  },
+  {
+   "key": "ndc",
+   "expected": 4,
+   "got": 4,
+   "tol": 0,
+   "ok": true
+  }
+ ],
+ "expected_ok": true
+}

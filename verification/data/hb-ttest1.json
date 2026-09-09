@@ -1,0 +1,17 @@
+{
+ "id": "hb-ttest1",
+ "module": "B",
+ "kind": "ttest1",
+ "title": "harness: one-sample t vs target",
+ "source": "constructed",
+ "setting": "fill weight g vs 250.0",
+ "params": {
+  "mu0": 250.0,
+  "alpha": 0.05
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

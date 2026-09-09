@@ -1,0 +1,20 @@
+{
+ "id": "hb-grr",
+ "module": "B",
+ "kind": "grr",
+ "title": "harness: crossed gauge R&R, 10 x 3 x 3",
+ "source": "constructed",
+ "setting": "bore diameter, tolerance 0.050 mm",
+ "params": {
+  "tolerance": 0.05,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05
+ },
+ "columns": [
+  "part",
+  "operator",
+  "trial",
+  "y"
+ ],
+ "n_rows": 90
+}

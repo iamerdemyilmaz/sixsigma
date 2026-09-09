@@ -1,0 +1,32 @@
+{
+ "id": "chk-nist-imr",
+ "module": "B",
+ "kind": "imr",
+ "title": "NIST 6.3.2.2 individuals chart example",
+ "source": "S-B3 NIST/SEMATECH e-Handbook 6.3.2.2 (10 batches of flow rate)",
+ "setting": "textbook data",
+ "params": {},
+ "columns": [
+  "batch",
+  "x"
+ ],
+ "expected": {
+  "xbar": [
+   50.81,
+   1e-09
+  ],
+  "mrbar": [
+   1.8778,
+   5e-05
+  ],
+  "ucl_x": [
+   55.8041,
+   5e-05
+  ],
+  "lcl_x": [
+   45.8159,
+   5e-05
+  ]
+ },
+ "n_rows": 10
+}

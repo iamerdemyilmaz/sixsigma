@@ -1,0 +1,16 @@
+{
+ "id": "hb-regression",
+ "module": "B",
+ "kind": "regression",
+ "title": "harness: simple linear regression",
+ "source": "constructed",
+ "setting": "pull strength N vs solder temperature degC",
+ "params": {
+  "alpha": 0.05
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 20
+}

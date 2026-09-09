@@ -1,0 +1,16 @@
+{
+ "id": "hb-anova1",
+ "module": "B",
+ "kind": "anova1",
+ "title": "harness: one-way ANOVA, 4 machines",
+ "source": "constructed",
+ "setting": "cycle time s",
+ "params": {
+  "alpha": 0.05
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 32
+}

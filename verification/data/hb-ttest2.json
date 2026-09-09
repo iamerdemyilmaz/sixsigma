@@ -1,0 +1,17 @@
+{
+ "id": "hb-ttest2",
+ "module": "B",
+ "kind": "ttest2",
+ "title": "harness: two-sample t",
+ "source": "constructed",
+ "setting": "pull strength N, two fixtures",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 33
+}

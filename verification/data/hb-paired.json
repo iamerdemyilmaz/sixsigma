@@ -1,0 +1,17 @@
+{
+ "id": "hb-paired",
+ "module": "B",
+ "kind": "paired",
+ "title": "harness: paired t, before/after",
+ "source": "constructed",
+ "setting": "flatness mm before and after fixture change",
+ "params": {
+  "alpha": 0.05
+ },
+ "columns": [
+  "pair",
+  "before",
+  "after"
+ ],
+ "n_rows": 12
+}

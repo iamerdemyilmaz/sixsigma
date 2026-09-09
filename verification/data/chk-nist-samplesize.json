@@ -1,0 +1,31 @@
+{
+ "id": "chk-nist-samplesize",
+ "module": "B",
+ "kind": "samplesize",
+ "title": "NIST 7.2.2.2 sample size example",
+ "source": "S-B8 NIST/SEMATECH e-Handbook 7.2.2.2 (one-sided, alpha 0.05, beta 0.10, delta = sigma)",
+ "setting": "parameters only",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "delta": 1.0,
+  "sigma": 1.0,
+  "sides": 1,
+  "design": "one-sample"
+ },
+ "columns": null,
+ "expected": {
+  "n_z_exact": [
+   8.567,
+   0.004
+  ],
+  "n_z": [
+   9,
+   0
+  ],
+  "n_t": [
+   11,
+   0
+  ]
+ }
+}

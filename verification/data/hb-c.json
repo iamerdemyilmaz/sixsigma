@@ -1,0 +1,14 @@
+{
+ "id": "hb-c",
+ "module": "B",
+ "kind": "c",
+ "title": "harness: c chart",
+ "source": "constructed",
+ "setting": "solder defects per board",
+ "params": {},
+ "columns": [
+  "sample",
+  "defects"
+ ],
+ "n_rows": 30
+}

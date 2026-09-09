@@ -1,0 +1,30 @@
+{
+ "id": "chk-aiagvda-onesided-a",
+ "module": "B",
+ "kind": "capability",
+ "title": "AIAG & VDA SPC Manual Fig. 7-6, location near natural limit",
+ "source": "S-A2 AIAG & VDA SPC Manual (2026) p. 48: xbar 0.166, s 0.0457, Cp* 1.46, Cpk 1.71 (upper limit inferred as 0.40 mm, natural lower limit 0)",
+ "setting": "n = 100 constructed values standardized to xbar = 0.166 mm, s = 0.0457 mm",
+ "params": {
+  "usl": 0.4,
+  "lsl": null,
+  "natural_lower": 0.0,
+  "subgroup_size": 1,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "expected": {
+  "overall.Ppk": [
+   1.71,
+   0.005
+  ],
+  "overall.Pp_natural": [
+   1.46,
+   0.005
+  ]
+ },
+ "n_rows": 100
+}

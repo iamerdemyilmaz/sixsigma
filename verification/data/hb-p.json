@@ -1,0 +1,15 @@
+{
+ "id": "hb-p",
+ "module": "B",
+ "kind": "p",
+ "title": "harness: p chart, variable n",
+ "source": "constructed",
+ "setting": "leak-test rejects per shift",
+ "params": {},
+ "columns": [
+  "sample",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 25
+}

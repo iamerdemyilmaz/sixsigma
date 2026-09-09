@@ -1,0 +1,26 @@
+{
+ "id": "hb-c",
+ "kind": "c",
+ "params": {},
+ "source": "constructed",
+ "results": {
+  "k": 30,
+  "cbar": 5.633333333333334,
+  "ucl": 12.753726580900494,
+  "lcl": 0.0,
+  "rules": {
+   "we1": [],
+   "we2": [],
+   "we3": [],
+   "we4": [],
+   "n2": [],
+   "n3": [],
+   "n4": [],
+   "n7": [],
+   "n8": []
+  },
+  "beyond": []
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

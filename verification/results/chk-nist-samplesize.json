@@ -1,0 +1,52 @@
+{
+ "id": "chk-nist-samplesize",
+ "kind": "samplesize",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "delta": 1.0,
+  "sigma": 1.0,
+  "sides": 1,
+  "design": "one-sample"
+ },
+ "source": "S-B8 NIST/SEMATECH e-Handbook 7.2.2.2 (one-sided, alpha 0.05, beta 0.10, delta = sigma)",
+ "results": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "power": 0.9,
+  "delta": 1.0,
+  "sigma": 1.0,
+  "sides": 1,
+  "design": "one-sample",
+  "z_alpha": 1.6448536269514722,
+  "z_beta": 1.2815515655446004,
+  "n_z_exact": 8.563847350667974,
+  "n_z": 9,
+  "n_t": 11,
+  "info_power_nct": 0.9244890652753142
+ },
+ "expected_checks": [
+  {
+   "key": "n_z_exact",
+   "expected": 8.567,
+   "got": 8.563847350667974,
+   "tol": 0.004,
+   "ok": true
+  },
+  {
+   "key": "n_z",
+   "expected": 9,
+   "got": 9,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "key": "n_t",
+   "expected": 11,
+   "got": 11,
+   "tol": 0,
+   "ok": true
+  }
+ ],
+ "expected_ok": true
+}

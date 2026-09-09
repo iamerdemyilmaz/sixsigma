@@ -1,0 +1,21 @@
+{
+ "id": "hb-imr",
+ "module": "B",
+ "kind": "capability",
+ "title": "harness: fill weight I-MR with one special cause",
+ "source": "constructed",
+ "setting": "fill weight 250 g nominal, spec 248 to 254 g, scale to 0.1 g",
+ "params": {
+  "usl": 254.0,
+  "lsl": 248.0,
+  "target": 250.0,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "g"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

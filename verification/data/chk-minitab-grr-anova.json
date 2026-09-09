@@ -1,0 +1,117 @@
+{
+ "id": "chk-minitab-grr-anova",
+ "module": "B",
+ "kind": "grr_summary",
+ "title": "Minitab crossed gauge R&R example, from the published ANOVA table",
+ "source": "Minitab Statistical Software help, 'Example of Crossed Gage R&R Study' (10 parts, 3 operators, 3 replicates, tolerance 8); ANOVA table as published",
+ "setting": "published mean squares; the raw data file is not reproduced on the page",
+ "params": {
+  "parts": 10,
+  "operators": 3,
+  "replicates": 3,
+  "tolerance": 8.0,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "ms_full": {
+   "part": 9.81799,
+   "operator": 1.58363,
+   "interaction": 0.01994,
+   "repeatability": 0.04598
+  },
+  "df_full": {
+   "part": 9,
+   "operator": 2,
+   "interaction": 18,
+   "repeatability": 60
+  },
+  "ms_reduced": {
+   "part": 9.81799,
+   "operator": 1.58363,
+   "repeatability": 0.03997
+  },
+  "df_reduced": {
+   "part": 9,
+   "operator": 2,
+   "repeatability": 78
+  }
+ },
+ "columns": null,
+ "expected": {
+  "interaction_p": [
+   0.974,
+   0.0005
+  ],
+  "interaction_F": [
+   0.434,
+   0.0005
+  ],
+  "varcomp.grr": [
+   0.09143,
+   5e-06
+  ],
+  "varcomp.repeatability": [
+   0.03997,
+   5e-06
+  ],
+  "varcomp.reproducibility": [
+   0.05146,
+   5e-06
+  ],
+  "varcomp.part": [
+   1.08645,
+   5e-06
+  ],
+  "varcomp.total": [
+   1.17788,
+   1e-05
+  ],
+  "pct_contribution.grr": [
+   7.76,
+   0.005
+  ],
+  "pct_contribution.part": [
+   92.24,
+   0.005
+  ],
+  "sd.grr": [
+   0.30237,
+   5e-06
+  ],
+  "sd.part": [
+   1.04233,
+   5e-06
+  ],
+  "sd.total": [
+   1.0853,
+   5e-06
+  ],
+  "pct_study_var.grr": [
+   27.86,
+   0.005
+  ],
+  "pct_study_var.repeatability": [
+   18.42,
+   0.005
+  ],
+  "pct_study_var.reproducibility": [
+   20.9,
+   0.005
+  ],
+  "pct_study_var.part": [
+   96.04,
+   0.005
+  ],
+  "pct_tolerance.grr": [
+   22.68,
+   0.005
+  ],
+  "pct_tolerance.part": [
+   78.17,
+   0.005
+  ],
+  "ndc": [
+   4,
+   0
+  ]
+ }
+}

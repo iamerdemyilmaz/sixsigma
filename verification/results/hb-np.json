@@ -1,0 +1,30 @@
+{
+ "id": "hb-np",
+ "kind": "np",
+ "params": {
+  "n": 200
+ },
+ "source": "constructed",
+ "results": {
+  "k": 25,
+  "n": 200,
+  "npbar": 8.56,
+  "pbar": 0.042800000000000005,
+  "ucl": 17.147356287007078,
+  "lcl": 0.0,
+  "rules": {
+   "we1": [],
+   "we2": [],
+   "we3": [],
+   "we4": [],
+   "n2": [],
+   "n3": [],
+   "n4": [],
+   "n7": [],
+   "n8": []
+  },
+  "beyond": []
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

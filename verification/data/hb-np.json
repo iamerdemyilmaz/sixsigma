@@ -1,0 +1,16 @@
+{
+ "id": "hb-np",
+ "module": "B",
+ "kind": "np",
+ "title": "harness: np chart, n = 200",
+ "source": "constructed",
+ "setting": "rejects in fixed samples of 200",
+ "params": {
+  "n": 200
+ },
+ "columns": [
+  "sample",
+  "defectives"
+ ],
+ "n_rows": 25
+}

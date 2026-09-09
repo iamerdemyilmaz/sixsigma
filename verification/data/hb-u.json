@@ -1,0 +1,15 @@
+{
+ "id": "hb-u",
+ "module": "B",
+ "kind": "u",
+ "title": "harness: u chart, variable n",
+ "source": "constructed",
+ "setting": "defects per unit, batches of 8 to 14 units",
+ "params": {},
+ "columns": [
+  "sample",
+  "n",
+  "defects"
+ ],
+ "n_rows": 25
+}

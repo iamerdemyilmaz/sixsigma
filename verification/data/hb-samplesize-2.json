@@ -1,0 +1,17 @@
+{
+ "id": "hb-samplesize-2",
+ "module": "B",
+ "kind": "samplesize",
+ "title": "harness: two-sample t sample size",
+ "source": "constructed",
+ "setting": "delta 1.5, sigma 2.0, alpha 0.05 two-sided, power 0.9",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "delta": 1.5,
+  "sigma": 2.0,
+  "sides": 2,
+  "design": "two-sample"
+ },
+ "columns": null
+}

@@ -1,0 +1,74 @@
+{
+ "id": "chk-nist-imr",
+ "kind": "imr",
+ "params": {},
+ "source": "S-B3 NIST/SEMATECH e-Handbook 6.3.2.2 (10 batches of flow rate)",
+ "results": {
+  "n": 10,
+  "xbar": 50.81,
+  "mrbar": 1.8777777777777784,
+  "d2": 1.128,
+  "sigma_within": 1.664696611505123,
+  "ucl_x": 55.80408983451537,
+  "lcl_x": 45.81591016548463,
+  "ucl_mr": 6.134700000000002,
+  "lcl_mr": 0.0,
+  "D4": 3.267,
+  "mr": [
+   2.0,
+   2.299999999999997,
+   1.3999999999999986,
+   3.5,
+   3.4000000000000057,
+   1.3999999999999986,
+   0.20000000000000284,
+   1.2000000000000028,
+   1.5
+  ],
+  "rules_x": {
+   "we1": [],
+   "we2": [],
+   "we3": [],
+   "we4": [],
+   "n2": [],
+   "n3": [],
+   "n4": [],
+   "n7": [],
+   "n8": []
+  },
+  "beyond_mr": [],
+  "stable": true,
+  "stable_we": true
+ },
+ "expected_checks": [
+  {
+   "key": "xbar",
+   "expected": 50.81,
+   "got": 50.81,
+   "tol": 1e-09,
+   "ok": true
+  },
+  {
+   "key": "mrbar",
+   "expected": 1.8778,
+   "got": 1.8777777777777784,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "key": "ucl_x",
+   "expected": 55.8041,
+   "got": 55.80408983451537,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "key": "lcl_x",
+   "expected": 45.8159,
+   "got": 45.81591016548463,
+   "tol": 5e-05,
+   "ok": true
+  }
+ ],
+ "expected_ok": true
+}

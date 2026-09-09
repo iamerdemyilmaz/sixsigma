@@ -1,0 +1,30 @@
+{
+ "id": "hb-samplesize-2",
+ "kind": "samplesize",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "delta": 1.5,
+  "sigma": 2.0,
+  "sides": 2,
+  "design": "two-sample"
+ },
+ "source": "constructed",
+ "results": {
+  "alpha": 0.05,
+  "beta": 0.1,
+  "power": 0.9,
+  "delta": 1.5,
+  "sigma": 2.0,
+  "sides": 2,
+  "design": "two-sample",
+  "z_alpha": 1.959963984540054,
+  "z_beta": 1.2815515655446004,
+  "n_z_exact": 37.359726440677754,
+  "n_z": 38,
+  "n_t": 39,
+  "info_power_nct": 0.904870483053928
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

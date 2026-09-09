@@ -1,0 +1,108 @@
+{
+ "id": "chk-montgomery-etch",
+ "module": "B",
+ "kind": "factorial",
+ "title": "Montgomery plasma etch 2^3 factorial, 2 replicates",
+ "source": "Montgomery, Design and Analysis of Experiments, plasma etch example; data and effects as reproduced in UW STAT 502 lecture notes (secondary)",
+ "setting": "A gap, B gas flow, C power; response etch rate (angstrom/min)",
+ "params": {
+  "k": 3,
+  "replicates": 2,
+  "factors": [
+   "A",
+   "B",
+   "C"
+  ]
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "C",
+  "y"
+ ],
+ "expected": {
+  "effects.A": [
+   -101.625,
+   1e-09
+  ],
+  "effects.B": [
+   7.375,
+   1e-09
+  ],
+  "effects.C": [
+   306.125,
+   1e-09
+  ],
+  "effects.AB": [
+   -24.875,
+   1e-09
+  ],
+  "effects.AC": [
+   -153.625,
+   1e-09
+  ],
+  "effects.BC": [
+   -2.125,
+   1e-09
+  ],
+  "effects.ABC": [
+   5.625,
+   1e-09
+  ],
+  "anova.A.ss": [
+   41311,
+   0.5
+  ],
+  "anova.C.ss": [
+   374850,
+   0.5
+  ],
+  "anova.AC.ss": [
+   94403,
+   0.5
+  ],
+  "anova.residual.ss": [
+   18020,
+   0.5
+  ],
+  "anova.residual.df": [
+   8,
+   0
+  ],
+  "anova.A.F": [
+   18.34,
+   0.005
+  ],
+  "anova.C.F": [
+   166.41,
+   0.005
+  ],
+  "anova.AC.F": [
+   41.91,
+   0.005
+  ],
+  "anova.A.p": [
+   0.0026786,
+   5e-07
+  ],
+  "anova.C.p": [
+   1.233e-06,
+   5e-10
+  ],
+  "anova.AC.p": [
+   0.0001934,
+   5e-08
+  ],
+  "residual_sd": [
+   47.46,
+   0.005
+  ],
+  "r2": [
+   0.9661,
+   5e-05
+  ]
+ },
+ "n_rows": 16
+}
