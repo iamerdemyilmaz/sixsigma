@@ -1274,6 +1274,22 @@ def attribute_agreement(cols, params):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 6: rolled throughput yield of a chain of steps
+#   rty_chain  no CSV; params yields (list of step FTYs, 0 to 1)
+# --------------------------------------------------------------------------
+def rty_chain(params):
+    ys = [float(v) for v in params["yields"]]
+    k = len(ys)
+    rty = 1.0
+    cumulative = []
+    for y in ys:
+        rty *= y
+        cumulative.append(rty)
+    return {"yields": ys, "k": k, "rty": rty, "normalized_yield": rty ** (1.0 / k),
+            "total_dpu": -math.log(rty), "cumulative_rty": cumulative}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1362,6 +1378,8 @@ def compute_one(ex_id):
         res = dnom_chart(cols)
     elif kind == "attribute_agreement":
         res = attribute_agreement(cols, params)
+    elif kind == "rty_chain":
+        res = rty_chain(params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

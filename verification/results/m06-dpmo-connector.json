@@ -1,0 +1,24 @@
+{
+ "id": "m06-dpmo-connector",
+ "kind": "dpmo",
+ "params": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 5
+ },
+ "source": "constructed",
+ "results": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 5,
+  "dpmo": 4500.0,
+  "dpu": 0.0225,
+  "dpo": 0.0045,
+  "yield_fty": 0.9777512371933363,
+  "yield_from_dpmo": 0.9955,
+  "sigma_long_term": 2.6120541412292817,
+  "sigma_level_shifted": 4.112054141229281
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

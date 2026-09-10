@@ -830,6 +830,15 @@
   S.sigmaFromDpmo = function (dpmo, shift) { return S.normPpf(1 - dpmo / 1e6) + (shift === undefined ? 1.5 : shift); };
   S.dpmoFromSigma = function (sigma, shift) { return S.normSf(sigma - (shift === undefined ? 1.5 : shift)) * 1e6; };
   S.rty = function (yields) { let r = 1; for (const y of yields) r *= y; return r; };
+  // Rolled throughput yield of a chain of step yields, with the normalized
+  // (geometric mean) yield per step and the total DPU that implies.
+  S.rtyChain = function (params) {
+    const ys = params.yields.map(Number), k = ys.length;
+    const cumulative = [];
+    let rty = 1;
+    for (const y of ys) { rty *= y; cumulative.push(rty); }
+    return { yields: ys, k: k, rty: rty, normalized_yield: Math.pow(rty, 1 / k), total_dpu: -Math.log(rty), cumulative_rty: cumulative };
+  };
 
   return S;
 }));

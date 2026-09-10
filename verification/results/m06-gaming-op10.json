@@ -1,0 +1,24 @@
+{
+ "id": "m06-gaming-op10",
+ "kind": "dpmo",
+ "params": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 10
+ },
+ "source": "constructed",
+ "results": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 10,
+  "dpmo": 2250.0,
+  "dpu": 0.0225,
+  "dpo": 0.00225,
+  "yield_fty": 0.9777512371933363,
+  "yield_from_dpmo": 0.99775,
+  "sigma_long_term": 2.8408037178631984,
+  "sigma_level_shifted": 4.340803717863198
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

@@ -1,0 +1,43 @@
+{
+ "id": "m06-rty-chain",
+ "kind": "rty_chain",
+ "params": {
+  "yields": [
+   0.98,
+   0.95,
+   0.99,
+   0.97,
+   0.985
+  ],
+  "step_names": [
+   "Crimp",
+   "Insulate",
+   "Sub-assemble",
+   "Function test",
+   "Final inspection"
+  ]
+ },
+ "source": "constructed",
+ "results": {
+  "yields": [
+   0.98,
+   0.95,
+   0.99,
+   0.97,
+   0.985
+  ],
+  "k": 5,
+  "rty": 0.8806287104999999,
+  "normalized_yield": 0.9748966276085947,
+  "total_dpu": 0.12711918285332824,
+  "cumulative_rty": [
+   0.98,
+   0.9309999999999999,
+   0.9216899999999999,
+   0.8940392999999999,
+   0.8806287104999999
+  ]
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

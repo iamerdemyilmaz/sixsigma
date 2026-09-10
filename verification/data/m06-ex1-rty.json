@@ -1,0 +1,23 @@
+{
+ "id": "m06-ex1-rty",
+ "module": "06",
+ "kind": "rty_chain",
+ "title": "Exercise 1: rolled throughput yield, 4-step board assembly line",
+ "source": "constructed",
+ "setting": "place, reflow, test, conformal coat; first-time yield at each of 4 steps",
+ "params": {
+  "yields": [
+   0.995,
+   0.96,
+   0.98,
+   0.99
+  ],
+  "step_names": [
+   "Place",
+   "Reflow",
+   "Test",
+   "Conformal coat"
+  ]
+ },
+ "columns": null
+}

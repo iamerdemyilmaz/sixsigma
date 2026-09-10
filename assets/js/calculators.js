@@ -515,8 +515,9 @@
         }
         var ys = numsOf(yields.value).map(function (v) { return v > 1 ? v / 100 : v; });
         if (ys.length) {
-          var rty = S.rty(ys);
-          o.appendChild(table("C. Rolled throughput yield", ["Quantity", "Value"], [["Number of steps", String(ys.length)], ["Step yields", ys.map(function (v) { return fmt(100 * v, 2) + " %"; }).join(", ")], ["Rolled throughput yield = product of step yields", fmt(100 * rty, 2) + " %"], ["Normalised yield per step = RTY^(1/k)", fmt(100 * Math.pow(rty, 1 / ys.length), 2) + " %"], ["Total DPU implied = −ln(RTY)", fmt(-Math.log(rty), 4)]]));
+          var rc = S.rtyChain({ yields: ys });
+          o.appendChild(table("C. Rolled throughput yield", ["Quantity", "Value"], [["Number of steps", String(ys.length)], ["Step yields", ys.map(function (v) { return fmt(100 * v, 2) + " %"; }).join(", ")], ["Rolled throughput yield = product of step yields", fmt(100 * rc.rty, 2) + " %"], ["Normalised yield per step = RTY^(1/k)", fmt(100 * rc.normalized_yield, 2) + " %"], ["Total DPU implied = −ln(RTY)", fmt(rc.total_dpu, 4)]]));
+          o.appendChild(table("Cumulative yield after each step", ["Step", "Cumulative RTY"], rc.cumulative_rty.map(function (v, i) { return [String(i + 1), fmt(100 * v, 2) + " %"]; })));
         }
         o.appendChild(note("Sigma level = Z + 1.5 is a convention, not a measurement. Both values are shown so the reader always knows which one a report is quoting."));
       }

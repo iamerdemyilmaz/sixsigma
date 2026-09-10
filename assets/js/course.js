@@ -16,7 +16,7 @@
     { num: "03", slug: "03-defining-a-project", title: "Defining a project", built: true },
     { num: "04", slug: "04-measurement-systems", title: "Measurement systems analysis", built: true },
     { num: "05", slug: "05-data-collection", title: "Data collection and sampling", built: true },
-    { num: "06", slug: "06-sigma-level-dpmo", title: "Sigma level, DPMO, DPU, RTY", built: false },
+    { num: "06", slug: "06-sigma-level-dpmo", title: "Sigma level, DPMO, DPU, RTY", built: true },
     { num: "07", slug: "07-capability-1", title: "Process capability I", built: true },
     { num: "08", slug: "08-capability-2", title: "Process capability II", built: true },
     { num: "09", slug: "09-graphical-analysis", title: "Graphical analysis", built: false },

@@ -1357,6 +1357,61 @@ register(id="m05-ex1-rational", module="05", kind="capability",
          columns=["subgroup", "x"], rows=[[(i // 5) + 1, float(v)] for i, v in enumerate(_m05ev_rational)])
 
 
+# ---------------------------------------------------------------------------
+# Module 6: Sigma level, DPMO, DPU, RTY (prefix m06-)
+# New kind this module: rty_chain (params yields -> RTY, normalized yield,
+# total DPU, cumulative RTY). dpmo and sigma_table already exist.
+# ---------------------------------------------------------------------------
+# A 5-step wire-harness assembly line; yields match Calc.dpmo's own client-side
+# default so the calculator's out-of-the-box view matches this worked example.
+register(id="m06-rty-chain", module="06", kind="rty_chain",
+         title="Rolled throughput yield, 5-step wire-harness assembly line",
+         source="constructed", setting="crimp, insulate, sub-assemble, function test, final inspection; first-time yield at each of the 5 steps",
+         params={"yields": [0.98, 0.95, 0.99, 0.97, 0.985],
+                 "step_names": ["Crimp", "Insulate", "Sub-assemble", "Function test", "Final inspection"]},
+         columns=None, rows=None)
+
+# Connector defects: 2,400 units, 5 solder joints (opportunities) per unit.
+register(id="m06-dpmo-connector", module="06", kind="dpmo",
+         title="Connector solder-joint defects, 2,400 units, 5 opportunities per unit",
+         source="constructed", setting="wire-to-board connector, 5 solder joints inspected per unit (the defined opportunities), 2,400 units, 54 joint defects logged",
+         params={"defects": 54, "units": 2400, "opportunities": 5}, columns=None, rows=None)
+
+# The identical 54-defects-in-2,400-units count, recounted with 1 and with 10
+# opportunities per unit, to show the sigma level move without the process changing.
+register(id="m06-gaming-op1", module="06", kind="dpmo",
+         title="The same 54 defects in 2,400 units, counted as 1 opportunity per unit",
+         source="constructed", setting="the same connector defects as m06-dpmo-connector, this time counted with only 1 opportunity per unit (a unit either has a defect or it does not)",
+         params={"defects": 54, "units": 2400, "opportunities": 1}, columns=None, rows=None)
+register(id="m06-gaming-op10", module="06", kind="dpmo",
+         title="The same 54 defects in 2,400 units, counted as 10 opportunities per unit",
+         source="constructed", setting="the same connector defects as m06-dpmo-connector, this time counted with 10 defined opportunities per unit (splitting each solder joint into 2 sub-checks)",
+         params={"defects": 54, "units": 2400, "opportunities": 10}, columns=None, rows=None)
+
+# A fuller sigma-level table than Module 0's preview: half-sigma steps 1 to 6.
+register(id="m06-sigma-table", module="06", kind="sigma_table",
+         title="Sigma level to PPM, half-sigma steps from 1 to 6, centred and with the 1.5 sigma shift",
+         source="arithmetic on the normal distribution; the shift is the Motorola convention (S-E8, S-D28), critiqued in S-C9 and S-E28",
+         setting="parameters only",
+         params={"levels": [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0], "shift": 1.5, "ppm_targets": [3.4, 100, 1000, 10000, 100000]},
+         columns=None, rows=None,
+         expected={"ppm_shifted_one_sided.10": [3.4, 0.01]})
+
+# Exercise 1: a 4-step board assembly line, different yields.
+register(id="m06-ex1-rty", module="06", kind="rty_chain",
+         title="Exercise 1: rolled throughput yield, 4-step board assembly line",
+         source="constructed", setting="place, reflow, test, conformal coat; first-time yield at each of 4 steps",
+         params={"yields": [0.995, 0.96, 0.98, 0.99],
+                 "step_names": ["Place", "Reflow", "Test", "Conformal coat"]},
+         columns=None, rows=None)
+
+# Exercise 2: a leak-test DPMO exercise, 3,000 units, 2 opportunities per unit.
+register(id="m06-ex2-dpmo", module="06", kind="dpmo",
+         title="Exercise 2: leak-test defects, 3,000 units, 2 opportunities per unit",
+         source="constructed", setting="brazed assembly, 2 leak-test points per unit (inlet and outlet joints), 3,000 units, 33 point failures logged",
+         params={"defects": 33, "units": 3000, "opportunities": 2}, columns=None, rows=None)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

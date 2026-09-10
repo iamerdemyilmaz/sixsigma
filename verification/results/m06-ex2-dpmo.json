@@ -1,0 +1,24 @@
+{
+ "id": "m06-ex2-dpmo",
+ "kind": "dpmo",
+ "params": {
+  "defects": 33,
+  "units": 3000,
+  "opportunities": 2
+ },
+ "source": "constructed",
+ "results": {
+  "defects": 33,
+  "units": 3000,
+  "opportunities": 2,
+  "dpmo": 5500.0,
+  "dpu": 0.011,
+  "dpo": 0.0055,
+  "yield_fty": 0.9890602787753687,
+  "yield_from_dpmo": 0.9945,
+  "sigma_long_term": 2.542698819399051,
+  "sigma_level_shifted": 4.042698819399051
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

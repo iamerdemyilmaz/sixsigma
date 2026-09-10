@@ -1,0 +1,39 @@
+{
+ "id": "m06-ex1-rty",
+ "kind": "rty_chain",
+ "params": {
+  "yields": [
+   0.995,
+   0.96,
+   0.98,
+   0.99
+  ],
+  "step_names": [
+   "Place",
+   "Reflow",
+   "Test",
+   "Conformal coat"
+  ]
+ },
+ "source": "constructed",
+ "results": {
+  "yields": [
+   0.995,
+   0.96,
+   0.98,
+   0.99
+  ],
+  "k": 4,
+  "rty": 0.92673504,
+  "normalized_yield": 0.9811578796748618,
+  "total_dpu": 0.07608757951482036,
+  "cumulative_rty": [
+   0.995,
+   0.9551999999999999,
+   0.9360959999999999,
+   0.92673504
+  ]
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

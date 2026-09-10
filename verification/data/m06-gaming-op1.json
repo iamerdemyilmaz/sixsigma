@@ -1,0 +1,14 @@
+{
+ "id": "m06-gaming-op1",
+ "module": "06",
+ "kind": "dpmo",
+ "title": "The same 54 defects in 2,400 units, counted as 1 opportunity per unit",
+ "source": "constructed",
+ "setting": "the same connector defects as m06-dpmo-connector, this time counted with only 1 opportunity per unit (a unit either has a defect or it does not)",
+ "params": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 1
+ },
+ "columns": null
+}

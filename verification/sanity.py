@@ -229,6 +229,14 @@ def check_tests(ex_id, r, kind):
         check(near(norm_sf(r["sigma_long_term"]) * 1e6, r["dpmo"], 1e-6), f"{tag}: Z vs DPMO tail")
         check(near(r["sigma_level_shifted"] - r["sigma_long_term"], 1.5), f"{tag}: shift is 1.5")
         check(0 <= r["yield_fty"] <= 1, f"{tag}: yield range")
+    elif kind == "rty_chain":
+        ys = r["yields"]
+        check(0 < r["rty"] <= min(ys) + 1e-12, f"{tag}: RTY should not exceed the smallest step yield")
+        check(r["rty"] <= r["normalized_yield"] + 1e-12, f"{tag}: normalized (geometric mean) yield should be >= RTY")
+        check(near(r["total_dpu"], -math.log(r["rty"]), 1e-9), f"{tag}: total_dpu != -ln(RTY)")
+        check(near(r["cumulative_rty"][-1], r["rty"], 1e-9), f"{tag}: cumulative_rty does not end at RTY")
+        check(all(r["cumulative_rty"][i] >= r["cumulative_rty"][i + 1] - 1e-12 for i in range(len(ys) - 1)), f"{tag}: cumulative RTY should be non-increasing")
+        check(near(r["normalized_yield"] ** len(ys), r["rty"], 1e-9), f"{tag}: normalized_yield^k != RTY")
     elif kind == "descriptive":
         d = r["descriptive"]
         check(d["min"] <= d["q1"] <= d["median"] <= d["q3"] <= d["max"], f"{tag}: order statistics")

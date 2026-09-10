@@ -1,0 +1,25 @@
+{
+ "id": "m06-rty-chain",
+ "module": "06",
+ "kind": "rty_chain",
+ "title": "Rolled throughput yield, 5-step wire-harness assembly line",
+ "source": "constructed",
+ "setting": "crimp, insulate, sub-assemble, function test, final inspection; first-time yield at each of the 5 steps",
+ "params": {
+  "yields": [
+   0.98,
+   0.95,
+   0.99,
+   0.97,
+   0.985
+  ],
+  "step_names": [
+   "Crimp",
+   "Insulate",
+   "Sub-assemble",
+   "Function test",
+   "Final inspection"
+  ]
+ },
+ "columns": null
+}

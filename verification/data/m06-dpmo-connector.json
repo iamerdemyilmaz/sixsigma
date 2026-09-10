@@ -1,0 +1,14 @@
+{
+ "id": "m06-dpmo-connector",
+ "module": "06",
+ "kind": "dpmo",
+ "title": "Connector solder-joint defects, 2,400 units, 5 opportunities per unit",
+ "source": "constructed",
+ "setting": "wire-to-board connector, 5 solder joints inspected per unit (the defined opportunities), 2,400 units, 54 joint defects logged",
+ "params": {
+  "defects": 54,
+  "units": 2400,
+  "opportunities": 5
+ },
+ "columns": null
+}

@@ -161,6 +161,13 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m05-rounding-fine, m05-rounding-coarse | 5 | descriptive (new use) | the same 80 readings at 0.001 mm vs 0.01 mm resolution: s 0.00677 → 0.00763 mm (13 % inflation), 80 → 5 distinct values | `m05-rounding-fine.csv`, `m05-rounding-coarse.csv` | pass | pass | pass | pass | 05 |
 | m05-ex1-naive, m05-ex1-rational | 5 | capability, X̄-R, 8 × 5 | two-lathe exercise, smaller scale: R̄ 0.0328 → 0.0196 mm, stable → not stable; exercise 1 | `m05-ex1-naive.csv`, `m05-ex1-rational.csv` | pass | pass | pass | pass | 05 |
 
+| m06-dpmo-connector | 6 | DPMO (parameters only) | connector, 54 defects / 2,400 units / 5 opportunities: DPU 0.0225, DPMO 4,500, sigma level (shifted) 4.11 | none | pass | pass | pass | pass | 06 |
+| m06-gaming-op1, m06-gaming-op10 | 6 | DPMO (parameters only) | the identical 54/2,400 recounted at 1 and 10 opportunities per unit: DPMO 22,500 → 2,250 (exactly 10×), sigma level 3.50 → 4.34, no real process change | none | pass | pass | pass | pass | 06 |
+| m06-rty-chain | 6 | RTY of a chain (new kind `rty_chain`) | 5-step wire-harness line, yields 98/95/99/97/98.5 %: RTY 88.06 %, normalised yield 97.49 %, total DPU 0.1271 | none | pass | pass | pass | pass | 06, calculators |
+| m06-sigma-table | 6 | sigma table (new use of `sigma_table`) | half-sigma steps 1 to 6, both conventions; k=6 centred 0.0020 PPM vs shifted one-sided 3.4 PPM (the Motorola target, checked) | none | pass (1 published value) | pass | pass | pass | 06 |
+| m06-ex1-rty | 6 | RTY of a chain | 4-step board line, yields 99.5/96/98/99 %: RTY 92.67 %, normalised 98.12 %; exercise 1 | none | pass | pass | pass | pass | 06 |
+| m06-ex2-dpmo | 6 | DPMO (parameters only) | leak test, 33 defects / 3,000 units / 2 opportunities: DPU 0.011, DPMO 5,500, sigma level 4.04; exercise 2 | none | pass | pass | pass | pass | 06 |
+
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 
-Totals on 2026-09-10 (after Module 5, both sessions combined): 124 examples; 3,599 quantities agree between Check 1 and Check 2; 7,969 values agree between Check 1 and the JavaScript engines; 1,141 page checks.
+Totals on 2026-09-10 (after Module 6, both sessions combined): 131 examples; 3,689 quantities agree between Check 1 and Check 2; 8,106 values agree between Check 1 and the JavaScript engines (109 examples with a calculator engine); 1,178 page checks.

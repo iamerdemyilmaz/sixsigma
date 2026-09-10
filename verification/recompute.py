@@ -1176,6 +1176,19 @@ def r_attribute_agreement(meta, cols):
     return out
 
 
+def r_rty_chain(meta):
+    """Independent route: RTY via the sum of logs (exp(sum(ln y_i))) rather
+    than compute.py's running product, and cumulative RTY recomputed the
+    same way at each step."""
+    ys = [float(v) for v in meta["params"]["yields"]]
+    k = len(ys)
+    logs = [math.log(y) for y in ys]
+    rty = math.exp(sum(logs))
+    cumulative = [math.exp(sum(logs[:i + 1])) for i in range(k)]
+    return {"rty": rty, "normalized_yield": math.exp(sum(logs) / k), "total_dpu": -sum(logs),
+            "cumulative_rty": cumulative}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1252,6 +1265,7 @@ def recompute_one(ex_id):
     elif kind == "dnom": mine = r_dnom(cols)
     elif kind == "pareto": mine = r_pareto(cols)
     elif kind == "attribute_agreement": mine = r_attribute_agreement(meta, cols)
+    elif kind == "rty_chain": mine = r_rty_chain(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

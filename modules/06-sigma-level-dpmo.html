@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 6: Sigma level, DPMO, DPU, RTY · Six Sigma Course</title>
+<meta name="description" content="Defects versus defectives, opportunities and how counting them gets gamed, first-time yield versus rolled throughput yield, sigma level conversion, and the 1.5 sigma shift's history and controversy presented fairly.">
+<meta name="examples" content="m06-rty-chain, m06-dpmo-connector, m06-gaming-op1, m06-gaming-op10, m06-sigma-table, m06-ex1-rty, m06-ex2-dpmo">
+<!-- allowed-numbers: percentage-form restatements of stored fraction fields (rty, normalized_yield),
+     each computed by script (value x 100) before being typed here. -->
+<meta name="allowed-numbers" content="88.06 92.67 98.12">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="06">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 6 · Measure</p>
+    <h1>Sigma level, DPMO, DPU, RTY</h1>
+    <p class="lead">Module 0 introduced "sigma level" as a preview: a defect rate expressed as a Z-value. This module is where that preview becomes a toolkit. Defects versus defectives, how an "opportunity" is defined and how that definition can be gamed, first-time yield versus the rolled throughput yield of an entire process, the arithmetic that converts a defect rate to a sigma level, and the 1.5&sigma; shift &mdash; where it comes from, the statistical argument for it, and the standing objection to it. None of this is difficult arithmetic. All of it is easy to state sloppily in a way that quietly changes what a reported number means.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Distinguish</strong> a defect from a defective, and DPU from DPO from DPMO.</li>
+      <li><strong>Explain</strong> how the choice of "opportunities per unit" can inflate a reported sigma level without the process changing at all.</li>
+      <li><strong>Compute</strong> first-time yield and rolled throughput yield for a multi-step process, and explain why they differ.</li>
+      <li><strong>Convert</strong> between a defect rate, a Z-value, and a sigma level, with and without the 1.5&sigma; shift, and label which convention is in use.</li>
+      <li><strong>Describe</strong> the origin of the 1.5&sigma; shift, the statistical argument for it, and the practitioner objection to it, without presenting either side as simply wrong.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Every sigma-level number this course computes traces back to one sentence in a NIST profile of Motorola's 1988 Baldrige Award: the company's Six Sigma Quality programme set "a target of no more than 3.4 defects per million products, customer services included."<sup class="cite"><a href="#ref-1">[1]</a></sup> That number is real, it is Motorola's own stated target, and it is also, by itself, incomplete: 3.4 parts per million is not what a process centred at six standard deviations from its nearest specification limit produces (that figure is roughly two thousandths of a PPM, six orders of magnitude smaller). The 3.4 comes from a specific, named convention &mdash; the 1.5&sigma; shift &mdash; that this module explains in full, because reporting a sigma level without saying which convention produced it is one of the most common ways a Six Sigma number misleads an audience that assumes it means something more literal than it does.</p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real incident.</p>
+    <p>A second, quieter way the same numbers mislead: two lines can report identical defect counts on identical products and publish two different sigma levels, purely from how "opportunity" was defined. A connector with 5 solder joints inspected as 5 separate opportunities per unit produces a very different DPMO than the same connector's identical defects counted as 1 opportunity (the unit either has a defect or it does not) &mdash; and a line under pressure to show improvement has an obvious incentive to redefine opportunities upward until the number looks better, with nothing about the actual process having changed. Worked example 1 below runs this exact comparison on one dataset.</p>
+
+    <h2 id="defect-defective">Defects versus defectives, and how opportunities get gamed</h2>
+    <p>A <strong>defective</strong> unit is one that fails, however many things are wrong with it: one defective is one defective, whether it has one flaw or five. A <strong>defect</strong> is one specific nonconformance; a single defective unit can carry several defects. Counting defectives answers "how many units failed"; counting defects answers "how many things went wrong," and the two questions need different denominators and can move independently &mdash; scrap rate (defectives / units) can hold steady while defects per unit quietly rises, if failures are increasingly multi-cause.</p>
+    <p>An <strong>opportunity</strong> is a defined chance for a defect to occur on a unit: a solder joint, a dimension, a required field on a form. The count is a judgement call, and Six Sigma's critics have long pointed out that it is judgement with an obvious incentive attached: define more opportunities per unit for the same defect count, and DPMO falls, and the resulting sigma level rises, with nothing about the process itself different. There is no universal rule for what counts as an opportunity; the discipline that prevents gaming is entirely procedural &mdash; define opportunities once, in writing, before comparing periods or lines, and never let the definition change just because the number needs to look better.</p>
+
+    <h2 id="formulas">DPU, DPO, DPMO</h2>
+    <div class="formula">DPU = defects / units
+      <br>DPO = defects / (units &times; opportunities per unit)
+      <br>DPMO = DPO &times; 1,000,000
+      <span class="where">DPU does not need an opportunity count and is the most defensible number to compare over time on one process, because there is nothing to redefine. DPO and DPMO normalise by opportunities, which makes them comparable <em>only</em> when the opportunity definition is held fixed.</span>
+    </div>
+
+    <h2 id="fty-rty">First-time yield versus rolled throughput yield</h2>
+    <p>First-time yield (FTY) at one step is the probability a unit passes that step without rework, scrap, or a defect found; under a Poisson defect model, FTY&nbsp;=&nbsp;e<sup>&minus;DPU</sup>. Rolled throughput yield (RTY) is the probability a unit passes <em>every</em> step in a multi-step process the first time, with no rework anywhere along the way.</p>
+    <div class="formula">RTY = FTY<sub>1</sub> &times; FTY<sub>2</sub> &times; &hellip; &times; FTY<sub>k</sub>
+      <br>Normalised yield per step = RTY<sup>1/k</sup>
+      <br>Total DPU implied = &minus;ln(RTY)
+      <span class="where">RTY is always at or below the worst individual step's yield, and it falls faster than intuition expects: five steps that each individually look "pretty good" at 95 to 99&nbsp;% can roll up to well under 90&nbsp;%. A final-inspection pass rate reported after rework can look far better than RTY, because rework lets a unit pass on a second or third try; RTY, computed from first-time step yields, is what reveals the cost of that rework &mdash; sometimes called the hidden factory, because the rework loop consumes real capacity that never shows up on a yield chart built only from final results.</span>
+    </div>
+
+    <h2 id="sigma-conversion">Converting a defect rate to a sigma level</h2>
+    <p>A "sigma level" is a Z-value: how many standard deviations the nearest specification limit sits from the process mean, under a normal model, read backward from an observed defect rate rather than forward from a measured mean and sigma the way Module 7 computes Cpk. Two numbers are commonly reported, and this course always labels which one is in use.</p>
+    <div class="formula">Z (long-term, no shift) = &Phi;<sup>&minus;1</sup>(1 &minus; DPMO / 1,000,000)
+      <br>Sigma level (Motorola convention) = Z + 1.5
+      <span class="where">&Phi;<sup>&minus;1</sup> is the inverse standard normal CDF (Module 1). The plain Z is a direct reading of the observed defect rate as a normal tail probability, nothing more. Adding 1.5 is the shift convention explained below; skipping the label on which one a report is quoting is how "we're at four sigma" ends up meaning two different defect rates depending on who is asked.</span>
+    </div>
+
+    <h2 id="shift">The 1.5 sigma shift: history and controversy</h2>
+    <p>Motorola's own articulation of Six Sigma treats a process as capable of drifting up to 1.5&sigma; off-centre over the long run without being considered out of control, and reports the sigma level for the resulting <em>worst-case, one-sided</em> tail rather than for a perfectly centred process.<sup class="cite"><a href="#ref-6">[6]</a></sup> Arithmetically: a process truly centred 6&sigma; from both specification limits has a predicted defect rate of about 0.002&nbsp;PPM (Table 1 below computes this exactly); a process whose mean has drifted 1.5&sigma; toward one limit, leaving only 4.5&sigma; of margin on the near side, has a predicted one-sided defect rate of about 3.4&nbsp;PPM &mdash; Motorola's published target. The two numbers describe different things: the first is "how good is this process if it never moves," the second is "how bad could this process get if it drifts as far as we're willing to tolerate before calling it a problem."</p>
+    <p>Tadikamalla's 1994 critique is that the shift is a definitional convention baked into the standard sigma-to-PPM lookup table, not a property measured on any particular process, and that presenting "6&sigma; = 3.4 PPM" without the shift explained lets readers assume a Z of 6 when the honest claim is closer to a Z of 4.5.<sup class="cite"><a href="#ref-2">[2]</a></sup> Bothe's 2002 paper supplies the strongest statistical argument <em>for</em> allowing the margin: with the small subgroup sizes (commonly n&nbsp;=&nbsp;4 or 5) typical of an X&#772;-R chart, a mean shift smaller than roughly 1.5&sigma; has a real chance of going undetected for some time by the chart's own limits, so a process that has drifted that far without tripping an alarm is not a hypothetical, it is a realistic blind spot of the monitoring method itself.<sup class="cite"><a href="#ref-3">[3]</a></sup> Burns' 2018 practitioner column takes the opposite position: if a process really does drift 1.5&sigma; routinely and this is built into the standard conversion table as normal, expected behaviour, that process is, by Shewhart's own definition, not in a state of statistical control at all, and the shift convention quietly normalises an out-of-control condition instead of flagging it as one.<sup class="cite"><a href="#ref-4">[4]</a></sup> This course takes no side: every sigma-level figure it reports states, in words and in the calculator output, whether the 1.5&sigma; shift is included, so the reader is never left to guess which claim is being made.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: DPMO, and what happens when "opportunity" changes</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>A wire-to-board connector has 5 solder joints. Over 2,400 units, 54 joint defects were logged &mdash; a specific, unambiguous count, independent of any opportunity definition.</p>
+    <div class="formula">DPU = 54 / 2,400 = <span data-ex="m06-dpmo-connector" data-key="dpu" data-dp="4">0.0225</span> &nbsp;&nbsp; DPO = 54 / (2,400 &times; 5) = <span data-ex="m06-dpmo-connector" data-key="dpo" data-dp="4">0.0045</span> &nbsp;&nbsp; DPMO = <span data-ex="m06-dpmo-connector" data-key="dpmo" data-dp="1">4500.0</span>
+      <span class="where">Z (no shift) = <span data-ex="m06-dpmo-connector" data-key="sigma_long_term" data-dp="2">2.61</span>; sigma level (with the 1.5&sigma; shift) = <span data-ex="m06-dpmo-connector" data-key="sigma_level_shifted" data-dp="2">4.11</span>.</span>
+    </div>
+    <p>Now recount the identical 54 defects on the identical 2,400 units, changing only how many opportunities are declared per unit.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. The same 54 defects in 2,400 units, three opportunity definitions.</caption>
+        <thead><tr><th>Opportunities per unit</th><th>DPMO</th><th>Sigma level (shifted)</th></tr></thead>
+        <tbody>
+          <tr><td>1 (unit pass/fail only)</td><td class="num"><span data-ex="m06-gaming-op1" data-key="dpmo" data-dp="1">22500.0</span></td><td class="num"><span data-ex="m06-gaming-op1" data-key="sigma_level_shifted" data-dp="2">3.50</span></td></tr>
+          <tr><td>5 (one per solder joint)</td><td class="num"><span data-ex="m06-dpmo-connector" data-key="dpmo" data-dp="1">4500.0</span></td><td class="num"><span data-ex="m06-dpmo-connector" data-key="sigma_level_shifted" data-dp="2">4.11</span></td></tr>
+          <tr><td>10 (each joint split into 2 sub-checks)</td><td class="num"><span data-ex="m06-gaming-op10" data-key="dpmo" data-dp="1">2250.0</span></td><td class="num"><span data-ex="m06-gaming-op10" data-key="sigma_level_shifted" data-dp="2">4.34</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Ten times more declared opportunities produces exactly one-tenth the DPMO (22,500 falls to 2,250, precisely proportional, since DPU and defect count never changed) and a reported sigma level that climbs by nearly a full point, from 3.50 to 4.34. Nothing about the connector, the solder process, or the 54 real defects changed at all. This is the entire mechanism behind opportunity-count gaming, and it is why DPU &mdash; which has no opportunity count to redefine &mdash; is the more defensible number to track over time on a single process.</p>
+    <div class="calc" data-calc="dpmo" id="calc-dpmo-connector">
+      <h3>Sigma level and DPMO converter</h3>
+      <p class="calc-intro">Pre-loaded with the connector's 5-opportunity count. Change "Opportunities per unit" to 1 or 10 to reproduce Table 1, or edit the RTY section's step yields to reproduce Worked example 2.</p>
+      <script type="application/json" class="calc-data">{"defects":54,"units":2400,"opportunities":5,"yields":[0.98,0.95,0.99,0.97,0.985]}</script>
+    </div>
+
+    <h3 id="example2">Worked example 2: rolled throughput yield of a 5-step line</h3>
+    <p class="example-label">Constructed example, not a real production line.</p>
+    <p>A wire-harness line runs five steps &mdash; crimp, insulate, sub-assemble, function test, final inspection &mdash; each with its own first-time yield.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Step yields and cumulative RTY, 5-step wire-harness line (constructed data).</caption>
+        <thead><tr><th>Step</th><th>First-time yield</th><th>Cumulative RTY through this step</th></tr></thead>
+        <tbody>
+          <tr><td>1. Crimp</td><td class="num">98.0 %</td><td class="num"><span data-ex="m06-rty-chain" data-key="cumulative_rty.0" data-dp="4">0.9800</span></td></tr>
+          <tr><td>2. Insulate</td><td class="num">95.0 %</td><td class="num"><span data-ex="m06-rty-chain" data-key="cumulative_rty.1" data-dp="4">0.9310</span></td></tr>
+          <tr><td>3. Sub-assemble</td><td class="num">99.0 %</td><td class="num"><span data-ex="m06-rty-chain" data-key="cumulative_rty.2" data-dp="4">0.9217</span></td></tr>
+          <tr><td>4. Function test</td><td class="num">97.0 %</td><td class="num"><span data-ex="m06-rty-chain" data-key="cumulative_rty.3" data-dp="4">0.8940</span></td></tr>
+          <tr><td>5. Final inspection</td><td class="num">98.5 %</td><td class="num"><span data-ex="m06-rty-chain" data-key="cumulative_rty.4" data-dp="4">0.8806</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">RTY = 0.98 &times; 0.95 &times; 0.99 &times; 0.97 &times; 0.985 = <span data-ex="m06-rty-chain" data-key="rty" data-dp="4">0.8806</span>, i.e. <strong>88.06&nbsp;%</strong>
+      <br>Normalised yield per step = RTY<sup>1/5</sup> = <span data-ex="m06-rty-chain" data-key="normalized_yield" data-dp="4">0.9749</span> &nbsp;&nbsp; Total DPU implied = <span data-ex="m06-rty-chain" data-key="total_dpu" data-dp="4">0.1271</span>
+      <span class="where">Every individual step looks solid, 95&nbsp;% or better. Rolled up, only about 88&nbsp;% of units pass all five steps with no rework anywhere. If this line's shipped-quality report only counts units after rework, it could plausibly show 99&nbsp;%+ final yield &mdash; correct, and telling a very different story than the 88.06&nbsp;% first-time number about how much rework capacity the line is actually consuming.</span>
+    </div>
+
+    <h3 id="example3">Worked example 3: a sigma-level table</h3>
+    <p class="example-label">Arithmetic on the normal distribution, not measured data.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 3. Sigma level to PPM, half-sigma steps, both conventions (generated by scipy in verification/tables.py).</caption>
+        <thead><tr><th>Sigma level (k)</th><th>Centred, two-sided PPM</th><th>Shifted 1.5&sigma;, one-sided PPM</th></tr></thead>
+        <tbody>
+          <tr><td>1.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.0" data-dp="0">317311</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.0" data-dp="0">691462</span></td></tr>
+          <tr><td>2.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.2" data-dp="0">45500</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.2" data-dp="0">308538</span></td></tr>
+          <tr><td>3.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.4" data-dp="1">2699.8</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.4" data-dp="0">66807</span></td></tr>
+          <tr><td>4.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.6" data-dp="1">63.3</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.6" data-dp="1">6209.7</span></td></tr>
+          <tr><td>5.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.8" data-dp="2">0.57</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.8" data-dp="1">232.6</span></td></tr>
+          <tr><td>6.0</td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_centered_two_sided.10" data-dp="4">0.0020</span></td><td class="num"><span data-ex="m06-sigma-table" data-key="ppm_shifted_one_sided.10" data-dp="1">3.4</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Reading straight across the k&nbsp;=&nbsp;6.0 row is the whole controversy in one line: a process genuinely centred at six standard deviations from both specification limits predicts about 0.002&nbsp;PPM; the number everyone actually quotes, 3.4&nbsp;PPM, is the one-sided tail after subtracting the 1.5&sigma; shift, i.e. what a true 4.5&sigma; process produces on its worst side. Both numbers are in this table. Only one of them is what "six sigma" literally means.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Reporting a sigma level without saying whether the 1.5&sigma; shift is included.</strong> Consequence: "four sigma" can mean a Z of 4 (PPM about 32) or a Z of 2.5 after subtracting the shift (PPM about 6,210) depending on which convention is meant, a more than 190-fold difference. Fix: always state the convention next to the number.</li>
+      <li><strong>Redefining "opportunities" to make a trend look better.</strong> Consequence: Worked example 1 &mdash; the identical defects and units produce a DPMO that swings by a factor of ten purely from the opportunity count. Fix: fix the opportunity definition in writing before comparing any two periods or lines.</li>
+      <li><strong>Confusing defectives with defects.</strong> Consequence: a scrap rate (defectives) can look stable while the average number of things wrong per unit (DPU) is quietly rising, and nobody notices because the wrong metric is being watched. Fix: track DPU alongside the defective rate, not instead of it.</li>
+      <li><strong>Computing RTY as if it were an average of the step yields.</strong> Consequence: five steps at 95 to 99&nbsp;% "feel" like a process running at roughly 97&nbsp;%; the actual RTY (Worked example 2) is meaningfully lower, because yields multiply, they do not average. Fix: always compute the product, never eyeball an average.</li>
+      <li><strong>Reporting a final-inspection pass rate as if it were RTY.</strong> Consequence: rework lets units pass on a second try, so a final pass rate can look good while masking a large, costly hidden factory of rework loops. Fix: compute RTY from first-time step yields specifically, not from a final good/bad tally.</li>
+      <li><strong>Treating the 1.5&sigma; shift as settled science in either direction.</strong> Consequence: presenting Motorola's convention as an arbitrary marketing trick, or presenting it as a rigorously derived universal constant, both overstate what the sources actually support. Fix: state Bothe's statistical rationale and Burns' and Tadikamalla's objections together, as this module does.</li>
+      <li><strong>Using DPMO to compare processes with genuinely different, non-comparable opportunity structures.</strong> Consequence: a simple one-step attribute inspection and a 40-step electronics assembly are not meaningfully compared by DPMO alone, because the opportunity-counting judgement calls are not equivalent. Fix: compare DPU or RTY trends within a process over time before comparing sigma levels across different processes.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: RTY of a 4-step board assembly line</h3>
+    <p class="example-label">Constructed example, not a real production line.</p>
+    <p>A board assembly line runs place, reflow, test, and conformal coat, with first-time yields 99.5&nbsp;%, 96.0&nbsp;%, 98.0&nbsp;% and 99.0&nbsp;%. <strong>Tasks.</strong> (a) Compute RTY. (b) Compute the normalised yield per step. (c) A colleague says "average yield is about 98&nbsp;%, so RTY should be about 98&nbsp;%." Explain what is wrong with that reasoning, using your answer to (a).</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> RTY = 0.995 &times; 0.96 &times; 0.98 &times; 0.99 = <span data-ex="m06-ex1-rty" data-key="rty" data-dp="4">0.9267</span>, i.e. 92.67&nbsp;%.</p>
+      <p><strong>(b)</strong> Normalised yield = RTY<sup>1/4</sup> = <span data-ex="m06-ex1-rty" data-key="normalized_yield" data-dp="4">0.9812</span>, i.e. 98.12&nbsp;% per step on average.</p>
+      <p><strong>(c)</strong> The arithmetic mean of 99.5, 96.0, 98.0 and 99.0 is indeed about 98.1&nbsp;%, close to the <em>normalised</em> yield in (b) &mdash; but RTY itself is 92.67&nbsp;%, over 5 points lower, because yields compound multiplicatively, not additively. The weakest step (96.0&nbsp;%, reflow) drags the product down by more than a simple average would suggest, and the gap between "average-looking" and "actual" widens as more steps are added.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: leak-test DPMO</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>A brazed assembly has 2 leak-test points per unit (inlet and outlet joints). Over 3,000 units, 33 point failures were logged. <strong>Tasks.</strong> (a) Compute DPU. (b) Compute DPMO. (c) Compute the sigma level with the 1.5&sigma; shift. (d) If a second plant reports the identical 33 failures on 3,000 units but counts only 1 opportunity per unit (a unit either leaks or it does not), will its DPMO be higher or lower than yours, and by what factor?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> DPU = 33 / 3,000 = <span data-ex="m06-ex2-dpmo" data-key="dpu" data-dp="3">0.011</span>.</p>
+      <p><strong>(b)</strong> DPMO = 33 / (3,000 &times; 2) &times; 1,000,000 = <span data-ex="m06-ex2-dpmo" data-key="dpmo" data-dp="1">5500.0</span>.</p>
+      <p><strong>(c)</strong> Sigma level (shifted) = <span data-ex="m06-ex2-dpmo" data-key="sigma_level_shifted" data-dp="2">4.04</span>.</p>
+      <p><strong>(d)</strong> Higher, by a factor of exactly 2: with 1 opportunity instead of 2, the same defect count is divided by half as many total opportunities, so DPMO doubles to 11,000. The two plants' processes could be identical; only the opportunity definition differs.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="06">
+      <fieldset class="q" data-answer="b">
+        <legend>1. A single unit with three separate nonconformances on it counts as</legend>
+        <label><input type="radio" name="q1" value="a"> three defectives</label>
+        <label><input type="radio" name="q1" value="b"> one defective, three defects</label>
+        <label><input type="radio" name="q1" value="c"> three defectives, one defect</label>
+        <label><input type="radio" name="q1" value="d"> it cannot be counted without knowing the opportunity total</label>
+        <p class="explain" hidden>A defective is a failed unit regardless of how many things are wrong; each nonconformance on it is a separate defect.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. Redefining "opportunities per unit" upward, with the same defect count and units, causes DPMO to</legend>
+        <label><input type="radio" name="q2" value="a"> increase</label>
+        <label><input type="radio" name="q2" value="b"> stay exactly the same</label>
+        <label><input type="radio" name="q2" value="c"> decrease, and the reported sigma level to rise, with no real process change</label>
+        <label><input type="radio" name="q2" value="d"> become undefined</label>
+        <p class="explain" hidden>DPMO = defects / (units × opportunities) × 1e6; more opportunities in the denominator, same defects, means a smaller DPMO and a higher apparent sigma level.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. Which metric is least sensitive to how "opportunity" is defined?</legend>
+        <label><input type="radio" name="q3" value="a"> DPMO</label>
+        <label><input type="radio" name="q3" value="b"> DPO</label>
+        <label><input type="radio" name="q3" value="c"> sigma level</label>
+        <label><input type="radio" name="q3" value="d"> DPU</label>
+        <p class="explain" hidden>DPU = defects / units has no opportunity count to redefine, making it the most defensible metric to track over time on one process.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>4. Rolled throughput yield of a multi-step process is computed as</legend>
+        <label><input type="radio" name="q4" value="a"> the average of each step's first-time yield</label>
+        <label><input type="radio" name="q4" value="b"> the product of each step's first-time yield</label>
+        <label><input type="radio" name="q4" value="c"> the minimum of each step's first-time yield</label>
+        <label><input type="radio" name="q4" value="d"> the final inspection pass rate after rework</label>
+        <p class="explain" hidden>Yields multiply, not average, which is why RTY is often well below what an average of the step yields would suggest.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>5. A final-inspection pass rate computed after units that failed have been reworked and re-tested</legend>
+        <label><input type="radio" name="q5" value="a"> can look considerably better than RTY, and can hide the cost of a large rework loop (the "hidden factory")</label>
+        <label><input type="radio" name="q5" value="b"> is mathematically identical to RTY</label>
+        <label><input type="radio" name="q5" value="c"> is always lower than RTY</label>
+        <label><input type="radio" name="q5" value="d"> cannot be computed for a multi-step process</label>
+        <p class="explain" hidden>Rework lets units pass on a second or third try, inflating the final pass rate relative to the true first-time RTY.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="3.4" data-tolerance="0.1">
+        <legend>6. Motorola's stated Six Sigma target, in defects per million, is</legend>
+        <input type="number" name="q6" step="any">
+        <p class="explain" hidden>3.4 defects per million, as stated in Motorola's own 1988 Baldrige Award profile.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>7. A process truly centred at six standard deviations from both specification limits, with no shift applied, has a predicted defect rate of approximately</legend>
+        <label><input type="radio" name="q7" value="a"> 3.4 PPM</label>
+        <label><input type="radio" name="q7" value="b"> 233 PPM</label>
+        <label><input type="radio" name="q7" value="c"> 0.002 PPM</label>
+        <label><input type="radio" name="q7" value="d"> 6,210 PPM</label>
+        <p class="explain" hidden>A genuinely centred 6-sigma process predicts about 0.002 PPM (two-sided); 3.4 PPM is the shifted, one-sided figure for an effectively 4.5-sigma process.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>8. Bothe's (2002) statistical rationale for the 1.5 sigma shift is that</legend>
+        <label><input type="radio" name="q8" value="a"> all real processes drift exactly 1.5 sigma over their lifetime</label>
+        <label><input type="radio" name="q8" value="b"> with typical small subgroup sizes, an X&#772; chart has a real chance of not detecting a mean shift smaller than about 1.5 sigma</label>
+        <label><input type="radio" name="q8" value="c"> the normal distribution requires a 1.5 sigma correction to be valid</label>
+        <label><input type="radio" name="q8" value="d"> customers always demand a 1.5 sigma margin</label>
+        <p class="explain" hidden>Bothe's argument is about the detection limits of small-subgroup control charts, not a universal property of processes.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>9. Burns' (2018) objection to the 1.5 sigma shift is that</legend>
+        <label><input type="radio" name="q9" value="a"> it makes the arithmetic too complicated for practitioners</label>
+        <label><input type="radio" name="q9" value="b"> Motorola never actually used it</label>
+        <label><input type="radio" name="q9" value="c"> it should be 2.0 sigma instead of 1.5</label>
+        <label><input type="radio" name="q9" value="d"> a process that routinely drifts 1.5 sigma is, by definition, not in a state of statistical control, and building that into a standard convention normalises an out-of-control condition</label>
+        <p class="explain" hidden>Burns' framing draws on the enumerative/analytic and control-chart tradition: routine drift of that size is itself evidence against control.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>10. This course's policy on reporting a sigma level is to</legend>
+        <label><input type="radio" name="q10" value="a"> always state whether the 1.5 sigma shift is included</label>
+        <label><input type="radio" name="q10" value="b"> only ever report the shifted figure, since that is the industry standard</label>
+        <label><input type="radio" name="q10" value="c"> only ever report the unshifted figure, since it is more statistically honest</label>
+        <label><input type="radio" name="q10" value="d"> avoid sigma levels entirely and report only DPMO</label>
+        <p class="explain" hidden>Both conventions are legitimate as long as the reader is told which one is being used; the course states the convention every time.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. One defective, three defects.</li>
+        <li>c. DPMO decreases, sigma level rises, nothing real changed.</li>
+        <li>d. DPU.</li>
+        <li>b. Product of the step yields.</li>
+        <li>a. Can hide the hidden factory of rework.</li>
+        <li>3.4 defects per million.</li>
+        <li>c. About 0.002 PPM.</li>
+        <li>b. Small-subgroup charts can miss a shift that size.</li>
+        <li>d. Routine drift of that size means the process is not in control.</li>
+        <li>a. Always state the convention.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A defective is a failed unit regardless of how many things are wrong; a defect is one specific nonconformance. DPU, not the defective rate alone, tracks how many things go wrong per unit.</li>
+      <li>An opportunity is a judgement call, defined in writing before comparisons are made; redefining it upward inflates the reported sigma level with no real process change.</li>
+      <li>RTY is the product of first-time step yields, not their average, and is always at or below the worst single step; a final-inspection pass rate after rework can hide a costly "hidden factory."</li>
+      <li>A sigma level is a Z-value read backward from a defect rate; always state whether the 1.5&sigma; shift is included, because the two conventions can differ by two orders of magnitude in implied PPM.</li>
+      <li>The 1.5&sigma; shift is Motorola's own convention for a worst-case, one-sided tail after allowing for drift; Bothe supplies a statistical rationale (small-subgroup charts can miss a shift that size), Tadikamalla and Burns supply standing objections (it is a definitional convention, and a process that drifts routinely is not in control). Present both sides.</li>
+      <li>Motorola's "3.4 defects per million" is the company's own stated target, verified from a primary NIST source, not an arithmetic property of a perfectly centred six-sigma process (which predicts about 0.002 PPM instead).</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">NIST. "Malcolm Baldrige National Quality Award 1988 Recipient: Motorola Inc." <a href="https://www.nist.gov/system/files/documents/2017/10/11/1988_Motorola_Inc.pdf">https://www.nist.gov/system/files/documents/2017/10/11/1988_Motorola_Inc.pdf</a></li>
+      <li id="ref-2">Tadikamalla, P. R. (1994). The confusion over six-sigma quality. <em>Quality Progress</em>, 27(11), 83&ndash;85. <a href="https://www.proquest.com/openview/df184b19ba7003517881a00d6f967c6d/1">https://www.proquest.com/openview/df184b19ba7003517881a00d6f967c6d/1</a></li>
+      <li id="ref-3">Bothe, D. R. (2002). Statistical reason for the 1.5&sigma; shift. <em>Quality Engineering</em>, 14(3), 479&ndash;487. <a href="https://www.tandfonline.com/doi/abs/10.1081/qen-120001884">https://www.tandfonline.com/doi/abs/10.1081/qen-120001884</a></li>
+      <li id="ref-4">Burns, T. "Predictable." <em>Quality Digest</em>, 13 June 2018. <a href="https://www.qualitydigest.com/inside/six-sigma-article/predictable-061318.html">https://www.qualitydigest.com/inside/six-sigma-article/predictable-061318.html</a></li>
+      <li id="ref-5">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 1.3.6.6.1 "Normal Distribution". NIST. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm</a></li>
+      <li id="ref-6">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+      <li id="ref-7">Harry, M. J. (1988). <em>The Nature of Six Sigma Quality</em>. Motorola University Press. <a href="https://openlibrary.org/books/OL9828527M/The_Nature_of_Six_Sigma_Quality">https://openlibrary.org/books/OL9828527M/The_Nature_of_Six_Sigma_Quality</a> <span class="tag">(secondary: catalogue-level; Motorola's own articulation of the shift convention, cited via [1] and [2] for the specifics used here)</span></li>
+      <li id="ref-8">Harry, M., &amp; Schroeder, R. (2000). <em>Six Sigma: The Breakthrough Management Strategy Revolutionizing the World's Top Corporations</em>. Currency/Doubleday. <a href="https://books.google.com/books/about/Six_Sigma.html?id=RY0rAAAAYAAJ">https://books.google.com/books/about/Six_Sigma.html?id=RY0rAAAAYAAJ</a> <span class="tag">(secondary: catalogue-level; RTY and belts background)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>
