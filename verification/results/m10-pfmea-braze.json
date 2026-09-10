@@ -1,0 +1,58 @@
+{
+ "id": "m10-pfmea-braze",
+ "kind": "rpn",
+ "params": {},
+ "source": "constructed",
+ "results": {
+  "failure_modes": [
+   "Braze void in fillet",
+   "Insufficient braze flow at header joint",
+   "Flux residue trapped in joint",
+   "Tube wall thinning from over-etch",
+   "Fixture misalignment causing gap",
+   "Furnace temperature out of profile",
+   "Wrong braze alloy used"
+  ],
+  "s": [
+   7,
+   8,
+   6,
+   9,
+   7,
+   8,
+   9
+  ],
+  "o": [
+   5,
+   4,
+   3,
+   2,
+   3,
+   2,
+   1
+  ],
+  "d": [
+   6,
+   5,
+   7,
+   6,
+   4,
+   3,
+   2
+  ],
+  "rpn": [
+   210,
+   160,
+   126,
+   108,
+   84,
+   48,
+   18
+  ],
+  "max_rpn": 210,
+  "total_rpn": 754,
+  "mean_rpn": 107.71428571428571
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

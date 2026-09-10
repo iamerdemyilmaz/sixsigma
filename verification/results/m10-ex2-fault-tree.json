@@ -1,0 +1,47 @@
+{
+ "id": "m10-ex2-fault-tree",
+ "kind": "fault_tree",
+ "params": {
+  "tree": {
+   "type": "OR",
+   "name": "Harness ships with an undetected open circuit",
+   "children": [
+    {
+     "type": "AND",
+     "name": "Open circuit occurs and test misses it",
+     "children": [
+      {
+       "type": "basic",
+       "name": "Crimp pull-out creates an open circuit",
+       "p": 0.01
+      },
+      {
+       "type": "basic",
+       "name": "Continuity test fails to detect an open",
+       "p": 0.03
+      }
+     ]
+    },
+    {
+     "type": "basic",
+     "name": "Connector damaged after test, before shipment",
+     "p": 0.001
+    }
+   ]
+  }
+ },
+ "source": "constructed",
+ "results": {
+  "top_probability": 0.0012997000000000147,
+  "nodes": {
+   "Crimp pull-out creates an open circuit": 0.01,
+   "Continuity test fails to detect an open": 0.03,
+   "Open circuit occurs and test misses it": 0.0003,
+   "Connector damaged after test, before shipment": 0.001,
+   "Harness ships with an undetected open circuit": 0.0012997000000000147
+  },
+  "top_name": "Harness ships with an undetected open circuit"
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

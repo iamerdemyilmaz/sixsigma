@@ -141,7 +141,10 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   attribute_agreement: true,
   // Module 9: multi-vari charts (a range-based positional/cyclical/temporal
   // decomposition) have no calculator among the nine required ones either.
-  multivari: true };
+  multivari: true,
+  // Module 10: RPN tables and fault trees are pure arithmetic with no
+  // calculator among the nine required ones.
+  rpn: true, fault_tree: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

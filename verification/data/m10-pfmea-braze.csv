@@ -1,0 +1,8 @@
+failure_mode,s,o,d
+Braze void in fillet,7,5,6
+Insufficient braze flow at header joint,8,4,5
+Flux residue trapped in joint,6,3,7
+Tube wall thinning from over-etch,9,2,6
+Fixture misalignment causing gap,7,3,4
+Furnace temperature out of profile,8,2,3
+Wrong braze alloy used,9,1,2

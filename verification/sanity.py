@@ -499,6 +499,26 @@ def check_multivari(ex_id, r):
         check(0.0 <= r[k] <= 100.0, f"{tag}: {k} out of [0,100]")
 
 
+def check_rpn(ex_id, r):
+    tag = ex_id
+    n = len(r["rpn"])
+    for i in range(n):
+        check(1 <= r["s"][i] <= 10 and 1 <= r["o"][i] <= 10 and 1 <= r["d"][i] <= 10, f"{tag}: S/O/D[{i}] out of [1,10]")
+        check(r["rpn"][i] == r["s"][i] * r["o"][i] * r["d"][i], f"{tag}: rpn[{i}] != s*o*d")
+    check(all(r["rpn"][i] >= r["rpn"][i + 1] for i in range(n - 1)), f"{tag}: rpn not sorted descending")
+    check(r["max_rpn"] == max(r["rpn"]), f"{tag}: max_rpn mismatch")
+    check(r["total_rpn"] == sum(r["rpn"]), f"{tag}: total_rpn mismatch")
+    check(near(r["mean_rpn"], r["total_rpn"] / n, 1e-9), f"{tag}: mean_rpn mismatch")
+
+
+def check_fault_tree(ex_id, r):
+    tag = ex_id
+    check(0.0 <= r["top_probability"] <= 1.0, f"{tag}: top_probability out of [0,1]")
+    for name, p in r["nodes"].items():
+        check(0.0 <= p <= 1.0, f"{tag}: node '{name}' probability out of [0,1]")
+    check(near(r["nodes"][r["top_name"]], r["top_probability"]), f"{tag}: top node's own probability != top_probability")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -537,6 +557,8 @@ def check_results():
         elif kind == "pareto": check_pareto(ex_id, r, data)
         elif kind == "attribute_agreement": check_attribute_agreement(ex_id, r)
         elif kind == "multivari": check_multivari(ex_id, r)
+        elif kind == "rpn": check_rpn(ex_id, r)
+        elif kind == "fault_tree": check_fault_tree(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

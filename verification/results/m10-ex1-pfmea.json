@@ -1,0 +1,48 @@
+{
+ "id": "m10-ex1-pfmea",
+ "kind": "rpn",
+ "params": {},
+ "source": "constructed",
+ "results": {
+  "failure_modes": [
+   "Wire insulation damaged during strip",
+   "Crimp pull-out below spec",
+   "Missing retention clip",
+   "Label transposed",
+   "Wrong connector installed"
+  ],
+  "s": [
+   5,
+   8,
+   7,
+   3,
+   9
+  ],
+  "o": [
+   5,
+   3,
+   4,
+   4,
+   1
+  ],
+  "d": [
+   6,
+   4,
+   3,
+   2,
+   2
+  ],
+  "rpn": [
+   150,
+   96,
+   84,
+   24,
+   18
+  ],
+  "max_rpn": 150,
+  "total_rpn": 372,
+  "mean_rpn": 74.4
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

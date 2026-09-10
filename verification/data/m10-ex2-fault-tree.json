@@ -1,0 +1,38 @@
+{
+ "id": "m10-ex2-fault-tree",
+ "module": "10",
+ "kind": "fault_tree",
+ "title": "Exercise 2: fault tree, wire-harness continuity escape",
+ "source": "constructed",
+ "setting": "wire-harness assembly, from crimping through continuity test to shipment",
+ "params": {
+  "tree": {
+   "type": "OR",
+   "name": "Harness ships with an undetected open circuit",
+   "children": [
+    {
+     "type": "AND",
+     "name": "Open circuit occurs and test misses it",
+     "children": [
+      {
+       "type": "basic",
+       "name": "Crimp pull-out creates an open circuit",
+       "p": 0.01
+      },
+      {
+       "type": "basic",
+       "name": "Continuity test fails to detect an open",
+       "p": 0.03
+      }
+     ]
+    },
+    {
+     "type": "basic",
+     "name": "Connector damaged after test, before shipment",
+     "p": 0.001
+    }
+   ]
+  }
+ },
+ "columns": null
+}

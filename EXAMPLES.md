@@ -176,4 +176,9 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 
-Totals on 2026-09-10 (after Module 9, both sessions combined): 138 examples; 3,791 quantities agree between Check 1 and Check 2; 8,211 values agree between Check 1 and the JavaScript engines (112 examples with a calculator engine); 1,252 page checks.
+| m10-pfmea-braze | 10 | RPN (new kind `rpn`) | PFMEA excerpt, furnace-braze, 7 failure modes: RPN 210 down to 18, total 754; "wrong braze alloy used" has S=9 (tied highest) but ranks last on RPN (18) — the Action Priority argument on real numbers | `m10-pfmea-braze.csv` | pass | pass | pass | n/a (no calculator) | 10 |
+| m10-fault-tree-leak | 10 | fault tree (new kind `fault_tree`) | 4-level AND/OR tree, leak escapes undetected: top probability 0.412 %, vs the 4.2 % reject rate the test catches (Module 3); joint-leaks branch 4.24 %, test-miss basic event 5 % | none | pass | pass | pass | n/a | 10 |
+| m10-ex1-pfmea | 10 | RPN | connector assembly, 5 failure modes; same S-high/RPN-low pattern as the main example; exercise 1 | `m10-ex1-pfmea.csv` | pass | pass | pass | n/a | 10 |
+| m10-ex2-fault-tree | 10 | fault tree | wire-harness continuity escape, 2-level tree: top probability 0.130 %; exercise 2 | none | pass | pass | pass | n/a | 10 |
+
+Totals on 2026-09-10 (after Module 10, both sessions combined): 142 examples; 3,860 quantities agree between Check 1 and Check 2; 8,211 values agree between Check 1 and the JavaScript engines (112 examples with a calculator engine); 1,314 page checks.

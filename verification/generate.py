@@ -1478,6 +1478,67 @@ register(id="m09-ex2-multivari", module="09", kind="multivari",
          params={}, columns=["time", "part", "x"], rows=_m09_ex2_rows)
 
 
+# ---------------------------------------------------------------------------
+# Module 10: Root cause analysis (prefix m10-)
+# New kinds this module: rpn, fault_tree (both pure arithmetic; see compute.py).
+# ---------------------------------------------------------------------------
+register(id="m10-pfmea-braze", module="10", kind="rpn",
+         title="PFMEA excerpt, brazed header joint, 7 failure modes",
+         source="constructed", setting="process FMEA on the furnace-braze step, brazed aluminium heat-exchanger core, ratings 1-10 per the AIAG-VDA S-O-D scales",
+         params={}, columns=["failure_mode", "s", "o", "d"],
+         rows=[["Braze void in fillet", 7, 5, 6],
+               ["Insufficient braze flow at header joint", 8, 4, 5],
+               ["Flux residue trapped in joint", 6, 3, 7],
+               ["Tube wall thinning from over-etch", 9, 2, 6],
+               ["Fixture misalignment causing gap", 7, 3, 4],
+               ["Furnace temperature out of profile", 8, 2, 3],
+               ["Wrong braze alloy used", 9, 1, 2]])
+
+# Fault tree: leak escapes to the customer undetected. Three-level tree:
+# top = OR(undetected leak, shipping damage); undetected leak = AND(joint
+# leaks, test misses it); joint leaks = OR(3 basic causes), chosen so the
+# joint-leaks probability lands close to the capstone/Module 3 baseline
+# (4.2 %, m03-charter-leak) for continuity across modules.
+_m10_tree = {
+    "type": "OR", "name": "Leak escapes to the customer undetected",
+    "children": [
+        {"type": "AND", "name": "Joint leaks and the test fails to catch it", "children": [
+            {"type": "OR", "name": "Braze joint leaks", "children": [
+                {"type": "basic", "name": "Insufficient flux coverage", "p": 0.015},
+                {"type": "basic", "name": "Joint gap out of tolerance", "p": 0.020},
+                {"type": "basic", "name": "Furnace temperature low at this joint", "p": 0.008}]},
+            {"type": "basic", "name": "Leak test fails to detect a real leak", "p": 0.05}]},
+        {"type": "basic", "name": "Shipping or handling damage causes a new leak", "p": 0.002}]}
+register(id="m10-fault-tree-leak", module="10", kind="fault_tree",
+         title="Fault tree: a leak escapes to the customer undetected",
+         source="constructed", setting="brazed heat-exchanger core, from joint formation through 100% leak test to shipment",
+         params={"tree": _m10_tree}, columns=None, rows=None)
+
+# Exercise 1: a second, smaller PFMEA, connector assembly.
+register(id="m10-ex1-pfmea", module="10", kind="rpn",
+         title="Exercise 1: PFMEA excerpt, connector assembly, 5 failure modes",
+         source="constructed", setting="process FMEA on final connector assembly, ratings 1-10 per the AIAG-VDA S-O-D scales",
+         params={}, columns=["failure_mode", "s", "o", "d"],
+         rows=[["Crimp pull-out below spec", 8, 3, 4],
+               ["Wrong connector installed", 9, 1, 2],
+               ["Missing retention clip", 7, 4, 3],
+               ["Wire insulation damaged during strip", 5, 5, 6],
+               ["Label transposed", 3, 4, 2]])
+
+# Exercise 2: a smaller two-level fault tree, wire-harness continuity failure.
+_m10_ex2_tree = {
+    "type": "OR", "name": "Harness ships with an undetected open circuit",
+    "children": [
+        {"type": "AND", "name": "Open circuit occurs and test misses it", "children": [
+            {"type": "basic", "name": "Crimp pull-out creates an open circuit", "p": 0.010},
+            {"type": "basic", "name": "Continuity test fails to detect an open", "p": 0.03}]},
+        {"type": "basic", "name": "Connector damaged after test, before shipment", "p": 0.001}]}
+register(id="m10-ex2-fault-tree", module="10", kind="fault_tree",
+         title="Exercise 2: fault tree, wire-harness continuity escape",
+         source="constructed", setting="wire-harness assembly, from crimping through continuity test to shipment",
+         params={"tree": _m10_ex2_tree}, columns=None, rows=None)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

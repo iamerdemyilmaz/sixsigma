@@ -1236,6 +1236,55 @@ def r_multivari(cols):
             "pct_temporal": 100.0 * sigma_temporal / total, "time_means": time_means}
 
 
+def r_rpn(cols):
+    """Independent route: plain lists and a manual insertion sort, no pandas."""
+    modes = list(cols["failure_mode"])
+    S = [int(v) for v in cols["s"]]; O = [int(v) for v in cols["o"]]; D = [int(v) for v in cols["d"]]
+    n = len(modes)
+    rows = [(modes[i], S[i], O[i], D[i], S[i] * O[i] * D[i]) for i in range(n)]
+    # manual insertion sort, descending by rpn (index 4)
+    for i in range(1, n):
+        key = rows[i]
+        j = i - 1
+        while j >= 0 and rows[j][4] < key[4]:
+            rows[j + 1] = rows[j]
+            j -= 1
+        rows[j + 1] = key
+    rpns = [r[4] for r in rows]
+    out = {"max_rpn": max(rpns), "total_rpn": sum(rpns), "mean_rpn": mean(rpns)}
+    # numeric fields only (s, o, d, rpn); failure_mode names are strings and
+    # are not put through the numeric close() comparison, matching r_pareto's
+    # precedent of comparing sorted numeric outputs, not the category labels.
+    for i, r in enumerate(rows):
+        out[f"s.{i}"] = r[1]; out[f"o.{i}"] = r[2]; out[f"d.{i}"] = r[3]; out[f"rpn.{i}"] = r[4]
+    return out
+
+
+def r_fault_tree_eval(node, out):
+    if node["type"] == "basic":
+        p = float(node["p"])
+    elif node["type"] == "AND":
+        p = 1.0
+        for c in node["children"]:
+            p = p * r_fault_tree_eval(c, out)
+    else:
+        surviving = 1.0
+        for c in node["children"]:
+            surviving = surviving * (1.0 - r_fault_tree_eval(c, out))
+        p = 1.0 - surviving
+    out[node["name"]] = p
+    return p
+
+
+def r_fault_tree(meta):
+    nodes = {}
+    top_p = r_fault_tree_eval(meta["params"]["tree"], nodes)
+    out = {"top_probability": top_p}
+    for name, p in nodes.items():
+        out[f"nodes.{name}"] = p
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1314,6 +1363,8 @@ def recompute_one(ex_id):
     elif kind == "attribute_agreement": mine = r_attribute_agreement(meta, cols)
     elif kind == "rty_chain": mine = r_rty_chain(meta)
     elif kind == "multivari": mine = r_multivari(cols)
+    elif kind == "rpn": mine = r_rpn(cols)
+    elif kind == "fault_tree": mine = r_fault_tree(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

@@ -1,0 +1,16 @@
+{
+ "id": "m10-ex1-pfmea",
+ "module": "10",
+ "kind": "rpn",
+ "title": "Exercise 1: PFMEA excerpt, connector assembly, 5 failure modes",
+ "source": "constructed",
+ "setting": "process FMEA on final connector assembly, ratings 1-10 per the AIAG-VDA S-O-D scales",
+ "params": {},
+ "columns": [
+  "failure_mode",
+  "s",
+  "o",
+  "d"
+ ],
+ "n_rows": 5
+}

@@ -1,0 +1,16 @@
+{
+ "id": "m10-pfmea-braze",
+ "module": "10",
+ "kind": "rpn",
+ "title": "PFMEA excerpt, brazed header joint, 7 failure modes",
+ "source": "constructed",
+ "setting": "process FMEA on the furnace-braze step, brazed aluminium heat-exchanger core, ratings 1-10 per the AIAG-VDA S-O-D scales",
+ "params": {},
+ "columns": [
+  "failure_mode",
+  "s",
+  "o",
+  "d"
+ ],
+ "n_rows": 7
+}

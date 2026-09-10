@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 10: Root cause analysis · Six Sigma Course</title>
+<meta name="description" content="Cause-and-effect diagrams, 5 Whys done properly with evidence, Is/Is-not, fault tree introduction, process FMEA per the AIAG-VDA handbook with a worked example, and prioritization.">
+<meta name="examples" content="m10-pfmea-braze, m10-fault-tree-leak, m10-ex1-pfmea, m10-ex2-fault-tree">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="10">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 10 · Analyze</p>
+    <h1>Root cause analysis</h1>
+    <p class="lead">Graphical analysis (Module 9) shows you where to look. Root cause analysis is the disciplined process of actually looking: generating candidate causes without prematurely narrowing them, testing each one against evidence instead of opinion, and building a shared, structured picture of a failure mode before proposing a fix. This module covers the core tools: cause-and-effect diagrams, the 5 Whys done properly, Kepner-Tregoe's Is/Is-not comparison, an introduction to fault trees, and process FMEA per the AIAG-VDA handbook, with a full worked PFMEA on the brazing process.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Build</strong> a cause-and-effect (fishbone) diagram organized by standard cause categories.</li>
+      <li><strong>Run</strong> a 5 Whys analysis that demands evidence at each step, not the first plausible guess.</li>
+      <li><strong>Use</strong> Kepner-Tregoe's Is/Is-not structure to narrow a problem before brainstorming causes.</li>
+      <li><strong>Build and quantify</strong> a simple fault tree using AND and OR gates.</li>
+      <li><strong>Build</strong> a process FMEA per the AIAG-VDA handbook's structure, rate Severity, Occurrence and Detection, and compute RPN.</li>
+      <li><strong>Explain</strong> why RPN alone can misprioritize risk, and what Action Priority changes about that.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>The published crankshaft DMAIC case cited in Modules 3 and 4 used exactly two of this module's tools in its Analyze phase: a cause-and-effect diagram and a process FMEA, ahead of the statistical work that produced its reported Cp and Cpk improvement.<sup class="cite"><a href="#ref-6">[6]</a></sup> That ordering is not incidental. Root cause tools are cheap, fast, and they scope the expensive work (a designed experiment, a new gauge study, a process change) onto the failure modes actually worth the effort, instead of the ones that happen to be top of mind in a meeting.</p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real incident.</p>
+    <p>The most common way root cause analysis fails is not using the wrong tool; it is stopping at the first answer that sounds right. A team investigating leak-test rejects asks "why did this joint leak," gets the answer "the operator rushed the flux step," writes a corrective action for operator retraining, and closes the investigation &mdash; three whys short of anything, no evidence collected, no fixture or furnace data pulled, and a very plausible-sounding story that happens to blame the person easiest to blame. Two months later the reject rate is unchanged, because the retrained operator was never the cause; a furnace zone was running four degrees under profile the entire time. Every tool in this module exists to make that shortcut harder to take by accident.</p>
+
+    <h2 id="fishbone">Cause-and-effect diagrams</h2>
+    <p>Kaoru Ishikawa's cause-and-effect diagram (fishbone, or Ishikawa diagram) organizes candidate causes of one clearly stated effect into standard categories, conventionally Man, Machine, Material, Method, Measurement, and Environment for a manufacturing process.<sup class="cite"><a href="#ref-3">[3]</a></sup> The categories are a checklist, not a theory: their purpose is to keep a brainstorming session from exhausting itself on the first category anyone thinks of (almost always "Man") and skipping the other five.</p>
+    <p class="example-label">The diagram below is a constructed example, drawn for teaching.</p>
+    <figure>
+      <svg viewBox="0 0 700 380" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Cause-and-effect diagram, leak-test rejects</title>
+        <desc id="fig1-d">A horizontal spine pointing right to a box labelled leak-test rejects. Six diagonal bones branch off the spine, three above and three below, labelled Man, Method and Measurement above, Machine, Material and Environment below, each with one or two example causes written near it: Man - inconsistent flux application technique; Method - no written flux application standard; Measurement - leak-test gauge R&R not recently verified; Machine - furnace temperature drift; Material - tube wall thickness variation; Environment - shop humidity affecting flux behaviour.</desc>
+        <g class="chart-axis" stroke-width="1.5"><path d="M40 190 H560"/></g>
+        <g class="chart-box"><rect x="560" y="165" width="120" height="50" rx="3"/></g>
+        <g class="chart-text" text-anchor="middle"><text x="620" y="195">Leak-test</text></g>
+        <g class="chart-text" text-anchor="middle"><text x="620" y="210" class="chart-text small">rejects</text></g>
+        <g class="chart-axis" stroke-width="1.2">
+          <path d="M120 190 L170 90"/><path d="M270 190 L320 90"/><path d="M420 190 L470 90"/>
+          <path d="M120 190 L170 290"/><path d="M270 190 L320 290"/><path d="M420 190 L470 290"/>
+        </g>
+        <g class="chart-text small" text-anchor="middle">
+          <text x="175" y="82">Man</text><text x="175" y="66">Inconsistent flux</text><text x="175" y="52">application technique</text>
+          <text x="325" y="82">Method</text><text x="325" y="66">No written flux</text><text x="325" y="52">application standard</text>
+          <text x="475" y="82">Measurement</text><text x="475" y="66">Leak-test gauge R&amp;R</text><text x="475" y="52">not recently verified</text>
+          <text x="175" y="300">Machine</text><text x="175" y="316">Furnace temperature</text><text x="175" y="330">drift</text>
+          <text x="325" y="300">Material</text><text x="325" y="316">Tube wall thickness</text><text x="325" y="330">variation</text>
+          <text x="475" y="300">Environment</text><text x="475" y="316">Shop humidity affecting</text><text x="475" y="330">flux behaviour</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. A fishbone diagram for leak-test rejects, six standard categories, one or two illustrative candidate causes per bone. Every branch here is a hypothesis to test, not a conclusion.</figcaption>
+    </figure>
+
+    <h2 id="fivewhys">5 Whys, done properly</h2>
+    <p>The 5 Whys technique, from Sakichi Toyoda and formalized within the Toyota Production System, repeatedly asks "why" about a stated problem until a root cause is reached, typically in about five iterations.<sup class="cite"><a href="#ref-4">[4]</a></sup> "Properly" means one specific discipline: each "why" answer must be something the team can point to evidence for &mdash; a data pull, a physical inspection, a log &mdash; not a plausible guess. A 5 Whys session that never leaves the conference room is brainstorming with a numbering system, not root cause analysis; the value of the technique is entirely in the verification step between each why and the next one.</p>
+
+    <h2 id="isisnot">Is/Is-not</h2>
+    <p>Kepner and Tregoe's Is/Is-not structure compares where, when, and how much a problem occurs against where, when, and how much it plausibly could occur but does not.<sup class="cite"><a href="#ref-5">[5]</a></sup> The comparison is deliberately negative-space: a defect that appears on cavity B but never cavity A, on the night shift but never day shift, or after a specific date but never before it, is telling you something through what it does <em>not</em> do, and the distinctions between the "is" and "is not" columns are frequently the fastest route to a specific, testable cause &mdash; well before a full statistical study confirms it.</p>
+
+    <h2 id="faulttree">Fault tree introduction</h2>
+    <p>A fault tree is a deductive, top-down diagram: start from one specific undesired top event and work backward through the logical combinations of more basic events that could produce it, connected by AND and OR gates.<sup class="cite"><a href="#ref-2">[2]</a></sup> An AND gate needs every input event to occur for the output to occur; an OR gate needs only one. Unlike a fishbone diagram (which organizes hypotheses) or 5 Whys (which is a single chain), a fault tree can be quantified directly from estimated or measured probabilities of the basic events at the bottom of the tree.</p>
+    <div class="formula">P(AND of independent events) = product of the individual probabilities
+      <br>P(OR of independent events) = 1 &minus; product of (1 &minus; each individual probability)
+      <span class="where">Independence is an assumption, not a guarantee; a fault tree built from events that are not actually independent (a shared cause behind two "independent" branches) will understate the true top-event probability. The NASA Fault Tree Handbook, developed for aerospace reliability analysis, is the standard reference for the method.<sup class="cite"><a href="#ref-2">[2]</a></sup></span>
+    </div>
+
+    <h2 id="pfmea">Process FMEA per the AIAG-VDA handbook</h2>
+    <p>The AIAG-VDA FMEA Handbook structures a process FMEA (PFMEA) as seven steps: Planning and Preparation, Structure Analysis, Function Analysis, Failure Analysis, Risk Analysis, Optimization, and Results Documentation.<sup class="cite"><a href="#ref-1">[1]</a></sup> Failure Analysis is where the tool does its cause-and-effect work explicitly: for every process step, every plausible failure mode, its effect, and its cause are named. Risk Analysis rates each failure mode on three 1-to-10 scales &mdash; Severity (S, how bad the effect is), Occurrence (O, how often the cause happens), Detection (D, how well the current controls catch it before it escapes) &mdash; and the classic Risk Priority Number is their product.</p>
+    <div class="formula">RPN = S &times; O &times; D
+      <span class="where">Higher is worse on all three scales, including Detection (a D of 10 means the current controls are least likely to catch the failure), so a high RPN is unambiguously a higher-priority risk under this scheme.</span>
+    </div>
+    <p>The current AIAG-VDA handbook replaces ranking failure modes by raw RPN with an Action Priority (AP) rating of High, Medium, or Low, driven primarily by Severity, then Occurrence, then Detection, rather than treating the three factors as freely interchangeable in one product.<sup class="cite"><a href="#ref-1">[1]</a></sup> The official AP lookup table itself is not reproduced here; it is proprietary content within the licensed handbook, and this course's sourcing for its exact cell-by-cell contents does not go beyond a secondary summary.<sup class="cite"><a href="#ref-7">[7]</a></sup> The principle behind it, though, is straightforward and worth internalizing on its own: a high-severity failure mode should not quietly fall to the bottom of a priority list just because it is rare and well detected, which is exactly what a pure RPN product can do. Worked example 1 below shows this happening on real numbers.</p>
+
+    <h2 id="prioritization">Prioritization</h2>
+    <p>RPN, Action Priority, and a Pareto chart (Module 9) of failure frequency are three different lenses on the same question, and they can disagree. RPN and AP both rate <em>potential</em> risk from an FMEA exercise, using judgement-based ratings; a Pareto chart of <em>actual</em> logged failures ranks by what has already happened. A failure mode can be genuinely low-probability and still deserve a high AP if its severity is high enough, while never showing up on this quarter's Pareto chart at all &mdash; both views are legitimate, and using only one of them (usually the Pareto chart, because the data already exists) is how a rare-but-severe risk stays unaddressed until it happens.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: PFMEA excerpt, the brazing process</h3>
+    <p class="example-label">The data below is a constructed example, not a real production PFMEA.</p>
+    <p>Seven failure modes from a process FMEA on the furnace-braze step, each rated 1 to 10 on Severity, Occurrence and Detection.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. PFMEA excerpt, furnace-braze step, sorted by RPN (constructed data).</caption>
+        <thead><tr><th>Failure mode</th><th>S</th><th>O</th><th>D</th><th>RPN = S&times;O&times;D</th></tr></thead>
+        <tbody>
+          <tr><td>Braze void in fillet</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.0" data-dp="0">7</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.0" data-dp="0">5</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.0" data-dp="0">6</span></td><td class="num"><strong><span data-ex="m10-pfmea-braze" data-key="rpn.0" data-dp="0">210</span></strong></td></tr>
+          <tr><td>Insufficient braze flow at header joint</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.1" data-dp="0">8</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.1" data-dp="0">4</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.1" data-dp="0">5</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="rpn.1" data-dp="0">160</span></td></tr>
+          <tr><td>Flux residue trapped in joint</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.2" data-dp="0">6</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.2" data-dp="0">3</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.2" data-dp="0">7</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="rpn.2" data-dp="0">126</span></td></tr>
+          <tr><td>Tube wall thinning from over-etch</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.3" data-dp="0">9</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.3" data-dp="0">2</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.3" data-dp="0">6</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="rpn.3" data-dp="0">108</span></td></tr>
+          <tr><td>Fixture misalignment causing gap</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.4" data-dp="0">7</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.4" data-dp="0">3</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.4" data-dp="0">4</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="rpn.4" data-dp="0">84</span></td></tr>
+          <tr><td>Furnace temperature out of profile</td><td class="num"><span data-ex="m10-pfmea-braze" data-key="s.5" data-dp="0">8</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.5" data-dp="0">2</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.5" data-dp="0">3</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="rpn.5" data-dp="0">48</span></td></tr>
+          <tr><td><strong>Wrong braze alloy used</strong></td><td class="num"><strong><span data-ex="m10-pfmea-braze" data-key="s.6" data-dp="0">9</span></strong></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="o.6" data-dp="0">1</span></td><td class="num"><span data-ex="m10-pfmea-braze" data-key="d.6" data-dp="0">2</span></td><td class="num"><strong><span data-ex="m10-pfmea-braze" data-key="rpn.6" data-dp="0">18</span></strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Total RPN across all seven modes: <span data-ex="m10-pfmea-braze" data-key="total_rpn" data-dp="0">754</span>; mean <span data-ex="m10-pfmea-braze" data-key="mean_rpn" data-dp="1">107.7</span>. By RPN alone, "wrong braze alloy used" ranks dead last, with an RPN of only <span data-ex="m10-pfmea-braze" data-key="rpn.6" data-dp="0">18</span> &mdash; twelve times smaller than the top item. Look at its Severity alone, though: a 9, tied for the highest severity rating on the whole list, exactly as severe as "tube wall thinning" and higher than everything else. Its low RPN comes entirely from Occurrence and Detection both being very low (1 and 2: this specific mistake almost never happens, and when it does, the current controls catch it almost every time). That is precisely the situation Action Priority logic is built to handle differently from raw RPN: a high-severity failure mode does not automatically deserve the bottom of the priority list just because its current occurrence and detection numbers happen to be good today. If either of those numbers ever gets worse &mdash; a supplier substitution, a label mix-up in stores &mdash; the severity is already sitting at 9, waiting.</p>
+
+    <h3 id="example2">Worked example 2: fault tree, a leak escaping undetected</h3>
+    <p class="example-label">Constructed example; the basic-event probabilities are illustrative, not measured data.</p>
+    <p>The capstone's charter (Module 3) states a 4.2&nbsp;% leak-test <em>reject</em> rate &mdash; leaks the test catches. This fault tree asks a different, narrower question: what is the probability a leak escapes the test <em>undetected</em> and reaches the customer? "Braze joint leaks" is built from the same three plausible causes a fishbone diagram might surface, quantified here as basic events.</p>
+    <ul>
+      <li><strong>Leak escapes to the customer undetected</strong> [OR] = <strong><span data-ex="m10-fault-tree-leak" data-key="top_probability" data-dp="5">0.00412</span></strong> (0.412&nbsp;%)
+        <ul>
+          <li>Joint leaks and the test fails to catch it [AND] = <span data-ex="m10-fault-tree-leak" data-key="nodes.Joint leaks and the test fails to catch it" data-dp="5">0.00212</span>
+            <ul>
+              <li>Braze joint leaks [OR] = <span data-ex="m10-fault-tree-leak" data-key="nodes.Braze joint leaks" data-dp="4">0.0424</span>
+                <ul>
+                  <li>Insufficient flux coverage (basic event) = <span data-ex="m10-fault-tree-leak" data-key="nodes.Insufficient flux coverage" data-dp="3">0.015</span></li>
+                  <li>Joint gap out of tolerance (basic event) = <span data-ex="m10-fault-tree-leak" data-key="nodes.Joint gap out of tolerance" data-dp="3">0.020</span></li>
+                  <li>Furnace temperature low at this joint (basic event) = <span data-ex="m10-fault-tree-leak" data-key="nodes.Furnace temperature low at this joint" data-dp="3">0.008</span></li>
+                </ul>
+              </li>
+              <li>Leak test fails to detect a real leak (basic event) = <span data-ex="m10-fault-tree-leak" data-key="nodes.Leak test fails to detect a real leak" data-dp="2">0.05</span></li>
+            </ul>
+          </li>
+          <li>Shipping or handling damage causes a new leak (basic event) = <span data-ex="m10-fault-tree-leak" data-key="nodes.Shipping or handling damage causes a new leak" data-dp="3">0.002</span></li>
+        </ul>
+      </li>
+    </ul>
+    <div class="formula">P(Braze joint leaks) = 1 &minus; (1&minus;0.015)(1&minus;0.020)(1&minus;0.008) = 0.0424
+      <br>P(Joint leaks AND test misses it) = 0.0424 &times; 0.05 = 0.00212
+      <br>P(top event) = 1 &minus; (1&minus;0.00212)(1&minus;0.002) = 0.00412
+    </div>
+    <p>About 4 in 1,000 assemblies are predicted to reach the customer with an undetected leak &mdash; noticeably smaller than the 4.2&nbsp;% reject rate the test catches, which is exactly the point of a 100&nbsp;% leak test: most leaks are caught. The tree also shows where the residual risk concentrates: the "test fails to detect" branch (5&nbsp;% miss rate) contributes roughly as much to the undetected-escape probability as all three physical leak causes combined, which argues for a Module 4 MSA study on the leak-test method itself as much as for any change to the braze process.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Stopping at the first plausible-sounding cause.</strong> Consequence: the illustrative failure above &mdash; a retraining corrective action closes the investigation while the real cause, a furnace zone out of profile, keeps producing rejects. Fix: every "why" needs evidence, not just plausibility.</li>
+      <li><strong>Running 5 Whys as a solo desk exercise.</strong> Consequence: one person's mental model of the process, not the process itself, gets interrogated five times. Fix: pull data and walk the floor between each why.</li>
+      <li><strong>Brainstorming causes only under "Man."</strong> Consequence: Machine, Material, Method, Measurement and Environment causes never get considered, and a genuine equipment or measurement problem gets missed entirely. Fix: work through all six fishbone categories deliberately, even the ones that feel like a stretch.</li>
+      <li><strong>Treating RPN as the only prioritization number that matters.</strong> Consequence: Worked example 1 &mdash; a high-severity, low-probability failure mode ranks near the bottom of a pure RPN list and gets no attention until it happens. Fix: read Severity on its own, not only inside the RPN product; use Action Priority logic (Severity first) alongside RPN.</li>
+      <li><strong>Building a fault tree from events that are not really independent.</strong> Consequence: a shared upstream cause behind two "independent" branches (the same furnace, the same operator, the same incoming lot) means the AND-gate multiplication understates the true top-event probability. Fix: check for shared causes before assuming independence.</li>
+      <li><strong>Skipping Structure and Function Analysis and jumping straight to Failure Analysis in a PFMEA.</strong> Consequence: failure modes get listed without a clear link to which process step and which function they actually affect, making the S-O-D ratings harder to justify and the team's discussion less focused. Fix: follow the AIAG-VDA seven steps in order, even briefly, before rating anything.</li>
+      <li><strong>Using only a Pareto chart of past failures to prioritize risk.</strong> Consequence: a rare, high-severity failure mode with no occurrences yet this quarter never appears on the chart and never gets addressed until it happens. Fix: use FMEA-based prioritization (RPN, Action Priority) alongside, not instead of, a Pareto chart of actual history.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a second PFMEA</h3>
+    <p class="example-label">Constructed example, not a real production PFMEA.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Exercise 1 data. PFMEA excerpt, final connector assembly (constructed data).</caption>
+        <thead><tr><th>Failure mode</th><th>S</th><th>O</th><th>D</th></tr></thead>
+        <tbody>
+          <tr><td>Crimp pull-out below spec</td><td class="num">8</td><td class="num">3</td><td class="num">4</td></tr>
+          <tr><td>Wrong connector installed</td><td class="num">9</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>Missing retention clip</td><td class="num">7</td><td class="num">4</td><td class="num">3</td></tr>
+          <tr><td>Wire insulation damaged during strip</td><td class="num">5</td><td class="num">5</td><td class="num">6</td></tr>
+          <tr><td>Label transposed</td><td class="num">3</td><td class="num">4</td><td class="num">2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute RPN for each failure mode and rank them. (b) Which failure mode has the highest Severity? Where does it rank by RPN? (c) Is this the same pattern as Worked example 1, or different? Explain.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Failure mode</th><th>S</th><th>O</th><th>D</th><th>RPN</th></tr></thead>
+          <tbody>
+            <tr><td>Wire insulation damaged during strip</td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="s.0" data-dp="0">5</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="o.0" data-dp="0">5</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="d.0" data-dp="0">6</span></td><td class="num"><strong><span data-ex="m10-ex1-pfmea" data-key="rpn.0" data-dp="0">150</span></strong></td></tr>
+            <tr><td>Crimp pull-out below spec</td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="s.1" data-dp="0">8</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="o.1" data-dp="0">3</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="d.1" data-dp="0">4</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="rpn.1" data-dp="0">96</span></td></tr>
+            <tr><td>Missing retention clip</td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="s.2" data-dp="0">7</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="o.2" data-dp="0">4</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="d.2" data-dp="0">3</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="rpn.2" data-dp="0">84</span></td></tr>
+            <tr><td>Label transposed</td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="s.3" data-dp="0">3</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="o.3" data-dp="0">4</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="d.3" data-dp="0">2</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="rpn.3" data-dp="0">24</span></td></tr>
+            <tr><td><strong>Wrong connector installed</strong></td><td class="num"><strong><span data-ex="m10-ex1-pfmea" data-key="s.4" data-dp="0">9</span></strong></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="o.4" data-dp="0">1</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="d.4" data-dp="0">2</span></td><td class="num"><span data-ex="m10-ex1-pfmea" data-key="rpn.4" data-dp="0">18</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>(b)</strong> "Wrong connector installed" has the highest Severity (9), but ranks last by RPN (18), because its Occurrence and Detection are both very low.</p>
+      <p><strong>(c)</strong> The same pattern as Worked example 1: the highest-severity failure mode is not the highest-RPN one, for the same structural reason (low O and D pull the product down even though S is high). This is not a coincidence specific to one PFMEA; it is a predictable consequence of RPN being a simple product of three independent-feeling scales, and it is exactly why Action Priority weights Severity first instead of treating all three factors as interchangeable.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a smaller fault tree</h3>
+    <p class="example-label">Constructed example; probabilities are illustrative.</p>
+    <p>A wire-harness assembly ships with an undetected open circuit if a crimp pull-out creates an open circuit <em>and</em> the continuity test fails to catch it, <em>or</em> if the connector is damaged after testing but before shipment.</p>
+    <ul>
+      <li>Crimp pull-out creates an open circuit (basic event) = 0.010</li>
+      <li>Continuity test fails to detect an open (basic event) = 0.03</li>
+      <li>Connector damaged after test, before shipment (basic event) = 0.001</li>
+    </ul>
+    <p><strong>Tasks.</strong> (a) Draw (in words or on paper) the gate structure connecting these three basic events to the top event. (b) Compute the top-event probability. (c) Which single change would reduce the top-event probability more: halving the crimp pull-out rate, or halving the test's miss rate? Compute both to check your intuition.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> "Open circuit occurs and test misses it" [AND] = crimp pull-out (0.010) &times; test miss (0.03). Top event [OR] = that AND-branch, or the shipping-damage basic event (0.001).</p>
+      <p><strong>(b)</strong> AND branch = 0.010 &times; 0.03 = <span data-ex="m10-ex2-fault-tree" data-key="nodes.Open circuit occurs and test misses it" data-dp="4">0.0003</span>. Top event = 1 &minus; (1&minus;0.0003)(1&minus;0.001) = <span data-ex="m10-ex2-fault-tree" data-key="top_probability" data-dp="6">0.001300</span>.</p>
+      <p><strong>(c)</strong> Halving the crimp rate (0.005 &times; 0.03 = 0.00015, versus halving the miss rate: 0.010 &times; 0.015 = 0.00015) &mdash; in this case the two changes are mathematically identical, because the AND branch is a simple product of the two and halving either factor halves the product by the same amount. This is a useful, general fact about AND gates with two inputs: the top event is equally sensitive to a proportional change in either input, so the better lever is whichever one is operationally cheaper to fix, not whichever number looks bigger on the page.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="10">
+      <fieldset class="q" data-answer="b">
+        <legend>1. A cause-and-effect diagram's standard categories (Man, Machine, Material, Method, Measurement, Environment) exist mainly to</legend>
+        <label><input type="radio" name="q1" value="a"> assign blame to a specific department</label>
+        <label><input type="radio" name="q1" value="b"> keep a brainstorm from exhausting itself on the first category anyone thinks of</label>
+        <label><input type="radio" name="q1" value="c"> replace the need for any data collection</label>
+        <label><input type="radio" name="q1" value="d"> compute an RPN</label>
+        <p class="explain" hidden>The categories are a checklist to ensure breadth, most often to counter the pull toward blaming "Man" first.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. "Properly" run 5 Whys means, above all, that</legend>
+        <label><input type="radio" name="q2" value="a"> exactly five whys must be asked, no more and no fewer</label>
+        <label><input type="radio" name="q2" value="b"> only one person should conduct it, for consistency</label>
+        <label><input type="radio" name="q2" value="c"> each answer is backed by evidence, not just plausibility</label>
+        <label><input type="radio" name="q2" value="d"> it replaces the need for a fishbone diagram</label>
+        <p class="explain" hidden>The discipline is verification between each why, not the specific count of five.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. Kepner-Tregoe's Is/Is-not structure is useful mainly because</legend>
+        <label><input type="radio" name="q3" value="a"> what a problem does NOT do (where, when, how much it plausibly could occur but does not) is often as informative as what it does do</label>
+        <label><input type="radio" name="q3" value="b"> it replaces the need for statistical testing</label>
+        <label><input type="radio" name="q3" value="c"> it only applies to attribute data</label>
+        <label><input type="radio" name="q3" value="d"> it is a synonym for a fishbone diagram</label>
+        <p class="explain" hidden>The distinctions between the Is and Is-not columns frequently point directly at a specific, testable cause.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. In a fault tree, an AND gate's output probability is computed as</legend>
+        <label><input type="radio" name="q4" value="a"> the sum of the input probabilities</label>
+        <label><input type="radio" name="q4" value="b"> the maximum of the input probabilities</label>
+        <label><input type="radio" name="q4" value="c"> 1 minus the product of (1 minus each input)</label>
+        <label><input type="radio" name="q4" value="d"> the product of the input probabilities</label>
+        <p class="explain" hidden>AND gates multiply (assuming independence); OR gates use 1 minus the product of the complements.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>5. A fault tree's AND/OR gate formulas assume that the input events are</legend>
+        <label><input type="radio" name="q5" value="a"> normally distributed</label>
+        <label><input type="radio" name="q5" value="b"> independent, which should be checked, not assumed</label>
+        <label><input type="radio" name="q5" value="c"> always equally likely</label>
+        <label><input type="radio" name="q5" value="d"> irrelevant to the top event</label>
+        <p class="explain" hidden>A shared cause behind two "independent" branches means the formulas understate the true top-event probability.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. RPN in a process FMEA is computed as</legend>
+        <label><input type="radio" name="q6" value="a"> Severity plus Occurrence plus Detection</label>
+        <label><input type="radio" name="q6" value="b"> Severity alone</label>
+        <label><input type="radio" name="q6" value="c"> Severity times Occurrence times Detection</label>
+        <label><input type="radio" name="q6" value="d"> the average of Severity, Occurrence and Detection</label>
+        <p class="explain" hidden>RPN = S × O × D, each rated 1 to 10.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>7. In Worked example 1, "wrong braze alloy used" ranked last by RPN despite having the joint-highest Severity rating because</legend>
+        <label><input type="radio" name="q7" value="a"> its Occurrence and Detection ratings were both very low, pulling the product down</label>
+        <label><input type="radio" name="q7" value="b"> Severity does not affect RPN</label>
+        <label><input type="radio" name="q7" value="c"> the failure mode was entered incorrectly</label>
+        <label><input type="radio" name="q7" value="d"> RPN always ranks by Severity first</label>
+        <p class="explain" hidden>Low O and D (rare occurrence, well detected today) can outweigh a high S in the product, which is exactly the RPN weakness Action Priority addresses.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>8. Action Priority (AP), as this course describes it, differs from raw RPN mainly by</legend>
+        <label><input type="radio" name="q8" value="a"> ignoring Occurrence entirely</label>
+        <label><input type="radio" name="q8" value="b"> using a 1-to-5 scale instead of 1-to-10</label>
+        <label><input type="radio" name="q8" value="c"> being identical to RPN in every case</label>
+        <label><input type="radio" name="q8" value="d"> weighting Severity first, then Occurrence, then Detection, rather than treating all three as freely interchangeable in one product</label>
+        <p class="explain" hidden>This course does not reproduce the official AP lookup table (proprietary, only secondary-sourced here), but the underlying principle is Severity-first prioritization.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. The AIAG-VDA PFMEA's seven-step structure begins with</legend>
+        <label><input type="radio" name="q9" value="a"> Risk Analysis</label>
+        <label><input type="radio" name="q9" value="b"> Results Documentation</label>
+        <label><input type="radio" name="q9" value="c"> Planning and Preparation</label>
+        <label><input type="radio" name="q9" value="d"> Optimization</label>
+        <p class="explain" hidden>Planning and Preparation, Structure Analysis, Function Analysis, Failure Analysis, Risk Analysis, Optimization, Results Documentation, in that order.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. Relying only on a Pareto chart of past failures to prioritize risk, instead of also using FMEA-based prioritization, mainly risks</legend>
+        <label><input type="radio" name="q10" value="a"> over-counting rare failure modes</label>
+        <label><input type="radio" name="q10" value="b"> missing a rare, high-severity failure mode that has not happened yet this period</label>
+        <label><input type="radio" name="q10" value="c"> nothing; the two approaches always agree</label>
+        <label><input type="radio" name="q10" value="d"> double-counting the same defect twice</label>
+        <p class="explain" hidden>A Pareto chart ranks by what has already happened; a failure with no occurrences yet this quarter cannot appear on it at all.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. Keep the brainstorm from stopping at one category.</li>
+        <li>c. Evidence at each step.</li>
+        <li>a. What the problem does not do is informative too.</li>
+        <li>d. Product of the inputs.</li>
+        <li>b. Independent, should be checked.</li>
+        <li>c. S × O × D.</li>
+        <li>a. Low O and D pulled the product down.</li>
+        <li>d. Severity first, then O, then D.</li>
+        <li>c. Planning and Preparation.</li>
+        <li>b. Missing a rare, high-severity, not-yet-occurred failure.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A cause-and-effect diagram organizes candidate causes into standard categories (Man, Machine, Material, Method, Measurement, Environment) so a brainstorm does not exhaust itself on the first category anyone thinks of.</li>
+      <li>5 Whys only works when each answer is backed by evidence collected between iterations; without that discipline it is brainstorming with a numbering system.</li>
+      <li>Is/Is-not narrows a problem by comparing where, when and how much it occurs against where, when and how much it plausibly could occur but does not.</li>
+      <li>A fault tree is deductive and quantifiable: AND gates multiply probabilities, OR gates use 1 minus the product of survival probabilities, and the method assumes independence between branches unless checked.</li>
+      <li>Process FMEA rates Severity, Occurrence and Detection on 1-to-10 scales; RPN = S × O × D is the classic product, but Action Priority (Severity first) exists specifically because a high-severity, low-probability failure can rank artificially low on RPN alone.</li>
+      <li>RPN/AP (potential risk) and a Pareto chart (actual history) are different lenses that can disagree; use both, not one instead of the other.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">AIAG &amp; VDA. <em>FMEA Handbook</em>, 1st ed., June 2019 (2nd printing with errata, Aug 2022). <a href="https://www.aiag.org/training-and-resources/manuals/details/FMEAAV-1">https://www.aiag.org/training-and-resources/manuals/details/FMEAAV-1</a> <span class="tag">(catalogue-level: existence, edition, printing history, and the seven-step structure are confirmed at this depth; the Action Priority table's exact contents are not reproduced from this source, see [7])</span></li>
+      <li id="ref-2">NASA (Vesely, W., Stamatelatos, M., et al.). <em>Fault Tree Handbook with Aerospace Applications</em>, Version 1.1, Aug 2002. <a href="https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf">https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf</a></li>
+      <li id="ref-3">Ishikawa, K. (1976). <em>Guide to Quality Control</em>. Asian Productivity Organization. <a href="https://openlibrary.org/books/OL4595409M/Guide_to_quality_control">https://openlibrary.org/books/OL4595409M/Guide_to_quality_control</a> <span class="tag">(catalogue-level; cause-and-effect diagram origin)</span></li>
+      <li id="ref-4">Ohno, T. (1988). <em>Toyota Production System: Beyond Large-Scale Production</em>. Productivity Press. <a href="https://books.google.com/books/about/Toyota_Production_System.html?id=QebEDwAAQBAJ">https://books.google.com/books/about/Toyota_Production_System.html?id=QebEDwAAQBAJ</a> <span class="tag">(catalogue-level; 5 Whys within the Toyota Production System)</span></li>
+      <li id="ref-5">Kepner, C. H., &amp; Tregoe, B. B. (1965). <em>The Rational Manager</em>. McGraw-Hill. <a href="https://books.google.com/books/about/The_Rational_Manager.html?id=OboWAAAAIAAJ">https://books.google.com/books/about/The_Rational_Manager.html?id=OboWAAAAIAAJ</a> <span class="tag">(catalogue-level; Is/Is-not problem analysis)</span></li>
+      <li id="ref-6">Sharma, G. V. S. S., &amp; Rao, P. S. (2014). A DMAIC approach for process capability improvement: an engine crankshaft manufacturing process. <em>Journal of Industrial Engineering International</em>, 10, 65. <a href="https://link.springer.com/article/10.1007/s40092-014-0065-7">https://link.springer.com/article/10.1007/s40092-014-0065-7</a></li>
+      <li id="ref-7">Quality-One. "AIAG &amp; VDA FMEA." <a href="https://quality-one.com/aiag-vda-fmea/">https://quality-one.com/aiag-vda-fmea/</a> <span class="tag">(secondary: seven-step process and Action Priority replacing RPN, as summarized by this source; the official AP lookup table's exact contents are not reproduced in this course)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

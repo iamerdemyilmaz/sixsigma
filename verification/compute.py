@@ -1335,6 +1335,50 @@ def multivari(cols, params):
             "times": [float(t) if isinstance(t, (int, float)) else t for t in times]}
 
 
+# --------------------------------------------------------------------------
+# Module 10: root cause analysis
+#   rpn         columns failure_mode, s, o, d (1-10 ratings); RPN = S*O*D,
+#               sorted descending. Action Priority (H/M/L) is taught in
+#               prose only (the official AIAG-VDA AP lookup table is not
+#               available at more than secondary depth in this course).
+#   fault_tree  params tree (nested AND/OR/basic dict with leaf p's) ->
+#               top-event probability and every named node's probability.
+# --------------------------------------------------------------------------
+def rpn_table(cols, params):
+    df = pd.DataFrame({"mode": cols["failure_mode"], "s": [int(v) for v in cols["s"]],
+                       "o": [int(v) for v in cols["o"]], "d": [int(v) for v in cols["d"]]})
+    df["rpn"] = df["s"] * df["o"] * df["d"]
+    df = df.sort_values("rpn", ascending=False).reset_index(drop=True)
+    return {"failure_modes": df["mode"].tolist(), "s": df["s"].tolist(), "o": df["o"].tolist(),
+            "d": df["d"].tolist(), "rpn": df["rpn"].tolist(), "max_rpn": int(df["rpn"].max()),
+            "total_rpn": int(df["rpn"].sum()), "mean_rpn": float(df["rpn"].mean())}
+
+
+def _fault_tree_eval(node, out):
+    if node["type"] == "basic":
+        p = float(node["p"])
+    else:
+        child_ps = [_fault_tree_eval(c, out) for c in node["children"]]
+        if node["type"] == "AND":
+            p = 1.0
+            for cp in child_ps:
+                p *= cp
+        else:  # OR
+            q = 1.0
+            for cp in child_ps:
+                q *= (1.0 - cp)
+            p = 1.0 - q
+    out[node["name"]] = p
+    return p
+
+
+def fault_tree(params):
+    tree = params["tree"]
+    nodes = {}
+    top_p = _fault_tree_eval(tree, nodes)
+    return {"top_probability": top_p, "nodes": nodes, "top_name": tree["name"]}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1427,6 +1471,10 @@ def compute_one(ex_id):
         res = rty_chain(params)
     elif kind == "multivari":
         res = multivari(cols, params)
+    elif kind == "rpn":
+        res = rpn_table(cols, params)
+    elif kind == "fault_tree":
+        res = fault_tree(params)
     elif kind == "pareto":
         res = pareto(cols)
     else:
