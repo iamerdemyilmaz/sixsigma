@@ -1,0 +1,18 @@
+{
+ "id": "m05-rounding-coarse",
+ "module": "05",
+ "kind": "descriptive",
+ "title": "The same 80 parts, recorded to 0.01 mm (coarse resolution, a dial caliper)",
+ "source": "constructed",
+ "setting": "the same 80 parts as m05-rounding-fine, this time read from a dial caliper to 0.01 mm",
+ "params": {
+  "usl": 6.53,
+  "lsl": 6.47,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 80
+}

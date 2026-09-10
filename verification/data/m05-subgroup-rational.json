@@ -1,0 +1,21 @@
+{
+ "id": "m05-subgroup-rational",
+ "module": "05",
+ "kind": "capability",
+ "title": "Rational subgrouping: the same 100 individuals, regrouped so every subgroup of 5 is a single cavity",
+ "source": "constructed",
+ "setting": "the same 100 readings as m05-subgroup-naive, reordered so subgroups 1-10 are cavity A and subgroups 11-20 are cavity B",
+ "params": {
+  "usl": 8.02,
+  "lsl": 7.98,
+  "target": 8.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 100
+}

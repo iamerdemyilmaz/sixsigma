@@ -156,6 +156,11 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m04-ex1-bias | 4 | one-sample t | keyway caliper on a 6.015 mm reference, 12 readings: bias −0.0053 mm (17.7 % of the 0.030 mm tolerance), t −9.61, p < 0.001; exercise 1 | `m04-ex1-bias.csv` | pass | pass | pass | pass | 04 |
 | m04-ex2-attribute | 4 | attribute agreement | 2 inspectors × 20 parts × 2 trials: Fleiss' κ 0.560 (moderate), within-inspector repeatability 0.90 / 0.80; exercise 2 | `m04-ex2-attribute.csv` | pass | pass | pass | n/a (no calculator fits) | 04 |
 
+| m05-subgroup-naive | 5 | capability, X̄-R, 20 × 5 (new use, no new kind) | two-cavity mould, consecutive-order subgrouping mixes both cavities: R̄ 0.0163 mm, σ̂ 0.0070, stable (falsely reassuring) | `m05-subgroup-naive.csv` | pass | pass | pass | pass | 05 |
+| m05-subgroup-rational | 5 | capability, X̄-R, 20 × 5 | the identical 100 values, regrouped one cavity per subgroup: R̄ 0.0106 mm (35 % smaller), not stable — WE1 at 2/3/7, WE4 (8 in a row) at both cavity blocks — correctly reveals the 0.010 mm cavity difference | `m05-subgroup-rational.csv` | pass | pass | pass | pass | 05 |
+| m05-rounding-fine, m05-rounding-coarse | 5 | descriptive (new use) | the same 80 readings at 0.001 mm vs 0.01 mm resolution: s 0.00677 → 0.00763 mm (13 % inflation), 80 → 5 distinct values | `m05-rounding-fine.csv`, `m05-rounding-coarse.csv` | pass | pass | pass | pass | 05 |
+| m05-ex1-naive, m05-ex1-rational | 5 | capability, X̄-R, 8 × 5 | two-lathe exercise, smaller scale: R̄ 0.0328 → 0.0196 mm, stable → not stable; exercise 1 | `m05-ex1-naive.csv`, `m05-ex1-rational.csv` | pass | pass | pass | pass | 05 |
+
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 
-Totals on 2026-09-10 (after Module 4, both sessions combined): 118 examples; 3,315 quantities agree between Check 1 and Check 2; 7,330 values agree between Check 1 and the JavaScript engines (96 examples with a calculator engine); 1,126 page checks.
+Totals on 2026-09-10 (after Module 5, both sessions combined): 124 examples; 3,599 quantities agree between Check 1 and Check 2; 7,969 values agree between Check 1 and the JavaScript engines; 1,141 page checks.

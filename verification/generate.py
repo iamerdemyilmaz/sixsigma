@@ -1261,6 +1261,102 @@ register(id="m04-ex2-attribute", module="04", kind="attribute_agreement",
          columns=["part", "appraiser", "trial", "rating"], rows=_ex2_rows)
 
 
+# ---------------------------------------------------------------------------
+# Module 5: Data collection and sampling (prefix m05-)
+# No new kind: rational subgrouping reuses `capability` (chart="xbar_r")
+# twice on the same 100 values with different subgroup assignment; rounding
+# loss reuses `descriptive` twice on the same values rounded two ways.
+# ---------------------------------------------------------------------------
+# A two-cavity mold: cavity A centred on 8.000 mm, cavity B running 0.010 mm
+# high, parts produced in strict alternation (A, B, A, B, ...). The same 100
+# individual readings are subgrouped two ways below.
+def _m05_two_cavity(seed=1, mu=8.000, sigma=0.005, delta=0.010, n=100):
+    rng = np.random.default_rng(seed)
+    vals = np.empty(n)
+    cavity = np.empty(n, dtype=int)
+    for i in range(n):
+        if i % 2 == 0:
+            vals[i] = rng.normal(mu, sigma)
+            cavity[i] = 0
+        else:
+            vals[i] = rng.normal(mu + delta, sigma)
+            cavity[i] = 1
+    return np.round(vals, 3), cavity
+
+
+_m05v, _m05c = _m05_two_cavity()
+_P_M05 = {"usl": 8.020, "lsl": 7.980, "target": 8.000, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"}
+
+# Naive (production-sequence) subgrouping: 20 consecutive subgroups of 5, in
+# the order parts actually came off the line, mixing both cavities in every
+# subgroup because the line alternates cavities part by part.
+register(id="m05-subgroup-naive", module="05", kind="capability",
+         title="Naive subgrouping: 100 individuals, 20 subgroups of 5 in strict production order (mixed cavities)",
+         source="constructed", setting="two-cavity injection-moulded bracket hole, Ø8.000 ± 0.020 mm, bore gauge to 0.001 mm, 100 consecutive parts, cavities alternate A, B, A, B ...",
+         params=dict(_P_M05),
+         columns=["subgroup", "x"], rows=[[(i // 5) + 1, float(v)] for i, v in enumerate(_m05v)])
+
+# Rational (by-cavity) subgrouping: the identical 100 values, reordered only
+# so that each subgroup of 5 comes from a single cavity (cavity A's 50
+# values as 10 subgroups, then cavity B's 50 values as 10 subgroups).
+_m05_order = [i for i in range(100) if _m05c[i] == 0] + [i for i in range(100) if _m05c[i] == 1]
+_m05v_rational = _m05v[_m05_order]
+register(id="m05-subgroup-rational", module="05", kind="capability",
+         title="Rational subgrouping: the same 100 individuals, regrouped so every subgroup of 5 is a single cavity",
+         source="constructed", setting="the same 100 readings as m05-subgroup-naive, reordered so subgroups 1-10 are cavity A and subgroups 11-20 are cavity B",
+         params=dict(_P_M05),
+         columns=["subgroup", "x"], rows=[[(i // 5) + 1, float(v)] for i, v in enumerate(_m05v_rational)])
+
+# Rounding loss: the same 80 true continuous readings, rounded to a
+# 0.001 mm gauge resolution (fine) and to a 0.01 mm resolution (coarse, an
+# under-resolved instrument for this tolerance), showing the sd inflation
+# from quantisation.
+_rng = np.random.default_rng(1)
+_m05_true = _rng.normal(6.500, 0.008, 80)
+register(id="m05-rounding-fine", module="05", kind="descriptive",
+         title="Locating pin diameter, 80 individuals, recorded to 0.001 mm (fine resolution)",
+         source="constructed", setting="locating pin Ø6.500 ± 0.030 mm, digital micrometer to 0.001 mm, 80 consecutive parts",
+         params={"usl": 6.530, "lsl": 6.470, "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 3)] for i, v in enumerate(_m05_true)])
+register(id="m05-rounding-coarse", module="05", kind="descriptive",
+         title="The same 80 parts, recorded to 0.01 mm (coarse resolution, a dial caliper)",
+         source="constructed", setting="the same 80 parts as m05-rounding-fine, this time read from a dial caliper to 0.01 mm",
+         params={"usl": 6.530, "lsl": 6.470, "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 2)] for i, v in enumerate(_m05_true)])
+
+# Exercise 1: two machines running the same part in alternation, 40
+# individuals, 8 subgroups of 5, the same naive-vs-rational comparison at
+# smaller scale.
+def _m05_two_machine(seed=5, mu=25.000, sigma=0.010, delta=0.018, n=40):
+    rng = np.random.default_rng(seed)
+    vals = np.empty(n)
+    machine = np.empty(n, dtype=int)
+    for i in range(n):
+        if i % 2 == 0:
+            vals[i] = rng.normal(mu, sigma)
+            machine[i] = 0
+        else:
+            vals[i] = rng.normal(mu + delta, sigma)
+            machine[i] = 1
+    return np.round(vals, 3), machine
+
+
+_m05ev, _m05em = _m05_two_machine()
+_P_M05EX = {"usl": 25.040, "lsl": 24.960, "target": 25.000, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"}
+register(id="m05-ex1-naive", module="05", kind="capability",
+         title="Exercise 1: naive subgrouping, two machines, 40 individuals, 8 subgroups of 5",
+         source="constructed", setting="a shaft shoulder diameter, Ø25.000 ± 0.040 mm, machined on two nominally identical lathes running in alternation, micrometer to 0.001 mm",
+         params=dict(_P_M05EX),
+         columns=["subgroup", "x"], rows=[[(i // 5) + 1, float(v)] for i, v in enumerate(_m05ev)])
+_m05e_order = [i for i in range(40) if _m05em[i] == 0] + [i for i in range(40) if _m05em[i] == 1]
+_m05ev_rational = _m05ev[_m05e_order]
+register(id="m05-ex1-rational", module="05", kind="capability",
+         title="Exercise 1: rational subgrouping, the same 40 individuals regrouped by machine",
+         source="constructed", setting="the same 40 readings as m05-ex1-naive, reordered so subgroups 1-4 are machine 1 and subgroups 5-8 are machine 2",
+         params=dict(_P_M05EX),
+         columns=["subgroup", "x"], rows=[[(i // 5) + 1, float(v)] for i, v in enumerate(_m05ev_rational)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

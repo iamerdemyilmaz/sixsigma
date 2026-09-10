@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 5: Data collection and sampling · Six Sigma Course</title>
+<meta name="description" content="Operational definitions, sampling plans, rational subgrouping and why it decides everything downstream, data collection sheets, and the common data quality failures that quietly wreck a study.">
+<meta name="examples" content="m05-subgroup-naive, m05-subgroup-rational, m05-rounding-fine, m05-rounding-coarse, m05-ex1-naive, m05-ex1-rational">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="05">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 5 · Measure</p>
+    <h1>Data collection and sampling</h1>
+    <p class="lead">A gauge that passes its MSA study (Module 4) can still produce a useless dataset, because how the data is collected matters as much as how accurately each individual reading is taken. Two engineers can run gauge R&amp;R on the identical instrument, then go collect process data in two different ways, and end up with two different control charts, two different capability verdicts, and two different conclusions about the same stable process. The difference is not the gauge. It is the sampling plan and, above everything else in this module, how the data gets split into subgroups. This module covers operational definitions, sampling plans, rational subgrouping, data collection sheets, and the everyday data quality failures that undermine a study before Analyze ever begins.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Write</strong> an operational definition precise enough that two people applying it independently reach the same result.</li>
+      <li><strong>Distinguish</strong> a sampling plan that represents the process from one that is merely convenient to collect.</li>
+      <li><strong>Explain</strong> rational subgrouping and why the subgrouping choice decides what a control chart can and cannot detect.</li>
+      <li><strong>Demonstrate</strong>, from data, how subgrouping the same measurements two different ways produces two different control limits and two different verdicts.</li>
+      <li><strong>Design</strong> a data collection sheet that captures the context a later analysis will need.</li>
+      <li><strong>Recognise</strong> the everyday data quality failures &mdash; coarse rounding, mixed streams, sorting before measuring &mdash; that quietly distort a study.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Donald Wheeler's account of rational subgrouping makes a claim stronger than most engineers expect: the subgrouping decision is not a detail to settle after the data is collected, it is the decision that determines what question a control chart is capable of answering at all.<sup class="cite"><a href="#ref-2">[2]</a></sup> A subgroup is supposed to represent "some small region of space, or time, or product" in which the process was doing only what it routinely does; the within-subgroup variation that estimates a chart's sigma should be nothing but that routine, common-cause noise. If a subgroup accidentally spans two different sources of variation &mdash; two cavities of a mold, two machines, two shifts, a tool change &mdash; the chart's own estimate of "routine" variation gets contaminated by variation that was never routine, and the chart's limits widen to absorb it. A real difference between the two sources then hides inside artificially wide limits instead of showing up as the signal it actually is.</p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real incident.</p>
+    <p>No fully documented public case study for this specific module was found in the sources searched for this course, so the illustration below is a labelled constructed scenario rather than a real one. A machining cell samples five consecutive parts every hour for its X&#772;-R chart. Two nominally identical lathes feed the same conveyor, and the sampler just grabs "the next five parts." Because the two machines run continuously and interleave on the conveyor, roughly half of every subgroup comes from each lathe. The chart has run stable for months. What it cannot show, by construction, is that lathe 2 has quietly drifted 0.018&nbsp;mm high of lathe 1: that difference is real, it is happening on every single part, and it is completely invisible on this chart, because it is baked into "normal" subgroup-to-subgroup noise rather than appearing as a between-subgroup signal. The chart is not lying. It is answering a question &mdash; "does the combined two-machine stream drift over time?" &mdash; that nobody meant to ask, instead of the question that mattered: "are these two machines producing the same thing?"</p>
+
+    <h2 id="op-def">Operational definitions</h2>
+    <p>An operational definition states, in terms specific enough to leave no room for judgement, exactly how a characteristic is measured and how the result is classified. "Reject if the fillet looks thin" is not an operational definition; "reject if the fillet width at the marked reference point measures below 1.2&nbsp;mm on the gauge described in WI-114" is. Deming argued that most disputes over data are really disputes over definitions that were never made operational, and that a numerical specification is meaningless without one, because two people can apply the same nominal rule to the same part and reach opposite conclusions if the rule leaves any of the measurement method, the reference point, the environment, or the classification boundary unstated.<sup class="cite"><a href="#ref-1">[1]</a></sup> Module 4's attribute agreement study is a direct, quantitative test of whether an operational definition is doing its job: a low kappa is usually evidence that the definition, not the inspectors, needs work.</p>
+
+    <h2 id="sampling">Sampling plans</h2>
+    <p>A sampling plan states what will be measured, how often, by whom, and from where in the process, decided before data collection starts rather than improvised by whoever happens to be free. Convenience sampling &mdash; measuring whatever is easiest to reach, whenever there is a spare moment &mdash; is the most common failure, because it silently trades representativeness for ease: parts from the end of a shift, parts near the inspection station, parts a particular operator happens to run. A sampling plan should say explicitly which population the sample is meant to represent (every part? every cavity? every shift?) and confirm the sampling method actually reaches all of it. The ASQ Green Belt Body of Knowledge places sampling plans and data collection squarely inside Measure, alongside rational subgrouping, as the foundation the rest of the phase depends on.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
+
+    <h2 id="subgrouping">Rational subgrouping and why it decides everything downstream</h2>
+    <p>The formal rule, in Wheeler's phrasing: choose subgroups so that the variation <em>within</em> a subgroup is only the routine variation you want the chart's limits to represent, and let any variation you want the chart to be able to <em>detect</em> show up <em>between</em> subgroups.<sup class="cite"><a href="#ref-2">[2]</a></sup> This is a design decision, not an afterthought, and it has to be made before data collection starts, because it cannot be fixed by more sophisticated analysis afterward &mdash; the information that a naive subgrouping throws away by blending two sources together is simply gone.</p>
+    <div class="formula">Within-subgroup variation should be routine, common-cause variation only.
+      <br>Between-subgroup variation is what the X&#772; chart is built to detect.
+      <span class="where">Consecutive-in-time subgroups (the default choice) are rational when the process runs as one stream. When a process has more than one stream &mdash; cavities, spindles, operators, machines &mdash; consecutive-in-time subgroups are usually <em>not</em> rational, because they mix the streams inside every subgroup.</span>
+    </div>
+    <p>The standard formulas for the chart (Module 16 builds them in full) do not change: A&#772; and R&#772; from the subgroups, limits at A&#8322;R&#772; either side of the grand mean.<sup class="cite"><a href="#ref-3">[3]</a></sup> What changes entirely is what those limits mean, depending on which values ended up in the same subgroup.</p>
+
+    <h2 id="sheets">Data collection sheets</h2>
+    <p>A data collection sheet exists to capture the context a later analysis will need, not just the measurement itself. At minimum: the value, the time it was taken, who took it, which machine/cavity/spindle/operator produced the part, and the gauge used. Skipping the context columns is the single most common reason a promising-looking dataset turns out to be unusable three weeks later, when someone asks "was this before or after the tool change?" and nobody recorded it.</p>
+
+    <h2 id="failures">Common data quality failures</h2>
+    <p>Three failures recur often enough to name individually, all of them things a data collection sheet and a sampling plan should have prevented, and none of them fixable by better statistics after the fact.</p>
+    <h3 id="rounding">Rounding to the tolerance</h3>
+    <p>Recording a measurement more coarsely than the process's own spread requires throws away real variation and replaces it with quantisation noise. A common rule of thumb: gauge resolution should divide the tolerance into at least ten increments (echoing the same "gauge before process" logic as Module 4); recording to fewer than that starts to matter, and recording to only two or three distinguishable values across the whole spread of the data makes a control chart's range-based sigma estimate unreliable, because a moving range or subgroup range computed from a handful of repeated, rounded values is not really measuring the same thing as one computed from continuous data.</p>
+    <h3 id="mixed-streams">Mixed streams</h3>
+    <p>Combining two sources &mdash; cavities, machines, operators, shifts, incoming lots &mdash; into a single stream before subgrouping, sampling, or even charting is the same failure as poor rational subgrouping, but it is not limited to control charts: a capability study, a hypothesis test, or a simple histogram can all be quietly wrong if the data is secretly two different populations stacked together. The fix is always the same: know your sources before you pool your data, and check whether pooling is throwing away information you actually need.</p>
+    <h3 id="sorting">Sorting before measuring</h3>
+    <p>Parts arrive at an inspection station in a tote, get sorted by size or appearance before measurement "for convenience," and the original production time order is gone. Rational subgrouping and control charting both depend on time order (or some other rational basis) being preserved; once it is destroyed, no subgroup can honestly represent "a small region of time," and any control chart built afterward is really just a histogram in disguise, incapable of detecting a time-based shift because the time axis no longer means anything.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: the same 100 measurements, subgrouped two ways</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>A two-cavity injection mould produces a bracket hole, Ø8.000&nbsp;&plusmn;&nbsp;0.020&nbsp;mm, bore gauge to 0.001&nbsp;mm. Cavity A runs centred on nominal; cavity B has always run about 0.010&nbsp;mm high, a known, small, stable difference nobody has bothered to chase down because both cavities individually make parts well inside the tolerance. Parts leave the mould strictly alternating cavity A, B, A, B, &hellip;, 100 parts in production order. The sampler takes the next five parts off the line every hour for the X&#772;-R chart &mdash; the naive, consecutive-in-time subgrouping below, which is rational only if there is one stream, and here there are two.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 1. Naive subgrouping: 20 subgroups of 5, in strict production order (mixed cavities in every subgroup).</caption>
+        <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>8.002</td><td>8.014</td><td>8.002</td><td>8.003</td><td>8.005</td></tr>
+          <tr><td>2</td><td>8.012</td><td>7.997</td><td>8.013</td><td>8.002</td><td>8.011</td></tr>
+          <tr><td>3</td><td>8.000</td><td>8.013</td><td>7.996</td><td>8.009</td><td>7.998</td></tr>
+          <tr><td>4</td><td>8.013</td><td>8.000</td><td>8.009</td><td>7.996</td><td>8.009</td></tr>
+          <tr><td>5</td><td>8.000</td><td>8.009</td><td>8.006</td><td>8.015</td><td>7.986</td></tr>
+          <tr><td>6</td><td>8.001</td><td>7.999</td><td>8.008</td><td>8.001</td><td>8.011</td></tr>
+          <tr><td>7</td><td>8.011</td><td>8.004</td><td>7.998</td><td>8.020</td><td>8.003</td></tr>
+          <tr><td>8</td><td>8.013</td><td>7.997</td><td>8.002</td><td>8.001</td><td>8.011</td></tr>
+          <tr><td>9</td><td>7.994</td><td>8.007</td><td>8.000</td><td>8.005</td><td>8.000</td></tr>
+          <tr><td>10</td><td>8.010</td><td>8.000</td><td>8.007</td><td>8.003</td><td>8.014</td></tr>
+          <tr><td>11</td><td>8.002</td><td>8.006</td><td>8.004</td><td>8.007</td><td>8.004</td></tr>
+          <tr><td>12</td><td>8.005</td><td>8.005</td><td>8.010</td><td>7.994</td><td>8.008</td></tr>
+          <tr><td>13</td><td>8.000</td><td>8.011</td><td>7.995</td><td>8.004</td><td>8.001</td></tr>
+          <tr><td>14</td><td>8.008</td><td>8.001</td><td>8.014</td><td>7.992</td><td>8.011</td></tr>
+          <tr><td>15</td><td>8.006</td><td>8.009</td><td>7.996</td><td>8.014</td><td>8.001</td></tr>
+          <tr><td>16</td><td>8.014</td><td>7.998</td><td>8.003</td><td>7.999</td><td>8.008</td></tr>
+          <tr><td>17</td><td>8.004</td><td>8.011</td><td>7.992</td><td>8.004</td><td>8.004</td></tr>
+          <tr><td>18</td><td>8.013</td><td>7.997</td><td>8.010</td><td>8.002</td><td>8.012</td></tr>
+          <tr><td>19</td><td>8.004</td><td>8.011</td><td>8.000</td><td>8.009</td><td>8.005</td></tr>
+          <tr><td>20</td><td>7.999</td><td>7.999</td><td>8.010</td><td>7.993</td><td>8.012</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">R&#772; (naive) = <span data-ex="m05-subgroup-naive" data-key="chart.rbar" data-dp="4">0.0163</span> mm &nbsp;&nbsp; &sigma;&#770; = R&#772;/d&#8322; = <span data-ex="m05-subgroup-naive" data-key="within.sigma" data-dp="4">0.0070</span> mm
+      <br>UCL(X&#772;) = <span data-ex="m05-subgroup-naive" data-key="chart.ucl_x" data-dp="4">8.0140</span> mm, LCL(X&#772;) = <span data-ex="m05-subgroup-naive" data-key="chart.lcl_x" data-dp="4">7.9952</span> mm
+      <span class="where">Stability verdict: no point beyond the limits, no run rule fires. The chart says this process is stable and has been for the whole study.</span>
+    </div>
+    <p>Now the same 100 numbers, not one of them changed, regrouped so that every subgroup is a single cavity: subgroups 1&ndash;10 are cavity A's 50 parts in their own production order, subgroups 11&ndash;20 are cavity B's.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 2. Rational subgrouping: the identical 100 values, reordered so each subgroup is one cavity only.</caption>
+        <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+        <tbody>
+          <tr><td>1 (A)</td><td>8.002</td><td>8.002</td><td>8.005</td><td>7.997</td><td>8.002</td></tr>
+          <tr><td>2 (A)</td><td>8.000</td><td>7.996</td><td>7.998</td><td>8.000</td><td>7.996</td></tr>
+          <tr><td>3 (A)</td><td>8.000</td><td>8.006</td><td>7.986</td><td>7.999</td><td>8.001</td></tr>
+          <tr><td>4 (A)</td><td>8.011</td><td>7.998</td><td>8.003</td><td>7.997</td><td>8.001</td></tr>
+          <tr><td>5 (A)</td><td>7.994</td><td>8.000</td><td>8.000</td><td>8.000</td><td>8.003</td></tr>
+          <tr><td>6 (A)</td><td>8.002</td><td>8.004</td><td>8.004</td><td>8.005</td><td>7.994</td></tr>
+          <tr><td>7 (A)</td><td>8.000</td><td>7.995</td><td>8.001</td><td>8.001</td><td>7.992</td></tr>
+          <tr><td>8 (A)</td><td>8.006</td><td>7.996</td><td>8.001</td><td>7.998</td><td>7.999</td></tr>
+          <tr><td>9 (A)</td><td>8.004</td><td>7.992</td><td>8.004</td><td>7.997</td><td>8.002</td></tr>
+          <tr><td>10 (A)</td><td>8.004</td><td>8.000</td><td>8.005</td><td>7.999</td><td>7.993</td></tr>
+          <tr><td>11 (B)</td><td>8.014</td><td>8.003</td><td>8.012</td><td>8.013</td><td>8.011</td></tr>
+          <tr><td>12 (B)</td><td>8.013</td><td>8.009</td><td>8.013</td><td>8.009</td><td>8.009</td></tr>
+          <tr><td>13 (B)</td><td>8.009</td><td>8.015</td><td>8.001</td><td>8.008</td><td>8.011</td></tr>
+          <tr><td>14 (B)</td><td>8.004</td><td>8.020</td><td>8.013</td><td>8.002</td><td>8.011</td></tr>
+          <tr><td>15 (B)</td><td>8.007</td><td>8.005</td><td>8.010</td><td>8.007</td><td>8.014</td></tr>
+          <tr><td>16 (B)</td><td>8.006</td><td>8.007</td><td>8.005</td><td>8.010</td><td>8.008</td></tr>
+          <tr><td>17 (B)</td><td>8.011</td><td>8.004</td><td>8.008</td><td>8.014</td><td>8.011</td></tr>
+          <tr><td>18 (B)</td><td>8.009</td><td>8.014</td><td>8.014</td><td>8.003</td><td>8.008</td></tr>
+          <tr><td>19 (B)</td><td>8.011</td><td>8.004</td><td>8.013</td><td>8.010</td><td>8.012</td></tr>
+          <tr><td>20 (B)</td><td>8.011</td><td>8.009</td><td>7.999</td><td>8.010</td><td>8.012</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">R&#772; (rational) = <span data-ex="m05-subgroup-rational" data-key="chart.rbar" data-dp="4">0.0106</span> mm &nbsp;&nbsp; &sigma;&#770; = R&#772;/d&#8322; = <span data-ex="m05-subgroup-rational" data-key="within.sigma" data-dp="4">0.0046</span> mm
+      <br>UCL(X&#772;) = <span data-ex="m05-subgroup-rational" data-key="chart.ucl_x" data-dp="4">8.0108</span> mm, LCL(X&#772;) = <span data-ex="m05-subgroup-rational" data-key="chart.lcl_x" data-dp="4">7.9985</span> mm
+      <span class="where">Same grand mean (both groupings average the identical 100 numbers), but R&#772; drops by about a third, because it is no longer measuring "cavity-to-cavity difference" mixed in with true part-to-part noise &mdash; it is measuring only the true part-to-part noise, cavity by cavity, which is what a range chart is supposed to estimate.</span>
+    </div>
+    <p>Correctly subgrouped, the chart is <strong>not</strong> stable. The primary 3-sigma rule catches only 3 of the 20 points (subgroups 2, 3 and 7, all cavity A, dipping just past the now-tighter LCL by chance), but the supplementary run rules leave no doubt: eight subgroups in a row on the low side (subgroups 3 through 10) and eight in a row on the high side (13 through 20) both trip the "8 in a row on one side of the centre line" rule, and the two-of-three-beyond-2-sigma and four-of-five-beyond-1-sigma rules fire repeatedly through both halves of the chart. Anyone looking at Figure-1-style output from this grouping would see the step immediately; anyone looking only at Table 1's naive chart would see nothing at all. The real, persistent 0.010&nbsp;mm cavity-to-cavity difference was never a mystery hiding in the process. It was hiding in the subgrouping.</p>
+    <div class="calc" data-calc="control" id="calc-control-naive">
+      <h3>Control chart builder &mdash; naive subgrouping</h3>
+      <p class="calc-intro">Pre-loaded with Table 1 (production order, mixed cavities).</p>
+      <script type="application/json" class="calc-data">{"type":"xbar_r","x":[8.002,8.014,8.002,8.003,8.005,8.012,7.997,8.013,8.002,8.011,8.0,8.013,7.996,8.009,7.998,8.013,8.0,8.009,7.996,8.009,8.0,8.009,8.006,8.015,7.986,8.001,7.999,8.008,8.001,8.011,8.011,8.004,7.998,8.02,8.003,8.013,7.997,8.002,8.001,8.011,7.994,8.007,8.0,8.005,8.0,8.01,8.0,8.007,8.003,8.014,8.002,8.006,8.004,8.007,8.004,8.005,8.005,8.01,7.994,8.008,8.0,8.011,7.995,8.004,8.001,8.008,8.001,8.014,7.992,8.011,8.006,8.009,7.996,8.014,8.001,8.014,7.998,8.003,7.999,8.008,8.004,8.011,7.992,8.004,8.004,8.013,7.997,8.01,8.002,8.012,8.004,8.011,8.0,8.009,8.005,7.999,7.999,8.01,7.993,8.012],"subgroup_size":5,"units":"mm"}</script>
+    </div>
+    <div class="calc" data-calc="control" id="calc-control-rational">
+      <h3>Control chart builder &mdash; rational subgrouping</h3>
+      <p class="calc-intro">Pre-loaded with Table 2 (the same 100 values, one cavity per subgroup). Try turning on the Nelson rules.</p>
+      <script type="application/json" class="calc-data">{"type":"xbar_r","x":[8.002,8.002,8.005,7.997,8.002,8.0,7.996,7.998,8.0,7.996,8.0,8.006,7.986,7.999,8.001,8.011,7.998,8.003,7.997,8.001,7.994,8.0,8.0,8.0,8.003,8.002,8.004,8.004,8.005,7.994,8.0,7.995,8.001,8.001,7.992,8.006,7.996,8.001,7.998,7.999,8.004,7.992,8.004,7.997,8.002,8.004,8.0,8.005,7.999,7.993,8.014,8.003,8.012,8.013,8.011,8.013,8.009,8.013,8.009,8.009,8.009,8.015,8.001,8.008,8.011,8.004,8.02,8.013,8.002,8.011,8.007,8.005,8.01,8.007,8.014,8.006,8.007,8.005,8.01,8.008,8.011,8.004,8.008,8.014,8.011,8.009,8.014,8.014,8.003,8.008,8.011,8.004,8.013,8.01,8.012,8.011,8.009,7.999,8.01,8.012],"subgroup_size":5,"units":"mm","rules":["we1","we2","we3","we4"]}</script>
+    </div>
+
+    <h3 id="example2">Worked example 2: rounding loss</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>A locating pin, Ø6.500&nbsp;&plusmn;&nbsp;0.030&nbsp;mm, is measured 80 times. The true readings, taken with a digital micrometer and recorded to 0.001&nbsp;mm, are compared with the same 80 parts read from a dial caliper and recorded only to 0.01&nbsp;mm &mdash; ten times coarser than the micrometer, and coarse enough, relative to this process's own tight spread, to matter.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Descriptive statistics, same 80 parts, two recording resolutions.</caption>
+        <thead><tr><th>Resolution</th><th>Mean (mm)</th><th>s (mm)</th><th>Distinct values observed</th></tr></thead>
+        <tbody>
+          <tr><td>Fine, 0.001 mm (micrometer)</td><td class="num"><span data-ex="m05-rounding-fine" data-key="descriptive.mean" data-dp="4">6.4994</span></td><td class="num"><span data-ex="m05-rounding-fine" data-key="descriptive.s" data-dp="5">0.00677</span></td><td class="num">most of the 80 unique</td></tr>
+          <tr><td>Coarse, 0.01 mm (dial caliper)</td><td class="num"><span data-ex="m05-rounding-coarse" data-key="descriptive.mean" data-dp="4">6.4998</span></td><td class="num"><span data-ex="m05-rounding-coarse" data-key="descriptive.s" data-dp="5">0.00763</span></td><td class="num">5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The mean barely moves. The standard deviation does not: it inflates from 0.00677 to 0.00763&nbsp;mm, about 13&nbsp;% higher, and the entire 80-part sample now lands on only five distinguishable values. Rounding to a resolution w adds independent, roughly uniformly distributed quantisation error with variance w&sup2;/12, so the observed variance is approximately the true variance plus w&sup2;/12 &mdash; here (0.01)&sup2;/12 &asymp; 0.0000083, enough on its own to move a process this tight by a visible amount. The distortion runs in only one direction: coarse rounding can only add apparent variation, never remove it, and it also throws away the fine structure a control chart or a capability study needs to tell a genuinely tight process from a merely adequate one.</p>
+    <div class="calc" data-calc="descriptive" id="calc-desc-rounding">
+      <h3>Descriptive statistics and histogram</h3>
+      <p class="calc-intro">Pre-loaded with the coarse (0.01 mm) readings from Table 3. Compare against the fine readings by pasting them in.</p>
+      <script type="application/json" class="calc-data">{"x":[6.5,6.51,6.5,6.49,6.51,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.49,6.5,6.5,6.5,6.5,6.5,6.49,6.5,6.5,6.5,6.51,6.51,6.48,6.48,6.5,6.5,6.5,6.5,6.52,6.49,6.5,6.52,6.51,6.51,6.5,6.49,6.5,6.5,6.49,6.49,6.5,6.49,6.5,6.5,6.5,6.5,6.5,6.51,6.5,6.49,6.51,6.5,6.51,6.49,6.51,6.5,6.49,6.5,6.5,6.5,6.49,6.49,6.5,6.5,6.5,6.51,6.49,6.5,6.51,6.5,6.49,6.51,6.5,6.51,6.5,6.49,6.5,6.5],"usl":6.53,"lsl":6.47,"units":"mm"}</script>
+    </div>
+
+    <h3 id="example3">Worked example 3: a sampling plan for a three-shift line</h3>
+    <p class="example-label">Constructed example, drawn for teaching.</p>
+    <p>The capstone's leak-test operation (Module 19) runs three shifts a day, seven days a week. A sampling plan for its ongoing p chart has to state, in advance, every one of the items below &mdash; leaving any of them to be decided ad hoc on the floor is how a chart quietly stops representing what it claims to represent.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Sampling plan, leak-test p chart, brazed heat-exchanger line (constructed example).</caption>
+        <tbody>
+          <tr><th>What is sampled</th><td>Every unit that completes the leak test (100&nbsp;% inspection at this station; the "sample" is the full population, so no selection bias is possible here).</td></tr>
+          <tr><th>Subgroup boundary</th><td>One subgroup per shift (three per day), not per hour and not per day &mdash; shift boundaries are rational here because shift-to-shift differences (operator, furnace warm-up state) are exactly the kind of variation the chart should be able to detect between subgroups.</td></tr>
+          <tr><th>Subgroup size</th><td>Variable, equal to that shift's actual production count (a p chart, not an np chart, because n is not constant).</td></tr>
+          <tr><th>Who records it</th><td>The leak-test operator, logged automatically by the test station at end of shift; no manual transcription step.</td></tr>
+          <tr><th>What is NOT in scope</th><td>Units reworked and re-tested are logged under the shift they were re-tested in, not the shift they were originally built in, and flagged as rework so Analyze can separate first-pass results from rework results on request.</td></tr>
+          <tr><th>Review cadence</th><td>Control limits recalculated monthly from the trailing 20 shifts; a special cause investigated the same shift it appears, not batched for the monthly review.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notice what makes this a plan and not just a description of what already happens: every decision (shift-based subgrouping, where rework goes, how often limits get recalculated) was made deliberately, in writing, before data collection, specifically so that no single sampler's convenience or a supervisor's after-the-fact judgement call quietly changes what the chart is measuring from one week to the next.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Subgrouping by consecutive production order without asking whether there is more than one stream.</strong> Consequence: Worked example 1 &mdash; a real, persistent difference hides inside artificially wide limits and the chart reports false stability. Fix: identify every stream (cavity, spindle, machine, operator) before deciding how to subgroup, not after.</li>
+      <li><strong>Recording data more coarsely than the process's own spread requires.</strong> Consequence: Worked example 2 &mdash; inflated apparent variation, a handful of distinguishable values standing in for what should be a continuous distribution, and range-based sigma estimates that no longer mean what they are supposed to mean. Fix: resolution should divide the tolerance (or the expected process spread, whichever is tighter) into at least ten steps.</li>
+      <li><strong>An operational definition that leaves the measurement method unstated.</strong> Consequence: two people, or the same person on two days, get different answers from nominally the same rule, and nobody can tell whether a chart signal is a process change or a definition drifting. Fix: write down the method, the reference point and the classification boundary, not just the pass/fail criterion.</li>
+      <li><strong>Sorting or batching parts before measuring them.</strong> Consequence: production time order is destroyed, and with it any chart's ability to detect a time-based shift; the "control chart" becomes a histogram wearing a time axis it no longer earns. Fix: measure in the order parts were made, or record the true order alongside the measurement if physical sorting cannot be avoided.</li>
+      <li><strong>Convenience sampling dressed up as a sampling plan.</strong> Consequence: whatever is easiest to reach (end of shift, near the inspection station, one operator's output) is systematically over-represented, and the sample silently stops representing the population it claims to. Fix: state which population the plan represents and confirm the method actually reaches all of it.</li>
+      <li><strong>Data collection sheets with no context columns.</strong> Consequence: a promising dataset becomes unusable weeks later because nobody recorded which machine, which operator, or what changed and when. Fix: capture context at the time of measurement; it cannot be reconstructed afterward.</li>
+      <li><strong>Assuming rational subgrouping is a one-time decision.</strong> Consequence: a process that gains a second stream (a new cavity added, a second shift started) keeps using the old subgrouping scheme, and the new source's variation gets silently absorbed the same way cavity B was in Worked example 1. Fix: revisit the subgrouping plan whenever the process configuration changes.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: two machines, naive vs rational</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>A shaft shoulder diameter, Ø25.000&nbsp;&plusmn;&nbsp;0.040&nbsp;mm, is machined on two nominally identical lathes that feed the same conveyor in strict alternation, 40 parts total. Naive subgrouping takes 8 consecutive subgroups of 5 in production order (mixing both lathes in every subgroup); rational subgrouping regroups the same 40 values so subgroups 1&ndash;4 are lathe 1 and subgroups 5&ndash;8 are lathe 2.</p>
+    <p><strong>Tasks.</strong> (a) Without computing anything, predict which grouping will show the smaller R&#772;. (b) Compute R&#772; for both groupings and check your prediction. (c) Which grouping's X&#772; chart is more likely to be unstable, and why is that the <em>useful</em> outcome rather than a problem to explain away?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Rational, because within-lathe variation alone should be smaller than variation that mixes two lathes running at different levels.</p>
+      <p><strong>(b)</strong> Naive R&#772; = <span data-ex="m05-ex1-naive" data-key="chart.rbar" data-dp="4">0.0328</span> mm. Rational R&#772; = <span data-ex="m05-ex1-rational" data-key="chart.rbar" data-dp="4">0.0196</span> mm &mdash; about 40&nbsp;% smaller, confirming the prediction.</p>
+      <p><strong>(c)</strong> The rational grouping's chart is the one worth trusting: it is <strong>not stable</strong>, while the naive grouping reports a falsely reassuring "stable, no signal." The rational grouping correctly flags that something worth investigating (the two lathes running at different levels) is present. An unstable chart from a rationally subgrouped study is not a failure of the study; it is the study doing its job.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: spot the data collection problems</h3>
+    <p class="example-label">Constructed scenario, not a real project.</p>
+    <p>A new hire is asked to collect 100 readings of a fill weight for a capability study. Their plan: "I'll grab whatever containers are sitting on the finished-goods pallet when I have a free ten minutes each day, sort them by how full they look so the light ones are easy to spot, and write down the weight to the nearest gram since that's what the customer spec is in." <strong>Task.</strong> Identify every data quality failure in this plan and say what it will do to the resulting study.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <ul>
+        <li><strong>Convenience sampling:</strong> "whatever is sitting on the pallet" when free is not tied to production time order or any defined population; it will over-represent whatever accumulates near the pallet at that time of day.</li>
+        <li><strong>Sorting before measuring:</strong> sorting by apparent fullness destroys production order entirely; any time-based shift becomes undetectable, and a "control chart" built from this data cannot function as one.</li>
+        <li><strong>Rounding to the tolerance, not the process:</strong> recording to the nearest gram because that is the spec's unit, rather than to a resolution that resolves the process's actual spread, risks exactly the sd inflation and value-clumping shown in Worked example 2 if the true spread is only a few grams.</li>
+      </ul>
+      <p>The fix for all three: a written sampling plan (which containers, on what schedule, in what order) agreed before data collection starts, measurement in production order with order preserved even if physical handling is out of order, and a resolution chosen from the process's own expected spread, not from the specification.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="05">
+      <fieldset class="q" data-answer="c">
+        <legend>1. An operational definition is best described as</legend>
+        <label><input type="radio" name="q1" value="a"> a company's mission statement for quality</label>
+        <label><input type="radio" name="q1" value="b"> a specification limit</label>
+        <label><input type="radio" name="q1" value="c"> a definition precise enough that two people applying it independently reach the same result</label>
+        <label><input type="radio" name="q1" value="d"> the same thing as an operating procedure</label>
+        <p class="explain" hidden>Deming's point: a rule that leaves the measurement method or classification boundary unstated is not yet operational, however precise it sounds.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. Rational subgrouping's core rule is that</legend>
+        <label><input type="radio" name="q2" value="a"> every subgroup should contain exactly five values</label>
+        <label><input type="radio" name="q2" value="b"> within-subgroup variation should be only routine, common-cause variation; variation you want the chart to detect should show up between subgroups</label>
+        <label><input type="radio" name="q2" value="c"> subgroups should always be formed by consecutive production order</label>
+        <label><input type="radio" name="q2" value="d"> subgroup size does not affect what a chart can detect</label>
+        <p class="explain" hidden>Consecutive-in-time subgrouping is rational only when there is genuinely one stream; with more than one stream it usually violates this rule.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. In Worked example 1, subgrouping the same 100 values by cavity instead of by production order</legend>
+        <label><input type="radio" name="q3" value="a"> decreased R&#772; and revealed a real, previously hidden difference as an unstable chart</label>
+        <label><input type="radio" name="q3" value="b"> changed the underlying data values</label>
+        <label><input type="radio" name="q3" value="c"> had no effect on R&#772; or on the stability verdict</label>
+        <label><input type="radio" name="q3" value="d"> increased R&#772; and made the chart falsely appear stable</label>
+        <p class="explain" hidden>Rational subgrouping tightened R&#772; from about 0.0163 to 0.0106 mm and turned a falsely stable chart into a correctly unstable one.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. An X&#772;-R chart built from data that mixes two genuinely different streams inside every subgroup tends to</legend>
+        <label><input type="radio" name="q4" value="a"> show tighter limits than a correctly subgrouped chart</label>
+        <label><input type="radio" name="q4" value="b"> be unaffected, since the grand mean is the same either way</label>
+        <label><input type="radio" name="q4" value="c"> always flag every point as a special cause</label>
+        <label><input type="radio" name="q4" value="d"> show wider limits than warranted and can hide a real, persistent difference between the streams</label>
+        <p class="explain" hidden>The between-stream difference gets absorbed into an inflated R&#772;, widening the limits and masking exactly the signal a correctly subgrouped chart would show.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>5. Recording measurements at a coarser resolution than the process spread requires tends to</legend>
+        <label><input type="radio" name="q5" value="a"> have no effect on the estimated standard deviation</label>
+        <label><input type="radio" name="q5" value="b"> deflate the estimated standard deviation</label>
+        <label><input type="radio" name="q5" value="c"> inflate the estimated standard deviation, by adding roughly independent quantisation noise</label>
+        <label><input type="radio" name="q5" value="d"> only matter if the process is not normally distributed</label>
+        <p class="explain" hidden>Rounding adds noise with approximate variance w²/12; that noise can only add to the observed variance, never subtract from it.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. Sorting parts by appearance before measuring them, instead of measuring in production order, mainly damages a study because it</legend>
+        <label><input type="radio" name="q6" value="a"> makes the gauge less accurate</label>
+        <label><input type="radio" name="q6" value="b"> destroys the time order a control chart needs to detect a time-based shift</label>
+        <label><input type="radio" name="q6" value="c"> is always faster than measuring in order</label>
+        <label><input type="radio" name="q6" value="d"> has no effect as long as every part still gets measured</label>
+        <p class="explain" hidden>A chart built from re-sorted data no longer has a meaningful time axis, however many parts were measured.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>7. Convenience sampling is a data quality risk mainly because it</legend>
+        <label><input type="radio" name="q7" value="a"> systematically over-represents whatever is easiest to reach, at the expense of representing the true population</label>
+        <label><input type="radio" name="q7" value="b"> always produces too few data points</label>
+        <label><input type="radio" name="q7" value="c"> is more expensive than a written sampling plan</label>
+        <label><input type="radio" name="q7" value="d"> only matters for attribute data</label>
+        <p class="explain" hidden>The sample silently stops representing the population it claims to, in whatever direction convenience happens to bias it.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>8. A data collection sheet should capture, at minimum, the value plus</legend>
+        <label><input type="radio" name="q8" value="a"> only the specification limits</label>
+        <label><input type="radio" name="q8" value="b"> the operator's name and nothing else</label>
+        <label><input type="radio" name="q8" value="c"> nothing; the value alone is sufficient for any later analysis</label>
+        <label><input type="radio" name="q8" value="d"> context: time, who took it, which machine/cavity/operator, and the gauge used</label>
+        <p class="explain" hidden>Context that is not captured at the time of measurement cannot be reconstructed later, and its absence is the most common reason a dataset turns out to be unusable.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. A sampling plan should be decided</legend>
+        <label><input type="radio" name="q9" value="a"> after the data has been collected, to fit whatever was gathered</label>
+        <label><input type="radio" name="q9" value="b"> by whoever has time on a given day</label>
+        <label><input type="radio" name="q9" value="c"> in advance, stating what, how often, by whom and from where</label>
+        <label><input type="radio" name="q9" value="d"> only for attribute data, never for variables data</label>
+        <p class="explain" hidden>A plan decided in advance is what prevents convenience sampling and inconsistent subgrouping from creeping in.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. If a process gains a second stream (for example, a second cavity is added to a mould), an existing control chart's subgrouping scheme should</legend>
+        <label><input type="radio" name="q10" value="a"> stay exactly as it was, since rational subgrouping is decided once and never revisited</label>
+        <label><input type="radio" name="q10" value="b"> be reviewed, since the old scheme may now mix the two streams inside every subgroup</label>
+        <label><input type="radio" name="q10" value="c"> automatically switch to an attribute chart</label>
+        <label><input type="radio" name="q10" value="d"> be ignored until the next scheduled capability study</label>
+        <p class="explain" hidden>Rational subgrouping depends on the process's actual structure, which changes whenever a new stream is added; the scheme has to be revisited, not left on autopilot.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Two people, same result.</li>
+        <li>b. Within-subgroup = routine only; between-subgroup = what the chart should detect.</li>
+        <li>a. R&#772; decreased; the real difference was revealed.</li>
+        <li>d. Wider limits, hiding a real difference.</li>
+        <li>c. Inflates the estimated sd.</li>
+        <li>b. Destroys the time order the chart needs.</li>
+        <li>a. Over-represents whatever is easiest to reach.</li>
+        <li>d. Context: time, who, which source, which gauge.</li>
+        <li>c. Decided in advance.</li>
+        <li>b. Reviewed; the old scheme may now mix streams.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>An operational definition is precise enough that two people applying it independently reach the same result; Module 4's attribute agreement study is a direct test of whether one is working.</li>
+      <li>A sampling plan states what, how often, by whom and from where, decided in advance; convenience sampling silently trades representativeness for ease.</li>
+      <li>Rational subgrouping's rule: within-subgroup variation should be only routine, common-cause variation; anything you want the chart to be able to detect should show up between subgroups.</li>
+      <li>The same 100 measurements, subgrouped two different ways, can produce two different R&#772;s and two opposite stability verdicts; the subgrouping choice, not more sophisticated analysis afterward, decides what a chart can detect.</li>
+      <li>Recording data more coarsely than the process's own spread requires inflates the apparent standard deviation and destroys the fine structure a chart or capability study needs.</li>
+      <li>Sorting or batching parts before measuring destroys production time order, and with it, a control chart's ability to detect a time-based shift.</li>
+      <li>A data collection sheet should capture context (time, source, gauge, operator), not just the value; context not captured at the time cannot be reconstructed later.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown.</p>
+    <ol class="references">
+      <li id="ref-1">Deming, W. E. (1975). On probability as a basis for action. <em>The American Statistician</em>, 29(4), 146&ndash;152. <a href="https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf">https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf</a></li>
+      <li id="ref-2">Wheeler, D. J. "Rational subgrouping: the conceptual foundation of process behavior charts." <em>Quality Digest</em>, 1 June 2015 (manuscript 282); "Rational sampling," 1 July 2015 (manuscript 283). <a href="https://spcpress.com/pdf/DJW282.pdf">https://spcpress.com/pdf/DJW282.pdf</a></li>
+      <li id="ref-3">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 6.3.2.1 "Shewhart X-bar and R and S control charts". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm</a></li>
+      <li id="ref-4">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+      <li id="ref-5">Wheeler, D. J., &amp; Chambers, D. S. (2010). <em>Understanding Statistical Process Control</em>, 3rd ed. SPC Press. <a href="https://www.spcpress.com/book_understanding_statistical_process_control.php">https://www.spcpress.com/book_understanding_statistical_process_control.php</a> <span class="tag">(catalogue-level; general reference for rational subgrouping's role in SPC)</span></li>
+      <li id="ref-6">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(secondary: catalogue-level)</span></li>
+      <li id="ref-7">Deming, W. E. (1986). <em>Out of the Crisis</em>. MIT Center for Advanced Engineering Study. <a href="https://archive.org/details/outofcrisisquali00demi">https://archive.org/details/outofcrisisquali00demi</a> <span class="tag">(secondary: catalogue-level; operational definitions are discussed at length in this book, not independently verified by page this session)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

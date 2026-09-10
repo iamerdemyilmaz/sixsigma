@@ -1,0 +1,21 @@
+{
+ "id": "m05-subgroup-naive",
+ "module": "05",
+ "kind": "capability",
+ "title": "Naive subgrouping: 100 individuals, 20 subgroups of 5 in strict production order (mixed cavities)",
+ "source": "constructed",
+ "setting": "two-cavity injection-moulded bracket hole, \u00d88.000 \u00b1 0.020 mm, bore gauge to 0.001 mm, 100 consecutive parts, cavities alternate A, B, A, B ...",
+ "params": {
+  "usl": 8.02,
+  "lsl": 7.98,
+  "target": 8.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 100
+}

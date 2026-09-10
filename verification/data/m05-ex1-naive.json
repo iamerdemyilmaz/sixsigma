@@ -1,0 +1,21 @@
+{
+ "id": "m05-ex1-naive",
+ "module": "05",
+ "kind": "capability",
+ "title": "Exercise 1: naive subgrouping, two machines, 40 individuals, 8 subgroups of 5",
+ "source": "constructed",
+ "setting": "a shaft shoulder diameter, \u00d825.000 \u00b1 0.040 mm, machined on two nominally identical lathes running in alternation, micrometer to 0.001 mm",
+ "params": {
+  "usl": 25.04,
+  "lsl": 24.96,
+  "target": 25.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 40
+}

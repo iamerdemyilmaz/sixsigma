@@ -1,0 +1,21 @@
+{
+ "id": "m05-ex1-rational",
+ "module": "05",
+ "kind": "capability",
+ "title": "Exercise 1: rational subgrouping, the same 40 individuals regrouped by machine",
+ "source": "constructed",
+ "setting": "the same 40 readings as m05-ex1-naive, reordered so subgroups 1-4 are machine 1 and subgroups 5-8 are machine 2",
+ "params": {
+  "usl": 25.04,
+  "lsl": 24.96,
+  "target": 25.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 40
+}

@@ -1,0 +1,18 @@
+{
+ "id": "m05-rounding-fine",
+ "module": "05",
+ "kind": "descriptive",
+ "title": "Locating pin diameter, 80 individuals, recorded to 0.001 mm (fine resolution)",
+ "source": "constructed",
+ "setting": "locating pin \u00d86.500 \u00b1 0.030 mm, digital micrometer to 0.001 mm, 80 consecutive parts",
+ "params": {
+  "usl": 6.53,
+  "lsl": 6.47,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 80
+}
