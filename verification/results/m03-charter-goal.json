@@ -1,0 +1,24 @@
+{
+ "id": "m03-charter-goal",
+ "kind": "dpmo",
+ "params": {
+  "defects": 10,
+  "units": 1000,
+  "opportunities": 1
+ },
+ "source": "constructed",
+ "results": {
+  "defects": 10,
+  "units": 1000,
+  "opportunities": 1,
+  "dpmo": 10000.0,
+  "dpu": 0.01,
+  "dpo": 0.01,
+  "yield_fty": 0.9900498337491681,
+  "yield_from_dpmo": 0.99,
+  "sigma_long_term": 2.3263478740408408,
+  "sigma_level_shifted": 3.8263478740408408
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

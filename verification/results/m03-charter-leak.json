@@ -1,0 +1,24 @@
+{
+ "id": "m03-charter-leak",
+ "kind": "dpmo",
+ "params": {
+  "defects": 42,
+  "units": 1000,
+  "opportunities": 1
+ },
+ "source": "constructed (matches the capstone baseline stated in SOURCES.md Module 19)",
+ "results": {
+  "defects": 42,
+  "units": 1000,
+  "opportunities": 1,
+  "dpmo": 42000.0,
+  "dpu": 0.042,
+  "dpo": 0.042,
+  "yield_fty": 0.9588697805724845,
+  "yield_from_dpmo": 0.958,
+  "sigma_long_term": 1.7279343223884185,
+  "sigma_level_shifted": 3.2279343223884185
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

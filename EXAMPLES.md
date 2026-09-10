@@ -99,4 +99,9 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m02-funnel-growth | 2 | funnel experiment, 4 rules, 150 × 40-drop replications | Monte Carlo check of the Var(x_k) = k·σ² claim: mean square at drop 8 and drop 40 for each rule, all four within a factor of 2 of theory, Rules 3 and 4 growing roughly fivefold as theory predicts | `m02-funnel-growth.csv` | pass | pass | pass | n/a (no calculator) | 02 |
 | m02-ex2-funnel | 2 | funnel experiment, rules 1 and 2, 30 drops | σ = 4.0 mm; Rule 1 var 12.70 mm², Rule 2 var 26.36 mm² (ratio 2.08 ≈ 2); exercise 2 | `m02-ex2-funnel.csv` | pass | pass | pass | n/a (no calculator) | 02 |
 
+| m03-charter-leak | 3 | DPMO (parameters only) | capstone baseline: 42 of 1,000 brazed assemblies fail the leak test; DPU 0.042 (4.2 %), DPMO 42,000, sigma level (shifted) 3.23 | none | pass | pass | pass | pass | 03 |
+| m03-charter-goal | 3 | DPMO (parameters only) | charter goal: 10 of 1,000 (1.0 %); DPU 0.01, DPMO 10,000, sigma level (shifted) 3.83 | none | pass | pass | pass | pass | 03 |
+
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
+
+Totals on 2026-09-10 (after Module 3): 65 examples; 2,171 quantities agree between Check 1 and Check 2; 4,494 values agree between Check 1 and the JavaScript engines; 435 page checks.

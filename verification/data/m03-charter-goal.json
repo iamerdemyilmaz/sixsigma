@@ -1,0 +1,14 @@
+{
+ "id": "m03-charter-goal",
+ "module": "03",
+ "kind": "dpmo",
+ "title": "Charter goal: leak-test reject rate at or below 1 %",
+ "source": "constructed",
+ "setting": "same line, the charter's stated goal state",
+ "params": {
+  "defects": 10,
+  "units": 1000,
+  "opportunities": 1
+ },
+ "columns": null
+}

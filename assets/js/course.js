@@ -13,7 +13,7 @@
     { num: "00", slug: "00-introduction", title: "Introduction: what Six Sigma is and is not", built: true },
     { num: "01", slug: "01-variation-statistics", title: "Variation and basic statistics", built: true },
     { num: "02", slug: "02-process-thinking", title: "Process thinking", built: true },
-    { num: "03", slug: "03-defining-a-project", title: "Defining a project", built: false },
+    { num: "03", slug: "03-defining-a-project", title: "Defining a project", built: true },
     { num: "04", slug: "04-measurement-systems", title: "Measurement systems analysis", built: false },
     { num: "05", slug: "05-data-collection", title: "Data collection and sampling", built: false },
     { num: "06", slug: "06-sigma-level-dpmo", title: "Sigma level, DPMO, DPU, RTY", built: false },

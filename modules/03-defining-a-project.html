@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 3: Defining a project · Six Sigma Course</title>
+<meta name="description" content="Problem statements that survive scrutiny, project charters, VOC to CTQ translation, the Kano model, stakeholder analysis, and what a good Green Belt project looks like in manufacturing.">
+<meta name="examples" content="m03-charter-leak, m03-charter-goal">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="03">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 3 · Define</p>
+    <h1>Defining a project</h1>
+    <p class="lead">Every DMAIC project starts before any data is collected: with a sentence that says what is wrong, a document that says why it is worth fixing, and a boundary that says where the team is and is not allowed to look. Get that sentence, document and boundary wrong, and the most careful capability study or gauge R&amp;R in the world is answering a question nobody needed answered. This module covers Define: problem statements, project charters, translating customer voice into measurable requirements, the Kano model, stakeholder analysis, and what separates a Green Belt project that changes something from one that produces a binder.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Write</strong> a problem statement that names a measurable gap instead of a feeling.</li>
+      <li><strong>Build</strong> a one-page project charter with a business case, goal statement, scope and boundaries.</li>
+      <li><strong>Translate</strong> a customer's own words into a structured, measurable critical-to-quality (CTQ) requirement.</li>
+      <li><strong>Classify</strong> a requirement using the Kano model and explain why "meeting spec" is not the same as "delighting the customer."</li>
+      <li><strong>Map</strong> a project's stakeholders by power and interest and say what each group needs from the team.</li>
+      <li><strong>Recognise</strong> the difference between a Green Belt project with a real, scoped, measurable problem and one that is really an assignment to "go do something about quality."</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Noriaki Kano and his co-authors published a two-dimensional model of quality in 1984 that is still the standard way to talk about customer requirements: some requirements are <strong>must-be</strong> (their absence causes real dissatisfaction, but meeting them earns no credit), some are <strong>one-dimensional</strong> (more is linearly better, less is linearly worse), and some are <strong>attractive</strong> (their absence causes no complaint, but their presence delights).<sup class="cite"><a href="#ref-1">[1]</a></sup> Kano validated the categories with consumer surveys on televisions and table clocks, and the reason the model has lasted forty years is that it answers a question every Define phase has to answer: which requirement, if you miss it, actually matters. A charter built around a must-be requirement ("the assembly should not leak") is defending against real pain; a charter built around a one-dimensional requirement ("cycle time should be faster") is trading off against something else; and confusing the two wastes a project on a requirement nobody was going to complain about.</p>
+    <p>A published, peer-reviewed illustration of what a scoped Green Belt project looks like in a manufacturing setting: Sharma and Rao's 2014 open-access case study of a DMAIC project on an engine crankshaft line reports a defined problem (excess dimensional variation on a ground journal), a measured baseline standard deviation of 0.003&nbsp;mm falling to 0.002&nbsp;mm after the project, Cp rising from 1.29 to 2.02 and Cpk from 0.32 to 1.45, using a cause-and-effect diagram and a process FMEA as the Analyze-phase tools.<sup class="cite"><a href="#ref-6">[6]</a></sup> Those numbers are quoted exactly as published; this course did not recompute them, and they are the one exception in this module to the rule that every number is independently checked, because they describe someone else's real production line, not a constructed dataset. What is worth noticing about the case is not the improvement itself but its shape: a specific characteristic, a specific gauge, a before-and-after Cpk, and root-cause tools used deliberately rather than a general instruction to "improve quality." That shape is what Define is supposed to produce, on every project, before Measure begins.</p>
+    <p>The opposite failure mode is familiar to anyone who has sat through a program review: a project chartered as "reduce scrap" or "improve the brazing process," with no baseline number, no goal number, and no stated boundary, staffed by whoever had time that quarter. Six months later nobody can say whether it succeeded, because nobody defined what success was. The tools in this module are not bureaucracy for its own sake; a charter, a CTQ tree and a stakeholder map are the fastest way to find out, before spending a single hour of Measure-phase data collection, whether a project is actually answerable.</p>
+
+    <h2 id="problem-statements">Problem statements that survive scrutiny</h2>
+    <p>A problem statement is one to three sentences. It names what is wrong, where, since when, and how big, without naming a cause and without naming a solution. Naming a cause turns the statement into an unverified hypothesis ("leaks are caused by bad flux application"); naming a solution skips Analyze entirely ("we need a new fixture"). A problem statement that survives a skeptical program manager's questions has four things in it:</p>
+    <ul>
+      <li><strong>What</strong> is happening, described by a measurable characteristic, not an adjective. "Quality is bad" is not measurable; "4.2&nbsp;% of assemblies fail the leak test" is.</li>
+      <li><strong>Where</strong> it happens: the process, the line, the product family. A statement that could describe any process in the plant is too vague to scope.</li>
+      <li><strong>Since when</strong> (or over what period) the data were collected, so the reader can judge whether the baseline is recent and representative.</li>
+      <li><strong>How big</strong> the gap is between current performance and requirement, ideally as a number the reader can check against a data source.</li>
+    </ul>
+    <p>A statement that adds a cause or a fix, however plausible, has quietly closed off Measure and Analyze before they started. "Leak-test rejects are running at 4.2&nbsp;%, up from a historical 2&nbsp;%, because operators are rushing the flux step, so we need a poka-yoke fixture" contains a real problem statement, an unverified cause, and a proposed fix, all before anyone has looked at the data. Strip it back to "leak-test rejects on the brazed heat-exchanger line ran at 4.2&nbsp;% over the last quarter (1,000 units), against a historical rate of 2&nbsp;%" and the team can now go find out why, instead of assuming they already know.</p>
+
+    <h2 id="charter">Project charters</h2>
+    <p>A charter is the one-page document that turns a problem statement into an authorized project. Every template varies in layout, but the content that has to be there is the same everywhere: a business case, a problem statement, a goal statement, a scope with explicit boundaries, a rough timeline with phase gates, and a named sponsor and team. The charter is a contract between the team and the organization: it says what the team is allowed to spend time on, and it is the document a sponsor signs to make that authorization real.</p>
+    <h3 id="charter-elements">The elements, and what each one is for</h3>
+    <p><strong>Business case.</strong> Two or three sentences on why this problem is worth a team's time now: cost of poor quality, a customer complaint trend, a capacity constraint, a safety exposure. The business case is what a sponsor reads to decide whether to authorize the project at all.</p>
+    <p><strong>Problem statement.</strong> As built above: measurable, causeless, solutionless.</p>
+    <p><strong>Goal statement.</strong> A target for the same metric named in the problem statement, with a deadline. "Reduce the leak-test reject rate from 4.2&nbsp;% to 1.0&nbsp;% or lower by the end of Q3" is a goal statement; "reduce leak-test rejects" is not, because it cannot be checked against a number on a specific date. Goal-setting research going back decades is unambiguous on this point in a way that generalizes well beyond Six Sigma: specific, difficult but attainable goals produce better performance than vague or easy ones, and Linderman and co-authors made exactly this argument about Six Sigma projects specifically, framing well-run DMAIC projects as an organizational application of goal-setting theory.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
+    <p><strong>Scope and boundaries.</strong> What process, what product family, what date range of data, and — just as important — what is explicitly out of scope. "In scope: the braze and leak-test steps for the heat-exchanger core. Out of scope: upstream tube-forming quality, the leak-test gauge's own measurement system (chartered separately if needed), and any change to the approved braze alloy." A boundary that is not written down gets renegotiated by whoever complains loudest in week six.</p>
+    <p><strong>Timeline and team.</strong> Target dates for each DMAIC gate, a sponsor, a Green or Black Belt project lead, and the subject-matter experts the team needs access to (an operator, a process engineer, a quality engineer). Six Sigma's own academic reviewers have argued that this organizational structure — project charters, phase gates, a belt hierarchy, dedicated project time — is the part of the methodology that is actually new; the statistical tools themselves mostly predate the programme by decades.<sup class="cite"><a href="#ref-4">[4]</a></sup> A charter without a named sponsor and a named lead is missing the one thing that makes the rest of the document enforceable.</p>
+
+    <h2 id="voc-ctq">Voice of the customer to critical-to-quality</h2>
+    <p>Customers do not speak in specification language. "It shouldn't leak," "it feels flimsy," "I don't trust the seal" are all real customer statements and none of them can be handed to a machinist. Griffin and Hauser's structure for turning verbatim customer language into engineering requirements — capture the statement in the customer's own words, organize statements into a hierarchy of needs and the more specific drivers that satisfy them, then translate the most specific level into a measurable requirement with a target and a tolerance — is the standard method, and it is the one this course uses.<sup class="cite"><a href="#ref-2">[2]</a></sup> The output is usually drawn as a tree: one voice-of-customer (VOC) statement branching into one or more drivers, each driver branching into one or more CTQs, each CTQ carrying a measurable target and a tolerance.</p>
+    <p class="example-label">The example below is a constructed CTQ tree, drawn for teaching. It is not a transcription of a real customer interview.</p>
+    <figure>
+      <svg viewBox="0 0 700 260" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">A CTQ tree from a customer statement to two measurable requirements</title>
+        <desc id="fig1-d">A box on the left holding the customer's verbatim statement, "It shouldn't leak," connects with two lines to two driver boxes in the middle, "Braze joint integrity" and "Dimensional fit." Each driver box connects to one CTQ box on the right: braze joint integrity to "Leak-test reject rate at or below 1 percent," and dimensional fit to "Bore diameter 12.000 plus or minus 0.025 millimetres."</desc>
+        <g class="chart-box">
+          <rect x="10" y="95" width="150" height="70" rx="4"/>
+          <rect x="270" y="35" width="150" height="60" rx="4"/>
+          <rect x="270" y="165" width="150" height="60" rx="4"/>
+          <rect x="530" y="35" width="160" height="60" rx="4"/>
+          <rect x="530" y="165" width="160" height="60" rx="4"/>
+        </g>
+        <g class="chart-text" text-anchor="middle" font-size="12">
+          <text x="85" y="122">VOC (customer's</text><text x="85" y="138">own words):</text><text x="85" y="154" font-style="italic">&#8220;It shouldn&#8217;t leak.&#8221;</text>
+          <text x="345" y="60">Driver:</text><text x="345" y="76">Braze joint integrity</text>
+          <text x="345" y="190">Driver:</text><text x="345" y="206">Dimensional fit</text>
+          <text x="610" y="55">CTQ: Leak-test</text><text x="610" y="71">reject rate</text><text x="610" y="87">&le; 1.0&#8201;%</text>
+          <text x="610" y="185">CTQ: Bore</text><text x="610" y="201">&Oslash;12.000 &plusmn;</text><text x="610" y="217">0.025&#8201;mm</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#m3arrow)">
+          <path d="M160 118 C210 90, 230 75, 268 65"/>
+          <path d="M160 142 C210 175, 230 185, 268 195"/>
+          <path d="M420 65 H528"/>
+          <path d="M420 195 H528"/>
+        </g>
+        <defs><marker id="m3arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/></marker></defs>
+      </svg>
+      <figcaption>Figure 1. A CTQ tree: one customer statement, in the customer's own words, branches into two engineering drivers, each ending in a measurable target and tolerance. The two CTQs shown here are the running examples of Module 7 (bore diameter) and the capstone (leak-test rate).</figcaption>
+    </figure>
+    <p>Two failure modes recur. The first is stopping at the driver level and calling it a requirement: "braze joint integrity" cannot be measured on an incoming inspection report, but "leak-test reject rate" can. The second is translating one VOC statement into a single CTQ and missing that it usually implies several independent ones, each needing its own target: "it shouldn't leak" is really about joint integrity <em>and</em> about the leak-test method's own capability to detect a bad joint (Module 4's subject), and treating it as one requirement can leave a real driver unmeasured.</p>
+
+    <h2 id="kano">The Kano model</h2>
+    <p>Once a CTQ exists, the Kano model asks a different question: if this requirement is met exactly, does the customer notice? Kano's survey method asks customers a pair of questions about each requirement — how would you feel if this feature were present, and how would you feel if it were absent — and classifies the answers into the categories below.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <figure>
+      <svg viewBox="0 0 640 420" role="img" aria-labelledby="fig2-t fig2-d">
+        <title id="fig2-t">Kano diagram: three requirement categories</title>
+        <desc id="fig2-d">A chart with degree of achievement on the horizontal axis, from not present to fully achieved, and customer satisfaction on the vertical axis, from dissatisfied to delighted, crossing at a neutral midpoint. Three curves are drawn. The one-dimensional curve is a straight diagonal line from dissatisfied-and-absent to delighted-and-fully-achieved. The must-be curve rises steeply from very dissatisfied when absent and flattens out at only neutral, never delighted, even when fully achieved. The attractive curve stays near neutral when absent, then rises steeply to delighted as it becomes fully achieved.</desc>
+        <g stroke="currentColor" stroke-width="1.2">
+          <line x1="315" y1="45" x2="315" y2="385"/>
+          <line x1="65" y1="215" x2="570" y2="215"/>
+        </g>
+        <g class="chart-text small muted" text-anchor="middle">
+          <text x="315" y="30">Delighted</text>
+          <text x="315" y="405">Dissatisfied</text>
+          <text x="70" y="235" text-anchor="start">Not present</text>
+          <text x="565" y="235" text-anchor="end">Fully achieved</text>
+        </g>
+        <g fill="none" class="chart-curve" stroke-width="1.6">
+          <path d="M70 380 L560 50"/>
+        </g>
+        <g fill="none" class="chart-curve bad" stroke-width="1.6">
+          <path d="M70 380 C130 160, 260 215, 560 215"/>
+        </g>
+        <g fill="none" stroke="var(--ok)" stroke-width="1.6">
+          <path d="M70 240 C380 240, 470 120, 560 50"/>
+        </g>
+        <g class="chart-text" font-size="12">
+          <text x="380" y="150">One-dimensional</text>
+          <text x="120" y="205">Must-be</text>
+          <text x="430" y="100" fill="var(--ok)">Attractive</text>
+        </g>
+      </svg>
+      <figcaption>Figure 2. The Kano model's three curves. A must-be requirement (e.g. a leak-free joint) only prevents dissatisfaction; a one-dimensional requirement (e.g. cycle time) trades off linearly; an attractive requirement (e.g. an unrequested finish improvement) delights when present but is not missed when absent. Drawn from the categories in Kano et al. 1984.</figcaption>
+    </figure>
+    <p>The category changes what a Cpk or a defect rate on that CTQ actually means to the customer. A must-be requirement that is 99&nbsp;% met is not "mostly delighting" customers; the 1&nbsp;% who get a leaking unit are simply dissatisfied, full stop, and there is no credit on the other side of the ledger for the 99&nbsp;% who got what they were never going to praise you for. This is why a leak-test reject rate belongs in a charter's goal statement as a hard target, not as a index to be optimized against cost: for a must-be requirement, the business case is the cost of the failures, not the marginal value of exceeding the target. A one-dimensional requirement is different: cutting cycle time from 60 to 45 seconds is worth roughly proportionally more than cutting it from 45 to 44, and the charter should say so by putting a real number, not "as fast as possible," in the goal statement. Kano's own categories also shift over time — features that delight in one product generation are must-be by the next, a point the original paper makes about televisions and clocks and one that applies just as directly to two manufacturing generations of the same assembly.</p>
+
+    <h2 id="stakeholders">Stakeholder analysis</h2>
+    <p>A charter that is technically correct can still fail if the people who can stop the project, fund it, or quietly ignore its recommendations were never accounted for. A power/interest grid is the simplest tool for this: place each stakeholder by how much influence they have over the project's resources and outcome (power) and how much the project's result affects them day to day (interest).</p>
+    <figure>
+      <svg viewBox="0 0 500 420" role="img" aria-labelledby="fig3-t fig3-d">
+        <title id="fig3-t">Stakeholder power/interest grid</title>
+        <desc id="fig3-d">A two by two grid with interest on the horizontal axis, low to high, and power on the vertical axis, low to high. The bottom left quadrant, low power and low interest, is labelled monitor with minimum effort and contains an example role, purchasing. The bottom right quadrant, low power and high interest, is labelled keep informed and contains operators and the quality engineer leading the project. The top left quadrant, high power and low interest, is labelled keep satisfied and contains the OEM customer. The top right quadrant, high power and high interest, is labelled manage closely and contains the plant manager and the process owner.</desc>
+        <g class="chart-box"><rect x="70" y="40" width="380" height="340"/></g>
+        <g stroke="var(--line)" stroke-width="1"><line x1="260" y1="40" x2="260" y2="380"/><line x1="70" y1="210" x2="450" y2="210"/></g>
+        <g class="chart-text small muted" text-anchor="middle">
+          <text x="260" y="405">Interest &#8594;</text>
+          <text x="30" y="215" transform="rotate(-90 30 215)">Power &#8594;</text>
+        </g>
+        <g class="chart-text small" font-style="italic">
+          <text x="90" y="200">Monitor</text>
+          <text x="270" y="200">Keep informed</text>
+          <text x="90" y="60">Keep satisfied</text>
+          <text x="270" y="60">Manage closely</text>
+        </g>
+        <g class="chart-text small">
+          <text x="90" y="180">Purchasing</text>
+          <text x="270" y="240">Operators</text>
+          <text x="270" y="260">Quality engineer (Green Belt)</text>
+          <text x="90" y="80">OEM customer</text>
+          <text x="270" y="80">Plant manager</text>
+          <text x="270" y="100">Process owner</text>
+        </g>
+      </svg>
+      <figcaption>Figure 3. A power/interest grid for the capstone leak-test project. Generic roles, not a specific organization's chart. Each quadrant implies a different communication plan: manage closely means regular working sessions, keep satisfied means periodic summaries pitched at business impact, keep informed means access to data and a voice in root-cause discussion, monitor means no action unless something changes.</figcaption>
+    </figure>
+    <p>The grid's value is not the diagram; it is the conversation it forces before the project starts. A process owner in the top-right quadrant who is not part of the core team will resist a change the team proposes in Improve, no matter how sound the data, simply because they were never consulted. An OEM customer in the "keep satisfied" quadrant does not need weekly control-chart updates, but does need to hear about a scope change or a schedule slip before they find out from a shipment. Getting this wrong is not a statistics mistake, and no amount of rigor in Measure and Analyze fixes it after the fact.</p>
+
+    <h2 id="good-project">What a good Green Belt project looks like</h2>
+    <p>The ASQ Green Belt Body of Knowledge frames Measure-phase work around verified measurement systems and capability studies that check stability and normality before quoting an index, and Analyze-phase work around root cause tools and hypothesis tests, all applied to a specific, scoped characteristic.<sup class="cite"><a href="#ref-5">[5]</a></sup> Combined with the crankshaft case above, a usable checklist for "is this project actually scoped" is: one measurable characteristic (not a category of characteristics), one process step or a short, connected sequence of steps (not "the plant"), a baseline number from real data (not an estimate), a goal number with a date, and a named sponsor who can remove obstacles the team cannot remove itself. A project charter that cannot answer "what one number will you report at the end, and what is it today" is not ready to leave Define, no matter how enthusiastic the kickoff meeting was.</p>
+    <!-- AUTHOR: optional personal note here (a charter you inherited with no baseline number, or a kickoff meeting that revealed the sponsor and the process owner wanted different things, without employer-specific detail) -->
+
+    <h2 id="examples">Worked examples</h2>
+    <h3 id="example1">Worked example 1: the capstone charter, baseline to goal</h3>
+    <p class="example-label">The data below is a constructed example matching the capstone project's own baseline (Module 19), not a real production run.</p>
+    <p>The capstone line (Module 19) brazes aluminium heat-exchanger cores and leak-tests every unit before it ships. Over the most recent 1,000 units, 42 failed the leak test.</p>
+    <div class="formula">DPU = defects / units = 42 / 1,000 = <span data-ex="m03-charter-leak" data-key="dpu" data-dp="3">0.042</span>, i.e. a <strong>4.2&nbsp;%</strong> reject rate
+      <span class="where">With one opportunity per unit (the unit either leaks or it does not), DPU and the reject rate are the same number; Module 6 covers what changes when a unit has more than one way to fail.</span>
+    </div>
+    <p>Converting that to a sigma level (Module 6 derives this properly; here it is only a preview): a DPO of 0.042 corresponds to a long-term Z of <span data-ex="m03-charter-leak" data-key="sigma_long_term" data-dp="2">1.73</span>, or a "sigma level" of <span data-ex="m03-charter-leak" data-key="sigma_level_shifted" data-dp="2">3.23</span> under the Motorola 1.5&sigma;-shift convention. The charter's goal statement targets a reject rate at or below 1.0&nbsp;% (10 defects in the same 1,000 units): DPU <span data-ex="m03-charter-goal" data-key="dpu" data-dp="2">0.01</span>, sigma level <span data-ex="m03-charter-goal" data-key="sigma_level_shifted" data-dp="2">3.83</span> &mdash; a target about six tenths of a sigma above where the line runs today, which is a meaningfully harder goal than it sounds when stated only as "4.2&nbsp;% to 1&nbsp;%."</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Project charter, brazed heat-exchanger leak-test reject rate (constructed example).</caption>
+        <tbody>
+          <tr><th>Business case</th><td>Leak-test failures are scrapped or reworked at the braze station; at the current rate this consumes an estimated 2 technician-hours per shift and delays shipment of about 40 units per week.</td></tr>
+          <tr><th>Problem statement</th><td>Over the most recent 1,000 brazed heat-exchanger cores, 42 (4.2&nbsp;%) failed the leak test at final inspection, against a design target of 1.0&nbsp;% or lower.</td></tr>
+          <tr><th>Goal statement</th><td>Reduce the leak-test reject rate from 4.2&nbsp;% to 1.0&nbsp;% or lower within one quarter, without increasing braze cycle time.</td></tr>
+          <tr><th>Scope: in</th><td>The furnace-braze and leak-test steps for the aluminium heat-exchanger core, one product family, one line.</td></tr>
+          <tr><th>Scope: out</th><td>Upstream tube and fin forming; the leak-test gauge's own measurement system (chartered separately, see Module 4); any change to the qualified braze alloy or flux.</td></tr>
+          <tr><th>Team</th><td>Sponsor: plant manager. Lead: quality engineer (Green Belt). Members: braze technician, process engineer, leak-test operator.</td></tr>
+          <tr><th>Timeline</th><td>Define and Measure complete by week 4; Analyze by week 8; Improve and Control by week 13.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="calc" data-calc="dpmo" id="calc-dpmo-charter">
+      <h3>Sigma level and DPMO converter</h3>
+      <p class="calc-intro">Pre-loaded with the charter's baseline: 42 leak-test failures in 1,000 assemblies, one opportunity per assembly. Change the goal's defect count to 10 to see the target state.</p>
+      <script type="application/json" class="calc-data">{"defects":42,"units":1000,"opportunities":1}</script>
+    </div>
+
+    <h3 id="example2">Worked example 2: three problem statements, rewritten</h3>
+    <p class="example-label">Constructed statements, written to illustrate common failures, not quotations from a real project.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Problem statements before and after (constructed examples).</caption>
+        <thead><tr><th>As written</th><th>What is wrong with it</th><th>Rewritten</th></tr></thead>
+        <tbody>
+          <tr><td>"Braze quality needs to improve."</td><td>No measurable characteristic, no baseline, no process boundary.</td><td>"The leak-test reject rate on the heat-exchanger core braze line was 4.2&nbsp;% over the last 1,000 units, against a 1.0&nbsp;% target."</td></tr>
+          <tr><td>"Operators are being careless with flux application, causing leaks, so we need a poka-yoke fixture."</td><td>States an unverified cause and a solution before Measure or Analyze has run.</td><td>"The leak-test reject rate on the heat-exchanger core braze line was 4.2&nbsp;% over the last 1,000 units, against a 1.0&nbsp;% target. Root cause has not yet been established."</td></tr>
+          <tr><td>"Reduce scrap plant-wide by 20&nbsp;%."</td><td>No single process boundary; "scrap" is not one measurable characteristic; unclear which of dozens of processes and part numbers is meant.</td><td>"Scrap on the heat-exchanger core braze line, measured as leak-test rejects, was 4.2&nbsp;% of 1,000 units over the last quarter."</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="example3">Worked example 3: a second CTQ tree</h3>
+    <p class="example-label">Constructed example, drawn for teaching.</p>
+    <p>A different VOC statement from the same customer base: "the connector housing sometimes doesn't seat properly." Following Griffin and Hauser's structure: the statement implies at least two independent drivers, each translating into its own CTQ.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. VOC to CTQ, connector housing (constructed example).</caption>
+        <thead><tr><th>VOC statement</th><th>Driver</th><th>CTQ (target and tolerance)</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="2">"The connector housing sometimes doesn't seat properly."</td><td>Mating feature dimension</td><td>Housing latch-tab width: 3.20 &plusmn; 0.05&nbsp;mm</td></tr>
+          <tr><td>Insertion effort</td><td>Insertion force: 15 to 35&nbsp;N (measured on a calibrated push gauge)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notice that "seat properly" alone cannot be handed to a machinist or written into a control plan; only the two rows on the right can. It is also worth checking, as Kano would, whether either driver is a must-be (a housing that will not seat at all is a hard failure, most likely must-be) or one-dimensional (insertion force has a comfort range, and both too loose and too tight are complaints, which is really a two-sided one-dimensional requirement, not a single-direction one). That classification changes how tightly Control (Module 18) needs to hold each characteristic.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Writing a problem statement with the cause or the fix already in it.</strong> Consequence: Analyze becomes a formality that confirms what the team already decided, and the real cause, if different, is never found. Fix: read the statement back and delete any clause that starts with "because" or "so we need."</li>
+      <li><strong>Chartering "quality" or "the plant" instead of one characteristic on one process.</strong> Consequence: no one can say what data to collect first, and the project drifts to whatever is easiest to measure. Fix: name the one characteristic and the one process step in the first sentence.</li>
+      <li><strong>A goal statement with no number or no date.</strong> Consequence: the project cannot be closed, because "better" has no criterion. Fix: same metric as the problem statement, a target value, a date.</li>
+      <li><strong>Skipping the CTQ tree and specifying straight from a customer's adjective.</strong> Consequence: engineering writes a spec for "feels solid" by guessing, and it is guessed wrong at least as often as it is guessed right. Fix: always pass through a driver before a number.</li>
+      <li><strong>Treating every requirement as one-dimensional.</strong> Consequence: a must-be requirement gets a Cpk target instead of a near-zero-defect target, and the business case understates the cost of the failures that remain. Fix: ask the Kano question — does the customer notice when this is met, or only when it is missed?</li>
+      <li><strong>Skipping stakeholder analysis because "everyone knows who's involved."</strong> Consequence: a process owner who was never consulted blocks the Improve-phase change, and the team relearns in week 10 what a fifteen-minute grid would have surfaced in week 1. Fix: do the grid on paper, by name, before the kickoff meeting.</li>
+      <li><strong>No named sponsor, or a sponsor who cannot actually authorize the scope.</strong> Consequence: the team hits an obstacle (a needed line stoppage, a budget line) that only someone two levels up can clear, and the project stalls waiting for an escalation path that was never built. Fix: confirm the sponsor's authority matches the scope before the charter is signed.</li>
+      <li><strong>Confusing a charter's business case with a savings estimate nobody can trace.</strong> Consequence: a project is sold on a round number ("this will save $500,000") that cannot survive a finance review, and the team's credibility is spent before Measure begins. Fix: tie the business case to a countable quantity from the problem statement (rework hours, units scrapped, complaints logged), and let finance do the currency conversion if one is needed.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: rewrite a problem statement and set a goal</h3>
+    <p class="example-label">Constructed scenario, not a real project.</p>
+    <p>A colleague hands you this: "The wire-bond process keeps failing pull-strength testing because the bonder settings drift, and maintenance needs to recalibrate it weekly." You are told the actual data behind it: over the last 1,000 wire bonds, 42 fell below the minimum pull strength, against a target reject rate of 1.0&nbsp;% or lower. <strong>Tasks.</strong> (a) Identify what is wrong with the statement as given. (b) Rewrite it as a proper problem statement. (c) Write a goal statement with a number and a plausible timeframe. (d) What is the sigma level (with the 1.5&sigma; shift) of the current state, and of the goal state?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> The statement names an unverified cause ("bonder settings drift") and a solution ("maintenance needs to recalibrate weekly") before any data has been analyzed. It also gives no baseline number.</p>
+      <p><strong>(b)</strong> "Over the most recent 1,000 wire bonds, 42 (4.2&nbsp;%) fell below the minimum pull-strength requirement, against a target reject rate of 1.0&nbsp;% or lower. Root cause has not yet been established."</p>
+      <p><strong>(c)</strong> "Reduce the wire-bond pull-strength reject rate from 4.2&nbsp;% to 1.0&nbsp;% or lower within one quarter."</p>
+      <p><strong>(d)</strong> This is numerically identical to Worked example 1's charter (same 42-in-1,000 baseline, same 10-in-1,000 goal): current state DPU <span data-ex="m03-charter-leak" data-key="dpu" data-dp="3">0.042</span>, sigma level <span data-ex="m03-charter-leak" data-key="sigma_level_shifted" data-dp="2">3.23</span>; goal state DPU <span data-ex="m03-charter-goal" data-key="dpu" data-dp="2">0.01</span>, sigma level <span data-ex="m03-charter-goal" data-key="sigma_level_shifted" data-dp="2">3.83</span>.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: build a CTQ tree and classify it</h3>
+    <p class="example-label">Constructed scenario, not a real customer interview.</p>
+    <p>A customer says: "The bracket assembly is fine, but I wish it were lighter — that would actually be a nice surprise, nobody's asked for it before." <strong>Tasks.</strong> (a) Identify the driver behind this VOC statement. (b) Propose one measurable CTQ (target and tolerance) for it. (c) Using the Kano model, classify this requirement, and justify your answer from the customer's own wording.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Driver: assembly mass.</p>
+      <p><strong>(b)</strong> A plausible CTQ: bracket assembly mass &le; 240&nbsp;g (current baseline to be measured; exact tolerance would come from a structural or cost trade-off study, not from the VOC statement alone).</p>
+      <p><strong>(c)</strong> Attractive. The customer's own words say the current state is "fine" (no dissatisfaction from the status quo) and that a mass reduction would be "a nice surprise" and something "nobody's asked for" — exactly the signature of an attractive requirement: absence causes no complaint, presence delights. This is different from a must-be requirement like leak-tightness, where absence causes a definite complaint.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="03">
+      <fieldset class="q" data-answer="b">
+        <legend>1. A well-formed problem statement should</legend>
+        <label><input type="radio" name="q1" value="a"> name the most likely root cause</label>
+        <label><input type="radio" name="q1" value="b"> name a measurable gap, without a cause or a proposed fix</label>
+        <label><input type="radio" name="q1" value="c"> recommend the corrective action</label>
+        <label><input type="radio" name="q1" value="d"> avoid mentioning any number until Measure is complete</label>
+        <p class="explain" hidden>A problem statement is a measurable description of the gap; naming a cause or a fix closes off Analyze before it starts.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>2. Which is a complete, usable goal statement?</legend>
+        <label><input type="radio" name="q2" value="a"> "Improve the leak-test pass rate."</label>
+        <label><input type="radio" name="q2" value="b"> "Reduce leak-test rejects as much as possible."</label>
+        <label><input type="radio" name="q2" value="c"> "Investigate leak-test failures."</label>
+        <label><input type="radio" name="q2" value="d"> "Reduce the leak-test reject rate from 4.2&#8201;% to 1.0&#8201;% or lower by the end of Q3."</label>
+        <p class="explain" hidden>A goal statement needs the same metric as the problem statement, a numeric target, and a date.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="0.01" data-tolerance="0.0005">
+        <legend>3. A charter's goal is a leak-test reject rate at or below 1.0&#8201;% out of 1,000 units. Expressed as DPU (defects per unit, one opportunity per unit), what is the target value?</legend>
+        <input type="number" name="q3" step="any">
+        <p class="explain" hidden>DPU = defects / units = 10 / 1,000 = 0.01, as in Worked example 1.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>4. In Griffin and Hauser's VOC-to-CTQ structure, the correct order is</legend>
+        <label><input type="radio" name="q4" value="a"> CTQ, then driver, then verbatim customer statement</label>
+        <label><input type="radio" name="q4" value="b"> driver, then CTQ, then verbatim customer statement</label>
+        <label><input type="radio" name="q4" value="c"> verbatim customer statement, then driver, then measurable CTQ</label>
+        <label><input type="radio" name="q4" value="d"> there is no fixed order; any translation is valid</label>
+        <p class="explain" hidden>Capture the customer's own words first, structure them into drivers, then translate the most specific driver into a measurable requirement.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>5. A must-be requirement, in the Kano model, is one where</legend>
+        <label><input type="radio" name="q5" value="a"> its absence causes real dissatisfaction, but fully meeting it earns no extra credit</label>
+        <label><input type="radio" name="q5" value="b"> more is always linearly better, with no ceiling</label>
+        <label><input type="radio" name="q5" value="c"> customers never notice whether it is present</label>
+        <label><input type="radio" name="q5" value="d"> it can only be discovered after the product ships</label>
+        <p class="explain" hidden>A must-be requirement's curve rises steeply from dissatisfied when absent, then flattens at merely neutral, never delighted, when fully met.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. An attractive requirement is best described as one where</legend>
+        <label><input type="radio" name="q6" value="a"> its absence causes strong complaints</label>
+        <label><input type="radio" name="q6" value="b"> it should always be prioritized over must-be requirements</label>
+        <label><input type="radio" name="q6" value="c"> its absence causes no particular complaint, but its presence delights</label>
+        <label><input type="radio" name="q6" value="d"> it is the same as a one-dimensional requirement</label>
+        <p class="explain" hidden>Attractive requirements stay near neutral satisfaction when absent and rise steeply to delight when present, unlike must-be or one-dimensional requirements.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>7. Why does a leak-test reject rate belong in a charter's goal statement as a hard target rather than as something to trade off against cost?</legend>
+        <label><input type="radio" name="q7" value="a"> Because leak testing is always the cheapest test to run</label>
+        <label><input type="radio" name="q7" value="b"> Because it is a must-be requirement: the customers who get a leaking unit are simply dissatisfied, with no offsetting credit from units that did not leak</label>
+        <label><input type="radio" name="q7" value="c"> Because DPMO cannot be computed for must-be requirements</label>
+        <label><input type="radio" name="q7" value="d"> Because one-dimensional requirements never need a numeric target</label>
+        <p class="explain" hidden>For a must-be requirement, the business case is the cost of the failures that remain, not the marginal value of exceeding the target.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>8. In a stakeholder power/interest grid, a process owner with high power and high interest in the project's outcome should be</legend>
+        <label><input type="radio" name="q8" value="a"> monitored with minimum effort</label>
+        <label><input type="radio" name="q8" value="b"> kept satisfied with occasional summaries only</label>
+        <label><input type="radio" name="q8" value="c"> excluded from the core team to keep meetings small</label>
+        <label><input type="radio" name="q8" value="d"> managed closely, with regular working involvement</label>
+        <p class="explain" hidden>High power and high interest is the "manage closely" quadrant; excluding this stakeholder is a common cause of resistance later in the project.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>9. According to Linderman and co-authors' goal-theoretic view of Six Sigma projects, project goals should be</legend>
+        <label><input type="radio" name="q9" value="a"> specific and difficult but attainable</label>
+        <label><input type="radio" name="q9" value="b"> deliberately vague, to allow flexibility as data comes in</label>
+        <label><input type="radio" name="q9" value="c"> set only after the project is complete</label>
+        <label><input type="radio" name="q9" value="d"> identical across every project regardless of the process</label>
+        <p class="explain" hidden>Goal-setting research, applied by Linderman et al. to Six Sigma projects, favors specific, difficult-but-attainable goals over vague or easy ones.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>10. In the Sharma and Rao (2014) crankshaft case cited in this module, the reported figures (standard deviation, Cp, Cpk before and after) are</legend>
+        <label><input type="radio" name="q10" value="a"> recomputed by this course from raw data and independently verified</label>
+        <label><input type="radio" name="q10" value="b"> a constructed illustrative example</label>
+        <label><input type="radio" name="q10" value="c"> quoted exactly as published in the peer-reviewed paper, not independently recomputed</label>
+        <label><input type="radio" name="q10" value="d"> disputed by a later paper and presented as a controversy</label>
+        <p class="explain" hidden>Real-world published cases are cited as published, with a source; the triple-check computation protocol applies only to this course's own constructed examples.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. A measurable gap, no cause, no fix.</li>
+        <li>d. Metric, number, date.</li>
+        <li>0.01.</li>
+        <li>c. Verbatim statement, then driver, then measurable CTQ.</li>
+        <li>a. Dissatisfies if absent, no extra credit if met.</li>
+        <li>c. No complaint if absent, delights if present.</li>
+        <li>b. It is must-be; there is no credit to offset the failures.</li>
+        <li>d. Manage closely.</li>
+        <li>a. Specific, difficult but attainable.</li>
+        <li>c. Quoted as published, not recomputed.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A problem statement names a measurable gap: what, where, since when, how big — with no cause and no proposed fix.</li>
+      <li>A charter is a contract: business case, problem statement, goal statement (a number and a date), scope with explicit boundaries, timeline, sponsor and team.</li>
+      <li>The Kano model classifies requirements as must-be (absence dissatisfies, presence earns no credit), one-dimensional (linear trade-off), or attractive (absence unnoticed, presence delights); the category changes how a charter should set the target.</li>
+      <li>VOC to CTQ translation (Griffin and Hauser) always passes through a driver: verbatim customer statement, then driver, then a measurable target and tolerance. Stopping at the driver produces an unmeasurable requirement.</li>
+      <li>A stakeholder power/interest grid, done on paper before kickoff, surfaces who can block an Improve-phase change before that change is proposed, not after.</li>
+      <li>A real-world published case (Sharma and Rao 2014) is cited as published, with a source; this course's own triple-check verification protocol applies to constructed examples, not to someone else's real data.</li>
+      <li>A project that cannot state, in one sentence, the one number it will report at closure is not ready to leave Define.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown.</p>
+    <ol class="references">
+      <li id="ref-1">Kano, N., Seraku, N., Takahashi, F., &amp; Tsuji, S. (1984). Attractive quality and must-be quality. <em>Journal of the Japanese Society for Quality Control</em>, 14(2), 147&ndash;156. <a href="https://www.jstage.jst.go.jp/article/quality/14/2/14_KJ00002952366/_article/-char/en">https://www.jstage.jst.go.jp/article/quality/14/2/14_KJ00002952366/_article/-char/en</a></li>
+      <li id="ref-2">Griffin, A., &amp; Hauser, J. R. (1993). The voice of the customer. <em>Marketing Science</em>, 12(1), 1&ndash;27. <a href="https://pubsonline.informs.org/doi/10.1287/mksc.12.1.1">https://pubsonline.informs.org/doi/10.1287/mksc.12.1.1</a></li>
+      <li id="ref-3">Linderman, K., Schroeder, R. G., Zaheer, S., &amp; Choo, A. S. (2003). Six Sigma: a goal-theoretic perspective. <em>Journal of Operations Management</em>, 21(2), 193&ndash;203. <a href="https://pure.psu.edu/en/publications/six-sigma-a-goal-theoretic-perspective/">https://pure.psu.edu/en/publications/six-sigma-a-goal-theoretic-perspective/</a></li>
+      <li id="ref-4">Schroeder, R. G., Linderman, K., Liedtke, C., &amp; Choo, A. S. (2008). Six Sigma: definition and underlying theory. <em>Journal of Operations Management</em>, 26(4), 536&ndash;554. <a href="https://strategicimprovementsystems.com/wp-content/uploads/2011/07/PAPER_SIX_SIGMA.pdf">https://strategicimprovementsystems.com/wp-content/uploads/2011/07/PAPER_SIX_SIGMA.pdf</a></li>
+      <li id="ref-5">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+      <li id="ref-6">Sharma, G. V. S. S., &amp; Rao, P. S. (2014). A DMAIC approach for process capability improvement: an engine crankshaft manufacturing process. <em>Journal of Industrial Engineering International</em>, 10, 65. <a href="https://link.springer.com/article/10.1007/s40092-014-0065-7">https://link.springer.com/article/10.1007/s40092-014-0065-7</a></li>
+      <li id="ref-7">Pyzdek, T., &amp; Keller, P. A. (2018). <em>The Six Sigma Handbook</em>, 5th ed. McGraw-Hill. <a href="https://www.accessengineeringlibrary.com/browse/six-sigma-handbook-fifth-edition">https://www.accessengineeringlibrary.com/browse/six-sigma-handbook-fifth-edition</a> <span class="tag">(secondary: catalogue-level; general charter template reference)</span></li>
+      <li id="ref-8">Harry, M., &amp; Schroeder, R. (2000). <em>Six Sigma: The Breakthrough Management Strategy Revolutionizing the World's Top Corporations</em>. Currency/Doubleday. <a href="https://books.google.com/books/about/Six_Sigma.html?id=RY0rAAAAYAAJ">https://books.google.com/books/about/Six_Sigma.html?id=RY0rAAAAYAAJ</a> <span class="tag">(secondary: catalogue-level; savings claims in this book are not repeated as fact)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+ "id": "m03-charter-leak",
+ "module": "03",
+ "kind": "dpmo",
+ "title": "Charter baseline: leak-test reject rate, 1,000 brazed assemblies",
+ "source": "constructed (matches the capstone baseline stated in SOURCES.md Module 19)",
+ "setting": "brazed aluminium heat-exchanger cores, leak-tested at final inspection, 1 opportunity per assembly",
+ "params": {
+  "defects": 42,
+  "units": 1000,
+  "opportunities": 1
+ },
+ "columns": null
+}

@@ -620,6 +620,22 @@ register(id="m02-ex2-funnel", module="02", kind="funnel",
          params={"sigma": 4.0}, columns=["i", "e"], rows=[[i + 1, v] for i, v in enumerate(_e30)])
 
 
+# ---------------------------------------------------------------------------
+# Module 3: Defining a project (prefix m03-)
+# ---------------------------------------------------------------------------
+# The capstone's own baseline: 42 of 1,000 brazed assemblies fail the leak
+# test (4.2 %), the figure Module 19 states as the capstone's starting point.
+# The charter's goal state, 1 % or fewer, registered the same way.
+register(id="m03-charter-leak", module="03", kind="dpmo",
+         title="Charter baseline: leak-test reject rate, 1,000 brazed assemblies",
+         source="constructed (matches the capstone baseline stated in SOURCES.md Module 19)",
+         setting="brazed aluminium heat-exchanger cores, leak-tested at final inspection, 1 opportunity per assembly",
+         params={"defects": 42, "units": 1000, "opportunities": 1}, columns=None, rows=None)
+register(id="m03-charter-goal", module="03", kind="dpmo",
+         title="Charter goal: leak-test reject rate at or below 1 %",
+         source="constructed", setting="same line, the charter's stated goal state",
+         params={"defects": 10, "units": 1000, "opportunities": 1}, columns=None, rows=None)
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}
