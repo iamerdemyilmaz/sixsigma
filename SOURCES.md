@@ -75,6 +75,9 @@ Publisher pages at tandfonline.com, iso.org, asq.org, and link.springer.com retu
 | S-B20 | 1.3.6.6.19 Poisson Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm | verified | full (2026-09-09, Module 1) | pmf e^(−λ)λ^x/x!; λ is the average number of events in the interval; mean and variance both λ; models the number of events in a given interval. |
 | S-B21 | 1.3.6.6.9 Lognormal Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm | verified | full (2026-09-09, Module 1) | X is lognormal if ln X is normal; shape σ, location θ, scale m (the median); positively skewed, more so as σ grows; used extensively in reliability to model failure times. |
 | S-B22 | 1.3.6.6.8 Weibull Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda3668.htm | verified | full (2026-09-09, Module 1) | pdf with shape γ, scale α, location μ; used extensively in reliability applications to model failure times. |
+| S-B23 | 5.3.3.4 Fractional factorial designs (with 5.3.3.4.1 half fractions, 5.3.3.4.4 confounding, 5.3.3.4.5 design resolution) | https://www.itl.nist.gov/div898/handbook/pri/section3/pri334.htm | verified | full (2026-09-10) | Half fraction built from a generator (D = ABC), defining relation, aliasing, resolution as the shortest word; resolution III/IV for screening, V for interactions (Module 13). |
+| S-B24 | 5.3.3.6 Response surface designs | https://www.itl.nist.gov/div898/handbook/pri/section3/pri336.htm | verified | full (2026-09-10) | Two-level designs with centre points detect but cannot estimate pure quadratic effects; central composite and Box-Behnken designs; rotatability (Module 13). |
+| S-B25 | 5.5.6 What are Taguchi designs? | https://www.itl.nist.gov/div898/handbook/pri/section5/pri56.htm | verified | full (2026-09-10) | Orthogonal arrays (L9, L18, L27, L36) as fractional factorials; inner and outer arrays; tolerance design as a last resort (Module 13). |
 
 ### C. Journal articles
 
@@ -130,6 +133,7 @@ Publisher pages at tandfonline.com, iso.org, asq.org, and link.springer.com retu
 | S-C48 | Yates, F. (1937). *The Design and Analysis of Factorial Experiments*. Imperial Bureau of Soil Science, Technical Communication 35. | https://link.springer.com/rwe/10.1007/978-0-387-32833-1_429 | secondary | – | Yates algorithm for 2ᵏ effects (the hand method used in recompute.py). |
 | S-C49 | Pearson, K. (1900). On the criterion that a given system of deviations from the probable in the case of a correlated system of variables is such that it can be reasonably supposed to have arisen from random sampling. *Philosophical Magazine*, Series 5, 50(302), 157–175. | https://www.tandfonline.com/doi/abs/10.1080/14786440009463897 | verified | catalog (2026-09-10) | Origin of the chi-square test (Module 11). |
 | S-C50 | Hodges, J. L., & Lehmann, E. L. (1963). Estimates of location based on rank tests. *Annals of Mathematical Statistics*, 34(2), 598–611. | https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-34/issue-2/Estimates-of-Location-Based-on-Rank-Tests/10.1214/aoms/1177704172.full | verified | abstract (2026-09-10) | The Hodges-Lehmann shift estimate (median of pairwise differences) reported with the Mann-Whitney test (Module 11). |
+| S-C51 | Lenth, R. V. (1989). Quick and easy analysis of unreplicated factorials. *Technometrics*, 31(4), 469–473. | https://www.tandfonline.com/doi/abs/10.1080/00401706.1989.10488595 | verified | abstract (2026-09-10) | Pseudo standard error and margin of error for unreplicated designs; implemented in compute.py, recompute.py and stats.js (Module 13). |
 
 ### D. Books
 
@@ -344,7 +348,7 @@ Verified sources are counted at any depth (full, abstract, scope, catalog). Cata
 **Outline.** OFAT and why it fails. 2ᵏ full factorials; main effects and interactions; a fully worked 2³ on the braze process (temperature, flux, gap) with effects by Yates' method by hand and by statsmodels. Fractional factorials and confounding; blocking; replication; RSM introduction (Box-Wilson). Taguchi methods and the debate (Box 1988; Nair 1992 panel), presented with both sides.
 
 **Real-world examples:** the Taguchi debate literature (S-C29, S-C30).
-**Invented examples:** `ex13-2k3-braze` (8 runs × 2 replicates). `ex13-fractional-2k5-1`. `ex13-ofat-trap` – simulated interaction that OFAT misses.
+**Invented examples (built 2026-09-10 as):** `m13-ofat` (2² × 2 adhesive bond strength with a strong interaction; the OFAT path misses the best corner), `m13-mould` (2³ × 2 moulded-housing length vs melt temperature, hold pressure, cooling time; A, B and AB active, full ANOVA and prediction equation), `m13-plating` (2⁴⁻¹ with D = ABC, unreplicated, plating thickness; A and D active by Lenth's method, alias structure written out), `chk-montgomery-etch` as the published check; exercises `m13-ex1-weld` (2² × 3) and `m13-ex2-roughness` (2³ unreplicated, Lenth). The planned 2⁵⁻¹ became a 2⁴⁻¹ so that the existing k ≤ 3 engine and calculator carry it. New sources S-B23 to S-B25, S-C51.
 
 ### Module 14. Lean improvement tools
 

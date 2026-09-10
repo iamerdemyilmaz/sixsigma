@@ -1,0 +1,27 @@
+{
+ "id": "m13-mould",
+ "module": "13",
+ "kind": "factorial",
+ "title": "2^3 factorial with 2 replicates: moulded housing length vs melt temperature, hold pressure, cooling time",
+ "source": "constructed",
+ "setting": "injection-moulded housing, overall length nominal 45.20 mm measured on a CMM to 0.01 mm; A melt temperature 230/250 \u00b0C, B hold pressure 40/60 MPa, C cooling time 15/25 s; 16 runs in random order",
+ "params": {
+  "k": 3,
+  "replicates": 2,
+  "factors": [
+   "A",
+   "B",
+   "C"
+  ],
+  "units": "mm"
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "C",
+  "y"
+ ],
+ "n_rows": 16
+}

@@ -190,6 +190,13 @@ def check_factorial(ex_id, r, data):
             if "p" in v:
                 in01(v["p"], f"{tag}: p for {k}")
         check(0 <= r["r2"] <= 1, f"{tag}: r2")
+    if "lenth" in r:
+        le = r["lenth"]
+        check(le["pse"] > 0 and le["me"] > 0 and le["sme"] >= le["me"], f"{tag}: Lenth PSE/ME")
+        check(near(le["me"], le["t_me"] * le["pse"]), f"{tag}: Lenth ME formula")
+        active = [k for k, v in r["effects"].items() if abs(v) > le["me"]]
+        check(active == le["active"], f"{tag}: Lenth active effects list")
+        check(N == 2 ** len(names), f"{tag}: Lenth reported on a replicated design")
 
 
 def check_tests(ex_id, r, kind):
@@ -546,8 +553,8 @@ def check_pages():
         for nm in NUMBER_RE.finditer(text):
             tok = nm.group(0)
             norm = tok.replace(",", "")
-            if tok in allowed or norm in allowed or norm.lstrip("-") in allowed:
-                continue
+            if tok in allowed or norm in allowed or norm.lstrip("-") in allowed or ("-" + norm) in allowed:
+                continue  # a negative value printed with the typographic minus sign is scanned without its sign
             try:
                 v = float(norm)
             except ValueError:

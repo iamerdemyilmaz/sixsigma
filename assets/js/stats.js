@@ -679,6 +679,20 @@
       out.r2 = 1 - ssRes / sst;
       out.r2_adj = 1 - (ssRes / dfRes) / (sst / (N - 1));
     }
+    if (N === (1 << k)) {
+      // Lenth's method for unreplicated designs (Lenth 1989, Technometrics 31(4):469-473):
+      // s0 = 1.5 median|effect|, PSE = 1.5 median of |effect| below 2.5 s0, ME = t(0.975, m/3) PSE
+      const labels = Object.keys(out.effects);
+      const absE = labels.map(function (l) { return Math.abs(out.effects[l]); }).sort(function (a, b) { return a - b; });
+      const s0 = 1.5 * median(absE);
+      const trimmed = absE.filter(function (v) { return v < 2.5 * s0; });
+      const pse = 1.5 * median(trimmed);
+      const m = labels.length, d = m / 3;
+      const gamma = (1 + Math.pow(0.95, 1 / m)) / 2;
+      const tme = S.tPpf(0.975, d), tsme = S.tPpf(gamma, d);
+      out.lenth = { s0: s0, pse: pse, df: d, t_me: tme, me: tme * pse, t_sme: tsme, sme: tsme * pse,
+        active: labels.filter(function (l) { return Math.abs(out.effects[l]) > tme * pse; }), n_trimmed: absE.length - trimmed.length };
+    }
     out.cell_means = {};
     const cells = {};
     for (let i = 0; i < N; i++) {

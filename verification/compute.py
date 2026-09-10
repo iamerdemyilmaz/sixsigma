@@ -670,6 +670,21 @@ def factorial(cols, params):
         out["se_effect"] = 2.0 * math.sqrt(an["residual"]["ms"] / N)
         out["r2"] = float(fit.rsquared)
         out["r2_adj"] = float(fit.rsquared_adj)
+    if N == 2 ** k:
+        # Lenth's method for unreplicated designs (Lenth 1989, Technometrics 31(4):469-473)
+        labels = list(eff.keys())
+        abs_e = sorted(abs(v) for v in eff.values())
+        s0 = 1.5 * float(np.median(abs_e))
+        trimmed = [v for v in abs_e if v < 2.5 * s0]
+        pse = 1.5 * float(np.median(trimmed))
+        m = len(labels); d = m / 3.0
+        gamma = (1 + 0.95 ** (1.0 / m)) / 2.0
+        me = float(stats.t.ppf(0.975, d)) * pse
+        sme = float(stats.t.ppf(gamma, d)) * pse
+        out["lenth"] = {"s0": s0, "pse": pse, "df": d, "t_me": float(stats.t.ppf(0.975, d)), "me": me,
+                        "t_sme": float(stats.t.ppf(gamma, d)), "sme": sme,
+                        "active": [lb for lb in labels if abs(eff[lb]) > me],
+                        "n_trimmed": len(abs_e) - len(trimmed)}
     # cell means in standard order for the page tables
     out["cell_means"] = {}
     for _, g in df.groupby(names, sort=True):

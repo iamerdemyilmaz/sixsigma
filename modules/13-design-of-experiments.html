@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 13: Design of experiments · Six Sigma Course</title>
+<meta name="description" content="Why one-factor-at-a-time fails, two-level factorial designs, main effects and interactions computed by hand and by script, a fully worked 2³ with replicates, fractional factorials and confounding, Lenth's method for unreplicated designs, blocking and randomisation, an introduction to response surface methods, and the Taguchi debate.">
+<meta name="examples" content="m13-ofat, m13-mould, m13-plating, chk-montgomery-etch, m13-ex1-weld, m13-ex2-roughness">
+<!-- allowed-numbers: conventions, factor settings and hand-arithmetic intermediates not stored in verification/results/.
+     Every intermediate was computed by the build script (m13_inter.py) from the results values before it was printed here. -->
+<meta name="allowed-numbers" content="0.05 0.01 0.95 0.975 45.20 45.15 45.25 0.10 0.20 0.50 1.00 2.33 1.50 2.50 5.00 8.00 16.0 0.60 4.75 -3.85 -1.95 6.55 42 2.325 4.225 8.50 6.175 45.1612 45.2413 -0.0800 45.2450 45.1575 -0.640 0.02560 0.0120 44.5 5.32 -0.0300 -0.1300 45.1425 -57 45.1725 -27 45.1800 -20 0.425 0.6375 1.594 0.225 0.57 32.51 17.81 2 0.6150 0.3183 0.0217 3.690 1.1347 0.0875 49.4 5.883 5.543 0.0525 0.07875 0.1969 0.0225 0.505 1.080 0.845">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="13">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 13 · Improve</p>
+    <h1>Design of experiments</h1>
+    <p class="lead">Everything before this module analysed data the process happened to produce. A designed experiment makes the process produce the data you need: a small, deliberate set of runs in which several factors are changed together, so that each factor's effect, and the way the factors interact, can be read off with arithmetic. This module builds the two-level factorial from the ground up, works a 2³ with replicates by hand and by script, shows what a half fraction costs and buys, and takes a fair look at the Taguchi controversy.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Explain</strong> with a worked case why changing one factor at a time can miss the best setting entirely, and what an interaction is.</li>
+      <li><strong>Lay out</strong> a 2<sup>k</sup> factorial in standard order, run it in random order, and compute every main effect and interaction from the contrast columns.</li>
+      <li><strong>Analyse</strong> a replicated factorial with an ANOVA table, a standard error for the effects and a prediction equation, and an unreplicated one with Lenth's method and a Pareto of effects.</li>
+      <li><strong>Construct</strong> a half-fraction design from a generator, write its defining relation and alias structure, and state its resolution.</li>
+      <li><strong>Describe</strong> when a two-level design is not enough and how a response surface design (centre points, central composite) follows from it.</li>
+      <li><strong>Summarise</strong> the Taguchi debate fairly: what is worth keeping (robustness, noise factors), what the critics showed, and how to analyse a Taguchi array with standard methods.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three questions on Module 11. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="13">
+      <fieldset class="q" data-answer="b">
+        <legend>1. In a one-way ANOVA, the F ratio compares</legend>
+        <label><input type="radio" name="p1" value="a"> the largest mean with the smallest</label>
+        <label><input type="radio" name="p1" value="b"> the variation between group means with the variation within groups</label>
+        <label><input type="radio" name="p1" value="c"> two variances from the same group</label>
+        <label><input type="radio" name="p1" value="d"> the mean with the median</label>
+        <p class="explain" hidden>MS between over MS within; a factorial ANOVA does the same for each effect.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. A p-value of 0.003 for a factor's effect means</legend>
+        <label><input type="radio" name="p2" value="a"> the effect is large</label>
+        <label><input type="radio" name="p2" value="b"> there is a 0.3 % chance the factor matters</label>
+        <label><input type="radio" name="p2" value="c"> an effect this far from zero would arise in about 0.3 % of experiments if the factor truly had no effect</label>
+        <label><input type="radio" name="p2" value="d"> the experiment should be repeated</label>
+        <p class="explain" hidden>Module 11: p describes the data given H₀, not the size of the effect.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. The standard error of a difference between two means of n values each, with common standard deviation σ, is</legend>
+        <label><input type="radio" name="p3" value="a"> σ √(2/n)</label>
+        <label><input type="radio" name="p3" value="b"> σ / n</label>
+        <label><input type="radio" name="p3" value="c"> 2σ</label>
+        <label><input type="radio" name="p3" value="d"> σ² / n</label>
+        <p class="explain" hidden>Each mean has variance σ²/n and the difference adds them; a factorial effect is such a difference.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Designed experiments are the oldest part of this course. Fisher set out randomisation, replication and blocking, and the factorial principle of varying several factors at once, in <em>The Design of Experiments</em> in 1935, for agricultural field trials.<sup class="cite"><a href="#ref-1">[1]</a></sup> Yates gave the arithmetic for two-level factorials in 1937,<sup class="cite"><a href="#ref-2">[2]</a></sup> Plackett and Burman the screening designs in 1946,<sup class="cite"><a href="#ref-5">[5]</a></sup> and Box and Wilson the response surface method in 1951, for a chemical process.<sup class="cite"><a href="#ref-6">[6]</a></sup> None of it is new, and none of it is used as much as it should be. The engineering instinct, when a process misbehaves, is to change one thing, look, change it back, change the next thing. That instinct is wrong in a specific, demonstrable way, and worked example 1 demonstrates it.</p>
+    <p>The <em>real</em> example of this module is a controversy again, because it is documented and it shaped how industry does experiments. In the 1980s Genichi Taguchi's methods for "robust design", experiments laid out on orthogonal arrays and analysed with signal-to-noise ratios, spread rapidly through American manufacturing.<sup class="cite"><a href="#ref-11">[11]</a><a href="#ref-12">[12]</a></sup> Statisticians examined them. Box's 1988 <em>Technometrics</em> paper argued that the signal-to-noise ratios were poorly chosen performance criteria and that a transformation of the response achieved the same ends more simply,<sup class="cite"><a href="#ref-9">[9]</a></sup> and the 1992 panel discussion edited by Nair brought Taguchi's proponents and critics into one room.<sup class="cite"><a href="#ref-10">[10]</a></sup> The section near the end of this module sets out what each side established. The short version, which the NIST handbook also takes, is that Taguchi's arrays are fractional factorials under another name, that his emphasis on noise factors and robustness was a genuine contribution, and that the analysis is best done with the standard methods this module teaches.<sup class="cite"><a href="#ref-8">[8]</a></sup></p>
+    <p><em>The following is an illustrative failure with invented details, not a real program.</em> A braze line has a leak problem. The engineer raises the furnace peak temperature by 10 °C: leaks go down a little. He tries more flux: no change. He tries a tighter fixture clamp: worse. He settles on the higher temperature and moves on. Six months later a designed experiment on the same line shows that the tighter clamp is by far the best change, <em>but only together with the extra flux</em>; on its own it starves the joint. One-factor-at-a-time never sees a combination it did not try, and the combination that matters is the one it did not try.</p>
+
+    <h2 id="ofat">One factor at a time, and why it fails</h2>
+    <p>Suppose two factors each have two levels. One-factor-at-a-time (OFAT) starts at a baseline, changes A and keeps the better level, then changes B at that level and keeps the better. It visits three of the four corners of the square and never the fourth. If the effect of B depends on the level of A, which is what an <strong>interaction</strong> means, the fourth corner can be the best by a wide margin and OFAT walks away from it. The factorial runs all four corners, and with the same number of measurements gives each effect twice the precision, because every run contributes to every effect.</p>
+
+    <h3 id="example1">Worked example 1: the corner OFAT never visits</h3>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. Setting: the lap-shear strength in MPa of a structural adhesive; factor A is cure temperature (80 °C low, 120 °C high), factor B is cure time (30 min low, 60 min high); two specimens per combination, eight runs in random order, tester to 0.1 MPa.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Bond strength, MPa, 2² factorial with two replicates (constructed data), in standard order with the cell means.</caption><thead><tr><th>Std. order</th><th>A</th><th>B</th><th>y (rep 1)</th><th>y (rep 2)</th><th>Cell mean</th></tr></thead><tbody>
+<tr><td>1 (1)</td><td>−</td><td>−</td><td>15.3</td><td>15.7</td><td>15.500</td></tr>
+<tr><td>2 a</td><td>+</td><td>−</td><td>12.3</td><td>11.0</td><td>11.650</td></tr>
+<tr><td>3 b</td><td>−</td><td>+</td><td>13.7</td><td>13.4</td><td>13.550</td></tr>
+<tr><td>4 ab</td><td>+</td><td>+</td><td>21.6</td><td>22.5</td><td>22.050</td></tr>
+</tbody></table></div>
+    <p><strong>The OFAT path.</strong> Start at the baseline, both low: <span data-ex="m13-ofat" data-key="cell_means.(1)" data-dp="2">15.50</span> MPa. Raise the temperature: <span data-ex="m13-ofat" data-key="cell_means.a" data-dp="2">11.65</span> MPa, worse by −3.85; keep 80 °C. Lengthen the cure at 80 °C: <span data-ex="m13-ofat" data-key="cell_means.b" data-dp="2">13.55</span> MPa, worse by −1.95; keep 30 min. Conclusion of OFAT: the baseline is best, neither factor helps. The corner it never visited, 120 °C for 60 min, gives <span data-ex="m13-ofat" data-key="cell_means.ab" data-dp="2">22.05</span> MPa, 6.55 MPa or 42 % better than the baseline.</p>
+    <p><strong>The factorial view.</strong> The main effect of A is the average change when A goes from low to high, over both levels of B: ((11.65 + 22.05) − (15.50 + 13.55))/2 = 2.325 MPa. The main effect of B likewise is 4.225 MPa. Both are positive on average, which is already something OFAT could not see. The interaction AB is half the difference between the effect of A at high B (8.50) and the effect of A at low B (−3.85): AB = ((15.50 + 22.05) − (11.65 + 13.55))/2 = 6.175 MPa, the largest effect of the three. Temperature hurts a short cure and helps a long one. The ANOVA (next section explains it) gives p = <span data-ex="m13-ofat" data-key="anova.AB.p" data-dp="5">0.00012</span> for the interaction. Chemically this is the ordinary story of a cure that needs both heat and time to complete; statistically it is the reason the factorial exists.</p>
+    <figure>
+      <svg viewBox="0 0 660 230" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Interaction plots: parallel lines mean no interaction, crossing lines mean an interaction</title>
+        <desc id="fig1-d">Two panels, each with factor A on the horizontal axis at its low and high level and the response on the vertical axis, and two lines, one for each level of factor B. In the left panel the two lines are parallel: the effect of A is the same at both levels of B. In the right panel the lines cross: A lowers the response at low B and raises it at high B, the shape of Table 1.</desc>
+        <g class="chart-axis"><path d="M50 190 H300"/><path d="M50 190 V30"/><path d="M380 190 H630"/><path d="M380 190 V30"/></g>
+        <g class="chart-text small muted">
+          <text x="80" y="208" text-anchor="middle">A low</text><text x="270" y="208" text-anchor="middle">A high</text>
+          <text x="410" y="208" text-anchor="middle">A low</text><text x="600" y="208" text-anchor="middle">A high</text>
+          <text x="22" y="110" text-anchor="middle" transform="rotate(-90 22 110)">Response</text>
+          <text x="352" y="110" text-anchor="middle" transform="rotate(-90 352 110)">Response</text>
+        </g>
+        <g class="chart-title"><text x="175" y="20" text-anchor="middle">No interaction</text><text x="505" y="20" text-anchor="middle">Interaction (Table 1)</text></g>
+        <g class="chart-line"><path d="M80 140 L270 100"/><path d="M80 100 L270 60"/></g>
+        <g class="chart-line"><path d="M410 90 L600 150"/></g>
+        <g class="chart-center"><path d="M410 120 L600 40"/></g>
+        <g class="chart-point"><circle cx="80" cy="140" r="4"/><circle cx="270" cy="100" r="4"/><circle cx="80" cy="100" r="4"/><circle cx="270" cy="60" r="4"/><circle cx="410" cy="90" r="4"/><circle cx="600" cy="150" r="4"/><circle cx="410" cy="120" r="4"/><circle cx="600" cy="40" r="4"/></g>
+        <g class="chart-text small">
+          <text x="278" y="104">B low</text><text x="278" y="64">B high</text>
+          <text x="608" y="154">B low (30 min)</text><text x="608" y="44" class="chart-text small accent">B high (60 min)</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Interaction plots. Left: the effect of A is the same whatever B is; the lines are parallel and the main effects tell the whole story. Right: the effect of A reverses with B, as in Table 1. OFAT, which changes A at one level of B only, sees one line and draws the wrong conclusion.</figcaption>
+    </figure>
+
+    <h2 id="design">The 2<sup>k</sup> factorial design</h2>
+    <p>Each of k factors is set at two levels, coded −1 and +1 (written − and +). All 2<sup>k</sup> combinations are run, each r times (r replicates), in random order. The runs are listed in <strong>standard order</strong>: A alternates fastest, then B, then C. Each treatment combination is labelled by the lower-case letters of the factors at their high level, with (1) for all low: for k = 3, (1), a, b, ab, c, ac, bc, abc. The columns of signs for the interactions are the products of the main-effect columns.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Sign table for a 2³ design in standard order. The interaction columns are the products of the factor columns; each column has four + and four −, and every pair of columns is orthogonal (their product sums to zero).</caption>
+        <thead><tr><th>Run</th><th>Label</th><th>A</th><th>B</th><th>C</th><th>AB</th><th>AC</th><th>BC</th><th>ABC</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>(1)</td><td>−</td><td>−</td><td>−</td><td>+</td><td>+</td><td>+</td><td>−</td></tr>
+          <tr><td>2</td><td>a</td><td>+</td><td>−</td><td>−</td><td>−</td><td>−</td><td>+</td><td>+</td></tr>
+          <tr><td>3</td><td>b</td><td>−</td><td>+</td><td>−</td><td>−</td><td>+</td><td>−</td><td>+</td></tr>
+          <tr><td>4</td><td>ab</td><td>+</td><td>+</td><td>−</td><td>+</td><td>−</td><td>−</td><td>−</td></tr>
+          <tr><td>5</td><td>c</td><td>−</td><td>−</td><td>+</td><td>+</td><td>−</td><td>−</td><td>+</td></tr>
+          <tr><td>6</td><td>ac</td><td>+</td><td>−</td><td>+</td><td>−</td><td>+</td><td>−</td><td>−</td></tr>
+          <tr><td>7</td><td>bc</td><td>−</td><td>+</td><td>+</td><td>−</td><td>−</td><td>+</td><td>−</td></tr>
+          <tr><td>8</td><td>abc</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">Contrast of a term = Σ (sign in its column × response), over all N = r 2<sup>k</sup> runs<br>
+      Effect = contrast / (r 2<sup>k−1</sup>) = (mean response at +) − (mean response at −); &nbsp; coefficient = effect / 2<br>
+      SS of the term = contrast² / (r 2<sup>k</sup>), 1 degree of freedom; &nbsp; residual SS = total SS − Σ SS of terms, with r 2<sup>k</sup> − 2<sup>k</sup> degrees of freedom<br>
+      standard error of an effect = 2 √(MS<sub>residual</sub> / N); &nbsp; prediction: ŷ = ȳ + Σ coefficient × (coded factor product)
+      <span class="where">The main effect of A is the difference between the average of all runs at A+ and the average at A−, whatever the other factors did; because the design is balanced, the other factors cancel. The same arithmetic on the AB column gives the interaction. Yates' 1937 algorithm is a bookkeeping shortcut for the same contrasts.<sup class="cite"><a href="#ref-2">[2]</a></sup> With replicates the residual measures pure noise and each effect gets an F test on 1 and r 2<sup>k</sup> − 2<sup>k</sup> degrees of freedom (Module 11).</span>
+    </div>
+
+    <h3 id="example2">Worked example 2: a 2³ with two replicates on a moulded housing</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the overall length of an injection-moulded housing, nominal 45.20 mm, measured on a CMM to 0.01 mm. Factors: A melt temperature (230/250 °C), B hold pressure (40/60 MPa), C cooling time (15/25 s). Two parts per combination, 16 runs in random order.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Housing length, mm, 2³ factorial with two replicates (constructed data), standard order, with the cell means.</caption><thead><tr><th>Std. order</th><th>A</th><th>B</th><th>C</th><th>y (rep 1)</th><th>y (rep 2)</th><th>Cell mean</th></tr></thead><tbody>
+<tr><td>1 (1)</td><td>−</td><td>−</td><td>−</td><td>45.15</td><td>45.18</td><td>45.1650</td></tr>
+<tr><td>2 a</td><td>+</td><td>−</td><td>−</td><td>45.14</td><td>45.14</td><td>45.1400</td></tr>
+<tr><td>3 b</td><td>−</td><td>+</td><td>−</td><td>45.34</td><td>45.28</td><td>45.3100</td></tr>
+<tr><td>4 ab</td><td>+</td><td>+</td><td>−</td><td>45.16</td><td>45.15</td><td>45.1550</td></tr>
+<tr><td>5 c</td><td>−</td><td>−</td><td>+</td><td>45.17</td><td>45.19</td><td>45.1800</td></tr>
+<tr><td>6 ac</td><td>+</td><td>−</td><td>+</td><td>45.14</td><td>45.15</td><td>45.1450</td></tr>
+<tr><td>7 bc</td><td>−</td><td>+</td><td>+</td><td>45.29</td><td>45.33</td><td>45.3100</td></tr>
+<tr><td>8 abc</td><td>+</td><td>+</td><td>+</td><td>45.18</td><td>45.23</td><td>45.2050</td></tr>
+</tbody></table></div>
+    <p><strong>Effects by hand.</strong> Mean of the eight runs at high melt temperature (a, ab, ac, abc, both replicates): 45.1612 mm; at low: 45.2413 mm; effect of A = −0.0800 mm, that is <span data-ex="m13-mould" data-key="effects.A" data-dp="3">−0.080</span> mm. For B: 45.2450 − 45.1575 = <span data-ex="m13-mould" data-key="effects.B" data-dp="4">0.0875</span> mm. The interaction AB from its sign column (Table 2 applied to Table 3): <span data-ex="m13-mould" data-key="effects.AB" data-dp="3">−0.050</span> mm. The contrast for A is 8 × effect = −0.640, and its sum of squares is contrast²/16 = 0.02560.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Effects and ANOVA for the housing length. Effects in mm; SS in mm²; residual on 8 degrees of freedom (16 runs − 8 cells).</caption>
+        <thead><tr><th>Term</th><th>Effect</th><th>Coefficient</th><th>SS</th><th>F</th><th>p</th></tr></thead>
+        <tbody>
+          <tr><td>A melt temperature</td><td class="num"><span data-ex="m13-mould" data-key="effects.A" data-dp="4">−0.0800</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.A" data-dp="4">−0.0400</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.A.ss" data-dp="5">0.02560</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.A.F" data-dp="1">44.5</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.A.p" data-dp="4">0.0002</span></td></tr>
+          <tr><td>B hold pressure</td><td class="num"><span data-ex="m13-mould" data-key="effects.B" data-dp="4">0.0875</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.B" data-dp="5">0.04375</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.B.ss" data-dp="5">0.03062</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.B.F" data-dp="1">53.3</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.B.p" data-dp="5">0.00008</span></td></tr>
+          <tr><td>C cooling time</td><td class="num"><span data-ex="m13-mould" data-key="effects.C" data-dp="4">0.0175</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.C" data-dp="5">0.00875</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.C.ss" data-dp="5">0.00122</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.C.F" data-dp="2">2.13</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.C.p" data-dp="3">0.183</span></td></tr>
+          <tr><td>AB</td><td class="num"><span data-ex="m13-mould" data-key="effects.AB" data-dp="4">−0.0500</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.AB" data-dp="4">−0.0250</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AB.ss" data-dp="5">0.01000</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AB.F" data-dp="1">17.4</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AB.p" data-dp="4">0.0031</span></td></tr>
+          <tr><td>AC</td><td class="num"><span data-ex="m13-mould" data-key="effects.AC" data-dp="4">0.0100</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.AC" data-dp="4">0.0050</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AC.ss" data-dp="5">0.00040</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AC.F" data-dp="2">0.70</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.AC.p" data-dp="2">0.43</span></td></tr>
+          <tr><td>BC</td><td class="num"><span data-ex="m13-mould" data-key="effects.BC" data-dp="4">0.0075</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.BC" data-dp="5">0.00375</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.BC.ss" data-dp="5">0.00022</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.BC.F" data-dp="2">0.39</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.BC.p" data-dp="2">0.55</span></td></tr>
+          <tr><td>ABC</td><td class="num"><span data-ex="m13-mould" data-key="effects.ABC" data-dp="4">0.0150</span></td><td class="num"><span data-ex="m13-mould" data-key="coefficients.ABC" data-dp="4">0.0075</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.ABC.ss" data-dp="5">0.00090</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.ABC.F" data-dp="2">1.57</span></td><td class="num"><span data-ex="m13-mould" data-key="anova.ABC.p" data-dp="2">0.25</span></td></tr>
+          <tr><td>Residual</td><td></td><td></td><td class="num"><span data-ex="m13-mould" data-key="anova.residual.ss" data-dp="5">0.00460</span></td><td colspan="2">df <span data-ex="m13-mould" data-key="anova.residual.df" data-dp="0">8</span>; MS <span data-ex="m13-mould" data-key="anova.residual.ms" data-dp="6">0.000575</span>; residual sd <span data-ex="m13-mould" data-key="residual_sd" data-dp="4">0.0240</span> mm</td></tr>
+          <tr><td>Total</td><td></td><td></td><td class="num"><span data-ex="m13-mould" data-key="anova.total.ss" data-dp="5">0.07357</span></td><td colspan="2">df <span data-ex="m13-mould" data-key="anova.total.df" data-dp="0">15</span>; R² = <span data-ex="m13-mould" data-key="r2" data-dp="3">0.937</span>, adjusted <span data-ex="m13-mould" data-key="r2_adj" data-dp="3">0.883</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Reading it.</strong> The standard error of an effect is 2√(0.000575/16) = 0.0120 mm, so any effect beyond about 0.03 mm (2.3 standard errors, the 5 % t on 8 degrees of freedom) is unlikely to be noise. Three terms clear that bar: hotter melt shortens the part by −0.080 mm (F = 44.5 against a 5 % critical value of 5.32), higher hold pressure lengthens it by 0.0875 mm, and the two interact: at low pressure the temperature effect is −0.0300 mm, at high pressure only −0.1300 mm. Cooling time (p = 0.18) and the other interactions are within noise. The model explains 0.937 of the total variation; the residual standard deviation of 0.0240 mm is the part-to-part noise at fixed settings, consistent with the replicate pairs in Table 3.</p>
+    <p><strong>Using it.</strong> The prediction equation in coded units is ŷ = <span data-ex="m13-mould" data-key="intercept" data-dp="4">45.2013</span> + −0.0400·A + 0.04375·B −0.0250·AB (dropping the terms within noise). The target is 45.20 mm. At high temperature and low pressure the model predicts 45.1425 mm, −57 µm short; at low temperature and low pressure 45.1725 mm, −27 µm short; at both high 45.1800 mm, −20 µm long. None of the corners hits nominal, and because of the interaction the answer is not on a straight line between them: the next step is a confirmation run at an interpolated pressure, or a small response-surface study (below). Note what the experiment has also told you for free: the cooling time can be cut from 25 s to 15 s with no measurable effect on length, which is a cycle-time saving that nobody asked the experiment about.</p>
+
+    <h3 id="calc-factorial">Calculator: 2<sup>k</sup> factorial effects</h3>
+    <p>Pre-loaded with Table 3. Enter responses in standard order (A alternates fastest); the calculator prints the effects, the ANOVA when there are replicates or Lenth's method when there are not, a Pareto of effects with the noise reference line, and the cell means.</p>
+    <div class="calc" data-calc="factorial" id="calc-fact-mould">
+      <h3>Factorial effects calculator</h3>
+      <script type="application/json" class="calc-data">{"k":3,"replicates":2,"factors":["Melt T","Hold P","Cool t"],"y":[[45.15,45.18],[45.14,45.14],[45.34,45.28],[45.16,45.15],[45.17,45.19],[45.14,45.15],[45.29,45.33],[45.18,45.23]]}</script>
+    </div>
+
+    <h2 id="principles">Randomisation, replication, blocking, and centre points</h2>
+    <ul>
+      <li><strong>Randomise the run order.</strong> Standard order is for the arithmetic; the runs happen in random order so that anything drifting during the experiment (tool wear, ambient temperature, operator fatigue) is spread across the effects instead of loading onto one of them. Fisher's insistence on this is the foundation of the whole subject.<sup class="cite"><a href="#ref-1">[1]</a></sup> If a factor is genuinely hard to change (a furnace temperature that takes an hour to settle), say so and use a split-plot analysis; do not pretend it was randomised.</li>
+      <li><strong>Replicate.</strong> A second run of every combination doubles the cost and gives you an honest estimate of noise, F tests, and a check that the effects are larger than the part-to-part scatter. Without replicates the design is saturated and the noise must be estimated from the small effects (Lenth's method, below), which assumes most effects are small.</li>
+      <li><strong>Block.</strong> If the 16 runs of a 2³ × 2 cannot be made in one shift, put one replicate in each shift: the shift difference is then confounded with nothing but the replicate label, and can be removed from the residual. For an unreplicated 2³ run over two days, confound the day with the ABC interaction (runs 1, 4, 6, 7 on day 1, the rest on day 2, from the ABC column of Table 2), sacrificing the effect you least expect to need.<sup class="cite"><a href="#ref-3">[3]</a></sup></li>
+      <li><strong>Add centre points.</strong> Three or four runs with every factor at its middle level, spread through the sequence, estimate pure error even without replicates and test for curvature: if the centre-point mean differs from the average of the corners by more than the noise, the response is not planar and a two-level design cannot describe it.<sup class="cite"><a href="#ref-7">[7]</a></sup></li>
+    </ul>
+
+    <h2 id="fractional">Fractional factorials and confounding</h2>
+    <p>A 2<sup>5</sup> needs 32 runs, a 2<sup>6</sup> 64. Most of those runs estimate three- and four-factor interactions that are almost always negligible. A <strong>fractional factorial</strong> runs a chosen fraction, half or a quarter, and gives up the ability to separate some effects from each other. The price is stated exactly.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
+    <p>To build a 2<sup>4−1</sup> (four factors in eight runs): write the full 2³ in A, B and C, then set the fourth factor's column equal to the ABC product column, D = ABC, the <strong>generator</strong>. Multiplying both sides by D gives the <strong>defining relation</strong> I = ABCD (I is the column of all +). Multiplying any effect by the defining relation gives its <strong>alias</strong>, the effect it cannot be separated from: A = BCD, B = ACD, C = ABD, D = ABC, AB = CD, AC = BD, BC = AD. Each contrast you compute is the sum of an effect and its alias. The <strong>resolution</strong> of a design is the length of the shortest word in its defining relation: here IV, meaning main effects are aliased only with three-factor interactions and two-factor interactions with each other. In a resolution III design (I = ABC for a 2<sup>3−1</sup>) main effects are aliased with two-factor interactions, which is why resolution III designs are used only for screening many factors when interactions are assumed absent, and resolution V or higher when two-factor interactions must be estimated cleanly.<sup class="cite"><a href="#ref-4">[4]</a></sup> Plackett-Burman designs extend the idea to 12, 20, 24 runs for screening up to 11, 19, 23 factors at resolution III.<sup class="cite"><a href="#ref-5">[5]</a></sup></p>
+
+    <h3 id="example3">Worked example 3: a half fraction on a plating bath</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: nickel plating thickness in µm measured by XRF to 0.1 µm. Factors: A current density (2/4 A/dm²), B bath temperature (50/60 °C), C agitation (off/on), D plating time (20/30 min). Eight runs, generator D = ABC, run in random order, no replicates.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 5. Plating thickness, µm, 2⁴⁻¹ half fraction with D = ABC (constructed data). The D column is the product of the A, B and C columns.</caption><thead><tr><th>Std. order</th><th>A</th><th>B</th><th>C</th><th>D</th><th>y (rep 1)</th><th>Cell mean</th></tr></thead><tbody>
+<tr><td>1 (1)</td><td>−</td><td>−</td><td>−</td><td>−</td><td>17.8</td><td>17.800</td></tr>
+<tr><td>2 ab</td><td>+</td><td>+</td><td>−</td><td>−</td><td>23.8</td><td>23.800</td></tr>
+<tr><td>3 ac</td><td>+</td><td>−</td><td>+</td><td>−</td><td>23.4</td><td>23.400</td></tr>
+<tr><td>4 bc</td><td>−</td><td>+</td><td>+</td><td>−</td><td>18.0</td><td>18.000</td></tr>
+<tr><td>5 ad</td><td>+</td><td>−</td><td>−</td><td>+</td><td>32.2</td><td>32.200</td></tr>
+<tr><td>6 bd</td><td>−</td><td>+</td><td>−</td><td>+</td><td>27.3</td><td>27.300</td></tr>
+<tr><td>7 cd</td><td>−</td><td>−</td><td>+</td><td>+</td><td>25.8</td><td>25.800</td></tr>
+<tr><td>8 abcd</td><td>+</td><td>+</td><td>+</td><td>+</td><td>33.0</td><td>33.000</td></tr>
+</tbody></table></div>
+    <p><strong>Effects.</strong> Analysed as a 2³ in A, B and C, the seven contrasts estimate the following aliased pairs: A + BCD = <span data-ex="m13-plating" data-key="effects.A" data-dp="3">5.875</span> µm; B + ACD = <span data-ex="m13-plating" data-key="effects.B" data-dp="3">0.725</span>; C + ABD = <span data-ex="m13-plating" data-key="effects.C" data-dp="3">−0.225</span>; AB + CD = <span data-ex="m13-plating" data-key="effects.AB" data-dp="3">−0.125</span>; AC + BD = <span data-ex="m13-plating" data-key="effects.AC" data-dp="3">0.425</span>; BC + AD = <span data-ex="m13-plating" data-key="effects.BC" data-dp="3">0.175</span>; and the ABC contrast, which is D + ABC = <span data-ex="m13-plating" data-key="effects.ABC" data-dp="3">8.825</span> µm. Two stand out: current density and time, exactly what Faraday's law would predict for a plating bath, which is the kind of agreement between physics and arithmetic that you should always look for.</p>
+    <p><strong>Lenth's method.</strong> With no replicates there is no residual. Lenth's method estimates the noise from the effects themselves, on the assumption that most of them are noise.<sup class="cite"><a href="#ref-13">[13]</a></sup> Sort the absolute effects: the median of the seven is 0.425, so s₀ = 1.5 × 0.425 = 0.6375. Discard any effect larger than 2.5 s₀ = 1.594 (that removes A and the ABC contrast, <span data-ex="m13-plating" data-key="lenth.n_trimmed" data-dp="0">2</span> of the seven) and take the median of the rest, 0.225: the pseudo standard error is PSE = 1.5 × 0.225 = <span data-ex="m13-plating" data-key="lenth.pse" data-dp="4">0.3375</span> µm. The margin of error is t<sub>0.975</sub> on m/3 = <span data-ex="m13-plating" data-key="lenth.df" data-dp="2">2.33</span> degrees of freedom, <span data-ex="m13-plating" data-key="lenth.t_me" data-dp="3">3.764</span>, times the PSE: ME = <span data-ex="m13-plating" data-key="lenth.me" data-dp="3">1.270</span> µm. Effects beyond it: A (5.875) and D + ABC (8.825). The next largest, B at 0.725, is 0.57 of the margin and is treated as noise. (Lenth's stricter simultaneous margin, SME = <span data-ex="m13-plating" data-key="lenth.sme" data-dp="3">3.040</span> µm, protects the whole set of seven comparisons and reaches the same verdict.)</p>
+    <p><strong>The alias caveat.</strong> The 8.825 µm attributed to plating time is strictly D + ABC. Attributing it to D rests on the assumption that a three-factor interaction of current, temperature and agitation is negligible, which is reasonable here and should be stated. Had the AC + BD contrast been large, the experiment could not have said whether current interacts with agitation or temperature with time; a follow-up half fraction with the opposite generator (D = −ABC) would separate them, and the two halves together are the full 2⁴. Prediction at the best corner (high current, long time, the others at centre): <span data-ex="m13-plating" data-key="intercept" data-dp="3">25.162</span> + 2.9375 + 4.4125 = 32.51 µm, against 17.81 µm at the worst.</p>
+    <div class="calc" data-calc="factorial" id="calc-fact-plating">
+      <h3>Table 5 in the calculator, analysed as a 2³ in A, B, C (inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"k":3,"replicates":1,"factors":["Current","Bath T","Agitation"],"y":[[17.8],[32.2],[27.3],[23.8],[25.8],[23.4],[18.0],[33.0]],"collapsed":true}</script>
+    </div>
+
+    <h2 id="check">A published check: Montgomery's plasma-etch experiment</h2>
+    <p>The harness behind this course reproduces the 2³ plasma-etch example from Montgomery's <em>Design and Analysis of Experiments</em> (gap, gas flow and power against etch rate, two replicates), as its data, effects and ANOVA are reproduced in a University of Washington lecture handout.<sup class="cite"><a href="#ref-14">[14]</a><a href="#ref-15">[15]</a></sup> The published effects are A = <span data-ex="chk-montgomery-etch" data-key="effects.A" data-dp="3">−101.625</span>, B = <span data-ex="chk-montgomery-etch" data-key="effects.B" data-dp="3">7.375</span>, C = <span data-ex="chk-montgomery-etch" data-key="effects.C" data-dp="3">306.125</span>, AC = <span data-ex="chk-montgomery-etch" data-key="effects.AC" data-dp="3">−153.625</span> Å/min, with residual standard deviation <span data-ex="chk-montgomery-etch" data-key="residual_sd" data-dp="2">47.46</span> and R² = <span data-ex="chk-montgomery-etch" data-key="r2" data-dp="4">0.9661</span>; the course's three independent routes match every published figure. That example also shows a large interaction, AC, 2 times the size of the gap main effect: power and gap do not act independently on etch rate, and an OFAT study would have reported whichever slice of it happened to be run.</p>
+
+    <h2 id="rsm">Beyond two levels: response surface methods</h2>
+    <p>A two-level factorial fits a plane (with twists for the interactions). It tells you the direction in which the response improves, not where it stops improving. Box and Wilson's method for reaching an optimum uses the factorial in sequence: fit the plane, move along the <strong>path of steepest ascent</strong> (the direction of the effects, in proportion to their sizes) with a few runs until the response stops improving, run a new factorial there, and when centre points show curvature, augment it into a design that can fit a quadratic.<sup class="cite"><a href="#ref-6">[6]</a></sup> The standard augmentation is the <strong>central composite design</strong>: the factorial corners, the centre points, and "star" points along each axis; the Box-Behnken design is the alternative that avoids the extreme corners. Both need each factor at three or more levels and fit the second-order model ŷ = b₀ + Σ b<sub>i</sub>x<sub>i</sub> + Σ b<sub>ii</sub>x<sub>i</sub>² + Σ b<sub>ij</sub>x<sub>i</sub>x<sub>j</sub>, whose contours locate the optimum.<sup class="cite"><a href="#ref-7">[7]</a></sup></p>
+    <figure>
+      <svg viewBox="0 0 660 260" role="img" aria-labelledby="fig2-t fig2-d">
+        <title id="fig2-t">A response surface study: a first factorial, the path of steepest ascent, and a central composite design at the optimum</title>
+        <desc id="fig2-d">A plane with factor A horizontal and factor B vertical. Concentric elliptical contours of the response surround an optimum in the upper right. A small square in the lower left marks the first two-level factorial with a centre point; an arrow leaves it along the path of steepest ascent toward the optimum; near the optimum a second square with centre and axial star points marks the central composite design.</desc>
+        <g class="chart-axis"><path d="M50 230 H620"/><path d="M50 230 V20"/></g>
+        <text x="335" y="250" text-anchor="middle" class="chart-text muted">Factor A</text>
+        <text x="22" y="125" text-anchor="middle" transform="rotate(-90 22 125)" class="chart-text muted">Factor B</text>
+        <g class="chart-zone">
+          <ellipse cx="470" cy="80" rx="150" ry="70" transform="rotate(-20 470 80)"/>
+          <ellipse cx="470" cy="80" rx="105" ry="48" transform="rotate(-20 470 80)"/>
+          <ellipse cx="470" cy="80" rx="60" ry="27" transform="rotate(-20 470 80)"/>
+          <ellipse cx="470" cy="80" rx="22" ry="10" transform="rotate(-20 470 80)"/>
+        </g>
+        <g class="chart-box"><rect x="110" y="150" width="60" height="60"/></g>
+        <g class="chart-point"><circle cx="110" cy="150" r="4"/><circle cx="170" cy="150" r="4"/><circle cx="110" cy="210" r="4"/><circle cx="170" cy="210" r="4"/><circle cx="140" cy="180" r="4"/></g>
+        <g class="chart-center"><path d="M175 175 L330 125"/><path d="M330 125 L318 122 M330 125 L323 135"/></g>
+        <g class="chart-point"><circle cx="215" cy="162" r="3"/><circle cx="255" cy="149" r="3"/><circle cx="295" cy="136" r="3"/></g>
+        <g class="chart-box"><rect x="440" y="50" width="60" height="60"/></g>
+        <g class="chart-point"><circle cx="440" cy="50" r="4"/><circle cx="500" cy="50" r="4"/><circle cx="440" cy="110" r="4"/><circle cx="500" cy="110" r="4"/><circle cx="470" cy="80" r="4"/></g>
+        <g class="chart-point signal"><circle cx="470" cy="38" r="4"/><circle cx="470" cy="122" r="4"/><circle cx="428" cy="80" r="4"/><circle cx="512" cy="80" r="4"/></g>
+        <g class="chart-text small">
+          <text x="140" y="228" text-anchor="middle">first 2² + centre point</text>
+          <text x="250" y="120" text-anchor="middle">steepest ascent</text>
+          <text x="470" y="140" text-anchor="middle">central composite: corners, centre, star points</text>
+          <text x="560" y="30" text-anchor="middle" class="chart-text small muted">response contours</text>
+        </g>
+      </svg>
+      <figcaption>Figure 2. The sequential strategy of response surface methodology. A two-level design far from the optimum sees a slope and points the way; runs along the path of steepest ascent climb it; a central composite design at the top fits the curvature and locates the optimum. Schematic, not data.</figcaption>
+    </figure>
+    <p>For a Green Belt the practical points are three. Use centre points in every factorial so that curvature announces itself. When it does, do not fit a two-level model to a curved response. And bring in someone who has run a response surface study before, because the design choices (axial distance, rotatability, the number of centre points) have consequences that the software's defaults hide.<sup class="cite"><a href="#ref-7">[7]</a></sup></p>
+
+    <h2 id="taguchi">Taguchi methods and the debate</h2>
+    <p>Taguchi's contribution has three parts, and the debate treated them differently.<sup class="cite"><a href="#ref-11">[11]</a><a href="#ref-12">[12]</a></sup></p>
+    <ol>
+      <li><strong>The idea of robust design.</strong> Choose the settings of the factors you control so that the product performs well <em>despite</em> the factors you cannot control (ambient temperature, material lot, wear), rather than trying to control the uncontrollable. This is universally accepted as important, and Module 15 builds on it with the loss function.</li>
+      <li><strong>Inner and outer arrays.</strong> Run the control factors in one array and, for each row, run the noise factors in another, so that the variation across the noise array measures robustness. The NIST handbook describes the arrangement and notes that Taguchi's orthogonal arrays are the familiar fractional factorials under another name.<sup class="cite"><a href="#ref-8">[8]</a></sup> The arrays are fine; they are mostly resolution III, so the alias structure of the previous section applies and interactions among control factors are confounded with main effects, which the method's users often did not know.</li>
+      <li><strong>Signal-to-noise ratios as the response.</strong> Collapsing the noise-array results into an SN ratio ("larger is better", "nominal is best") and analysing that. This is where the critics concentrated. Box showed that the SN ratios confound location and dispersion effects and that analysing the mean and the log of the variance separately, or transforming the response, does the job more transparently.<sup class="cite"><a href="#ref-9">[9]</a></sup> The 1992 panel recorded broad agreement on the value of the robustness goal and on the weaknesses of the SN analysis and of the accompanying analysis-by-marginal-means without interactions.<sup class="cite"><a href="#ref-10">[10]</a></sup></li>
+    </ol>
+    <p>The position this course takes, which is the mainstream one: keep the goal, keep the noise factors, and analyse the experiment as a factorial with the noise factors as factors (a crossed or combined array), reporting the mean and a dispersion measure separately with the standard methods of this module. If a customer or a supplier hands you an L8 or L9 array, it is a fractional factorial; write its alias structure before you believe its conclusions.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>One factor at a time.</strong> Consequence: the best combination is never run and the interaction is never seen. Fix: a 2<sup>k</sup> or a fraction of it, always.</li>
+      <li><strong>Running in standard order.</strong> Consequence: a drift during the day lands on factor C, which happens to be the one that changed halfway through. Fix: randomise, record the actual order, and chart the residuals against it.</li>
+      <li><strong>Ranges too narrow.</strong> Consequence: real effects sit inside the noise and the report says "no factor matters". Fix: set levels bold enough to produce a change you could see without statistics, within the safe operating window.</li>
+      <li><strong>No replicates and no centre points.</strong> Consequence: no estimate of noise, no F tests, no curvature check; every effect looks either huge or negligible. Fix: replicate, or add three or four centre points, or accept Lenth's assumption and say so.</li>
+      <li><strong>Ignoring the alias structure of a fraction.</strong> Consequence: a "main effect" that is really a two-factor interaction gets built into the process. Fix: write the defining relation and the aliases before the runs; state the assumption behind each attribution.</li>
+      <li><strong>Reading main effects when there is an interaction.</strong> Consequence: "temperature raises strength by 2.3 MPa" when it lowers it at short cures. Fix: interpret an interaction with the two-way table of means, not the marginal means.</li>
+      <li><strong>Stopping at the ANOVA.</strong> Consequence: a list of p-values and no setting. Fix: the prediction equation, the predicted response at the chosen setting, and a confirmation run before anything is changed on the line.</li>
+      <li><strong>Extrapolating the plane.</strong> Consequence: a setting outside the ranges tested, where the response curved and the plane did not. Fix: predictions inside the box only; a response surface study beyond it.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: spot-weld nugget diameter, 2² with three replicates</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the nugget diameter in mm of resistance spot welds, measured by peel test to 0.01 mm. Factors: A weld current (8/10 kA), B weld time (10/14 cycles). Three welds per combination, 12 runs in random order.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 6. Nugget diameter, mm, 2² factorial with three replicates (constructed data).</caption><thead><tr><th>Std. order</th><th>A</th><th>B</th><th>y (rep 1)</th><th>y (rep 2)</th><th>y (rep 3)</th><th>Cell mean</th></tr></thead><tbody>
+<tr><td>1 (1)</td><td>−</td><td>−</td><td>5.00</td><td>4.92</td><td>4.93</td><td>4.9500</td></tr>
+<tr><td>2 a</td><td>+</td><td>−</td><td>5.23</td><td>5.74</td><td>5.66</td><td>5.5433</td></tr>
+<tr><td>3 b</td><td>−</td><td>+</td><td>5.18</td><td>5.31</td><td>5.25</td><td>5.2467</td></tr>
+<tr><td>4 ab</td><td>+</td><td>+</td><td>5.81</td><td>6.00</td><td>5.84</td><td>5.8833</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Compute the three effects from the cell means. (b) Compute SS<sub>A</sub> from its contrast, the residual mean square, the standard error of an effect and the F ratio for A. (c) Which effects are real? (d) The specification minimum is 5.6 mm. Which settings satisfy it, according to the model, and what would you do next?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> A = ((5.5433 + 5.8833) − (4.95 + 5.2467))/2 = 0.6150 mm; B = 0.3183 mm; AB = 0.0217 mm.</p>
+      <p><strong>(b)</strong> Contrast for A = 6 × 0.615 = 3.690; SS<sub>A</sub> = 3.69²/12 = 1.1347. Residual SS = <span data-ex="m13-ex1-weld" data-key="anova.residual.ss" data-dp="4">0.1836</span> on <span data-ex="m13-ex1-weld" data-key="anova.residual.df" data-dp="0">8</span> degrees of freedom, MS = <span data-ex="m13-ex1-weld" data-key="anova.residual.ms" data-dp="5">0.02295</span>, residual sd <span data-ex="m13-ex1-weld" data-key="residual_sd" data-dp="3">0.151</span> mm. Standard error of an effect = 2√(0.02295/12) = 0.0875 mm. F<sub>A</sub> = 1.1347/0.02295 = 49.4, p = <span data-ex="m13-ex1-weld" data-key="anova.A.p" data-dp="4">0.0001</span>.</p>
+      <p><strong>(c)</strong> Current (effect 0.615 mm, about seven standard errors) and time (effect 0.318 mm, p = <span data-ex="m13-ex1-weld" data-key="anova.B.p" data-dp="4">0.0066</span>) are real; the interaction (0.022 mm, p = <span data-ex="m13-ex1-weld" data-key="anova.AB.p" data-dp="2">0.81</span>) is noise: the two factors act additively over these ranges. R² = <span data-ex="m13-ex1-weld" data-key="r2" data-dp="3">0.887</span>.</p>
+      <p><strong>(d)</strong> Predicted diameters: both high 5.883 mm (satisfies 5.6 with a margin of about two residual standard deviations); high current, short time 5.543 mm, marginal; the other two corners fall short. The recommendation is high current with the long time, confirmed by a run of ten or more welds and a capability study against the 5.6 mm minimum (Module 7): an effect that clears a specification on average still has a tail.</p>
+      <div class="calc" data-calc="factorial" id="calc-fact-ex1">
+        <h3>Exercise 1 in the calculator (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"k":2,"replicates":3,"factors":["Current","Time"],"y":[[5.0,4.92,4.93],[5.23,5.74,5.66],[5.18,5.31,5.25],[5.81,6.0,5.84]],"collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: surface roughness, 2³ unreplicated</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the surface roughness Ra in µm of a turned shaft, profilometer to 0.01 µm. Factors: A feed (0.1/0.2 mm/rev), B cutting speed (150/250 m/min), C depth of cut (0.5/1.0 mm). Eight runs, no replicates, random order.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 7. Surface roughness Ra, µm, 2³ unreplicated (constructed data).</caption><thead><tr><th>Std. order</th><th>A</th><th>B</th><th>C</th><th>y (rep 1)</th><th>Cell mean</th></tr></thead><tbody>
+<tr><td>1 (1)</td><td>−</td><td>−</td><td>−</td><td>1.57</td><td>1.5700</td></tr>
+<tr><td>2 a</td><td>+</td><td>−</td><td>−</td><td>2.10</td><td>2.1000</td></tr>
+<tr><td>3 b</td><td>−</td><td>+</td><td>−</td><td>0.87</td><td>0.8700</td></tr>
+<tr><td>4 ab</td><td>+</td><td>+</td><td>−</td><td>1.87</td><td>1.8700</td></tr>
+<tr><td>5 c</td><td>−</td><td>−</td><td>+</td><td>1.60</td><td>1.6000</td></tr>
+<tr><td>6 ac</td><td>+</td><td>−</td><td>+</td><td>2.08</td><td>2.0800</td></tr>
+<tr><td>7 bc</td><td>−</td><td>+</td><td>+</td><td>0.82</td><td>0.8200</td></tr>
+<tr><td>8 abc</td><td>+</td><td>+</td><td>+</td><td>1.98</td><td>1.9800</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Compute the seven effects. (b) Apply Lenth's method by hand: s₀, the trimmed set, PSE, ME. (c) Which effects are active, and what does the interaction mean physically? (d) Recommend a setting for minimum roughness and predict Ra there.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> A = <span data-ex="m13-ex2-roughness" data-key="effects.A" data-dp="4">0.7925</span>, B = <span data-ex="m13-ex2-roughness" data-key="effects.B" data-dp="4">−0.4525</span>, C = <span data-ex="m13-ex2-roughness" data-key="effects.C" data-dp="4">0.0175</span>, AB = <span data-ex="m13-ex2-roughness" data-key="effects.AB" data-dp="4">0.2875</span>, AC = <span data-ex="m13-ex2-roughness" data-key="effects.AC" data-dp="4">0.0275</span>, BC = <span data-ex="m13-ex2-roughness" data-key="effects.BC" data-dp="4">0.0125</span>, ABC = <span data-ex="m13-ex2-roughness" data-key="effects.ABC" data-dp="4">0.0525</span> µm.</p>
+      <p><strong>(b)</strong> Median of the absolute effects 0.0525, s₀ = 0.07875; cut-off 2.5 s₀ = 0.1969, which removes A, B and AB (<span data-ex="m13-ex2-roughness" data-key="lenth.n_trimmed" data-dp="0">3</span> effects); median of the remaining four 0.0225; PSE = <span data-ex="m13-ex2-roughness" data-key="lenth.pse" data-dp="5">0.03375</span> µm; ME = 3.764 × PSE = <span data-ex="m13-ex2-roughness" data-key="lenth.me" data-dp="4">0.1270</span> µm (SME <span data-ex="m13-ex2-roughness" data-key="lenth.sme" data-dp="3">0.304</span>).</p>
+      <p><strong>(c)</strong> Active: A, B and AB. Feed raises roughness (the classical Ra ∝ feed² relationship for a turned surface), speed lowers it, and the interaction says the feed penalty is larger at low speed: the effect of feed is 0.505 µm at 150 m/min and 1.080 µm at 250 m/min. Depth of cut does nothing to Ra over this range, which also agrees with machining theory.</p>
+      <p><strong>(d)</strong> Low feed, high speed, depth of cut wherever productivity wants it: predicted Ra = 1.6112 − 0.3963 − −0.2262 − 0.1437 = 0.845 µm, against a grand mean of <span data-ex="m13-ex2-roughness" data-key="grand_mean" data-dp="3">1.611</span>. Confirm with a few parts before writing it into the process sheet; and if the drawing calls for less than about 0.9 µm, a response surface study of feed and speed will be needed, because Ra will not keep falling linearly.</p>
+      <div class="calc" data-calc="factorial" id="calc-fact-ex2">
+        <h3>Exercise 2 in the calculator (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"k":3,"replicates":1,"factors":["Feed","Speed","Depth"],"y":[[1.57],[2.1],[0.87],[1.87],[1.6],[2.08],[0.82],[1.98]],"collapsed":true}</script>
+      </div>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="13">
+      <fieldset class="q" data-answer="b">
+        <legend>1. An interaction between factors A and B means</legend>
+        <label><input type="radio" name="q1" value="a"> A and B are correlated in the data</label>
+        <label><input type="radio" name="q1" value="b"> the effect of A depends on the level of B</label>
+        <label><input type="radio" name="q1" value="c"> both A and B have large main effects</label>
+        <label><input type="radio" name="q1" value="d"> A and B were changed at the same time</label>
+        <p class="explain" hidden>Non-parallel lines on the interaction plot.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="4.75" data-tolerance="0.02">
+        <legend>2. A 2² design gives cell means (1) = 12, a = 14, b = 13, ab = 20. What is the main effect of A?</legend>
+        <input type="number" name="q2" step="any">
+        <p class="explain" hidden>((14 + 20) − (12 + 13))/2 = 4.75.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>3. Runs are executed in random order so that</legend>
+        <label><input type="radio" name="q3" value="a"> the arithmetic is simpler</label>
+        <label><input type="radio" name="q3" value="b"> the operator cannot predict the next setting</label>
+        <label><input type="radio" name="q3" value="c"> any drift during the experiment is spread across the effects instead of being confounded with one of them</label>
+        <label><input type="radio" name="q3" value="d"> replicates are not needed</label>
+        <p class="explain" hidden>Fisher's principle; standard order is for the calculation only.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. In a replicated 2³ with 16 runs, the residual has how many degrees of freedom?</legend>
+        <label><input type="radio" name="q4" value="a"> 8</label>
+        <label><input type="radio" name="q4" value="b"> 15</label>
+        <label><input type="radio" name="q4" value="c"> 7</label>
+        <label><input type="radio" name="q4" value="d"> 1</label>
+        <p class="explain" hidden>16 runs − 8 cells = 8, one from each replicate pair.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>5. In a 2⁴⁻¹ design with generator D = ABC, the contrast labelled AB estimates</legend>
+        <label><input type="radio" name="q5" value="a"> AB alone</label>
+        <label><input type="radio" name="q5" value="b"> AB + ABCD</label>
+        <label><input type="radio" name="q5" value="c"> AB + D</label>
+        <label><input type="radio" name="q5" value="d"> AB + CD</label>
+        <p class="explain" hidden>Multiply AB by the defining relation I = ABCD: AB × ABCD = CD.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. The resolution of a design is</legend>
+        <label><input type="radio" name="q6" value="a"> the number of factors</label>
+        <label><input type="radio" name="q6" value="b"> the length of the shortest word in its defining relation; at resolution IV main effects are clear of two-factor interactions</label>
+        <label><input type="radio" name="q6" value="c"> the number of replicates</label>
+        <label><input type="radio" name="q6" value="d"> the smallest effect it can detect</label>
+        <p class="explain" hidden>I = ABCD has a four-letter word: resolution IV.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="16" data-tolerance="0.5">
+        <legend>7. How many runs does a half fraction of a 2⁵ design need (one replicate)?</legend>
+        <input type="number" name="q7" step="any">
+        <p class="explain" hidden>2⁵ / 2 = 16.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>8. Lenth's method is used when</legend>
+        <label><input type="radio" name="q8" value="a"> the design has many replicates</label>
+        <label><input type="radio" name="q8" value="b"> the response is non-normal</label>
+        <label><input type="radio" name="q8" value="c"> the design is unreplicated and the noise must be estimated from the small effects</label>
+        <label><input type="radio" name="q8" value="d"> there are more than three factors</label>
+        <p class="explain" hidden>PSE from the median of the small absolute effects; ME = t(m/3) × PSE.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>9. Centre points are added to a two-level factorial mainly to</legend>
+        <label><input type="radio" name="q9" value="a"> detect curvature and estimate pure error</label>
+        <label><input type="radio" name="q9" value="b"> increase the resolution</label>
+        <label><input type="radio" name="q9" value="c"> remove the need for randomisation</label>
+        <label><input type="radio" name="q9" value="d"> estimate three-factor interactions</label>
+        <p class="explain" hidden>If the centre differs from the corner average, the plane is wrong and a response surface design follows.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. The mainstream conclusion of the Taguchi debate was that</legend>
+        <label><input type="radio" name="q10" value="a"> orthogonal arrays are invalid</label>
+        <label><input type="radio" name="q10" value="b"> robustness to noise factors is not worth pursuing</label>
+        <label><input type="radio" name="q10" value="c"> signal-to-noise ratios are the best response for every experiment</label>
+        <label><input type="radio" name="q10" value="d"> the robustness goal and noise factors are valuable; the arrays are fractional factorials; the SN-ratio analysis is better replaced by standard analysis of mean and dispersion</label>
+        <p class="explain" hidden>Box 1988 and the Nair 1992 panel.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. Effect of A depends on B.</li>
+        <li>4.75.</li>
+        <li>c. Spreads drift across effects.</li>
+        <li>a. 8.</li>
+        <li>d. AB + CD.</li>
+        <li>b. Shortest word; resolution IV.</li>
+        <li>16.</li>
+        <li>c. Unreplicated designs.</li>
+        <li>a. Curvature and pure error.</li>
+        <li>d. Keep the goal, use standard analysis.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Changing one factor at a time never runs the combination it did not think of, and cannot see interactions. A factorial runs every combination and gets every effect from every run.</li>
+      <li>In a 2<sup>k</sup> design each effect is the average response at the high level minus the average at the low level; interactions come from the product columns; SS = contrast²/N; the standard error of an effect is 2√(MSE/N).</li>
+      <li>Randomise the run order, replicate or add centre points, and block what you cannot randomise. Report the prediction equation and a confirmation run, not only the p-values.</li>
+      <li>A half fraction saves half the runs and aliases effects in pairs given by the defining relation. Write the alias structure before the experiment; resolution IV keeps main effects clear of two-factor interactions, resolution III does not.</li>
+      <li>Unreplicated designs are analysed with Lenth's pseudo standard error and a Pareto or normal plot of effects; the method assumes most effects are noise.</li>
+      <li>When centre points show curvature, a two-level model is wrong; response surface designs (central composite, Box-Behnken) fit the quadratic and locate the optimum.</li>
+      <li>Taguchi's robustness goal and noise factors are worth keeping; his arrays are fractional factorials; analyse them with standard methods rather than signal-to-noise ratios.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-10. Sources marked "catalogue" or "secondary" were not read in full by the course author; the claim is taken from the part shown. Standards and books are paraphrased.</p>
+    <ol class="references">
+      <li id="ref-1">Fisher, R. A. <em>The Design of Experiments</em>. Oliver and Boyd, 1935. <a href="https://archive.org/details/in.ernet.dli.2015.502684">https://archive.org/details/in.ernet.dli.2015.502684</a> <span class="tag">(catalogue; randomisation, replication, blocking and the factorial principle)</span></li>
+      <li id="ref-2">Yates, F. <em>The Design and Analysis of Factorial Experiments</em>. Imperial Bureau of Soil Science, Technical Communication 35, 1937. <a href="https://link.springer.com/rwe/10.1007/978-0-387-32833-1_429">https://link.springer.com/rwe/10.1007/978-0-387-32833-1_429</a> <span class="tag">(secondary: Yates' algorithm as described in later texts; the original was not read)</span></li>
+      <li id="ref-3">Box, G. E. P., Hunter, J. S., and Hunter, W. G. <em>Statistics for Experimenters</em>, 2nd ed. Wiley, 2005. <a href="https://www.wiley.com/en-us/Statistics+for+Experimenters:+Design,+Innovation,+and+Discovery,+2nd+Edition-p-9780471718130">https://www.wiley.com/en-us/Statistics+for+Experimenters...</a> <span class="tag">(catalogue; factorial design, effects, blocking)</span></li>
+      <li id="ref-4">NIST/SEMATECH. "5.3.3.4. Fractional factorial designs" and subsections (5.3.3.4.1 half fractions, 5.3.3.4.4 confounding, 5.3.3.4.5 design resolution). <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/pri/section3/pri334.htm">https://www.itl.nist.gov/div898/handbook/pri/section3/pri334.htm</a></li>
+      <li id="ref-5">Plackett, R. L., and Burman, J. P. "The Design of Optimum Multifactorial Experiments." <em>Biometrika</em> 33(4):305 to 325, 1946. <a href="https://academic.oup.com/biomet/article-abstract/33/4/305/225377">https://academic.oup.com/biomet/article-abstract/33/4/305/225377</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-6">Box, G. E. P., and Wilson, K. B. "On the Experimental Attainment of Optimum Conditions." <em>Journal of the Royal Statistical Society, Series B</em> 13(1):1 to 45, 1951. <a href="https://academic.oup.com/jrsssb/article/13/1/1/7026650">https://academic.oup.com/jrsssb/article/13/1/1/7026650</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-7">NIST/SEMATECH. "5.3.3.6. Response surface designs." <em>e-Handbook of Statistical Methods</em>. Centre points and curvature, central composite and Box-Behnken designs, rotatability. <a href="https://www.itl.nist.gov/div898/handbook/pri/section3/pri336.htm">https://www.itl.nist.gov/div898/handbook/pri/section3/pri336.htm</a></li>
+      <li id="ref-8">NIST/SEMATECH. "5.5.6. What are Taguchi designs?" <em>e-Handbook of Statistical Methods</em>. Orthogonal arrays as fractional factorials; inner and outer arrays. <a href="https://www.itl.nist.gov/div898/handbook/pri/section5/pri56.htm">https://www.itl.nist.gov/div898/handbook/pri/section5/pri56.htm</a></li>
+      <li id="ref-9">Box, G. E. P. "Signal-to-Noise Ratios, Performance Criteria, and Transformations (with discussion)." <em>Technometrics</em> 30(1):1 to 40, 1988. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1988.10488313">https://www.tandfonline.com/doi/abs/10.1080/00401706.1988.10488313</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-10">Nair, V. N. (ed.). "Taguchi's Parameter Design: A Panel Discussion." <em>Technometrics</em> 34(2):127 to 161, 1992. <a href="https://www.stat.cmu.edu/technometrics/90-00/vol-34-02/v3402127.pdf">https://www.stat.cmu.edu/technometrics/90-00/vol-34-02/v3402127.pdf</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-11">Taguchi, G. <em>Introduction to Quality Engineering: Designing Quality into Products and Processes</em>. Asian Productivity Organization, 1986. <a href="https://archive.org/details/introductiontoqu0000tagu">https://archive.org/details/introductiontoqu0000tagu</a> <span class="tag">(catalogue)</span></li>
+      <li id="ref-12">Phadke, M. S. <em>Quality Engineering Using Robust Design</em>. Prentice Hall, 1989. <a href="https://books.google.com/books/about/Quality_Engineering_Using_Robust_Design.html?id=TZoQAQAAMAAJ">https://books.google.com/books/about/Quality_Engineering_Using_Robust_Design.html?id=TZoQAQAAMAAJ</a> <span class="tag">(catalogue)</span></li>
+      <li id="ref-13">Lenth, R. V. "Quick and Easy Analysis of Unreplicated Factorials." <em>Technometrics</em> 31(4):469 to 473, 1989. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1989.10488595">https://www.tandfonline.com/doi/abs/10.1080/00401706.1989.10488595</a> <span class="tag">(abstract read; the s₀, PSE and ME definitions are the standard ones implemented in statistical software)</span></li>
+      <li id="ref-14">Montgomery, D. C. <em>Design and Analysis of Experiments</em>, 8th ed., Wiley, 2013 (the plasma-etch 2³ example, Section 6.3); 10th ed., 2019. <a href="https://www.wiley.com/en-us/Design+and+Analysis+of+Experiments,+10th+Edition-p-9781119492443">https://www.wiley.com/en-us/Design+and+Analysis+of+Experiments,+10th+Edition-p-9781119492443</a> <span class="tag">(catalogue; the example's data and results are taken from [15])</span></li>
+      <li id="ref-15">University of Washington, STAT 502 lecture notes. "The 2ᵏ Factorial Design (Montgomery chap. 6; BHH chap. 5)." <a href="https://sites.stat.washington.edu/pds/stat502/LectureNotes/2k.factorial.intro.pdf">https://sites.stat.washington.edu/pds/stat502/LectureNotes/2k.factorial.intro.pdf</a> <span class="tag">(secondary: reproduces Montgomery's plasma-etch data, effects and ANOVA, which the course harness matches)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>NIST/SEMATECH e-Handbook, Chapter 5 (Process Improvement), for the complete treatment of design selection, analysis and response surface methods with worked examples.</li>
+      <li>Module 15 for the Taguchi loss function and robust design; Module 11 for the F tests and p-values used in the ANOVA tables.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a designed experiment that found an interaction nobody expected, or an OFAT trial that went wrong, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

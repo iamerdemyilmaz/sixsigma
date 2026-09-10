@@ -116,6 +116,11 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m11-samplesize-pull | 11 | sample size (parameters only) | the same δ and σ at 80 % power: 27.6 → 28 (z), 29 (t-iteration) | none | pass | pass | pass | pass | 11 |
 | m11-ex1-cure | 11 | two-sample t, 10 + 10 | adhesive cure time in two ovens: diff −0.64 min, Welch p 0.41, CI −2.24 to +0.96; n ≈ 22 per oven for 80 % power at 1.0 min; exercise 1 | `m11-ex1-cure.csv` | pass | pass | pass | pass | 11 |
 | m11-ex2-chisq-leak | 11 | chi-square independence, 2 × 3 | leak location by fixture, N 112: χ² 1.50, p 0.47, V 0.12; no evidence; exercise 2 | `m11-ex2-chisq-leak.csv` | pass | pass | pass | n/a | 11 |
+| m13-ofat | 13 | 2² factorial, 2 replicates | adhesive lap-shear strength, MPa: cell means (1) 15.5, a 11.65, b 13.55, ab 22.05; effects A 2.33, B 4.23, AB 6.18 (p 0.0001); the OFAT path from (1) rejects both factors and misses ab | `m13-ofat.csv` | pass | pass | pass | pass | 13 |
+| m13-mould | 13 | 2³ factorial, 2 replicates | moulded housing length, mm, vs melt temperature, hold pressure, cooling time: A −0.080 (p 0.0002), B +0.0875 (p 0.0001), AB −0.050 (p 0.003), C and other interactions noise; residual sd 0.024 mm, R² 0.937; prediction equation and corner predictions | `m13-mould.csv` | pass | pass | pass | pass | 13, calculators (module page) |
+| m13-plating | 13 | 2⁴⁻¹ half fraction (D = ABC), unreplicated | plating thickness, µm: A + BCD 5.875, D + ABC 8.825, others below Lenth's ME 1.27 (PSE 0.3375, SME 3.04); alias structure and resolution IV | `m13-plating.csv` | pass | pass | pass | pass | 13 |
+| m13-ex1-weld | 13 | 2² factorial, 3 replicates | spot-weld nugget diameter, mm: A 0.615 (p 0.0001), B 0.318 (p 0.007), AB 0.022 (p 0.81); prediction 5.88 mm at both high vs a 5.6 mm minimum; exercise 1 | `m13-ex1-weld.csv` | pass | pass | pass | pass | 13 |
+| m13-ex2-roughness | 13 | 2³ unreplicated | turned surface Ra, µm: A 0.79, B −0.45, AB 0.29 active by Lenth (ME 0.127), C and others noise; exercise 2 | `m13-ex2-roughness.csv` | pass | pass | pass | pass | 13 |
 
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 

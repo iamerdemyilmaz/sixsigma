@@ -1,0 +1,27 @@
+{
+ "id": "m13-ex2-roughness",
+ "module": "13",
+ "kind": "factorial",
+ "title": "Exercise 2: 2^3 unreplicated, turned surface roughness, Lenth's method",
+ "source": "constructed",
+ "setting": "surface roughness Ra in \u00b5m of a turned shaft, profilometer to 0.01 \u00b5m; A feed 0.1/0.2 mm/rev, B cutting speed 150/250 m/min, C depth of cut 0.5/1.0 mm; 8 runs",
+ "params": {
+  "k": 3,
+  "replicates": 1,
+  "factors": [
+   "A",
+   "B",
+   "C"
+  ],
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "C",
+  "y"
+ ],
+ "n_rows": 8
+}

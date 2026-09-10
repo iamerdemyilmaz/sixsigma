@@ -1,0 +1,29 @@
+{
+ "id": "m13-plating",
+ "module": "13",
+ "kind": "factorial",
+ "title": "2^(4-1) half fraction (D = ABC), unreplicated: plating thickness vs current density, bath temperature, agitation, time",
+ "source": "constructed",
+ "setting": "nickel plating thickness in \u00b5m measured by XRF to 0.1 \u00b5m; A current density 2/4 A/dm\u00b2, B bath temperature 50/60 \u00b0C, C agitation off/on, D plating time 20/30 min; 8 runs, generator D = ABC, analysed as a 2^3 in A, B, C with the ABC contrast estimating D",
+ "params": {
+  "k": 3,
+  "replicates": 1,
+  "factors": [
+   "A",
+   "B",
+   "C"
+  ],
+  "generator": "D = ABC",
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "C",
+  "D",
+  "y"
+ ],
+ "n_rows": 8
+}

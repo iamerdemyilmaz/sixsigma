@@ -651,6 +651,19 @@ def r_factorial(meta, cols):
             out[f"anova.{label}.F"] = F; out[f"anova.{label}.p"] = f_sf(F, 1, df_res)
         out["residual_sd"] = math.sqrt(mse); out["se_effect"] = 2 * math.sqrt(mse / N)
         out["r2"] = 1 - ss_res / sst; out["r2_adj"] = 1 - (ss_res / df_res) / (sst / (N - 1))
+    if N == 2 ** k:
+        # Lenth 1989: s0 = 1.5 median|c|, PSE = 1.5 median of |c| below 2.5 s0, ME = t(0.975, m/3) PSE
+        effs = [out[f"effects.{''.join(combo)}"] for combo in terms]
+        abs_e = sorted(abs(v) for v in effs)
+        s0 = 1.5 * median(abs_e)
+        trimmed = [v for v in abs_e if v < 2.5 * s0]
+        pse = 1.5 * median(trimmed)
+        m = len(effs); d = m / 3.0
+        gamma = (1 + 0.95 ** (1.0 / m)) / 2.0
+        out["lenth.s0"] = s0; out["lenth.pse"] = pse; out["lenth.df"] = d
+        out["lenth.t_me"] = t_ppf(0.975, d); out["lenth.me"] = t_ppf(0.975, d) * pse
+        out["lenth.t_sme"] = t_ppf(gamma, d); out["lenth.sme"] = t_ppf(gamma, d) * pse
+        out["lenth.n_trimmed"] = len(abs_e) - len(trimmed)
     return out
 
 

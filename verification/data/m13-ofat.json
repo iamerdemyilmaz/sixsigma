@@ -1,0 +1,25 @@
+{
+ "id": "m13-ofat",
+ "module": "13",
+ "kind": "factorial",
+ "title": "2^2 factorial with 2 replicates: adhesive bond strength with a strong interaction (the OFAT trap)",
+ "source": "constructed",
+ "setting": "lap-shear strength in MPa of a structural adhesive; A cure temperature 80/120 \u00b0C, B cure time 30/60 min; tester to 0.1 MPa",
+ "params": {
+  "k": 2,
+  "replicates": 2,
+  "factors": [
+   "A",
+   "B"
+  ],
+  "units": "MPa"
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "y"
+ ],
+ "n_rows": 8
+}

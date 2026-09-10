@@ -790,6 +790,80 @@ register(id="m11-ex2-chisq-leak", module="11", kind="chisq",
          columns=["row", "Header", "Tube", "Baffle"], rows=[[nm] + o for nm, o in zip(["Fixture A", "Fixture B"], _obs2)])
 
 
+# ---------------------------------------------------------------------------
+# Module 13: Design of experiments (prefix m13-)
+# ---------------------------------------------------------------------------
+_STD3 = [(-1, -1, -1), (1, -1, -1), (-1, 1, -1), (1, 1, -1), (-1, -1, 1), (1, -1, 1), (-1, 1, 1), (1, 1, 1)]
+_STD2 = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
+
+# 2^3 with 2 replicates: length of a moulded housing (mm) vs melt temperature (A),
+# hold pressure (B) and cooling time (C); A and B large, AB present, C small.
+_rng = np.random.default_rng(12)
+_m13a = []; _run = 0
+for (_a, _b, _c) in _STD3:
+    for _rep in (1, 2):
+        _run += 1
+        _m13a.append([_run, _rep, _a, _b, _c, round(float(45.20 - 0.040 * _a + 0.050 * _b + 0.010 * _c - 0.025 * _a * _b + _rng.normal(0, 0.02)), 2)])
+register(id="m13-mould", module="13", kind="factorial",
+         title="2^3 factorial with 2 replicates: moulded housing length vs melt temperature, hold pressure, cooling time",
+         source="constructed", setting="injection-moulded housing, overall length nominal 45.20 mm measured on a CMM to 0.01 mm; A melt temperature 230/250 °C, B hold pressure 40/60 MPa, C cooling time 15/25 s; 16 runs in random order",
+         params={"k": 3, "replicates": 2, "factors": ["A", "B", "C"], "units": "mm"},
+         columns=["run", "rep", "A", "B", "C", "y"], rows=_m13a)
+
+# 2^2 with 2 replicates where one-factor-at-a-time misses the optimum: bond strength (MPa)
+# vs cure temperature (A) and cure time (B) with a strong interaction.
+_rng = np.random.default_rng(1)
+_base = {(-1, -1): 15.0, (1, -1): 12.0, (-1, 1): 13.0, (1, 1): 22.0}
+_m13b = []; _run = 0
+for (_a, _b) in _STD2:
+    for _rep in (1, 2):
+        _run += 1
+        _m13b.append([_run, _rep, _a, _b, round(float(_base[(_a, _b)] + _rng.normal(0, 0.8)), 1)])
+register(id="m13-ofat", module="13", kind="factorial",
+         title="2^2 factorial with 2 replicates: adhesive bond strength with a strong interaction (the OFAT trap)",
+         source="constructed", setting="lap-shear strength in MPa of a structural adhesive; A cure temperature 80/120 °C, B cure time 30/60 min; tester to 0.1 MPa",
+         params={"k": 2, "replicates": 2, "factors": ["A", "B"], "units": "MPa"},
+         columns=["run", "rep", "A", "B", "y"], rows=_m13b)
+
+# 2^(4-1) half fraction, D = ABC, unreplicated: plating thickness (µm) vs current density (A),
+# bath temperature (B), agitation (C) and plating time (D); A and D active, analysed by Lenth's method.
+_rng = np.random.default_rng(1)
+_m13c = []; _run = 0
+for (_a, _b, _c) in _STD3:
+    _d = _a * _b * _c; _run += 1
+    _m13c.append([_run, 1, _a, _b, _c, _d, round(float(25.0 + 3.0 * _a + 0.75 * _b - 0.25 * _c + 4.0 * _d + _rng.normal(0, 0.9)), 1)])
+register(id="m13-plating", module="13", kind="factorial",
+         title="2^(4-1) half fraction (D = ABC), unreplicated: plating thickness vs current density, bath temperature, agitation, time",
+         source="constructed", setting="nickel plating thickness in µm measured by XRF to 0.1 µm; A current density 2/4 A/dm², B bath temperature 50/60 °C, C agitation off/on, D plating time 20/30 min; 8 runs, generator D = ABC, analysed as a 2^3 in A, B, C with the ABC contrast estimating D",
+         params={"k": 3, "replicates": 1, "factors": ["A", "B", "C"], "generator": "D = ABC", "units": "µm"},
+         columns=["run", "rep", "A", "B", "C", "D", "y"], rows=_m13c)
+
+# Exercise 1: 2^2 with 3 replicates, spot-weld nugget diameter (mm) vs current (A) and weld time (B).
+_rng = np.random.default_rng(2)
+_m13d = []; _run = 0
+for (_a, _b) in _STD2:
+    for _rep in (1, 2, 3):
+        _run += 1
+        _m13d.append([_run, _rep, _a, _b, round(float(5.4 + 0.30 * _a + 0.15 * _b + 0.03 * _a * _b + _rng.normal(0, 0.12)), 2)])
+register(id="m13-ex1-weld", module="13", kind="factorial",
+         title="Exercise 1: 2^2 factorial with 3 replicates, spot-weld nugget diameter",
+         source="constructed", setting="nugget diameter in mm from peel tests, to 0.01 mm; A weld current 8/10 kA, B weld time 10/14 cycles; 12 welds in random order",
+         params={"k": 2, "replicates": 3, "factors": ["A", "B"], "units": "mm"},
+         columns=["run", "rep", "A", "B", "y"], rows=_m13d)
+
+# Exercise 2: 2^3 unreplicated, surface roughness Ra (µm) vs feed (A), speed (B), depth of cut (C).
+_rng = np.random.default_rng(1)
+_m13e = []; _run = 0
+for (_a, _b, _c) in _STD3:
+    _run += 1
+    _m13e.append([_run, 1, _a, _b, _c, round(float(1.60 + 0.40 * _a - 0.20 * _b + 0.15 * _a * _b + _rng.normal(0, 0.06)), 2)])
+register(id="m13-ex2-roughness", module="13", kind="factorial",
+         title="Exercise 2: 2^3 unreplicated, turned surface roughness, Lenth's method",
+         source="constructed", setting="surface roughness Ra in µm of a turned shaft, profilometer to 0.01 µm; A feed 0.1/0.2 mm/rev, B cutting speed 150/250 m/min, C depth of cut 0.5/1.0 mm; 8 runs",
+         params={"k": 3, "replicates": 1, "factors": ["A", "B", "C"], "units": "µm"},
+         columns=["run", "rep", "A", "B", "C", "y"], rows=_m13e)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

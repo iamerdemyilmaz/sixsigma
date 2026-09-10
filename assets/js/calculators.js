@@ -825,28 +825,34 @@
       function compute() {
         var o = outBox(node), kk = Number(k.value), R = Number(reps.value), nm = names.value.split(",").map(function (s) { return s.trim(); }).filter(Boolean).slice(0, kk);
         while (nm.length < kk) { nm.push("ABC"[nm.length]); }
-        var inputs = grid.querySelectorAll("input"), cols = { run: [], rep: [], y: [] }; nm.forEach(function (n) { cols[n] = []; });
+        // compute with single-letter codes so that interaction keys are "AB", "ABC"; display with the user's names
+        var letters = "ABC".slice(0, kk).split("");
+        var inputs = grid.querySelectorAll("input"), cols = { run: [], rep: [], y: [] }; letters.forEach(function (n) { cols[n] = []; });
+        function disp(l) { return l.split("").map(function (ch) { return nm[letters.indexOf(ch)]; }).join(" × "); }
         var ok = true; current = [];
         for (var i = 0; i < (1 << kk); i++) {
           current.push([]);
           for (var rr = 0; rr < R; rr++) {
             var v = optNum(inputs[i * R + rr]); if (!has(v)) { ok = false; }
             current[i].push(v); cols.run.push(i + 1); cols.rep.push(rr + 1); cols.y.push(v);
-            for (var j = 0; j < kk; j++) { cols[nm[j]].push((i >> j) & 1 ? 1 : -1); }
+            for (var j = 0; j < kk; j++) { cols[letters[j]].push((i >> j) & 1 ? 1 : -1); }
           }
         }
         if (!ok) { o.appendChild(el("p", { "class": "error", text: "Fill every response cell." })); return; }
-        var r = S.factorial(cols, { k: kk, replicates: R, factors: nm });
+        var r = S.factorial(cols, { k: kk, replicates: R, factors: letters });
         var dp = autoDp(cols.y);
         var labels = Object.keys(r.effects);
-        var rows = labels.map(function (l) { var row = [l, fmt(r.effects[l], dp + 1), fmt(r.coefficients[l], dp + 2)]; if (r.anova) { row.push(r.anova[l].ss.toPrecision(5), fmt(r.anova[l].F, 2), fmtP(r.anova[l].p)); } return row; });
+        var rows = labels.map(function (l) { var row = [disp(l), fmt(r.effects[l], dp + 1), fmt(r.coefficients[l], dp + 2)]; if (r.anova) { row.push(r.anova[l].ss.toPrecision(5), fmt(r.anova[l].F, 2), fmtP(r.anova[l].p)); } return row; });
         var hdr = ["Term", "Effect (ȳ₊ − ȳ₋)", "Coefficient (effect / 2)"]; if (r.anova) { hdr.push("SS", "F", "p"); }
         o.appendChild(table("Effects (grand mean " + fmt(r.grand_mean, dp + 1) + ")", hdr, rows));
         if (r.anova) {
           o.appendChild(table("Residual", ["Quantity", "Value"], [["Residual SS", r.anova.residual.ss.toPrecision(5)], ["Residual df", String(r.anova.residual.df)], ["Residual standard deviation", fmt(r.residual_sd, dp + 2)], ["Standard error of an effect = 2·√(MSE/N)", fmt(r.se_effect, dp + 2)], ["R²", fmt(r.r2, 4)], ["Adjusted R²", fmt(r.r2_adj, 4)]]));
-        } else { o.appendChild(note("Unreplicated design: no residual, so no F-tests. Judge the effects by their size on the Pareto chart, or by a normal probability plot of effects (Module 13).")); }
-        var ref = r.anova ? S.tPpf(0.975, r.anova.residual.df) * r.se_effect : null;
-        o.appendChild(figure(barChart({ id: node.id + "-p", items: labels.map(function (l) { return { label: l, value: r.effects[l] }; }), sort: true, dp: dp + 1, title: "Pareto of effects (absolute value)", desc: "Horizontal bars of the absolute effect of each term, largest first." + (ref ? " A reference line marks the effect size that would be significant at the 5 % level." : ""), refLine: ref, refLabel: ref ? "t₀.₉₇₅ × SE" : "" })));
+        } else if (r.lenth) {
+          o.appendChild(note("Unreplicated design: no residual, so no F-tests. Lenth's method (1989) estimates the noise from the small effects: s₀ = 1.5 × median|effect|, PSE = 1.5 × median of the |effects| below 2.5 s₀, margin of error ME = t(0.975, m/3) × PSE. Effects beyond ME are judged active; the simultaneous margin SME is the stricter limit for the whole set."));
+          o.appendChild(table("Lenth's method", ["Quantity", "Value"], [["s₀", fmt(r.lenth.s0, dp + 2)], ["Pseudo standard error PSE", fmt(r.lenth.pse, dp + 2)], ["Degrees of freedom m/3", fmt(r.lenth.df, 2)], ["Margin of error ME", fmt(r.lenth.me, dp + 2)], ["Simultaneous margin SME", fmt(r.lenth.sme, dp + 2)], ["Effects beyond ME", r.lenth.active.length ? r.lenth.active.map(disp).join(", ") : "none"]]));
+        }
+        var ref = r.anova ? S.tPpf(0.975, r.anova.residual.df) * r.se_effect : (r.lenth ? r.lenth.me : null);
+        o.appendChild(figure(barChart({ id: node.id + "-p", items: labels.map(function (l) { return { label: disp(l), value: r.effects[l] }; }), sort: true, dp: dp + 1, title: "Pareto of effects (absolute value)", desc: "Horizontal bars of the absolute effect of each term, largest first." + (ref ? " A reference line marks the effect size that would be significant at the 5 % level." : ""), refLine: ref, refLabel: ref ? "t₀.₉₇₅ × SE" : "" })));
         var cm = Object.keys(r.cell_means).map(function (c) { return [c, fmt(r.cell_means[c], dp + 1)]; });
         o.appendChild(table("Cell means (label = factors at the high level)", ["Treatment", "Mean response"], cm));
       }
