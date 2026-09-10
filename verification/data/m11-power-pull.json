@@ -1,0 +1,31 @@
+{
+ "id": "m11-power-pull",
+ "module": "11",
+ "kind": "power",
+ "title": "Power of a two-sample t at n = 12 per group, delta 2.0 N, sigma 2.65 N",
+ "source": "arithmetic on the normal approximation (NIST 7.2.2.2 formula solved for power)",
+ "setting": "parameters only; sigma 2.65 N is the pooled sd of the pull-strength study rounded",
+ "params": {
+  "alpha": 0.05,
+  "sides": 2,
+  "delta": 2.0,
+  "sigma": 2.65,
+  "n": 12,
+  "design": "two-sample",
+  "curve_n": [
+   4,
+   6,
+   8,
+   10,
+   12,
+   15,
+   20,
+   25,
+   30,
+   40,
+   50,
+   60
+  ]
+ },
+ "columns": null
+}

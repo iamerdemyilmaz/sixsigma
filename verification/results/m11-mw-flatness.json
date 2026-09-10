@@ -1,0 +1,46 @@
+{
+ "id": "m11-mw-flatness",
+ "kind": "mannwhitney",
+ "params": {
+  "alpha": 0.05,
+  "units": "\u00b5m"
+ },
+ "source": "constructed",
+ "results": {
+  "groups": [
+   "F1",
+   "F2"
+  ],
+  "n": [
+   15,
+   15
+  ],
+  "medians": [
+   8.7,
+   11.2
+  ],
+  "means": [
+   9.120000000000001,
+   12.48
+  ],
+  "rank_sums": [
+   177.0,
+   288.0
+  ],
+  "U1": 57.0,
+  "U2": 168.0,
+  "U": 57.0,
+  "mean_U": 112.5,
+  "sd_U": 24.101080244783994,
+  "z": 2.282055386787205,
+  "p": 0.02248607046979191,
+  "ties": 3,
+  "hodges_lehmann": -3.0999999999999996,
+  "prob_superiority": 0.25333333333333335,
+  "welch_t": -1.5671857392990927,
+  "welch_p": 0.12875322852775514,
+  "alpha": 0.05
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

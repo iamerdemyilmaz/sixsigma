@@ -1,0 +1,17 @@
+{
+ "id": "m11-mw-flatness",
+ "module": "11",
+ "kind": "mannwhitney",
+ "title": "Flatness from two fixtures, 15 parts each, Mann-Whitney U",
+ "source": "constructed",
+ "setting": "flatness of a milled face in \u00b5m (CMM to 0.1 \u00b5m) on 15 parts from each of two fixtures; right-skewed by construction",
+ "params": {
+  "alpha": 0.05,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 30
+}

@@ -973,6 +973,82 @@ def attribute_capability(n, d, params):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 11: chi-square test of independence, Mann-Whitney U, power at a
+# given sample size
+#   chisq        columns: row (labels) + one count column per category;
+#                params: columns (order), alpha, correction (Yates, default off)
+#   mannwhitney  columns group, x (two groups); asymptotic normal p with tie
+#                and continuity corrections (scipy method="asymptotic")
+#   power        params alpha, sides, delta, sigma, n (per group), design;
+#                z-approximation power in closed form, exact noncentral-t
+#                power as information only (info_power_nct)
+# --------------------------------------------------------------------------
+def chisq(cols, params):
+    labels = [str(v) for v in cols["row"]]
+    names = params.get("columns") or [c for c in cols if c != "row"]
+    obs = np.array([[cols[c][i] for c in names] for i in range(len(labels))], float)
+    alpha = params.get("alpha", 0.05)
+    chi2, p, dof, exp = stats.chi2_contingency(obs, correction=params.get("correction", False))
+    n = float(obs.sum()); r, c = obs.shape
+    contrib = (obs - exp) ** 2 / exp
+    out = {"rows": labels, "columns": names, "observed": obs.tolist(), "expected": exp.tolist(),
+           "row_totals": obs.sum(axis=1).tolist(), "col_totals": obs.sum(axis=0).tolist(), "n": int(n),
+           "row_proportions": (obs / obs.sum(axis=1, keepdims=True)).tolist(),
+           "col_overall_proportions": (obs.sum(axis=0) / n).tolist(),
+           "contributions": contrib.tolist(), "chi2": float(chi2), "df": int(dof), "p": float(p),
+           "chi2_crit": float(stats.chi2.ppf(1 - alpha, dof)), "alpha": alpha,
+           "cramer_v": math.sqrt(float(chi2) / (n * (min(r, c) - 1))), "min_expected": float(exp.min()),
+           "cells_expected_below_5": int((exp < 5).sum())}
+    return out
+
+
+def mannwhitney(cols, params):
+    df = pd.DataFrame({"g": cols["group"], "x": cols["x"]})
+    groups = list(dict.fromkeys(df.g))
+    a = df.x[df.g == groups[0]].values.astype(float); b = df.x[df.g == groups[1]].values.astype(float)
+    n1, n2 = len(a), len(b)
+    res = stats.mannwhitneyu(a, b, alternative="two-sided", method="asymptotic", use_continuity=True)
+    U1 = float(res.statistic); U2 = n1 * n2 - U1
+    allv = np.concatenate([a, b])
+    ranks = stats.rankdata(allv)
+    _, t = np.unique(allv, return_counts=True)
+    N = n1 + n2
+    mu = n1 * n2 / 2.0
+    sd = math.sqrt(n1 * n2 / 12.0 * ((N + 1) - float((t ** 3 - t).sum()) / (N * (N - 1))))
+    z = (max(U1, U2) - mu - 0.5) / sd
+    diffs = np.subtract.outer(a, b).ravel()
+    tw = stats.ttest_ind(a, b, equal_var=False)
+    out = {"groups": groups, "n": [n1, n2], "medians": [float(np.median(a)), float(np.median(b))],
+           "means": [float(a.mean()), float(b.mean())], "rank_sums": [float(ranks[:n1].sum()), float(ranks[n1:].sum())],
+           "U1": U1, "U2": U2, "U": min(U1, U2), "mean_U": mu, "sd_U": sd, "z": z, "p": float(res.pvalue),
+           "ties": int((t > 1).sum()), "hodges_lehmann": float(np.median(diffs)),
+           "prob_superiority": U1 / (n1 * n2), "welch_t": float(tw.statistic), "welch_p": float(tw.pvalue),
+           "alpha": params.get("alpha", 0.05)}
+    return out
+
+
+def power(params):
+    alpha, sides = params["alpha"], params.get("sides", 2)
+    delta, sigma, n = params["delta"], params["sigma"], params["n"]
+    two = params.get("design", "two-sample") == "two-sample"
+    mult = 2.0 if two else 1.0
+    za = float(stats.norm.ppf(1 - alpha / sides))
+
+    def pw(nn):
+        ncp = delta / sigma * math.sqrt(nn / mult)
+        return float(stats.norm.sf(za - ncp) + (stats.norm.sf(za + ncp) if sides == 2 else 0.0))
+    out = {"alpha": alpha, "sides": sides, "delta": delta, "sigma": sigma, "n": n, "design": params.get("design", "two-sample"),
+           "z_alpha": za, "ncp": delta / sigma * math.sqrt(n / mult), "power_z": pw(n), "beta_z": 1 - pw(n),
+           "effect_d": delta / sigma}
+    if "curve_n" in params:
+        out["curve_n"] = list(params["curve_n"]); out["curve_power"] = [pw(v) for v in params["curve_n"]]
+    dfree = 2 * n - 2 if two else n - 1
+    tcrit = stats.t.ppf(1 - alpha / sides, dfree)
+    out["info_power_nct"] = float(stats.nct.sf(tcrit, dfree, out["ncp"]))
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1047,6 +1123,12 @@ def compute_one(ex_id):
         res = capability_nonnormal(cols["x"], params)
     elif kind == "attribute_capability":
         res = attribute_capability(cols["n"], cols["defectives"], params)
+    elif kind == "chisq":
+        res = chisq(cols, params)
+    elif kind == "mannwhitney":
+        res = mannwhitney(cols, params)
+    elif kind == "power":
+        res = power(params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

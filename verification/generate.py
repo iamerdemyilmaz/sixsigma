@@ -704,6 +704,92 @@ register(id="m08-ex2-paint", module="08", kind="attribute_capability",
          columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_cn, _cd))])
 
 
+# ---------------------------------------------------------------------------
+# Module 11: Hypothesis testing (prefix m11-; m11-ttest2-pull and
+# m11-anova-machines were registered in Phase C and are taught here)
+# ---------------------------------------------------------------------------
+# The two supplier groups of m11-ttest2-pull as separate descriptive sets, for
+# the normality check on each group.
+register(id="m11-pull-a", module="11", kind="descriptive",
+         title="Supplier A pull strengths (the A group of m11-ttest2-pull)", source="constructed",
+         setting="12 solder-joint pull strengths in N from supplier A", params={"units": "N"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ta)])
+register(id="m11-pull-b", module="11", kind="descriptive",
+         title="Supplier B pull strengths (the B group of m11-ttest2-pull)", source="constructed",
+         setting="12 solder-joint pull strengths in N from supplier B", params={"units": "N"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_tb)])
+
+# Power of the pull-strength study at n = 12 per group for a 2.0 N difference,
+# and the sample size that would give 80 % power.
+register(id="m11-power-pull", module="11", kind="power",
+         title="Power of a two-sample t at n = 12 per group, delta 2.0 N, sigma 2.65 N",
+         source="arithmetic on the normal approximation (NIST 7.2.2.2 formula solved for power)",
+         setting="parameters only; sigma 2.65 N is the pooled sd of the pull-strength study rounded",
+         params={"alpha": 0.05, "sides": 2, "delta": 2.0, "sigma": 2.65, "n": 12, "design": "two-sample",
+                 "curve_n": [4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60]},
+         columns=None, rows=None)
+register(id="m11-samplesize-pull", module="11", kind="samplesize",
+         title="Sample size per group for delta 2.0 N, sigma 2.65 N, alpha 0.05 two-sided, power 0.80",
+         source="NIST 7.2.2.2 (S-B8) formula", setting="parameters only",
+         params={"alpha": 0.05, "beta": 0.20, "delta": 2.0, "sigma": 2.65, "sides": 2, "design": "two-sample"},
+         columns=None, rows=None)
+
+# Paired: cycle time at 12 assembly stations before and after a fixture change.
+_rng = np.random.default_rng(6)
+_pb = np.round(_rng.normal(48.0, 3.0, 12), 1); _pa = np.round(_pb - 1.6 + _rng.normal(0, 1.1, 12), 1)
+register(id="m11-paired-cycle", module="11", kind="paired",
+         title="Cycle time at 12 stations before and after a fixture change, paired t",
+         source="constructed", setting="manual assembly cycle time in s at 12 stations, each timed before and after a fixture change, stopwatch to 0.1 s",
+         params={"alpha": 0.05, "units": "s"},
+         columns=["pair", "before", "after"], rows=[[i + 1, float(b), float(a)] for i, (b, a) in enumerate(zip(_pb, _pa))])
+
+# One-sample: the Module 1 torque data against the 12.0 N·m target.
+_rng = np.random.default_rng(2)
+register(id="m11-ttest1-torque", module="11", kind="ttest1",
+         title="Tightening torque, 30 joints, one-sample t against the 12.0 N·m target",
+         source="constructed", setting="the Module 1 exercise data: tightening torque of a bolted joint, 12.0 ± 1.0 N·m, torque analyser to 0.01 N·m, 30 consecutive joints",
+         params={"mu0": 12.0, "alpha": 0.05, "units": "N·m"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 2)] for i, v in enumerate(_rng.normal(12.15, 0.28, 30))])
+
+# Chi-square: defect type by shift on a brazed assembly line.
+_rng = np.random.default_rng(1)
+_P3 = [[0.40, 0.30, 0.20, 0.10], [0.42, 0.28, 0.20, 0.10], [0.25, 0.30, 0.35, 0.10]]
+_obs3 = [list(map(int, _rng.multinomial(t, p))) for t, p in zip([120, 110, 95], _P3)]
+register(id="m11-chisq-shift", module="11", kind="chisq",
+         title="Defect type by shift, 3 x 4 contingency table",
+         source="constructed", setting="rejects on a brazed assembly line over a month, classified by defect type (porosity, crack, gap, other) and by shift",
+         params={"columns": ["Porosity", "Crack", "Gap", "Other"], "alpha": 0.05},
+         columns=["row", "Porosity", "Crack", "Gap", "Other"],
+         rows=[[nm] + o for nm, o in zip(["Day", "Evening", "Night"], _obs3)])
+
+# Mann-Whitney: flatness (lognormal) from two fixtures, 15 parts each.
+_rng = np.random.default_rng(39)
+_fa = np.round(np.exp(_rng.normal(np.log(8.0), 0.5, 15)), 1); _fb = np.round(np.exp(_rng.normal(np.log(12.0), 0.5, 15)), 1)
+register(id="m11-mw-flatness", module="11", kind="mannwhitney",
+         title="Flatness from two fixtures, 15 parts each, Mann-Whitney U",
+         source="constructed", setting="flatness of a milled face in µm (CMM to 0.1 µm) on 15 parts from each of two fixtures; right-skewed by construction",
+         params={"alpha": 0.05, "units": "µm"},
+         columns=["group", "x"], rows=[["F1", float(v)] for v in _fa] + [["F2", float(v)] for v in _fb])
+
+# Exercise 1: adhesive cure time from two ovens, 10 each, no real difference.
+_rng = np.random.default_rng(2)
+_o1 = np.round(_rng.normal(31.5, 1.8, 10), 1); _o2 = np.round(_rng.normal(32.3, 1.8, 10), 1)
+register(id="m11-ex1-cure", module="11", kind="ttest2",
+         title="Exercise 1: adhesive cure time from two ovens, two-sample t",
+         source="constructed", setting="time in min for an adhesive to reach handling strength, 10 samples cured in each of two ovens, timed to 0.1 min",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "min"},
+         columns=["group", "x"], rows=[["Oven 1", float(v)] for v in _o1] + [["Oven 2", float(v)] for v in _o2])
+
+# Exercise 2: leak location by braze fixture, 2 x 3, no evidence of association.
+_rng = np.random.default_rng(1)
+_obs2 = [list(map(int, _rng.multinomial(t, p))) for t, p in zip([60, 52], [[0.5, 0.3, 0.2], [0.45, 0.33, 0.22]])]
+register(id="m11-ex2-chisq-leak", module="11", kind="chisq",
+         title="Exercise 2: leak location by fixture, 2 x 3 contingency table",
+         source="constructed", setting="leak location (header joint, tube joint, baffle joint) of 112 leaking heat-exchanger cores, by the braze fixture they were built on",
+         params={"columns": ["Header", "Tube", "Baffle"], "alpha": 0.05},
+         columns=["row", "Header", "Tube", "Baffle"], rows=[[nm] + o for nm, o in zip(["Fixture A", "Fixture B"], _obs2)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

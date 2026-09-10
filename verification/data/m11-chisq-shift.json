@@ -1,0 +1,25 @@
+{
+ "id": "m11-chisq-shift",
+ "module": "11",
+ "kind": "chisq",
+ "title": "Defect type by shift, 3 x 4 contingency table",
+ "source": "constructed",
+ "setting": "rejects on a brazed assembly line over a month, classified by defect type (porosity, crack, gap, other) and by shift",
+ "params": {
+  "columns": [
+   "Porosity",
+   "Crack",
+   "Gap",
+   "Other"
+  ],
+  "alpha": 0.05
+ },
+ "columns": [
+  "row",
+  "Porosity",
+  "Crack",
+  "Gap",
+  "Other"
+ ],
+ "n_rows": 3
+}

@@ -1,0 +1,18 @@
+{
+ "id": "m11-ex1-cure",
+ "module": "11",
+ "kind": "ttest2",
+ "title": "Exercise 1: adhesive cure time from two ovens, two-sample t",
+ "source": "constructed",
+ "setting": "time in min for an adhesive to reach handling strength, 10 samples cured in each of two ovens, timed to 0.1 min",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "min"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 20
+}

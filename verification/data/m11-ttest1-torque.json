@@ -1,0 +1,18 @@
+{
+ "id": "m11-ttest1-torque",
+ "module": "11",
+ "kind": "ttest1",
+ "title": "Tightening torque, 30 joints, one-sample t against the 12.0 N\u00b7m target",
+ "source": "constructed",
+ "setting": "the Module 1 exercise data: tightening torque of a bolted joint, 12.0 \u00b1 1.0 N\u00b7m, torque analyser to 0.01 N\u00b7m, 30 consecutive joints",
+ "params": {
+  "mu0": 12.0,
+  "alpha": 0.05,
+  "units": "N\u00b7m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 30
+}

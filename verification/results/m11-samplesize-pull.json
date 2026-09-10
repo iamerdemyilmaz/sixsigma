@@ -1,0 +1,30 @@
+{
+ "id": "m11-samplesize-pull",
+ "kind": "samplesize",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.2,
+  "delta": 2.0,
+  "sigma": 2.65,
+  "sides": 2,
+  "design": "two-sample"
+ },
+ "source": "NIST 7.2.2.2 (S-B8) formula",
+ "results": {
+  "alpha": 0.05,
+  "beta": 0.2,
+  "power": 0.8,
+  "delta": 2.0,
+  "sigma": 2.65,
+  "sides": 2,
+  "design": "two-sample",
+  "z_alpha": 1.959963984540054,
+  "z_beta": 0.8416212335729143,
+  "n_z_exact": 27.559378967233236,
+  "n_z": 28,
+  "n_t": 29,
+  "info_power_nct": 0.8062899428140283
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

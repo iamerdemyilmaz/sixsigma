@@ -1,0 +1,17 @@
+{
+ "id": "m11-samplesize-pull",
+ "module": "11",
+ "kind": "samplesize",
+ "title": "Sample size per group for delta 2.0 N, sigma 2.65 N, alpha 0.05 two-sided, power 0.80",
+ "source": "NIST 7.2.2.2 (S-B8) formula",
+ "setting": "parameters only",
+ "params": {
+  "alpha": 0.05,
+  "beta": 0.2,
+  "delta": 2.0,
+  "sigma": 2.65,
+  "sides": 2,
+  "design": "two-sample"
+ },
+ "columns": null
+}

@@ -1,0 +1,23 @@
+{
+ "id": "m11-ex2-chisq-leak",
+ "module": "11",
+ "kind": "chisq",
+ "title": "Exercise 2: leak location by fixture, 2 x 3 contingency table",
+ "source": "constructed",
+ "setting": "leak location (header joint, tube joint, baffle joint) of 112 leaking heat-exchanger cores, by the braze fixture they were built on",
+ "params": {
+  "columns": [
+   "Header",
+   "Tube",
+   "Baffle"
+  ],
+  "alpha": 0.05
+ },
+ "columns": [
+  "row",
+  "Header",
+  "Tube",
+  "Baffle"
+ ],
+ "n_rows": 2
+}

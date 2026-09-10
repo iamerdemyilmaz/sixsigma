@@ -1,0 +1,16 @@
+{
+ "id": "m11-pull-a",
+ "module": "11",
+ "kind": "descriptive",
+ "title": "Supplier A pull strengths (the A group of m11-ttest2-pull)",
+ "source": "constructed",
+ "setting": "12 solder-joint pull strengths in N from supplier A",
+ "params": {
+  "units": "N"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 12
+}

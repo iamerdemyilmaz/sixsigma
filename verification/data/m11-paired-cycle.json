@@ -1,0 +1,18 @@
+{
+ "id": "m11-paired-cycle",
+ "module": "11",
+ "kind": "paired",
+ "title": "Cycle time at 12 stations before and after a fixture change, paired t",
+ "source": "constructed",
+ "setting": "manual assembly cycle time in s at 12 stations, each timed before and after a fixture change, stopwatch to 0.1 s",
+ "params": {
+  "alpha": 0.05,
+  "units": "s"
+ },
+ "columns": [
+  "pair",
+  "before",
+  "after"
+ ],
+ "n_rows": 12
+}

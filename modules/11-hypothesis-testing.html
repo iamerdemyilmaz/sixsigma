@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 11: Hypothesis testing · Six Sigma Course</title>
+<meta name="description" content="The logic of a statistical test, p-values and confidence intervals explained correctly, Type I and II errors, t-tests, paired t, one-way ANOVA, chi-square, tests for variances, normality tests, nonparametric alternatives, effect size, power and sample size, all worked on printed data.">
+<meta name="examples" content="m11-ttest2-pull, m11-pull-a, m11-pull-b, m11-paired-cycle, m11-ttest1-torque, m11-anova-machines, m11-chisq-shift, m11-mw-flatness, m11-power-pull, m11-samplesize-pull, chk-nist-samplesize, m11-ex1-cure, m11-ex2-chisq-leak">
+<!-- allowed-numbers: conventions and hand-arithmetic intermediates not stored in verification/results/.
+     Every intermediate was computed by the build script (m11_inter.py) from the results values before it was printed here. -->
+<meta name="allowed-numbers" content="0.05 0.01 0.10 0.20 0.80 0.90 0.95 0.975 1.96 1.645 1.282 0.842 0.8416 0.20 0.50 12.0 11.0 13.0 1.16 42.46 15.7 0.0027 0.025 2.00 0.30 0.70 0.06 0.6 -1.8 1.0 5.186 7.837 0.4322 0.6530 2.079 2.17 6.511 2.201 2.6 0.1287 0.13 13 3.110 0.5553 3.35 1.10 42.46 22.80 3.71 2.61 650 18.3 21.8 33.7 35.0 44.5 25.3 120 24.11 2.926 0.755 2.449 -0.111 7.849 1.7556 0.7460 44 26.79 50 38">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="11">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 11 · Analyze</p>
+    <h1>Hypothesis testing</h1>
+    <p class="lead">Two suppliers, two fixtures, two ovens: is the difference you see real, or is it the noise you would see anyway? A hypothesis test is the disciplined way to ask that question. It is also the most misread tool in the Green Belt kit, because a p-value does not say what most people think it says. This module builds the logic once, applies it to the six tests you will actually use, and insists on the two numbers that go next to every p-value: the size of the effect and the interval around it.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>State</strong> a null and an alternative hypothesis for a manufacturing question and say what a Type I and a Type II error would cost.</li>
+      <li><strong>Explain</strong> a p-value and a confidence interval correctly, and recognise the six common misreadings the ASA statement warns against.</li>
+      <li><strong>Run and read</strong> a two-sample t-test (Welch), a paired t-test, a one-sample t-test, a one-way ANOVA and a chi-square test of independence from printed data.</li>
+      <li><strong>Check</strong> the assumptions behind each test (normality, equal variances, independence) and choose a nonparametric alternative when they fail.</li>
+      <li><strong>Report</strong> an effect size and a confidence interval alongside every p-value, and separate statistical from practical significance.</li>
+      <li><strong>Compute</strong> the power of a planned comparison and the sample size it needs, and explain why a small study that "found nothing" proves nothing.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three questions on Module 1. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="11">
+      <fieldset class="q" data-answer="b">
+        <legend>1. The standard error of a mean from n values is</legend>
+        <label><input type="radio" name="p1" value="a"> s</label>
+        <label><input type="radio" name="p1" value="b"> s / √n</label>
+        <label><input type="radio" name="p1" value="c"> s / n</label>
+        <label><input type="radio" name="p1" value="d"> s²</label>
+        <p class="explain" hidden>Means of n values vary less than single values by the factor √n (Module 1, central limit theorem).</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. About what fraction of a normal distribution lies more than 1.96 standard deviations from the mean, both sides together?</legend>
+        <label><input type="radio" name="p2" value="a"> 0.3 %</label>
+        <label><input type="radio" name="p2" value="b"> 1 %</label>
+        <label><input type="radio" name="p2" value="c"> 5 %</label>
+        <label><input type="radio" name="p2" value="d"> 32 %</label>
+        <p class="explain" hidden>2.5 % in each tail; this is where the 0.05 convention comes from.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. The sample standard deviation of a right-skewed characteristic such as flatness</legend>
+        <label><input type="radio" name="p3" value="a"> is dominated by the few large values in the tail</label>
+        <label><input type="radio" name="p3" value="b"> equals the mean</label>
+        <label><input type="radio" name="p3" value="c"> cannot be computed</label>
+        <label><input type="radio" name="p3" value="d"> is smaller than for a normal distribution with the same range</label>
+        <p class="explain" hidden>Modules 1 and 8; the reason rank-based tests exist.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>In 2016 the American Statistical Association did something it had never done: it issued a formal statement on a single statistical method, because the method was being misused so widely that the association judged it a threat to the credibility of science. The statement on p-values sets out six principles. A p-value indicates how incompatible the data are with a specified statistical model. It does not measure the probability that the hypothesis is true, or the probability that the data were produced by chance alone. Scientific and business conclusions should not be based only on whether a p-value passes a threshold. Proper inference requires full reporting. A p-value does not measure the size of an effect or the importance of a result. And by itself a p-value is not a good measure of evidence.<sup class="cite"><a href="#ref-1">[1]</a></sup> Every one of those six has a manufacturing version, and this module is organised so that you cannot commit any of them without noticing.</p>
+    <p><em>The following is an illustrative failure with invented details, not a real program.</em> A Green Belt project changes a braze fixture. The leak rate over the two weeks before was 2.3 %, and over the two weeks after it is 1.9 %. The team's report shows two bars and the word "improved". A quality engineer asks how many cores were tested: about 800 in each period, so 18 leakers before and 15 after. A two-proportion test gives p = 0.6; the 95 % interval on the change runs from about −1.8 to +1.0 percentage points, that is, from a substantial improvement to a moderate worsening. The fixture may well be better. The data cannot tell, and the report should have said so, together with the number of cores it would take to find out (Module 8 did that arithmetic for a similar case: several thousand). The test is not there to bless the bar chart. It is there to tell you whether you have enough evidence to act, and if not, how much more you need.</p>
+    <p>Everything that follows is taught with the ASQ Green Belt body of knowledge in mind, which lists one- and two-sample tests, paired tests, ANOVA, chi-square, tests of proportions and variances, and nonparametric methods.<sup class="cite"><a href="#ref-14">[14]</a></sup> This is not a certification course, but you will find nothing here that a Green Belt exam would not expect you to know.</p>
+
+    <h2 id="logic">The logic of a test</h2>
+    <p>A hypothesis test starts from a statement you would like to disprove, the <strong>null hypothesis</strong> H₀: the two suppliers have the same mean pull strength; the fixture change did nothing; defect type does not depend on shift. The <strong>alternative</strong> H₁ is what you would conclude if the null fails. You collect data, compute a <strong>test statistic</strong> that measures how far the data sit from what H₀ predicts, in units of the noise, and then ask one precise question:</p>
+    <div class="formula">p-value = the probability of obtaining a test statistic at least as extreme as the one observed, <em>if H₀ were true</em> and the model's assumptions held.
+      <span class="where">It is a statement about the data given the hypothesis, never about the hypothesis given the data. A p-value of 0.01 means "data this extreme would arise about once in a hundred repetitions of this experiment on a process where H₀ is true"; it does not mean "there is a 1 % chance H₀ is true".</span>
+    </div>
+    <p>Before looking at the data you choose a significance level α, conventionally 0.05, and you reject H₀ if p &lt; α. That decision can go wrong in two ways, and the two are not symmetric.</p>
+    <figure>
+      <svg viewBox="0 0 660 230" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">The four outcomes of a test: correct decisions, Type I and Type II errors</title>
+        <desc id="fig1-d">A two-by-two grid. Columns: H0 is actually true, H0 is actually false. Rows: the test rejects H0, the test does not reject H0. Rejecting a true H0 is a Type I error with probability alpha; failing to reject a false H0 is a Type II error with probability beta; the other two cells are correct decisions, and the lower-right correct rejection has probability 1 minus beta, the power.</desc>
+        <g class="chart-text small muted">
+          <text x="345" y="18" text-anchor="middle">The truth about the process</text>
+          <text x="20" y="130" text-anchor="middle" transform="rotate(-90 20 130)">What the test says</text>
+        </g>
+        <g class="chart-title">
+          <text x="250" y="42" text-anchor="middle">H₀ is true (no difference)</text>
+          <text x="500" y="42" text-anchor="middle">H₀ is false (a real difference)</text>
+          <text x="105" y="98" text-anchor="end">Reject H₀ (p &lt; α)</text>
+          <text x="105" y="178" text-anchor="end">Do not reject H₀</text>
+        </g>
+        <g class="chart-box">
+          <rect x="125" y="60" width="250" height="70"/><rect x="375" y="60" width="250" height="70"/>
+          <rect x="125" y="130" width="250" height="70"/><rect x="375" y="130" width="250" height="70"/>
+        </g>
+        <g class="chart-text">
+          <text x="250" y="88" text-anchor="middle" class="chart-text bad">Type I error: a false alarm</text>
+          <text x="250" y="108" text-anchor="middle" class="chart-text small">probability α (you chose it)</text>
+          <text x="500" y="88" text-anchor="middle" class="chart-text accent">Correct: the difference is found</text>
+          <text x="500" y="108" text-anchor="middle" class="chart-text small">probability 1 − β, the power</text>
+          <text x="250" y="158" text-anchor="middle" class="chart-text accent">Correct: no false alarm</text>
+          <text x="250" y="178" text-anchor="middle" class="chart-text small">probability 1 − α</text>
+          <text x="500" y="158" text-anchor="middle" class="chart-text bad">Type II error: a missed difference</text>
+          <text x="500" y="178" text-anchor="middle" class="chart-text small">probability β (depends on n, σ and the size of the difference)</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. The two ways a test goes wrong. α is set by you; β is set by the sample size, the noise and how large the real difference is. A small study has a large β, which is why "not significant" is not "no difference".</figcaption>
+    </figure>
+    <p>In a plant, a Type I error means changing a process, a supplier or a fixture for no reason: cost, disruption, and a story that "the data said so". A Type II error means leaving a real problem in place because the study was too small to see it. Six Sigma culture worries about the first; in practice the second is far more common, because studies are small and nobody computes β. The section on power at the end of this module is the antidote.</p>
+
+    <h2 id="pci">p-values and confidence intervals, read correctly</h2>
+    <p>A p-value answers a yes/no question and throws away the magnitude. The <strong>confidence interval</strong> keeps it. A 95 % confidence interval for a difference is a range computed from the data by a procedure that, in repeated sampling from the same process, would cover the true difference 95 % of the time. It is not a statement that the true difference has a 95 % probability of lying in this particular range; the true difference is a fixed number, and the interval is what varies. In practice the interval is read as the set of true differences that the data are compatible with at the 5 % level, which is exactly the information a decision needs: if the whole interval is inside the range you do not care about, the difference does not matter even if p is small; if the interval spans both "harmless" and "serious", you do not know yet, whatever p says.</p>
+    <p>Three numbers therefore go on every report of a comparison: the estimate of the difference in engineering units, its confidence interval, and the p-value. A fourth is useful when the units are unfamiliar: a standardised <strong>effect size</strong>. For a difference of means the usual one is Cohen's d, the difference divided by the pooled standard deviation. Cohen's descriptive labels (0.2 small, 0.5 medium, 0.8 large) come from behavioural science and were offered by Cohen himself as a last resort when nothing better is known; in engineering the better reference is the tolerance or the customer's requirement, not the label.<sup class="cite"><a href="#ref-13">[13]</a></sup></p>
+    <div class="formula">Cohen's d = (x̄₁ − x̄₂) / s<sub>p</sub>, &nbsp; s<sub>p</sub> = √[ ((n₁ − 1)s₁² + (n₂ − 1)s₂²) / (n₁ + n₂ − 2) ]
+      <span class="where">The pooled standard deviation weights each group's variance by its degrees of freedom. d is a difference in standard-deviation units.</span>
+    </div>
+
+    <h2 id="ttest2">Two independent samples: the t-test</h2>
+    <p>The workhorse. Two groups, each a sample of a continuous characteristic; is the mean different? The statistic is the observed difference divided by its standard error. Welch's version, which does not assume the two groups have the same variance, is the default in this course and in most modern software, because it costs almost nothing when the variances are equal and protects you when they are not.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
+    <div class="formula">t = (x̄₁ − x̄₂) / √( s₁²/n₁ + s₂²/n₂ ), &nbsp; with Welch's degrees of freedom &nbsp; ν = (s₁²/n₁ + s₂²/n₂)² / [ (s₁²/n₁)²/(n₁ − 1) + (s₂²/n₂)²/(n₂ − 1) ]
+      <span class="where">The p-value is the two-sided tail area of the t distribution with ν degrees of freedom beyond |t|. The 95 % interval on the difference is (x̄₁ − x̄₂) ± t<sub>0.975, ν</sub> × standard error. The classical pooled-variance test replaces the standard error by s<sub>p</sub>√(1/n₁ + 1/n₂) with n₁ + n₂ − 2 degrees of freedom; when the variances are similar the two agree closely.</span>
+    </div>
+
+    <h3 id="example1">Worked example 1: pull strength from two suppliers</h3>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. Setting: the pull strength in N of a soldered terminal, 12 joints made with supplier A's terminals and 12 with supplier B's, pulled on a tester reading to 0.1 N, in randomised order on the same day.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Pull strength, N, twelve joints per supplier (constructed data).</caption><thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead><tbody>
+<tr><td>A</td><td>44.1</td><td>46.7</td><td>45.8</td><td>46.1</td><td>46.4</td><td>44.9</td><td>42.4</td><td>45.9</td><td>44.2</td><td>50.0</td><td>45.9</td><td>50.4</td></tr>
+<tr><td>B</td><td>49.7</td><td>52.0</td><td>48.3</td><td>46.2</td><td>50.5</td><td>52.2</td><td>46.8</td><td>50.4</td><td>46.9</td><td>49.0</td><td>43.5</td><td>52.8</td></tr>
+</tbody></table></div>
+    <p><strong>Step 1, look.</strong> Supplier A: mean <span data-ex="m11-pull-a" data-key="descriptive.mean" data-dp="2">46.07</span> N, s = <span data-ex="m11-pull-a" data-key="descriptive.s" data-dp="3">2.277</span> N, range <span data-ex="m11-pull-a" data-key="descriptive.min" data-dp="1">42.4</span> to <span data-ex="m11-pull-a" data-key="descriptive.max" data-dp="1">50.4</span>. Supplier B: mean <span data-ex="m11-pull-b" data-key="descriptive.mean" data-dp="2">49.02</span> N, s = <span data-ex="m11-pull-b" data-key="descriptive.s" data-dp="3">2.799</span> N, range <span data-ex="m11-pull-b" data-key="descriptive.min" data-dp="1">43.5</span> to <span data-ex="m11-pull-b" data-key="descriptive.max" data-dp="1">52.8</span>. B is about 3 N stronger on average and slightly more variable. Dot plots of the two groups (Module 9) overlap substantially; the question is whether a 3 N gap between means of 12 is more than noise.</p>
+    <p><strong>Step 2, assumptions.</strong> The t-test assumes each group is a random sample from a roughly normal distribution and that the groups are independent. Anderson-Darling on A: A² = <span data-ex="m11-pull-a" data-key="descriptive.ad_A2" data-dp="2">0.57</span>, p = <span data-ex="m11-pull-a" data-key="descriptive.ad_p" data-dp="2">0.11</span>; on B: A² = <span data-ex="m11-pull-b" data-key="descriptive.ad_A2" data-dp="2">0.21</span>, p = <span data-ex="m11-pull-b" data-key="descriptive.ad_p" data-dp="2">0.81</span>. No evidence against normality in either group, which with 12 values is also not strong evidence for it; the t-test is tolerant of moderate non-normality at these sizes. Levene's test for equal variances: W = <span data-ex="m11-ttest2-pull" data-key="variance_tests.levene_W" data-dp="2">1.22</span>, p = <span data-ex="m11-ttest2-pull" data-key="variance_tests.levene_p" data-dp="2">0.28</span>; the F ratio of the variances is <span data-ex="m11-ttest2-pull" data-key="variance_tests.F" data-dp="2">0.66</span> (p = <span data-ex="m11-ttest2-pull" data-key="variance_tests.F_p" data-dp="2">0.50</span>). Nothing suggests unequal spread, and Welch's test does not need the assumption anyway.</p>
+    <p><strong>Step 3, the test.</strong> Difference A − B = <span data-ex="m11-ttest2-pull" data-key="diff" data-dp="3">−2.958</span> N. Standard error = √(5.186/12 + 7.837/12) = √(0.4322 + 0.6530) = <span data-ex="m11-ttest2-pull" data-key="welch.se" data-dp="4">1.0417</span> N. t = −2.958 / 1.0417 = <span data-ex="m11-ttest2-pull" data-key="welch.t" data-dp="3">−2.840</span> on ν = <span data-ex="m11-ttest2-pull" data-key="welch.df" data-dp="1">21.1</span> degrees of freedom, p = <span data-ex="m11-ttest2-pull" data-key="welch.p" data-dp="4">0.0098</span>. The pooled test gives the same t on 22 degrees of freedom and p = <span data-ex="m11-ttest2-pull" data-key="pooled.p" data-dp="4">0.0095</span>; the two agree because the variances are similar and the groups are equal in size.</p>
+    <p><strong>Step 4, size and interval.</strong> The 95 % interval on the difference is −2.958 ± 2.079 × 1.0417 = −2.958 ± 2.17, that is <span data-ex="m11-ttest2-pull" data-key="welch.ci.0" data-dp="2">−5.12</span> to <span data-ex="m11-ttest2-pull" data-key="welch.ci.1" data-dp="2">−0.79</span> N. Pooled s<sub>p</sub> = √6.511 = <span data-ex="m11-ttest2-pull" data-key="pooled.sp" data-dp="3">2.552</span> N, so d = −2.958 / 2.552 = <span data-ex="m11-ttest2-pull" data-key="cohen_d" data-dp="2">−1.16</span>: a difference of more than one standard deviation, large by any label.</p>
+    <p><strong>Step 5, the sentence.</strong> "Supplier B's joints pulled −3.0 N stronger on average (95 % interval −5.1 to −0.8 N in favour of B; Welch t = −2.84, ν = 21.1, p = 0.010; d = −1.16). Data this far apart would arise in about 1 % of studies of this size if the suppliers were truly equal." Whether −3.0 N matters is an engineering question: if the drawing minimum is 40 N and both suppliers sit well above it, the difference is real and irrelevant; if the minimum is 45 N, supplier A's lower tail is a problem and B is the answer. The test does not know which. You do.</p>
+
+    <h3 id="calc-tests">Calculator: t-tests and one-way ANOVA</h3>
+    <p>Pre-loaded with Table 1. The output prints the p-value sentence in the correct form, both the Welch and pooled results, the interval and d. Switch the mode to run the paired and one-sample tests and ANOVA on the same page.</p>
+    <div class="calc" data-calc="tests" id="calc-tests-pull">
+      <h3>Hypothesis tests calculator</h3>
+      <script type="application/json" class="calc-data">{"mode":"ttest2","alpha":0.05,"lines":["A 44.1 46.7 45.8 46.1 46.4 44.9 42.4 45.9 44.2 50.0 45.9 50.4","B 49.7 52.0 48.3 46.2 50.5 52.2 46.8 50.4 46.9 49.0 43.5 52.8"]}</script>
+    </div>
+
+    <h2 id="paired">Paired samples</h2>
+    <p>When the same units are measured twice, before and after a change, the two measurements are not independent: a station that was slow before is probably slow after. Comparing the two columns with a two-sample t-test throws that information away and buries the change under the station-to-station spread. The paired t-test works on the differences instead, one per unit, and tests whether their mean is zero. It is simply a one-sample t-test on the differences.</p>
+    <div class="formula">d<sub>i</sub> = after<sub>i</sub> − before<sub>i</sub>; &nbsp; t = d̄ / (s<sub>d</sub> / √n), &nbsp; n − 1 degrees of freedom; &nbsp; 95 % interval d̄ ± t<sub>0.975, n−1</sub> s<sub>d</sub>/√n
+      <span class="where">s<sub>d</sub> is the standard deviation of the n differences. Pairing removes the between-unit variation from the noise; the price is that only n differences count, not 2n values.</span>
+    </div>
+
+    <h3 id="example2">Worked example 2: cycle time before and after a fixture change</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the manual assembly cycle time in seconds at 12 stations, each timed with a stopwatch to 0.1 s before and after a new locating fixture was fitted, same operators, same shift.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 2. Cycle time, s, at 12 stations before and after the fixture change (constructed data), with the difference for each station.</caption><thead><tr><th>Pair</th><th>Before</th><th>After</th><th>Difference (after − before)</th></tr></thead><tbody>
+<tr><td>1</td><td>51.2</td><td>48.7</td><td>−2.5</td></tr>
+<tr><td>2</td><td>53.3</td><td>52.1</td><td>−1.2</td></tr>
+<tr><td>3</td><td>40.3</td><td>38.1</td><td>−2.2</td></tr>
+<tr><td>4</td><td>47.6</td><td>47.4</td><td>−0.2</td></tr>
+<tr><td>5</td><td>51.0</td><td>50.8</td><td>−0.2</td></tr>
+<tr><td>6</td><td>52.1</td><td>52.5</td><td>+0.4</td></tr>
+<tr><td>7</td><td>50.0</td><td>48.4</td><td>−1.6</td></tr>
+<tr><td>8</td><td>52.5</td><td>52.4</td><td>−0.1</td></tr>
+<tr><td>9</td><td>48.9</td><td>46.3</td><td>−2.6</td></tr>
+<tr><td>10</td><td>49.7</td><td>47.2</td><td>−2.5</td></tr>
+<tr><td>11</td><td>48.5</td><td>47.0</td><td>−1.5</td></tr>
+<tr><td>12</td><td>44.8</td><td>43.5</td><td>−1.3</td></tr>
+</tbody></table></div>
+    <p>Mean before <span data-ex="m11-paired-cycle" data-key="mean_before" data-dp="2">49.16</span> s, mean after <span data-ex="m11-paired-cycle" data-key="mean_after" data-dp="2">47.87</span> s. The differences have mean d̄ = <span data-ex="m11-paired-cycle" data-key="mean" data-dp="3">−1.292</span> s and s<sub>d</sub> = <span data-ex="m11-paired-cycle" data-key="s" data-dp="3">1.056</span> s; standard error 1.056/√12 = <span data-ex="m11-paired-cycle" data-key="se" data-dp="4">0.3049</span> s; t = −1.292 / 0.3049 = <span data-ex="m11-paired-cycle" data-key="t" data-dp="2">−4.24</span> on 11 degrees of freedom, p = <span data-ex="m11-paired-cycle" data-key="p" data-dp="4">0.0014</span>. The 95 % interval on the mean saving is −1.292 ± 2.201 × 0.3049 = <span data-ex="m11-paired-cycle" data-key="ci.0" data-dp="2">−1.96</span> to <span data-ex="m11-paired-cycle" data-key="ci.1" data-dp="2">−0.62</span> s; d (on the differences) = <span data-ex="m11-paired-cycle" data-key="cohen_d" data-dp="2">−1.22</span>. The fixture saves about 2.6 % of the cycle, and the data are quite clear about it: eleven of the twelve stations got faster, and the one that did not changed by less than half a second.</p>
+    <p>Run the same numbers as a two-sample test (the "before" column against the "after" column) and the station-to-station spread of more than 3 s swamps a 1.3 s change: the p-value rises to about 0.4 and you would report no evidence of improvement. The pairing is the analysis. Note also what the test does not tell you: whether the saving persists after the novelty wears off, and whether the operators worked faster because they were being timed. A control chart of cycle time over the following weeks (Module 16) answers the first.</p>
+    <div class="calc" data-calc="tests" id="calc-tests-paired">
+      <h3>Table 2 in the calculator, paired mode (inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"mode":"paired","alpha":0.05,"lines":["before 51.2 53.3 40.3 47.6 51.0 52.1 50.0 52.5 48.9 49.7 48.5 44.8","after 48.7 52.1 38.1 47.4 50.8 52.5 48.4 52.4 46.3 47.2 47.0 43.5"],"collapsed":true}</script>
+    </div>
+
+    <h2 id="ttest1">One sample against a target</h2>
+    <p>Is the process on target? The one-sample t-test compares a sample mean with a stated value μ₀: t = (x̄ − μ₀)/(s/√n) on n − 1 degrees of freedom. The NIST handbook's worked example of this test is the reference for its form.<sup class="cite"><a href="#ref-3">[3]</a></sup> The interesting thing about it in a plant is how often it is significant and irrelevant at the same time.</p>
+    <p><span class="example-label">Constructed data: the Module 1 torque exercise.</span> Thirty tightening torques with a target of 12.0 N·m and a tolerance of ±1.0 N·m: mean <span data-ex="m11-ttest1-torque" data-key="mean" data-dp="4">12.1287</span> N·m, s = <span data-ex="m11-ttest1-torque" data-key="s" data-dp="4">0.2854</span>, standard error <span data-ex="m11-ttest1-torque" data-key="se" data-dp="4">0.0521</span>; t = 0.1287 / 0.0521 = <span data-ex="m11-ttest1-torque" data-key="t" data-dp="2">2.47</span>, p = <span data-ex="m11-ttest1-torque" data-key="p" data-dp="3">0.020</span>; 95 % interval for the mean <span data-ex="m11-ttest1-torque" data-key="ci.0" data-dp="3">12.022</span> to <span data-ex="m11-ttest1-torque" data-key="ci.1" data-dp="3">12.235</span> N·m; d = <span data-ex="m11-ttest1-torque" data-key="cohen_d" data-dp="2">0.45</span>. Statistically, the mean is not 12.0: the offset of 12.13 − 12.0 = 0.13 N·m is about two and a half standard errors from zero. Practically, the offset is 13 % of the half-tolerance, and whether that is worth a tool adjustment depends on the joint, not on the p-value. This is the ASA's fifth principle in one example: p measures the evidence for an offset, not its size.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+
+    <h2 id="anova">Several groups: one-way ANOVA</h2>
+    <p>Three machines, four cavities, five operators: are the means all the same? Running t-tests on every pair inflates the Type I error (six comparisons at α = 0.05 gives roughly a one in four chance of at least one false alarm). Analysis of variance tests all the means at once by splitting the total variation into a between-group part and a within-group part and comparing them.</p>
+    <div class="formula">SS<sub>between</sub> = Σ n<sub>j</sub>(x̄<sub>j</sub> − x̄̄)², df = k − 1; &nbsp; SS<sub>within</sub> = Σ Σ (x<sub>ij</sub> − x̄<sub>j</sub>)², df = N − k; &nbsp; F = MS<sub>between</sub> / MS<sub>within</sub> = (SS<sub>between</sub>/(k − 1)) / (SS<sub>within</sub>/(N − k))
+      <span class="where">k groups, N values in total. Under H₀ (all means equal) F is about 1; a large F says the group means spread more than the within-group noise would explain. The p-value is the upper tail of the F distribution with (k − 1, N − k) degrees of freedom. η² = SS<sub>between</sub>/SS<sub>total</sub> is the fraction of variation explained by the grouping, the ANOVA effect size.</span>
+    </div>
+
+    <h3 id="example3">Worked example 3: cycle time on three machines</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the cycle time in s of the same operation on three nominally identical machines, ten cycles each, timed to 0.1 s.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Cycle time, s, ten cycles on each of three machines (constructed data).</caption><thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>M1</td><td>42.0</td><td>41.9</td><td>42.6</td><td>43.0</td><td>42.3</td><td>42.7</td><td>41.9</td><td>43.0</td><td>41.8</td><td>41.2</td></tr>
+<tr><td>M2</td><td>43.1</td><td>41.6</td><td>41.5</td><td>41.8</td><td>43.1</td><td>43.0</td><td>41.6</td><td>40.0</td><td>41.0</td><td>41.8</td></tr>
+<tr><td>M3</td><td>43.0</td><td>42.8</td><td>42.5</td><td>43.3</td><td>43.2</td><td>41.8</td><td>42.4</td><td>43.3</td><td>43.8</td><td>43.4</td></tr>
+</tbody></table></div>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. One-way ANOVA of Table 3. Every entry computed from the data; the arithmetic uses rounded intermediates.</caption>
+        <thead><tr><th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p</th></tr></thead>
+        <tbody>
+          <tr><td>Between machines</td><td class="num"><span data-ex="m11-anova-machines" data-key="ss_between" data-dp="3">6.221</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="df_between" data-dp="0">2</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="ms_between" data-dp="3">3.110</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="F" data-dp="2">5.60</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="p" data-dp="4">0.0092</span></td></tr>
+          <tr><td>Within machines (error)</td><td class="num"><span data-ex="m11-anova-machines" data-key="ss_within" data-dp="3">14.994</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="df_within" data-dp="0">27</span></td><td class="num"><span data-ex="m11-anova-machines" data-key="ms_within" data-dp="4">0.5553</span></td><td></td><td></td></tr>
+          <tr><td>Total</td><td class="num"><span data-ex="m11-anova-machines" data-key="ss_total" data-dp="3">21.215</span></td><td class="num">29</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Means <span data-ex="m11-anova-machines" data-key="means.0" data-dp="2">42.24</span>, <span data-ex="m11-anova-machines" data-key="means.1" data-dp="2">41.85</span> and <span data-ex="m11-anova-machines" data-key="means.2" data-dp="2">42.95</span> s; grand mean <span data-ex="m11-anova-machines" data-key="grand_mean" data-dp="3">42.347</span> s. F = 3.110 / 0.5553 = 5.60 against a 5 % critical value of 3.35 on (2, 27) degrees of freedom; p = 0.0092. η² = 6.221 / 21.215 = <span data-ex="m11-anova-machines" data-key="eta2" data-dp="2">0.29</span>: the machine identity explains about 29 % of the variation in cycle time, and the within-machine standard deviation (√MS<sub>within</sub>) is <span data-ex="m11-anova-machines" data-key="pooled_sd" data-dp="3">0.745</span> s. Levene's test on the three spreads: p = <span data-ex="m11-anova-machines" data-key="levene_p" data-dp="2">0.42</span>, so the equal-variance assumption behind the F test is not contradicted.</p>
+    <p>ANOVA says the means are not all equal. It does not say which ones differ. Machine 3 is 1.10 s slower than machine 2 and the obvious next step is to compare pairs, but each pairwise comparison after a significant F must use a multiple-comparison method (Tukey's is the standard) so that the family of comparisons keeps its 5 % error rate; any statistics package provides it (this course's calculator stops at the F test and η², deliberately, and says so). The engineering question, as always, is different: why is machine 3 slower, and does 1.1 s matter against the takt time (Module 2)?</p>
+    <div class="calc" data-calc="tests" id="calc-tests-anova">
+      <h3>Table 3 in the calculator, ANOVA mode (inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"mode":"anova1","alpha":0.05,"lines":["M1 42.0 41.9 42.6 43.0 42.3 42.7 41.9 43.0 41.8 41.2","M2 43.1 41.6 41.5 41.8 43.1 43.0 41.6 40.0 41.0 41.8","M3 43.0 42.8 42.5 43.3 43.2 41.8 42.4 43.3 43.8 43.4"],"collapsed":true}</script>
+    </div>
+
+    <h2 id="chisq">Counts in categories: the chi-square test</h2>
+    <p>Defect type by shift, leak location by fixture, pass/fail by supplier: when both variables are categories the data are a table of counts, and the question is whether the row variable and the column variable are associated. Pearson's chi-square test compares each observed count with the count expected if the rows and columns were independent.<sup class="cite"><a href="#ref-10">[10]</a></sup></p>
+    <div class="formula">E<sub>ij</sub> = (row total<sub>i</sub> × column total<sub>j</sub>) / N; &nbsp; χ² = Σ (O<sub>ij</sub> − E<sub>ij</sub>)² / E<sub>ij</sub>; &nbsp; df = (rows − 1)(columns − 1)
+      <span class="where">The p-value is the upper tail of the chi-square distribution with df degrees of freedom. The approximation is trusted when every expected count is at least about 5. Cramér's V = √[χ² / (N × (min(rows, columns) − 1))] is an effect size on a 0 to 1 scale.<sup class="cite"><a href="#ref-11">[11]</a></sup> For a 2 × 2 table the test is equivalent to a two-proportion z-test.</span>
+    </div>
+
+    <h3 id="example4">Worked example 4: defect type by shift</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: every reject on a brazed assembly line over a month, classified by defect type and by the shift that made it.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 5. Rejects by defect type and shift (constructed data), observed counts.</caption><thead><tr><th>Shift</th><th>Porosity</th><th>Crack</th><th>Gap</th><th>Other</th></tr></thead><tbody>
+<tr><td>Day</td><td>42</td><td>41</td><td>22</td><td>15</td></tr>
+<tr><td>Evening</td><td>49</td><td>22</td><td>24</td><td>15</td></tr>
+<tr><td>Night</td><td>24</td><td>27</td><td>32</td><td>12</td></tr>
+</tbody></table></div>
+    <p>Row totals <span data-ex="m11-chisq-shift" data-key="row_totals.0" data-dp="0">120</span>, <span data-ex="m11-chisq-shift" data-key="row_totals.1" data-dp="0">110</span> and <span data-ex="m11-chisq-shift" data-key="row_totals.2" data-dp="0">95</span>; column totals <span data-ex="m11-chisq-shift" data-key="col_totals.0" data-dp="0">115</span>, <span data-ex="m11-chisq-shift" data-key="col_totals.1" data-dp="0">90</span>, <span data-ex="m11-chisq-shift" data-key="col_totals.2" data-dp="0">78</span> and <span data-ex="m11-chisq-shift" data-key="col_totals.3" data-dp="0">42</span>; N = <span data-ex="m11-chisq-shift" data-key="n" data-dp="0">325</span>. If defect type did not depend on shift, the day shift would show 120 × 115 / 325 = 42.46 porosity rejects (it shows <span data-ex="m11-chisq-shift" data-key="observed.0.0" data-dp="0">42</span>) and the night shift 95 × 78 / 325 = 22.80 gap rejects (it shows <span data-ex="m11-chisq-shift" data-key="observed.2.2" data-dp="0">32</span>). The largest contributions to χ² come from exactly those cells: night-shift gap (3.71) and evening-shift porosity (2.61). In all, χ² = <span data-ex="m11-chisq-shift" data-key="chi2" data-dp="2">15.15</span> on <span data-ex="m11-chisq-shift" data-key="df" data-dp="0">6</span> degrees of freedom against a 5 % critical value of <span data-ex="m11-chisq-shift" data-key="chi2_crit" data-dp="2">12.59</span>; p = <span data-ex="m11-chisq-shift" data-key="p" data-dp="3">0.019</span>; the smallest expected count is <span data-ex="m11-chisq-shift" data-key="min_expected" data-dp="1">12.3</span>, so the approximation is safe. Cramér's V = √(15.15 / 650) = <span data-ex="m11-chisq-shift" data-key="cramer_v" data-dp="2">0.15</span>, a weak association overall.</p>
+    <p>What it means: the mix of defects differs by shift, and the table says where. Gap defects are 18.3 % of day-shift rejects, 21.8 % of evening and 33.7 % of night; porosity runs the other way (35.0, 44.5, 25.3 %). That is a lead, not a cause: the night shift may set fixtures differently, or run a different furnace, or simply classify defects differently (Module 4's attribute agreement analysis is how you check the last one). Note also what the test compares: the <em>mix</em> of defect types among rejects, not the reject rate. A shift with twice the rejects and the same mix would show nothing here; that question is a p chart or a two-proportion test.</p>
+
+    <h2 id="variances">Tests for variances</h2>
+    <p>Sometimes the spread is the question: does the new fixture reduce variation, are two gauges equally repeatable? The classical F test compares two variances by their ratio, F = s₁²/s₂², against the F distribution with (n₁ − 1, n₂ − 1) degrees of freedom. It is exact for normal data and badly wrong for anything else, because a variance ratio is very sensitive to tails. Levene's test, which runs an ANOVA on the absolute deviations of each value from its group centre (the median, in the robust version used here), is far less sensitive to non-normality and is the one to report.<sup class="cite"><a href="#ref-5">[5]</a></sup> In worked example 1 the F ratio was 0.66 (p = 0.50) and Levene's W was 1.22 (p = 0.28); they agree here because the data are close to normal. Because Welch's t-test does not assume equal variances, the variance test is not a gate before the t-test; it is a question in its own right.</p>
+
+    <h2 id="normality">Normality tests, and what they are for</h2>
+    <p>Two tests dominate the software menus. The Shapiro-Wilk test compares the ordered sample with what a normal sample would look like and is the most powerful general test at small n.<sup class="cite"><a href="#ref-6">[6]</a></sup> The Anderson-Darling test measures the distance between the empirical and the fitted normal cumulative distribution, weighted toward the tails, and is the default in most SPC software; the p-values in this course come from the adjusted statistic A* = A²(1 + 0.75/n + 2.25/n²) with the approximation tabulated by Stephens.<sup class="cite"><a href="#ref-7">[7]</a><a href="#ref-8">[8]</a></sup></p>
+    <p>Three cautions. A normality test can only reject; a p of 0.8 on 12 values says the sample is not obviously non-normal, which is faint praise. With hundreds of values the test rejects for departures too small to matter to a t-test, whose robustness comes from the central limit theorem (Module 1). And a rejection is a question, not a verdict: Module 8's flatness data failed the test because the characteristic is bounded, and Wheeler's point that non-normal-looking data are usually inhomogeneous data applies to test inputs as much as to capability studies. Look at the histogram and the time order before you believe either the test or its p-value.</p>
+
+    <h2 id="nonparam">When the assumptions fail: rank-based tests</h2>
+    <p>For skewed data, data with outliers, or ordinal ratings, the mean is a poor summary and the t-test's p-value is unreliable at small n. Rank-based tests replace the values by their ranks and ask whether one group tends to have larger values than the other. The two-sample version is the Wilcoxon rank-sum test, equivalently the Mann-Whitney U test; the paired version is the Wilcoxon signed-rank test; the several-group version is the Kruskal-Wallis test.<sup class="cite"><a href="#ref-9">[9]</a></sup> They lose a little power on truly normal data and gain a great deal on anything else.</p>
+    <div class="formula">Rank all n₁ + n₂ values together (ties get the average rank); R₁ = sum of ranks in group 1; &nbsp; U₁ = R₁ − n₁(n₁ + 1)/2, &nbsp; U₂ = n₁n₂ − U₁
+      <span class="where">Under H₀, U has mean n₁n₂/2 and standard deviation √[n₁n₂(n₁ + n₂ + 1)/12] (slightly reduced when there are ties). For groups of 8 or more the standardised statistic z = (max(U₁, U₂) − n₁n₂/2 − ½)/σ<sub>U</sub> is referred to the normal distribution; smaller samples use exact tables. U₁/(n₁n₂) is the probability that a random value from group 1 exceeds a random value from group 2, a natural effect size. The Hodges-Lehmann estimate, the median of all n₁n₂ pairwise differences, is the rank-based estimate of the shift with a matching interval.<sup class="cite"><a href="#ref-12">[12]</a></sup></span>
+    </div>
+
+    <h3 id="example5">Worked example 5: flatness from two fixtures</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the flatness in µm of a milled face on 15 parts from each of two fixtures, CMM to 0.1 µm. Flatness is bounded at zero and right-skewed (Modules 1 and 8), and the data were constructed that way.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 6. Flatness, µm, fifteen parts from each fixture (constructed data).</caption><thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th></tr></thead><tbody>
+<tr><td>F1</td><td>8.1</td><td>9.3</td><td>8.8</td><td>5.2</td><td>4.5</td><td>9.5</td><td>9.9</td><td>20.7</td><td>5.9</td><td>9.8</td><td>8.7</td><td>7.2</td><td>4.2</td><td>3.8</td><td>21.2</td></tr>
+<tr><td>F2</td><td>9.4</td><td>33.1</td><td>17.1</td><td>8.8</td><td>15.1</td><td>5.7</td><td>9.5</td><td>12.2</td><td>14.2</td><td>9.4</td><td>7.3</td><td>11.2</td><td>12.8</td><td>10.1</td><td>11.3</td></tr>
+</tbody></table></div>
+    <p>Medians <span data-ex="m11-mw-flatness" data-key="medians.0" data-dp="1">8.7</span> and <span data-ex="m11-mw-flatness" data-key="medians.1" data-dp="1">11.2</span> µm; means <span data-ex="m11-mw-flatness" data-key="means.0" data-dp="2">9.12</span> and <span data-ex="m11-mw-flatness" data-key="means.1" data-dp="2">12.48</span> µm, pulled up by the tails. Rank sums R₁ = <span data-ex="m11-mw-flatness" data-key="rank_sums.0" data-dp="0">177</span> and R₂ = <span data-ex="m11-mw-flatness" data-key="rank_sums.1" data-dp="0">288</span> (they add to 465, as 30 ranks must). U₁ = 177 − 15 × 16/2 = 177 − 120 = <span data-ex="m11-mw-flatness" data-key="U1" data-dp="0">57</span>; U₂ = 225 − 57 = <span data-ex="m11-mw-flatness" data-key="U2" data-dp="0">168</span>. Mean of U under H₀ = <span data-ex="m11-mw-flatness" data-key="mean_U" data-dp="1">112.5</span>; σ<sub>U</sub> = <span data-ex="m11-mw-flatness" data-key="sd_U" data-dp="2">24.10</span> (it would be 24.11 without the <span data-ex="m11-mw-flatness" data-key="ties" data-dp="0">3</span> tied pairs); z = (168 − 112.5 − 0.5) / 24.10 = <span data-ex="m11-mw-flatness" data-key="z" data-dp="2">2.28</span>; p = <span data-ex="m11-mw-flatness" data-key="p" data-dp="3">0.022</span>. Fixture 2 tends to give larger flatness: the probability that a random F1 part is flatter than a random F2 part is 1 − <span data-ex="m11-mw-flatness" data-key="prob_superiority" data-dp="2">0.25</span> = about three in four, and the Hodges-Lehmann shift estimate is <span data-ex="m11-mw-flatness" data-key="hodges_lehmann" data-dp="1">−3.1</span> µm (F1 minus F2).</p>
+    <p>Now the same data in Welch's t-test: t = <span data-ex="m11-mw-flatness" data-key="welch_t" data-dp="2">−1.57</span>, p = <span data-ex="m11-mw-flatness" data-key="welch_p" data-dp="3">0.129</span>. Not significant. The t-test is comparing means that a few large values dominate, with standard errors those same values inflate; the rank test sees that most F2 parts sit above most F1 parts. Neither test is "right" in the abstract. The rank test answers the better question for a skewed, bounded characteristic ("does one fixture tend to make flatter parts?"), and it should be the one on the report, with the medians and the shift estimate. A log transformation followed by a t-test, as in Module 8, is the other legitimate route and usually agrees with the rank test.</p>
+
+    <h2 id="power">Power and sample size</h2>
+    <p>Every "no significant difference" result raises the question the ASA's sixth principle points at: was there enough evidence to find one? <strong>Power</strong> is the probability that the test rejects H₀ when a difference of a stated size δ really exists. It rises with the sample size, falls with the noise σ, and depends on the α you chose. The NIST handbook gives the sample-size formula and its worked example, which the course harness reproduces exactly.<sup class="cite"><a href="#ref-2">[2]</a></sup></p>
+    <div class="formula">n per group (two-sample, two-sided) = 2 (z<sub>1−α/2</sub> + z<sub>1−β</sub>)² (σ/δ)²; &nbsp; one-sample: n = (z<sub>1−α/2</sub> + z<sub>1−β</sub>)² (σ/δ)²
+      <span class="where">z<sub>0.975</sub> = 1.960, z<sub>0.80</sub> = 0.842, z<sub>0.90</sub> = 1.282. The formula uses the normal approximation; NIST's refinement replaces z by t with the degrees of freedom of the current n and iterates, which adds a few units at small n. Read backwards, the power at a given n is Φ(δ√(n/2)/σ − z<sub>1−α/2</sub>) for the two-sample case.</span>
+    </div>
+    <p><strong>The NIST check.</strong> One-sample, one-sided, α = 0.05, β = 0.10, δ = σ: (1.645 + 1.282)² = 2.926² = <span data-ex="chk-nist-samplesize" data-key="n_z_exact" data-dp="2">8.56</span>, so n = <span data-ex="chk-nist-samplesize" data-key="n_z" data-dp="0">9</span>; the t-iteration raises it to <span data-ex="chk-nist-samplesize" data-key="n_t" data-dp="0">11</span>. Both match the handbook's published example.<sup class="cite"><a href="#ref-2">[2]</a></sup></p>
+
+    <h3 id="example6">Worked example 6: how much could the pull-strength study have missed?</h3>
+    <p><span class="example-label">Parameters from the constructed pull-strength study.</span> Suppose the engineering question had been whether the suppliers differ by 2.0 N or more, with σ taken as <span data-ex="m11-power-pull" data-key="sigma" data-dp="2">2.65</span> N (the pooled standard deviation of the study, rounded) and 12 joints per supplier. The standardised difference is d = 2.0 / 2.65 = <span data-ex="m11-power-pull" data-key="effect_d" data-dp="3">0.755</span>; the noncentrality is d √(12/2) = 0.755 × 2.449 = <span data-ex="m11-power-pull" data-key="ncp" data-dp="3">1.849</span>; the power is Φ(1.849 − 1.960) = Φ(−0.111) = <span data-ex="m11-power-pull" data-key="power_z" data-dp="2">0.46</span>. A coin toss. Had the true difference been 2.0 N, this study would have missed it more often than not; it found a 3.0 N difference, which is why p came out small, but a "not significant" result from the same design would have meant almost nothing.</p>
+    <div class="table-wrap"><table><caption>Table 7. Power of a two-sided two-sample t-test at α = 0.05 to detect δ = 2.0 N with σ = 2.65 N, by sample size per group (normal approximation, computed by script).</caption><tbody>
+<tr><th>n per group</th><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.0" data-dp="0">4</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.1" data-dp="0">6</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.2" data-dp="0">8</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.3" data-dp="0">10</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.4" data-dp="0">12</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.5" data-dp="0">15</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.6" data-dp="0">20</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.7" data-dp="0">25</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.8" data-dp="0">30</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.9" data-dp="0">40</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.10" data-dp="0">50</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_n.11" data-dp="0">60</span></td></tr>
+<tr><th>Power</th><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.0" data-dp="2">0.19</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.1" data-dp="2">0.26</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.2" data-dp="2">0.33</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.3" data-dp="2">0.39</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.4" data-dp="2">0.46</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.5" data-dp="2">0.54</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.6" data-dp="2">0.67</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.7" data-dp="2">0.76</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.8" data-dp="2">0.83</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.9" data-dp="2">0.92</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.10" data-dp="2">0.97</span></td><td class="num"><span data-ex="m11-power-pull" data-key="curve_power.11" data-dp="2">0.99</span></td></tr>
+</tbody></table></div>
+    <p>To have an 80 % chance of detecting 2.0 N: n = 2 × (1.960 + 0.842)² × (2.65/2.0)² = 2 × 7.849 × 1.7556 = <span data-ex="m11-samplesize-pull" data-key="n_z_exact" data-dp="1">27.6</span>, so <span data-ex="m11-samplesize-pull" data-key="n_z" data-dp="0">28</span> per group by the normal formula and <span data-ex="m11-samplesize-pull" data-key="n_t" data-dp="0">29</span> after NIST's t-iteration. Roughly two and a half times the study that was run. This is the number to compute <em>before</em> the study, from the difference that would change a decision and the σ from a pilot or a control chart, and to write into the project plan. A study designed for 80 % power that finds nothing has earned the right to say "no difference of 2 N or more"; a study of 12 that finds nothing has not.</p>
+
+    <h3 id="calc-samplesize">Calculator: sample size for a two-sample t-test</h3>
+    <p>Pre-loaded with the pull-strength parameters. Change δ to the difference that would change your decision and σ to your process's noise.</p>
+    <div class="calc" data-calc="samplesize" id="calc-ss-pull">
+      <h3>Sample size calculator</h3>
+      <script type="application/json" class="calc-data">{"delta":2.0,"sigma":2.65,"alpha":0.05,"power":0.8,"sides":2,"design":"two-sample"}</script>
+    </div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Reading p as the probability that H₀ is true.</strong> Consequence: "p = 0.03, so there is a 97 % chance the fixture works." Fix: p is the probability of data this extreme if H₀ were true; say it that way, every time.</li>
+      <li><strong>Reporting p without the difference and its interval.</strong> Consequence: a 0.13 N·m offset with p = 0.02 gets a tool adjustment nobody needed, and a 2.9 N difference with p = 0.06 gets ignored. Fix: estimate, interval, p, effect size, in that order.</li>
+      <li><strong>"Not significant" read as "no difference".</strong> Consequence: a real 2 N supplier difference is declared absent by a study with 46 % power. Fix: compute the power, or better, the sample size, before the study; report what the study could have detected.</li>
+      <li><strong>Unpaired analysis of paired data.</strong> Consequence: a 1.3 s saving at every station disappears under 3 s of station-to-station spread. Fix: if the same units were measured twice, analyse the differences.</li>
+      <li><strong>Many t-tests instead of ANOVA, or ANOVA without a multiple-comparison method after it.</strong> Consequence: false alarms at a rate far above 5 %. Fix: ANOVA first, Tukey (or equivalent) for the pairs.</li>
+      <li><strong>A t-test on skewed data with outliers.</strong> Consequence: the mean is a poor summary and the p-value swings with one part. Fix: look first; use a rank test or a transformation, and report medians.</li>
+      <li><strong>Testing the hypothesis the data suggested.</strong> Consequence: you noticed the night shift looked worse, then tested night against the rest and got p = 0.02; the test's α no longer means 5 %, because you chose the comparison after seeing it. Fix: state the hypothesis before looking, or treat a data-suggested finding as a lead to confirm with new data.</li>
+      <li><strong>Chi-square on rates that are really counts of different sizes.</strong> Consequence: comparing "defects per shift" when the shifts made different quantities. Fix: the chi-square table needs the counts, and the denominators need a p chart or a two-proportion test.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: cure time in two ovens</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the time in minutes for a structural adhesive to reach handling strength, ten samples cured in each of two ovens, timed to 0.1 min.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 8. Cure time, min, ten samples per oven (constructed data).</caption><thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>Oven 1</td><td>31.8</td><td>30.6</td><td>30.8</td><td>27.1</td><td>34.7</td><td>33.6</td><td>30.9</td><td>32.9</td><td>32.0</td><td>30.5</td></tr>
+<tr><td>Oven 2</td><td>34.1</td><td>31.7</td><td>31.7</td><td>30.9</td><td>33.1</td><td>32.1</td><td>33.3</td><td>31.2</td><td>32.5</td><td>30.7</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Summarise both groups and check the assumptions. (b) Run Welch's t-test; give t, ν, p, the 95 % interval on the difference and d. (c) The process owner wants to know whether oven 2 is slower. Write the sentence. (d) A difference of 1.0 min would matter to the line balance. Could this study have detected it? How many samples per oven would be needed for 80 % power?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Oven 1: mean <span data-ex="m11-ex1-cure" data-key="means.0" data-dp="2">31.49</span> min, s = <span data-ex="m11-ex1-cure" data-key="sds.0" data-dp="3">2.081</span>; oven 2: mean <span data-ex="m11-ex1-cure" data-key="means.1" data-dp="2">32.13</span>, s = <span data-ex="m11-ex1-cure" data-key="sds.1" data-dp="3">1.112</span>. Oven 1 is about twice as variable; Levene p = <span data-ex="m11-ex1-cure" data-key="variance_tests.levene_p" data-dp="2">0.21</span>, F-ratio p = <span data-ex="m11-ex1-cure" data-key="variance_tests.F_p" data-dp="3">0.076</span>. Nothing conclusive at n = 10, and Welch's test does not require equal variances.</p>
+      <p><strong>(b)</strong> Difference (oven 1 − oven 2) = <span data-ex="m11-ex1-cure" data-key="diff" data-dp="2">−0.64</span> min; standard error 0.7460; t = <span data-ex="m11-ex1-cure" data-key="welch.t" data-dp="2">−0.86</span> on ν = <span data-ex="m11-ex1-cure" data-key="welch.df" data-dp="1">13.8</span>; p = <span data-ex="m11-ex1-cure" data-key="welch.p" data-dp="2">0.41</span>; 95 % interval <span data-ex="m11-ex1-cure" data-key="welch.ci.0" data-dp="2">−2.24</span> to <span data-ex="m11-ex1-cure" data-key="welch.ci.1" data-dp="2">0.96</span> min; d = <span data-ex="m11-ex1-cure" data-key="cohen_d" data-dp="2">−0.38</span>.</p>
+      <p><strong>(c)</strong> "Oven 2 cured −0.6 min slower on average in this study, but the data are compatible with anything from oven 2 being −2.2 min slower to 1.0 min faster (p = 0.41). There is no evidence of a difference, and no evidence of equivalence either."</p>
+      <p><strong>(d)</strong> No. The interval is about 3 min wide, three times the difference of interest; a 1.0 min true difference would be found by this design well under half the time. For 80 % power at δ = 1.0 min with σ ≈ <span data-ex="m11-ex1-cure" data-key="pooled.sp" data-dp="2">1.67</span> min (pooled), n = 2 × (1.960 + 0.842)² × (1.67/1.0)² ≈ 44 samples per oven. Plan that, or accept that the ovens are interchangeable for want of evidence and monitor the line.</p>
+      <div class="calc" data-calc="tests" id="calc-tests-ex1">
+        <h3>Exercise 1 in the calculator (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"mode":"ttest2","alpha":0.05,"lines":["Oven 1 31.8 30.6 30.8 27.1 34.7 33.6 30.9 32.9 32.0 30.5","Oven 2 34.1 31.7 31.7 30.9 33.1 32.1 33.3 31.2 32.5 30.7"],"collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: leak location by braze fixture</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: 112 heat-exchanger cores that failed the leak test over a quarter, each traced to the braze fixture it was built on and to the joint that leaked (header, tube or baffle).</p>
+    <div class="table-wrap"><table class="data"><caption>Table 9. Leaking cores by fixture and leak location (constructed data).</caption><thead><tr><th>Fixture</th><th>Header joint</th><th>Tube joint</th><th>Baffle joint</th></tr></thead><tbody>
+<tr><td>Fixture A</td><td>30</td><td>14</td><td>16</td></tr>
+<tr><td>Fixture B</td><td>20</td><td>15</td><td>17</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) State H₀. (b) Compute the expected counts, χ², df and p. (c) Fixture A shows a higher share of header leaks; does the test support acting on that? (d) What question does this table <em>not</em> answer about the fixtures?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> H₀: the distribution of leak locations is the same for both fixtures (location is independent of fixture).</p>
+      <p><strong>(b)</strong> Expected header leaks on fixture A = 60 × 50 / 112 = 26.79 against <span data-ex="m11-ex2-chisq-leak" data-key="observed.0.0" data-dp="0">30</span> observed; the smallest expected count is <span data-ex="m11-ex2-chisq-leak" data-key="min_expected" data-dp="2">13.46</span>. χ² = <span data-ex="m11-ex2-chisq-leak" data-key="chi2" data-dp="2">1.50</span> on <span data-ex="m11-ex2-chisq-leak" data-key="df" data-dp="0">2</span> degrees of freedom (critical value <span data-ex="m11-ex2-chisq-leak" data-key="chi2_crit" data-dp="2">5.99</span>), p = <span data-ex="m11-ex2-chisq-leak" data-key="p" data-dp="2">0.47</span>; Cramér's V = <span data-ex="m11-ex2-chisq-leak" data-key="cramer_v" data-dp="2">0.12</span>.</p>
+      <p><strong>(c)</strong> Header leaks are 50 % of fixture A's leakers and 38 % of fixture B's, but a difference this size in a table of 112 arises about half the time when there is no association. No evidence for a fixture-specific header problem. It remains a hypothesis worth a designed check (Module 13), not a conclusion.</p>
+      <p><strong>(d)</strong> Whether the two fixtures have different leak <em>rates</em>. This table contains only leakers; it says nothing about how many good cores each fixture made. That needs the production counts and a two-proportion test or a p chart split by fixture (Module 17).</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="11">
+      <fieldset class="q" data-answer="c">
+        <legend>1. A two-sample t-test gives p = 0.03. Which statement is correct?</legend>
+        <label><input type="radio" name="q1" value="a"> There is a 3 % probability that the two means are equal</label>
+        <label><input type="radio" name="q1" value="b"> There is a 97 % probability that the difference is real</label>
+        <label><input type="radio" name="q1" value="c"> If the means were equal, data at least this far apart would arise in about 3 % of such studies</label>
+        <label><input type="radio" name="q1" value="d"> The difference is large</label>
+        <p class="explain" hidden>p is the probability of the data given H₀, not of H₀ given the data, and says nothing about size.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. A 95 % confidence interval on a difference of means runs from −0.4 to +2.1 N. This means</legend>
+        <label><input type="radio" name="q2" value="a"> the true difference has a 95 % chance of being between −0.4 and 2.1</label>
+        <label><input type="radio" name="q2" value="b"> the data are compatible with true differences anywhere in that range, including zero, so the test is not significant at 5 %</label>
+        <label><input type="radio" name="q2" value="c"> the difference is significant because 2.1 is large</label>
+        <label><input type="radio" name="q2" value="d"> 95 % of the parts differ by that amount</label>
+        <p class="explain" hidden>An interval that includes zero corresponds to p &gt; 0.05; the interval is the set of compatible true values.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="1.16" data-tolerance="0.02">
+        <legend>3. Two groups differ by 2.96 N with a pooled standard deviation of 2.55 N. What is Cohen's d (two decimals, sign not needed)?</legend>
+        <input type="number" name="q3" step="any">
+        <p class="explain" hidden>d = 2.96 / 2.55 = 1.16.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. The same 12 stations are timed before and after a change. The right test is</legend>
+        <label><input type="radio" name="q4" value="a"> a two-sample t-test on the two columns</label>
+        <label><input type="radio" name="q4" value="b"> a chi-square test</label>
+        <label><input type="radio" name="q4" value="c"> one-way ANOVA with 12 groups</label>
+        <label><input type="radio" name="q4" value="d"> a paired t-test on the 12 differences</label>
+        <p class="explain" hidden>Pairing removes station-to-station variation from the noise.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>5. A one-way ANOVA on four machines gives p = 0.004. What you know is</legend>
+        <label><input type="radio" name="q5" value="a"> the four means are not all equal; which pairs differ needs a multiple-comparison method</label>
+        <label><input type="radio" name="q5" value="b"> every machine differs from every other</label>
+        <label><input type="radio" name="q5" value="c"> machine 4 is the slowest</label>
+        <label><input type="radio" name="q5" value="d"> the variances are unequal</label>
+        <p class="explain" hidden>F tests the whole set of means at once.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="42.46" data-tolerance="0.05">
+        <legend>6. In a contingency table with N = 325, a row total of 120 and a column total of 115, what is the expected count in that cell under independence (two decimals)?</legend>
+        <input type="number" name="q6" step="any">
+        <p class="explain" hidden>120 × 115 / 325 = 42.46.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>7. Fifteen flatness values per fixture, right-skewed with two large outliers. The comparison to report is</legend>
+        <label><input type="radio" name="q7" value="a"> a pooled-variance t-test, because n is equal</label>
+        <label><input type="radio" name="q7" value="b"> the F test on the variances</label>
+        <label><input type="radio" name="q7" value="c"> a Mann-Whitney (rank-sum) test with the medians and the shift estimate, or a t-test after a log transformation</label>
+        <label><input type="radio" name="q7" value="d"> no test; the data are not normal</label>
+        <p class="explain" hidden>Rank tests are the standard route for skewed, bounded characteristics.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="15.7" data-tolerance="0.3">
+        <legend>8. For a two-sided two-sample t-test at α = 0.05 with 80 % power to detect a difference equal to σ, the normal formula gives n per group of about (one decimal)</legend>
+        <input type="number" name="q8" step="any">
+        <p class="explain" hidden>2 × (1.960 + 0.842)² × 1² = 15.7, so 16 per group (a few more after the t-iteration).</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>9. A study of 8 parts per group finds p = 0.40 for a supplier difference. The right conclusion is</legend>
+        <label><input type="radio" name="q9" value="a"> the suppliers are equivalent</label>
+        <label><input type="radio" name="q9" value="b"> no evidence of a difference; the study's power for any difference that matters should be reported before "no difference" is claimed</label>
+        <label><input type="radio" name="q9" value="c"> the difference is 40 %</label>
+        <label><input type="radio" name="q9" value="d"> the null hypothesis is true with probability 0.40</label>
+        <p class="explain" hidden>Absence of evidence is not evidence of absence; compute β.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. Levene's test is preferred to the F test for comparing variances because</legend>
+        <label><input type="radio" name="q10" value="a"> it has more power for normal data</label>
+        <label><input type="radio" name="q10" value="b"> it needs no data</label>
+        <label><input type="radio" name="q10" value="c"> it tests means as well</label>
+        <label><input type="radio" name="q10" value="d"> a variance ratio is very sensitive to non-normal tails and Levene's test is not</label>
+        <p class="explain" hidden>Levene's test works on absolute deviations from the group median.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Probability of the data given H₀.</li>
+        <li>b. Compatible values include zero.</li>
+        <li>1.16.</li>
+        <li>d. Paired t.</li>
+        <li>a. Not all equal; pairs need Tukey.</li>
+        <li>42.46.</li>
+        <li>c. Rank test or log transform.</li>
+        <li>About 15.7, so 16.</li>
+        <li>b. No evidence, report power.</li>
+        <li>d. Robust to non-normality.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A p-value is the probability of data at least this extreme if the null hypothesis were true. It is not the probability the hypothesis is true, and it does not measure the size or importance of an effect.</li>
+      <li>Report four things: the estimated difference in engineering units, its confidence interval, the p-value, and an effect size. Decide on the interval against the tolerance or the customer's need, not on p alone.</li>
+      <li>Welch's t-test for two independent groups, the paired t-test for the same units measured twice, one-way ANOVA (then Tukey) for several groups, chi-square for counts in categories.</li>
+      <li>Check assumptions by looking first: histograms, time order, then Anderson-Darling or Shapiro-Wilk and Levene. A normality test can only reject, and at large n it rejects for departures that do not matter.</li>
+      <li>For skewed or outlier-prone data use rank-based tests (Mann-Whitney, Wilcoxon signed-rank, Kruskal-Wallis) with medians and the Hodges-Lehmann shift, or transform and test.</li>
+      <li>"Not significant" is not "no difference". Compute power or the required sample size before the study, from the difference that would change a decision and a σ from a pilot or a control chart.</li>
+      <li>State the hypothesis before looking at the data. A comparison chosen because it looked interesting has an α nobody can compute; confirm it with new data.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10. Sources marked "secondary" or "catalogue" were not read in full by the course author; the claim is taken from the part shown. Standards and papers are paraphrased.</p>
+    <ol class="references">
+      <li id="ref-1">Wasserstein, R. L., and Lazar, N. A. "The ASA's Statement on p-Values: Context, Process, and Purpose." <em>The American Statistician</em> 70(2):129 to 133, 2016. <a href="https://www.stat.berkeley.edu/~aldous/Real_World/ASA_statement.pdf">https://www.stat.berkeley.edu/~aldous/Real_World/ASA_statement.pdf</a></li>
+      <li id="ref-2">NIST/SEMATECH. "7.2.2.2. Sample sizes required." <em>e-Handbook of Statistical Methods</em>. The z-based formula, the t-iteration, and the worked example (α 0.05, β 0.10, δ = σ: 9, then 11) reproduced by this course's harness. <a href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc222.htm">https://www.itl.nist.gov/div898/handbook/prc/section2/prc222.htm</a></li>
+      <li id="ref-3">NIST/SEMATECH. "7.2.2. Are the data consistent with the assumed process mean?" <em>e-Handbook of Statistical Methods</em>. One-sample t and z tests. <a href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc22.htm">https://www.itl.nist.gov/div898/handbook/prc/section2/prc22.htm</a></li>
+      <li id="ref-4">Welch, B. L. "The Generalization of 'Student's' Problem when Several Different Population Variances are Involved." <em>Biometrika</em> 34(1/2):28 to 35, 1947. <a href="https://academic.oup.com/biomet/article-abstract/34/1-2/28/210174">https://academic.oup.com/biomet/article-abstract/34/1-2/28/210174</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-5">Levene, H. "Robust Tests for Equality of Variances." In Olkin, I. (ed.), <em>Contributions to Probability and Statistics: Essays in Honor of Harold Hotelling</em>, pp. 278 to 292. Stanford University Press, 1960. <span class="tag">(catalogue; the median-centred version used here is the common modification)</span></li>
+      <li id="ref-6">Shapiro, S. S., and Wilk, M. B. "An Analysis of Variance Test for Normality (Complete Samples)." <em>Biometrika</em> 52(3/4):591 to 611, 1965. <a href="https://academic.oup.com/biomet/article-abstract/52/3-4/591/336553">https://academic.oup.com/biomet/article-abstract/52/3-4/591/336553</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-7">Anderson, T. W., and Darling, D. A. "Asymptotic Theory of Certain 'Goodness of Fit' Criteria Based on Stochastic Processes." <em>Annals of Mathematical Statistics</em> 23(2):193 to 212, 1952. <a href="https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-23/issue-2/Asymptotic-Theory-of-Certain-Goodness-of-Fit-Criteria-Based-on/10.1214/aoms/1177729437.full">https://projecteuclid.org/.../10.1214/aoms/1177729437.full</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-8">Stephens, M. A. "Tests Based on EDF Statistics." In D'Agostino, R. B., and Stephens, M. A. (eds.), <em>Goodness-of-Fit Techniques</em>. Marcel Dekker, 1986. <a href="https://openlibrary.org/books/OL26834757M/Goodness-of-Fit_Techniques">https://openlibrary.org/books/OL26834757M/Goodness-of-Fit_Techniques</a> <span class="tag">(catalogue; source of the adjusted Anderson-Darling statistic and p-value approximation implemented in the course harness, as reproduced in standard statistical software)</span></li>
+      <li id="ref-9">Wilcoxon, F. "Individual Comparisons by Ranking Methods." <em>Biometrics Bulletin</em> 1(6):80 to 83, 1945; Mann, H. B., and Whitney, D. R. "On a Test of Whether One of Two Random Variables is Stochastically Larger than the Other." <em>Annals of Mathematical Statistics</em> 18(1):50 to 60, 1947; Kruskal, W. H., and Wallis, W. A. "Use of Ranks in One-Criterion Variance Analysis." <em>Journal of the American Statistical Association</em> 47(260):583 to 621, 1952. <a href="https://garfield.library.upenn.edu/classics1987/A1987K083100001.pdf">https://garfield.library.upenn.edu/classics1987/A1987K083100001.pdf</a> <span class="tag">(citation-classic commentary read; originals not read)</span></li>
+      <li id="ref-10">Pearson, K. "On the Criterion that a Given System of Deviations from the Probable in the Case of a Correlated System of Variables is such that it can be Reasonably Supposed to have Arisen from Random Sampling." <em>Philosophical Magazine</em>, Series 5, 50(302):157 to 175, 1900. <a href="https://www.tandfonline.com/doi/abs/10.1080/14786440009463897">https://www.tandfonline.com/doi/abs/10.1080/14786440009463897</a> <span class="tag">(catalogue; origin of the chi-square test)</span></li>
+      <li id="ref-11">Cramér, H. <em>Mathematical Methods of Statistics</em>. Princeton University Press, 1946. <a href="https://archive.org/details/in.ernet.dli.2015.223699">https://archive.org/details/in.ernet.dli.2015.223699</a> <span class="tag">(catalogue; origin of the association measure known as Cramér's V)</span></li>
+      <li id="ref-12">Hodges, J. L., and Lehmann, E. L. "Estimates of Location Based on Rank Tests." <em>Annals of Mathematical Statistics</em> 34(2):598 to 611, 1963. <a href="https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-34/issue-2/Estimates-of-Location-Based-on-Rank-Tests/10.1214/aoms/1177704172.full">https://projecteuclid.org/.../10.1214/aoms/1177704172.full</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-13">Cohen, J. <em>Statistical Power Analysis for the Behavioral Sciences</em>, 2nd ed. Lawrence Erlbaum, 1988. <a href="https://www.routledge.com/Statistical-Power-Analysis-for-the-Behavioral-Sciences/Cohen/p/book/9780805802832">https://www.routledge.com/Statistical-Power-Analysis-for-the-Behavioral-Sciences/Cohen/p/book/9780805802832</a> <span class="tag">(catalogue; the 0.2 / 0.5 / 0.8 labels are behavioural-science conventions)</span></li>
+      <li id="ref-14">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014 to 2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>NIST/SEMATECH e-Handbook, Chapter 7 (Product and Process Comparisons), for the full set of comparison procedures with worked examples.</li>
+      <li>Module 8 for the two-proportion arithmetic on attribute data; Module 13 for designed experiments, where the same F tests reappear with several factors at once.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a "significant but irrelevant" or an underpowered "no difference" study from your own experience, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

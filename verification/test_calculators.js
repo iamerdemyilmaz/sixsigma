@@ -121,7 +121,11 @@ const SKIP = { info_power_nct: true };
 // static page computations as well: the capability calculator covers the
 // normal case and the DPMO converter the p-to-sigma step, but no calculator
 // fits distributions, so Checks 1 to 3 carry these kinds.
-const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_nonnormal: true, attribute_capability: true };
+// Module 11's chisq (contingency table), mannwhitney and power kinds have no
+// calculator either (the tests calculator covers t-tests and ANOVA, the
+// sample-size calculator the n-for-power direction).
+const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_nonnormal: true, attribute_capability: true,
+  chisq: true, mannwhitney: true, power: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

@@ -915,6 +915,91 @@ def r_attribute_capability(meta, cols):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 11: chi-square independence, Mann-Whitney, power, closed form
+# --------------------------------------------------------------------------
+def r_chisq(meta, cols):
+    p = meta["params"]
+    names = p.get("columns") or [c for c in cols if c != "row"]
+    labels = [str(v) for v in cols["row"]]
+    obs = [[float(cols[c][i]) for c in names] for i in range(len(labels))]
+    r, c = len(obs), len(names)
+    rt = [sum(row) for row in obs]; ct = [sum(obs[i][j] for i in range(r)) for j in range(c)]
+    n = sum(rt)
+    exp = [[rt[i] * ct[j] / n for j in range(c)] for i in range(r)]
+    contrib = [[(obs[i][j] - exp[i][j]) ** 2 / exp[i][j] for j in range(c)] for i in range(r)]
+    chi2 = sum(sum(row) for row in contrib)
+    if p.get("correction", False):
+        chi2 = sum(sum((max(0.0, abs(obs[i][j] - exp[i][j]) - 0.5)) ** 2 / exp[i][j] for j in range(c)) for i in range(r))
+    dof = (r - 1) * (c - 1)
+    alpha = p.get("alpha", 0.05)
+    out = {"observed": obs, "expected": exp, "row_totals": rt, "col_totals": ct, "n": int(n),
+           "row_proportions": [[obs[i][j] / rt[i] for j in range(c)] for i in range(r)],
+           "col_overall_proportions": [v / n for v in ct], "contributions": contrib,
+           "chi2": chi2, "df": dof, "p": 1.0 - chi2_cdf(chi2, dof), "chi2_crit": chi2_ppf(1 - alpha, dof),
+           "cramer_v": math.sqrt(chi2 / (n * (min(r, c) - 1))), "min_expected": min(min(row) for row in exp),
+           "cells_expected_below_5": sum(1 for row in exp for v in row if v < 5)}
+    return out
+
+
+def _ranks(v):
+    order = sorted(range(len(v)), key=lambda i: v[i])
+    ranks = [0.0] * len(v)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and v[order[j + 1]] == v[order[i]]: j += 1
+        avg = (i + j + 2) / 2.0
+        for k in range(i, j + 1): ranks[order[k]] = avg
+        i = j + 1
+    return ranks
+
+
+def r_mannwhitney(meta, cols):
+    groups = list(dict.fromkeys(cols["group"]))
+    a = [cols["x"][i] for i in range(len(cols["x"])) if cols["group"][i] == groups[0]]
+    b = [cols["x"][i] for i in range(len(cols["x"])) if cols["group"][i] == groups[1]]
+    n1, n2 = len(a), len(b); N = n1 + n2
+    ranks = _ranks(a + b)
+    R1 = sum(ranks[:n1]); R2 = sum(ranks[n1:])
+    U1 = R1 - n1 * (n1 + 1) / 2.0; U2 = n1 * n2 - U1
+    counts = {}
+    for v in a + b: counts[v] = counts.get(v, 0) + 1
+    tie = sum(t ** 3 - t for t in counts.values())
+    mu = n1 * n2 / 2.0
+    sd = math.sqrt(n1 * n2 / 12.0 * ((N + 1) - tie / (N * (N - 1))))
+    z = (max(U1, U2) - mu - 0.5) / sd
+    diffs = sorted(x - y for x in a for y in b)
+    m1, m2 = mean(a), mean(b)
+    se = math.sqrt(sd_(a) ** 2 / n1 + sd_(b) ** 2 / n2)
+    tw = (m1 - m2) / se
+    dfw = se ** 4 / ((sd_(a) ** 2 / n1) ** 2 / (n1 - 1) + (sd_(b) ** 2 / n2) ** 2 / (n2 - 1))
+    out = {"n": [n1, n2], "medians": [median(a), median(b)], "means": [m1, m2], "rank_sums": [R1, R2],
+           "U1": U1, "U2": U2, "U": min(U1, U2), "mean_U": mu, "sd_U": sd, "z": z, "p": min(1.0, 2 * norm_sf(z)),
+           "ties": sum(1 for t in counts.values() if t > 1), "hodges_lehmann": median(diffs),
+           "prob_superiority": U1 / (n1 * n2), "welch_t": tw, "welch_p": 2 * (1 - t_cdf(abs(tw), dfw))}
+    return out
+
+
+def sd_(x): return sd(x)
+
+
+def r_power(meta):
+    p = meta["params"]
+    alpha, sides = p["alpha"], p.get("sides", 2)
+    delta, sigma, n = p["delta"], p["sigma"], p["n"]
+    mult = 2.0 if p.get("design", "two-sample") == "two-sample" else 1.0
+    za = norm_ppf(1 - alpha / sides)
+
+    def pw(nn):
+        ncp = delta / sigma * math.sqrt(nn / mult)
+        return norm_sf(za - ncp) + (norm_sf(za + ncp) if sides == 2 else 0.0)
+    out = {"z_alpha": za, "ncp": delta / sigma * math.sqrt(n / mult), "power_z": pw(n), "beta_z": 1 - pw(n), "effect_d": delta / sigma}
+    if "curve_n" in p:
+        out["curve_power"] = [pw(v) for v in p["curve_n"]]
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -977,6 +1062,9 @@ def recompute_one(ex_id):
     elif kind == "funnel_growth": mine = r_funnel_growth(meta, cols)
     elif kind == "capability_nonnormal": mine = r_capability_nonnormal(meta, cols)
     elif kind == "attribute_capability": mine = r_attribute_capability(meta, cols)
+    elif kind == "chisq": mine = r_chisq(meta, cols)
+    elif kind == "mannwhitney": mine = r_mannwhitney(meta, cols)
+    elif kind == "power": mine = r_power(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

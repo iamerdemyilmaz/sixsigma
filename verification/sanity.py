@@ -367,6 +367,36 @@ def check_attribute(ex_id, r, data):
     check_chart(ex_id, r["chart"], "p")
 
 
+def check_chisq(ex_id, r):
+    tag = ex_id
+    obs, exp = r["observed"], r["expected"]
+    for i in range(len(obs)):
+        check(near(sum(obs[i]), sum(exp[i])), f"{tag}: expected row total {i}")
+    check(near(sum(sum(row) for row in r["contributions"]), r["chi2"]) or r["params"].get("correction"), f"{tag}: chi2 vs contributions")
+    check(r["df"] == (len(obs) - 1) * (len(obs[0]) - 1), f"{tag}: df")
+    in01(r["p"], f"{tag}: p"); check(0 <= r["cramer_v"] <= 1, f"{tag}: Cramer V")
+    check((r["p"] < r["alpha"]) == (r["chi2"] > r["chi2_crit"]), f"{tag}: p vs critical value")
+    check(r["min_expected"] >= 1, f"{tag}: an expected count below 1")
+
+
+def check_mw(ex_id, r):
+    tag = ex_id
+    n1, n2 = r["n"]
+    check(near(r["U1"] + r["U2"], n1 * n2), f"{tag}: U1 + U2")
+    check(near(r["rank_sums"][0] + r["rank_sums"][1], (n1 + n2) * (n1 + n2 + 1) / 2), f"{tag}: rank sums")
+    in01(r["p"], f"{tag}: p"); in01(r["welch_p"], f"{tag}: Welch p")
+    check(0 <= r["prob_superiority"] <= 1, f"{tag}: probability of superiority")
+    check(r["z"] >= 0, f"{tag}: z from max(U1, U2) should be non-negative")
+
+
+def check_power(ex_id, r):
+    tag = ex_id
+    in01(r["power_z"], f"{tag}: power"); check(near(r["power_z"] + r["beta_z"], 1.0), f"{tag}: power + beta")
+    if "curve_power" in r:
+        check(all(r["curve_power"][i] <= r["curve_power"][i + 1] + 1e-12 for i in range(len(r["curve_power"]) - 1)), f"{tag}: power not monotone in n")
+    check(abs(r["power_z"] - r["info_power_nct"]) < 0.08, f"{tag}: z-approximation far from noncentral-t power")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -396,6 +426,9 @@ def check_results():
         elif kind == "factorial": check_factorial(ex_id, r, data)
         elif kind == "capability_nonnormal": check_nonnormal(ex_id, r, data)
         elif kind == "attribute_capability": check_attribute(ex_id, r, data)
+        elif kind == "chisq": check_chisq(ex_id, r)
+        elif kind == "mannwhitney": check_mw(ex_id, r)
+        elif kind == "power": check_power(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n
