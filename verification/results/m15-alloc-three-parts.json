@@ -1,0 +1,66 @@
+{
+ "id": "m15-alloc-three-parts",
+ "kind": "tolerance_stack",
+ "params": {
+  "parts": [
+   {
+    "name": "A (housing depth)",
+    "nominal": 25.0,
+    "tolerance": 0.06,
+    "sign": 1
+   },
+   {
+    "name": "B (spacer thickness)",
+    "nominal": 8.0,
+    "tolerance": 0.015,
+    "sign": -1
+   },
+   {
+    "name": "C (shaft-shoulder position)",
+    "nominal": 15.0,
+    "tolerance": 0.04,
+    "sign": -1
+   }
+  ],
+  "spec_half_width": 0.1,
+  "assumed_cpk": 1.33,
+  "shift_sigma": 0.5,
+  "mc_n": 200000,
+  "mc_seed": 3,
+  "units": "mm"
+ },
+ "source": "constructed",
+ "results": {
+  "names": [
+   "A (housing depth)",
+   "B (spacer thickness)",
+   "C (shaft-shoulder position)"
+  ],
+  "nominal_stack": 2.0,
+  "spec_half_width": 0.1,
+  "usl": 2.1,
+  "lsl": 1.9,
+  "worst_case": 0.11499999999999999,
+  "rss": 0.07365459931328118,
+  "worst_case_exceeds_spec": true,
+  "rss_within_spec": true,
+  "assumed_cpk": 1.33,
+  "sigmas": [
+   0.015037593984962405,
+   0.0037593984962406013,
+   0.010025062656641603
+  ],
+  "sigma_stack_predicted": 0.018459799326636887,
+  "cpk_predicted": 1.8057256605836676,
+  "shift_sigma": 0.5,
+  "n_mc": 200000,
+  "simulated": {
+   "mean": 1.9855906839473865,
+   "sd": 0.018476755238897098,
+   "cpk": 1.5441146247583888,
+   "ppm": 5.0
+  }
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

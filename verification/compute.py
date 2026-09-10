@@ -1361,6 +1361,65 @@ def rpn_table(cols, params):
             "total_rpn": int(df["rpn"].sum()), "mean_rpn": float(df["rpn"].mean())}
 
 
+def tolerance_stack(params):
+    parts = params["parts"]  # list of {"name", "nominal", "tolerance", "sign"}
+    names = [p["name"] for p in parts]
+    noms = np.array([p["nominal"] for p in parts], float)
+    tols = np.array([p["tolerance"] for p in parts], float)
+    signs = np.array([p["sign"] for p in parts], float)
+    nominal_stack = float(np.sum(signs * noms))
+    worst_case = float(np.sum(tols))
+    rss = float(np.sqrt(np.sum(tols ** 2)))
+    spec_half = float(params["spec_half_width"])
+    usl, lsl = nominal_stack + spec_half, nominal_stack - spec_half
+    assumed_cpk = float(params["assumed_cpk"])
+    sigmas = tols / (3 * assumed_cpk)
+    sigma_stack_predicted = float(np.sqrt(np.sum(sigmas ** 2)))
+    cpk_predicted = spec_half / (3 * sigma_stack_predicted)
+    # Monte Carlo: each part's process is offset from nominal by
+    # shift_sigma * sigma_i (a fixed, per-part centring bias, not
+    # re-randomised per assembly -- this models a process that is quietly
+    # off-target, not one with unusually large piece-to-piece noise), in the
+    # direction that pushes the stack the same way for every part, then
+    # n Monte Carlo assemblies are drawn from each part's own (biased) normal
+    # distribution and combined with the same signs as the closed-form stack.
+    shift_sigma = float(params["shift_sigma"])
+    n_mc = int(params["mc_n"])
+    rng = np.random.default_rng(int(params["mc_seed"]))
+    shift = shift_sigma * sigmas * np.sign(signs) * -1.0
+    draws = rng.normal(noms + shift, sigmas, size=(n_mc, len(parts)))
+    stack = draws @ signs
+    sim_mean = float(stack.mean())
+    sim_sd = float(stack.std(ddof=1))
+    cpu = (usl - sim_mean) / (3 * sim_sd)
+    cpl = (sim_mean - lsl) / (3 * sim_sd)
+    cpk_simulated = float(min(cpu, cpl))
+    ppm_simulated = float(np.mean((stack > usl) | (stack < lsl)) * 1e6)
+    return {"names": names, "nominal_stack": nominal_stack, "spec_half_width": spec_half,
+            "usl": usl, "lsl": lsl, "worst_case": worst_case, "rss": rss,
+            "worst_case_exceeds_spec": worst_case > spec_half, "rss_within_spec": rss < spec_half,
+            "assumed_cpk": assumed_cpk, "sigmas": sigmas.tolist(), "sigma_stack_predicted": sigma_stack_predicted,
+            "cpk_predicted": cpk_predicted, "shift_sigma": shift_sigma, "n_mc": n_mc,
+            "simulated": {"mean": sim_mean, "sd": sim_sd, "cpk": cpk_simulated, "ppm": ppm_simulated}}
+
+
+def taguchi_loss(cols, params):
+    x = np.asarray(cols["x"], float)
+    target = float(params["target"])
+    a0 = float(params["a0"]); delta0 = float(params["delta0"])
+    k = a0 / delta0 ** 2
+    n = len(x); m = float(x.mean()); s = float(x.std(ddof=1))
+    var_ss = float(np.sum((x - m) ** 2) / n)  # biased (n) mean-square, matches E[(X-target)^2] decomposition
+    var_component = k * var_ss
+    offcenter_component = k * (m - target) ** 2
+    avg_loss = var_component + offcenter_component
+    per_part_loss = k * (x - target) ** 2
+    return {"n": n, "mean": m, "s": s, "target": target, "a0": a0, "delta0": delta0, "k": k,
+            "var_component": var_component, "offcenter_component": offcenter_component,
+            "avg_loss": avg_loss, "pct_from_offcenter": 100.0 * offcenter_component / avg_loss,
+            "total_loss": float(per_part_loss.sum()), "max_loss": float(per_part_loss.max())}
+
+
 def pugh_matrix(cols, params):
     criteria = params["criteria"]
     concepts = cols["concept"]
@@ -1529,6 +1588,10 @@ def compute_one(ex_id):
         res = mregression(cols, params)
     elif kind == "pugh_matrix":
         res = pugh_matrix(cols, params)
+    elif kind == "tolerance_stack":
+        res = tolerance_stack(params)
+    elif kind == "taguchi_loss":
+        res = taguchi_loss(cols, params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

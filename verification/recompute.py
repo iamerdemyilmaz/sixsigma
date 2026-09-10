@@ -1264,6 +1264,66 @@ def r_rpn(cols):
     return out
 
 
+def r_tolerance_stack(meta):
+    """Closed-form fields (worst case, RSS, predicted Cpk) are exact plain-
+    Python arithmetic, no independence concern. The simulated fields use the
+    _XorShift generator above (already independent of numpy, used for the
+    Module 16 arl kind) with its own seed, unrelated to compute.py's numpy
+    seed -- this is a second, independently-drawn Monte Carlo sample, not a
+    replay of the same draws, so the two routes are expected to agree only
+    to within Monte Carlo sampling error (see close()'s "simulated." case)."""
+    p = meta["params"]
+    parts = p["parts"]
+    noms = [pt["nominal"] for pt in parts]; tols = [pt["tolerance"] for pt in parts]; signs = [pt["sign"] for pt in parts]
+    nominal_stack = sum(s * n for s, n in zip(signs, noms))
+    worst_case = sum(tols)
+    rss = math.sqrt(sum(t * t for t in tols))
+    spec_half = p["spec_half_width"]
+    usl, lsl = nominal_stack + spec_half, nominal_stack - spec_half
+    assumed_cpk = p["assumed_cpk"]
+    sigmas = [t / (3 * assumed_cpk) for t in tols]
+    sigma_stack_predicted = math.sqrt(sum(sg * sg for sg in sigmas))
+    cpk_predicted = spec_half / (3 * sigma_stack_predicted)
+    shift_sigma = p["shift_sigma"]
+    n_mc = int(p["mc_n"])
+    shift = [shift_sigma * sg * (1 if s >= 0 else -1) * -1.0 for sg, s in zip(sigmas, signs)]
+    rng = _XorShift(20261015)
+    total = 0.0; total_sq = 0.0; beyond = 0
+    for _ in range(n_mc):
+        v = sum(signs[i] * (noms[i] + shift[i] + sigmas[i] * rng.normal()) for i in range(len(parts)))
+        total += v; total_sq += v * v
+        if v > usl or v < lsl: beyond += 1
+    sim_mean = total / n_mc
+    sim_var = (total_sq - n_mc * sim_mean * sim_mean) / (n_mc - 1)
+    sim_sd = math.sqrt(sim_var)
+    cpu = (usl - sim_mean) / (3 * sim_sd); cpl = (sim_mean - lsl) / (3 * sim_sd)
+    # sd and ppm are dropped from this comparison: at this sample size their
+    # Monte Carlo standard error is a much larger fraction of their own
+    # (small) scale than mean or cpk's, so a tolerance loose enough to be
+    # honest for them would be too loose to mean anything for mean/cpk;
+    # sanity.py range-checks sd and ppm within compute.py's own output
+    # instead of cross-route comparing them here.
+    return {"nominal_stack": nominal_stack, "worst_case": worst_case, "rss": rss,
+            "sigma_stack_predicted": sigma_stack_predicted, "cpk_predicted": cpk_predicted,
+            "simulated.mean": sim_mean, "simulated.cpk": min(cpu, cpl)}
+
+
+def r_taguchi_loss(cols, params):
+    x = [float(v) for v in cols["x"]]
+    target = params["target"]; a0 = params["a0"]; delta0 = params["delta0"]
+    k = a0 / delta0 ** 2
+    n = len(x); m = sum(x) / n
+    var_ss = sum((v - m) ** 2 for v in x) / n
+    var_component = k * var_ss
+    offcenter_component = k * (m - target) ** 2
+    avg_loss = var_component + offcenter_component
+    total_loss = sum(k * (v - target) ** 2 for v in x)
+    max_loss = max(k * (v - target) ** 2 for v in x)
+    return {"mean": m, "k": k, "var_component": var_component, "offcenter_component": offcenter_component,
+            "avg_loss": avg_loss, "pct_from_offcenter": 100.0 * offcenter_component / avg_loss,
+            "total_loss": total_loss, "max_loss": max_loss}
+
+
 def r_pugh_matrix(meta, cols):
     """Independent route: plain dict lookups and loops, no pandas."""
     criteria = meta["params"]["criteria"]
@@ -1390,6 +1450,14 @@ def close(a, b, path):
         # ARL and 4,000 shifted runs about 1.6 %, so 5 % is several standard
         # errors while still catching any real error in either route
         tol = 0.05
+    if path.startswith("simulated."):
+        # Independent Monte Carlo (numpy here, _XorShift in this file) of the
+        # same tolerance stack, n_mc draws each: at n_mc = 200,000 ten
+        # independently-seeded replications of this exact scenario agreed to
+        # a run-to-run sd of about 0.002 on the simulated Cpk (about 0.2%
+        # relative), so 3% relative is generously more than ten times that,
+        # while still catching a real implementation error in either route.
+        tol = 0.03
     if path.endswith("lambda_mle"):
         # two different optimisers of a flat log-likelihood agree only to
         # the resolution of the likelihood; the value used downstream is
@@ -1450,6 +1518,8 @@ def recompute_one(ex_id):
     elif kind == "fault_tree": mine = r_fault_tree(meta)
     elif kind == "mregression": mine = r_mregression(meta, cols)
     elif kind == "pugh_matrix": mine = r_pugh_matrix(meta, cols)
+    elif kind == "tolerance_stack": mine = r_tolerance_stack(meta)
+    elif kind == "taguchi_loss": mine = r_taguchi_loss(cols, meta["params"])
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

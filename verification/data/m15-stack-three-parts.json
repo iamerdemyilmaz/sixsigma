@@ -1,0 +1,37 @@
+{
+ "id": "m15-stack-three-parts",
+ "module": "15",
+ "kind": "tolerance_stack",
+ "title": "Three-part assembly gap: worst case vs RSS vs a simulated stack with a real centring bias",
+ "source": "constructed",
+ "setting": "an assembly gap formed by a housing depth (A), a spacer thickness (B), and a shaft-shoulder position (C), gap = A - B - C, spec 2.000 +/- 0.100 mm",
+ "params": {
+  "parts": [
+   {
+    "name": "A (housing depth)",
+    "nominal": 25.0,
+    "tolerance": 0.05,
+    "sign": 1
+   },
+   {
+    "name": "B (spacer thickness)",
+    "nominal": 8.0,
+    "tolerance": 0.025,
+    "sign": -1
+   },
+   {
+    "name": "C (shaft-shoulder position)",
+    "nominal": 15.0,
+    "tolerance": 0.04,
+    "sign": -1
+   }
+  ],
+  "spec_half_width": 0.1,
+  "assumed_cpk": 1.0,
+  "shift_sigma": 1.0,
+  "mc_n": 200000,
+  "mc_seed": 1,
+  "units": "mm"
+ },
+ "columns": null
+}

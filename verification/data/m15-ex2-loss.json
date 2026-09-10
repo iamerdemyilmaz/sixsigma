@@ -1,0 +1,19 @@
+{
+ "id": "m15-ex2-loss",
+ "module": "15",
+ "kind": "taguchi_loss",
+ "title": "Exercise 2: Taguchi loss for a fill-weight process",
+ "source": "constructed",
+ "setting": "packaged fill weight (g), target 250.0 g, spec +/- 3.0 g, 25 packages",
+ "params": {
+  "target": 250.0,
+  "a0": 20.0,
+  "delta0": 3.0,
+  "units_x": "g",
+  "cost_units": "illustrative cost units, not a real currency"
+ },
+ "columns": [
+  "x"
+ ],
+ "n_rows": 25
+}

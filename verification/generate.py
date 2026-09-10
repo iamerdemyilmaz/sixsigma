@@ -1687,6 +1687,61 @@ register(id="m14-ex2-pugh", module="14", kind="pugh_matrix",
          ])
 
 
+# Module 15: Variation reduction and design (prefix m15-)
+# New kinds this module: tolerance_stack (worst case, RSS, and a Monte Carlo
+# of the actual stack given a deliberate per-part centring bias) and
+# taguchi_loss (quadratic loss decomposed into a variance and an off-centre
+# component). The Taguchi-loss worked example reuses m07-bore's raw data
+# rather than inventing a new bore dataset.
+# ---------------------------------------------------------------------------
+register(id="m15-stack-three-parts", module="15", kind="tolerance_stack",
+         title="Three-part assembly gap: worst case vs RSS vs a simulated stack with a real centring bias",
+         source="constructed",
+         setting="an assembly gap formed by a housing depth (A), a spacer thickness (B), and a shaft-shoulder position (C), gap = A - B - C, spec 2.000 +/- 0.100 mm",
+         params={"parts": [{"name": "A (housing depth)", "nominal": 25.00, "tolerance": 0.050, "sign": 1},
+                            {"name": "B (spacer thickness)", "nominal": 8.00, "tolerance": 0.025, "sign": -1},
+                            {"name": "C (shaft-shoulder position)", "nominal": 15.00, "tolerance": 0.040, "sign": -1}],
+                 "spec_half_width": 0.100, "assumed_cpk": 1.0, "shift_sigma": 1.0,
+                 "mc_n": 200000, "mc_seed": 1, "units": "mm"},
+         columns=None, rows=None)
+
+# Exercise 1: a smaller two-part clearance stack, gentler bias (0.5 sigma vs
+# the main example's 1.0), textbook assumed Cpk of 1.33.
+register(id="m15-ex1-stack", module="15", kind="tolerance_stack",
+         title="Exercise 1: a two-part shaft-in-bore clearance, worst case vs RSS vs simulated",
+         source="constructed", setting="a bore (D) and a shaft (E), clearance = D - E, spec 0.050 +/- 0.045 mm",
+         params={"parts": [{"name": "D (bore)", "nominal": 20.00, "tolerance": 0.030, "sign": 1},
+                            {"name": "E (shaft)", "nominal": 19.95, "tolerance": 0.020, "sign": -1}],
+                 "spec_half_width": 0.045, "assumed_cpk": 1.33, "shift_sigma": 0.5,
+                 "mc_n": 200000, "mc_seed": 7, "units": "mm"},
+         columns=None, rows=None)
+
+register(id="m15-alloc-three-parts", module="15", kind="tolerance_stack",
+         title="Reallocating the same three-part stack's tolerance budget",
+         source="constructed", setting="the same A - B - C gap as m15-stack-three-parts, tolerance reallocated: A loosened (a machined feature, expensive to hold tighter), B tightened (a purchased shim, cheap to hold tighter), C unchanged",
+         params={"parts": [{"name": "A (housing depth)", "nominal": 25.00, "tolerance": 0.060, "sign": 1},
+                            {"name": "B (spacer thickness)", "nominal": 8.00, "tolerance": 0.015, "sign": -1},
+                            {"name": "C (shaft-shoulder position)", "nominal": 15.00, "tolerance": 0.040, "sign": -1}],
+                 "spec_half_width": 0.100, "assumed_cpk": 1.33, "shift_sigma": 0.5,
+                 "mc_n": 200000, "mc_seed": 3, "units": "mm"},
+         columns=None, rows=None)
+
+register(id="m15-loss-bore", module="15", kind="taguchi_loss",
+         title="Taguchi loss for the Module 7 bore data (Cpk about 1.1)",
+         source="constructed (reuses m07-bore's 125 raw values)",
+         setting="reamed bore Ø12.000 +/- 0.025 mm, the same 125 values as m07-bore",
+         params={"target": 12.000, "a0": 40.0, "delta0": 0.025, "units_x": "mm", "cost_units": "illustrative cost units, not a real currency"},
+         columns=["x"], rows=[[float(row[1])] for row in _m07b])
+
+_rng = np.random.default_rng(0)
+_m15e2 = _rng.normal(249.3, 1.3, 25)
+register(id="m15-ex2-loss", module="15", kind="taguchi_loss",
+         title="Exercise 2: Taguchi loss for a fill-weight process",
+         source="constructed", setting="packaged fill weight (g), target 250.0 g, spec +/- 3.0 g, 25 packages",
+         params={"target": 250.0, "a0": 20.0, "delta0": 3.0, "units_x": "g", "cost_units": "illustrative cost units, not a real currency"},
+         columns=["x"], rows=[[float(v)] for v in np.round(_m15e2, 2)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

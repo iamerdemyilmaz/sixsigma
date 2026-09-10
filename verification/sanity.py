@@ -551,6 +551,30 @@ def check_pugh_matrix(ex_id, r):
     check(r["net"][r["concepts"].index(r["winner"])] == max(r["net"]), f"{tag}: winner does not have the maximum net score")
 
 
+def check_tolerance_stack(ex_id, r):
+    tag = ex_id
+    check(r["rss"] <= r["worst_case"] + 1e-9, f"{tag}: RSS should never exceed the worst-case sum")
+    check(r["worst_case_exceeds_spec"] == (r["worst_case"] > r["spec_half_width"]), f"{tag}: worst_case_exceeds_spec flag mismatch")
+    check(r["rss_within_spec"] == (r["rss"] < r["spec_half_width"]), f"{tag}: rss_within_spec flag mismatch")
+    check(r["cpk_predicted"] > 0, f"{tag}: cpk_predicted should be positive")
+    sim = r["simulated"]
+    check(0.0 <= sim["ppm"] <= 1e6, f"{tag}: simulated ppm out of [0, 1e6]")
+    check(sim["sd"] > 0, f"{tag}: simulated sd should be positive")
+    check(abs(sim["sd"] - r["sigma_stack_predicted"]) < 0.15 * r["sigma_stack_predicted"], f"{tag}: simulated sd far from the RSS-predicted stack sigma (a fixed per-part mean shift should not materially change the spread)")
+    if r["shift_sigma"] > 0:
+        check(sim["cpk"] < r["cpk_predicted"], f"{tag}: a deliberate off-centre shift should lower the simulated Cpk below the centred prediction")
+
+
+def check_taguchi_loss(ex_id, r):
+    tag = ex_id
+    check(near(r["k"], r["a0"] / r["delta0"] ** 2), f"{tag}: k != a0/delta0^2")
+    check(near(r["avg_loss"], r["var_component"] + r["offcenter_component"]), f"{tag}: avg_loss != var_component + offcenter_component")
+    check(r["var_component"] >= 0 and r["offcenter_component"] >= 0, f"{tag}: loss components should be non-negative")
+    check(0.0 <= r["pct_from_offcenter"] <= 100.0, f"{tag}: pct_from_offcenter out of [0,100]")
+    check(near(r["total_loss"], r["n"] * r["avg_loss"]), f"{tag}: total_loss != n * avg_loss")
+    check(r["max_loss"] >= r["avg_loss"] - 1e-9, f"{tag}: max_loss should be at least the average")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -593,6 +617,8 @@ def check_results():
         elif kind == "fault_tree": check_fault_tree(ex_id, r)
         elif kind == "mregression": check_mregression(ex_id, r)
         elif kind == "pugh_matrix": check_pugh_matrix(ex_id, r)
+        elif kind == "tolerance_stack": check_tolerance_stack(ex_id, r)
+        elif kind == "taguchi_loss": check_taguchi_loss(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

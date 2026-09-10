@@ -150,7 +150,10 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   mregression: true,
   // Module 14: a Pugh concept-selection matrix is pure summation with no
   // calculator among the nine required ones.
-  pugh_matrix: true };
+  pugh_matrix: true,
+  // Module 15: tolerance stack-up (worst case / RSS / Monte Carlo) and the
+  // Taguchi loss function have no calculator among the nine required ones.
+  tolerance_stack: true, taguchi_loss: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

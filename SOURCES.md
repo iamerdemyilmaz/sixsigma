@@ -364,7 +364,7 @@ Verified sources are counted at any depth (full, abstract, scope, catalog). Cata
 
 ### Module 15. Variation reduction and design
 
-**Verified sources (6):** S-C33, S-C34, S-A20, S-D21, S-D23, S-E24. **Secondary:** S-E25, S-D22.
+**Verified sources (7):** S-C33, S-C34, S-A20, S-D21, S-D23, S-E24, S-C29. **Secondary:** S-E25, S-D22.
 
 **Outline.** Tolerance stack-up revisited from a capability angle: worst-case vs RSS (Evans), the assumptions behind RSS (independence, centring), and what a real Cpk does to the stack. Allocating tolerances using capability data. Robust design introduction. The Taguchi loss function with the Sony story labelled "as reported by Taguchi and Clausing; underlying data not independently verified". Feeding capability data back into DFM.
 

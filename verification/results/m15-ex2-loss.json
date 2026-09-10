@@ -1,0 +1,29 @@
+{
+ "id": "m15-ex2-loss",
+ "kind": "taguchi_loss",
+ "params": {
+  "target": 250.0,
+  "a0": 20.0,
+  "delta0": 3.0,
+  "units_x": "g",
+  "cost_units": "illustrative cost units, not a real currency"
+ },
+ "source": "constructed",
+ "results": {
+  "n": 25,
+  "mean": 249.2052,
+  "s": 1.1350077826458582,
+  "target": 250.0,
+  "a0": 20.0,
+  "delta0": 3.0,
+  "k": 2.2222222222222223,
+  "var_component": 2.7482510222222243,
+  "offcenter_component": 1.403793422222255,
+  "avg_loss": 4.1520444444444795,
+  "pct_from_offcenter": 33.809691611094365,
+  "total_loss": 103.80111111111117,
+  "max_loss": 30.75199999999998
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

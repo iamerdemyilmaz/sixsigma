@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 15: Variation reduction and design · Six Sigma Course</title>
+<meta name="description" content="Tolerance stack-up revisited from a capability angle: worst case vs RSS, what happens when a real process is not centred, allocating tolerance using capability data, robust design, and the Taguchi loss function.">
+<meta name="examples" content="m15-stack-three-parts, m15-alloc-three-parts, m15-loss-bore, m15-ex1-stack, m15-ex2-loss">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="15">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 15 · Improve</p>
+    <h1>Variation reduction and design</h1>
+    <p class="lead">Module 7 introduced Cp and Cpk as a way to check whether a process, as built, meets a spec. This module runs the same idea in the other direction: given a spec, what does it take from the design &mdash; the individual part tolerances, the target each process aims for &mdash; to make the assembled result capable? Tolerance stack-up connects directly to capability, robust design connects capability data back to the drawing before parts are ever cut, and the Taguchi loss function makes the case that "within spec" was never really the right question.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Compute</strong> a worst-case and an RSS (root-sum-square) predicted tolerance for a linear dimensional stack, and explain when each is the right tool.</li>
+      <li><strong>State</strong> the independence and centring assumptions behind RSS, and what happens to a stack's real capability when centring fails.</li>
+      <li><strong>Use</strong> a Monte Carlo simulation to see how a real, quietly off-target process degrades a stack's actual Cpk relative to RSS's centred prediction.</li>
+      <li><strong>Reallocate</strong> a stack's tolerance budget across parts using the same RSS relationship, favouring the parts that are cheaper to hold tight.</li>
+      <li><strong>Apply</strong> the Taguchi loss function to decompose average loss into a variance component and an off-centre component.</li>
+      <li><strong>Explain</strong> robust design's core idea (reducing sensitivity to noise, not just tightening tolerances) and connect capability data back to a design decision.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p class="example-label">The account below is a widely cited illustration, presented as reported, not independently re-verified in this course.</p>
+    <p>The story most often used to introduce the Taguchi loss function concerns two Sony plants making the same television, one in Japan and one in the United States, both meeting the same colour-density specification.<sup class="cite"><a href="#ref-6">[6]</a></sup> As reported by Taguchi and Clausing and by Phadke, the two plants' output looked identical by a pass/fail count against the spec, but their distributions did not: the Japanese plant's units clustered tightly around the target value, while the American plant's were spread more evenly across the full tolerance band.<sup class="cite"><a href="#ref-6">[6]</a></sup><sup class="cite"><a href="#ref-7">[7]</a></sup> Taguchi's argument was that this difference is not invisible to the customer just because both plants pass the same inspection: a unit sitting near a spec limit degrades picture quality more than one sitting near target, even though both are "in spec." A traditional pass/fail view of tolerance cannot see this difference at all; the loss function, built to rise continuously with distance from target rather than jump at the spec limit, is built specifically to see it. This module's underlying data are the original 1979 newspaper account cited by later authors, not independently re-verified here, but the argument does not depend on the exact historical figures: it is the same argument, worked on fully traceable constructed numbers, in Worked example 2 below.</p>
+
+    <h2 id="stackup">Tolerance stack-up revisited: worst case vs RSS</h2>
+    <p>When several toleranced dimensions add up to form one assembled result &mdash; a gap, a clearance, an overall length &mdash; the assembly's own tolerance depends on how the individual tolerances are assumed to combine. The traditional, conservative answer is worst case: assume every part lands at its own tolerance limit simultaneously, in the direction that makes things worst.</p>
+    <div class="formula">worst-case stack tolerance = &Sigma; |tolerance<sub>i</sub>|
+      <span class="where">Guarantees the assembly meets its spec even in the single worst combination of parts, but that combination is rare when tolerances are independent, which makes worst-case tolerancing needlessly expensive to hold in production.</span>
+    </div>
+    <p>If each part's dimension varies independently and (approximately) normally around its own nominal, the statistical alternative combines the tolerances in quadrature instead of by simple addition, following the same variance-addition rule behind every "sum of independent random variables" result in this course.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <div class="formula">RSS stack tolerance = &radic;(&Sigma; tolerance<sub>i</sub><sup>2</sup>)
+      <span class="where">Always smaller than the worst-case sum (equal only in the degenerate case of a single part). This is the entire appeal of statistical tolerancing: it predicts a materially tighter, cheaper-to-achieve assembly tolerance than worst case, for the same part tolerances.</span>
+    </div>
+    <p>RSS's saving is not free. It assumes the part dimensions are independent (no shared cause pulling two of them the same way at once) and that each part's own process is centred on its nominal. Evans' three-part survey of statistical tolerancing methods covers exactly this trade-off, including what happens under shifts and drifts away from the centred assumption.<sup class="cite"><a href="#ref-1">[1]</a></sup> Worked example 1 below shows a case where the centring assumption is the one that actually matters in practice.</p>
+
+    <h2 id="allocation">Allocating tolerance using capability data</h2>
+    <p>RSS combines in quadrature, so a part's tolerance contributes to the stack total in proportion to its <em>square</em>, not linearly. Practically: loosening a large tolerance by a given amount costs the stack relatively little once other tolerances are already smaller, while tightening the smallest tolerance in a stack buys back very little RSS margin. This gives a designer real room to negotiate &mdash; loosen the tolerance on whichever part is hardest or most expensive to hold, and recover the RSS budget by tightening a part that is cheap to hold tighter, typically a purchased or standard component rather than a machined feature with its own process to control. Worked example 3 reallocates Worked example 1's own stack this way, on real numbers.</p>
+
+    <h2 id="robust">Robust design</h2>
+    <p>Taguchi's robust design approach starts from a different question than tolerancing does. Instead of asking how tightly a dimension must be held to control a known noise source, it asks whether the design itself can be changed so the response is <em>less sensitive</em> to that noise in the first place &mdash; parameter design before tolerance design, in Taguchi's own framing.<sup class="cite"><a href="#ref-4">[4]</a></sup><sup class="cite"><a href="#ref-5">[5]</a></sup> A signal-to-noise ratio is used to identify a combination of design (control) factors that keeps the response on target across the range of noise the product will actually see, using the same factorial methods Module 13 already covers to find that combination; only after the design is made robust does tightening any remaining tolerances become worthwhile. The specific signal-to-noise ratio statistics Taguchi proposed have drawn a real, published statistical critique &mdash; that they can confound location and dispersion effects in ways an analysis of the mean and log-variance separately does not.<sup class="cite"><a href="#ref-8">[8]</a></sup> This course teaches the robustness idea and the loss function as Taguchi presented them, and teaches that a standard factorial analysis of mean and variance separately is the more defensible way to carry out the analysis, consistent with the published statistical response to the SN-ratio critique.</p>
+
+    <h2 id="lossfunction">The Taguchi loss function</h2>
+    <p>The loss function formalizes the "distance from target matters, not just the spec limits" argument from the Sony story above into a single quadratic curve, calibrated so the loss equals a stated cost A&#8320; exactly at the spec limit (a distance &delta;&#8320; from target).</p>
+    <div class="formula">k = A&#8320; / &delta;&#8320;<sup>2</sup> &nbsp; &nbsp; average loss = k &times; (s<sup>2</sup> + (mean &minus; target)<sup>2</sup>)
+      <span class="where">s&sup2; here is the population (n, not n&minus;1) mean square about the sample mean; the identity mean((x&minus;target)&sup2;) = variance + (mean&minus;target)&sup2; only holds exactly with that convention. The two terms split total average loss into a piece from spread around the mean and a piece from the mean itself sitting off target &mdash; two separately actionable causes.</span>
+    </div>
+    <p>The formula's shape is what carries Taguchi's point: loss rises continuously and smoothly with distance from target, with no discontinuity at the spec limit the way a pass/fail view has one. A part sitting just inside the limit costs almost as much, in this view, as one sitting just outside it; a part sitting exactly on target costs (in principle) nothing. Worked example 2 applies this to real capability data already used elsewhere in this course.</p>
+
+    <h2 id="dfm">Feeding capability data back into DFM</h2>
+    <p>Every tool in this module runs in the direction production engineers usually do not get to run it: from a spec, backward, into what the design and the tolerances need to be. In practice the flow goes both ways. A supplier's demonstrated process capability (Module 7's Cpk, an MSA study's %R&amp;R, Module 9's multi-vari decomposition of where the variation actually comes from) is exactly the input a stack-up or a loss-function calculation needs to be realistic rather than aspirational, and a design-for-manufacturing review that ignores what a process can actually hold is choosing, by omission, either an expensive over-tight tolerance or an assembly that will not be capable once it is built. Capability data belongs in the tolerance decision, not just in the inspection report that follows it.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: a three-part assembly gap, worst case vs RSS vs a real centring bias</h3>
+    <p class="example-label">The data below is a constructed example, not a real production assembly.</p>
+    <p>An assembly gap is formed by three stacked dimensions: a housing depth (A), a spacer thickness (B) subtracted from it, and a shaft-shoulder position (C) also subtracted, gap = A &minus; B &minus; C. The spec on the gap is 2.000&nbsp;mm &plusmn; 0.100&nbsp;mm.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Three-part gap stack, nominal and tolerance (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Nominal (mm)</th><th>Tolerance (&plusmn;mm)</th><th>Sign in the stack</th></tr></thead>
+        <tbody>
+          <tr><td>A, housing depth</td><td>25.000</td><td>0.050</td><td>+</td></tr>
+          <tr><td>B, spacer thickness</td><td>8.000</td><td>0.025</td><td>&minus;</td></tr>
+          <tr><td>C, shaft-shoulder position</td><td>15.000</td><td>0.040</td><td>&minus;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Nominal gap = 25.000 &minus; 8.000 &minus; 15.000 = 2.000&nbsp;mm, matching the spec's centre. Worst case = 0.050 + 0.025 + 0.040 = <span data-ex="m15-stack-three-parts" data-key="worst_case" data-dp="3">0.115</span>&nbsp;mm &mdash; this <strong>exceeds</strong> the 0.100&nbsp;mm spec half-width, so worst-case tolerancing says this stack cannot be guaranteed to pass. RSS = &radic;(0.050&sup2; + 0.025&sup2; + 0.040&sup2;) = <span data-ex="m15-stack-three-parts" data-key="rss" data-dp="4">0.0687</span>&nbsp;mm &mdash; comfortably <strong>within</strong> spec, assuming independence and centring. Assuming each part's own process runs at Cpk&nbsp;=&nbsp;1.0 (a fairly ordinary, "just adequate" process, not an exceptional one), each part's own sigma is tolerance&nbsp;/&nbsp;(3&nbsp;&times;&nbsp;1.0): 0.0167, 0.0083, and 0.0133&nbsp;mm for A, B, and C. Combining those in quadrature gives a predicted stack sigma of <span data-ex="m15-stack-three-parts" data-key="sigma_stack_predicted" data-dp="5">0.02291</span>&nbsp;mm and a predicted stack Cpk, assuming everything stays centred, of <span data-ex="m15-stack-three-parts" data-key="cpk_predicted" data-dp="3">1.455</span> &mdash; a comfortable, apparently capable result.</p>
+    <p>Now drop the centring assumption. Suppose each of the three processes is quietly running one full sigma off its own target &mdash; not a large or unusual shift for an unmonitored process, and all three biased in the direction that closes the gap (a plausible scenario: shared tooling wear, a fixture that consistently locates slightly off, or simply three ordinary processes that each happen to drift the same way). A Monte Carlo simulation of 200,000 assemblies built from these three biased-but-otherwise-identical processes gives a simulated mean of <span data-ex="m15-stack-three-parts" data-key="simulated.mean" data-dp="4">1.9617</span>&nbsp;mm (spread, sd&nbsp;=&nbsp;<span data-ex="m15-stack-three-parts" data-key="simulated.sd" data-dp="5">0.02283</span>&nbsp;mm, essentially the same spread RSS predicted &mdash; the bias moves the centre, not the width) and a simulated Cpk of only <span data-ex="m15-stack-three-parts" data-key="simulated.cpk" data-dp="3">0.901</span>, with about <span data-ex="m15-stack-three-parts" data-key="simulated.ppm" data-dp="0">3530</span> assemblies per million falling outside the 2.000&nbsp;&plusmn;&nbsp;0.100&nbsp;mm spec. RSS's centred prediction (Cpk&nbsp;1.455, negligible reject rate) and the simulated reality (Cpk&nbsp;0.901, roughly 1 assembly in 280 outside spec) describe the same nominal design; the entire difference is three ordinary, individually unremarkable centring biases combining in the same direction. RSS's spread prediction was essentially exact; its implicit assumption that every part stays centred was the one that cost real capability.</p>
+
+    <h3 id="example2">Worked example 2: Taguchi loss for the Module 7 bore data</h3>
+    <p class="example-label">The data below reuses the 125 bore-diameter readings from Module 7's Worked example (Ø12.000&nbsp;&plusmn;&nbsp;0.025&nbsp;mm, Cpk about 1.1), with an illustrative cost at the spec limit added for this module's purpose. Cost figures below are illustrative cost units, not a real currency or a claimed real cost.</p>
+    <p>With target&nbsp;=&nbsp;12.000&nbsp;mm, a cost of A&#8320;&nbsp;=&nbsp;40 illustrative cost units at the spec limit (&delta;&#8320;&nbsp;=&nbsp;0.025&nbsp;mm), k&nbsp;=&nbsp;40&nbsp;/&nbsp;0.025&sup2;&nbsp;=&nbsp;<span data-ex="m15-loss-bore" data-key="k" data-dp="0">64000</span> cost units per mm&sup2;. The 125 readings have mean <span data-ex="m15-loss-bore" data-key="mean" data-dp="4">12.0039</span>&nbsp;mm and s&nbsp;=&nbsp;<span data-ex="m15-loss-bore" data-key="s" data-dp="5">0.00676</span>&nbsp;mm. Average loss splits into a variance component of <span data-ex="m15-loss-bore" data-key="var_component" data-dp="3">2.903</span> and an off-centre component of <span data-ex="m15-loss-bore" data-key="offcenter_component" data-dp="4">0.9754</span>, for a total average loss of <span data-ex="m15-loss-bore" data-key="avg_loss" data-dp="3">3.879</span> cost units per part &mdash; about <span data-ex="m15-loss-bore" data-key="pct_from_offcenter" data-dp="2">25.15</span>&nbsp;% of it from the process being slightly off target (mean 12.0039 vs. target 12.000), the rest from ordinary piece-to-piece spread. Summed over the full 125-part sample, total loss is <span data-ex="m15-loss-bore" data-key="total_loss" data-dp="2">484.86</span> cost units. The single worst reading in the sample carries a loss of exactly <span data-ex="m15-loss-bore" data-key="max_loss" data-dp="4">40.0000</span> &mdash; exactly A&#8320;, because that reading landed exactly at the spec limit, the boundary the loss function is calibrated against by construction. Every reading closer to target than that one costs less, continuously, all the way down to a reading exactly on target, which is precisely the argument the Sony story above is making on real, traceable numbers: two processes can pass the same inspection and still carry very different real cost, and the loss function is what makes that difference visible.</p>
+
+    <h3 id="example3">Worked example 3: reallocating the stack's tolerance budget</h3>
+    <p class="example-label">Constructed example, continuing Worked example 1's stack.</p>
+    <p>Part A (the housing depth) is a machined feature on an expensive setup; tightening it further would mean a new fixture. Part B (the spacer) is a purchased shim, available in finer increments at essentially the same unit cost. Loosen A from &plusmn;0.050 to &plusmn;0.060&nbsp;mm and tighten B from &plusmn;0.025 to &plusmn;0.015&nbsp;mm, leaving C unchanged, and assume a more typical Cpk of 1.33 per part (rather than Worked example 1's deliberately ordinary 1.0, to show a second, independent starting point) with the same 0.5&sigma; centring bias used in the exercises below.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. The same stack, tolerance reallocated (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Original tolerance</th><th>Reallocated tolerance</th></tr></thead>
+        <tbody>
+          <tr><td>A, housing depth</td><td>&plusmn;0.050&nbsp;mm</td><td>&plusmn;0.060&nbsp;mm (loosened)</td></tr>
+          <tr><td>B, spacer thickness</td><td>&plusmn;0.025&nbsp;mm</td><td>&plusmn;0.015&nbsp;mm (tightened)</td></tr>
+          <tr><td>C, shaft-shoulder position</td><td>&plusmn;0.040&nbsp;mm</td><td>&plusmn;0.040&nbsp;mm (unchanged)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Worst case is essentially unchanged (0.060&nbsp;+&nbsp;0.015&nbsp;+&nbsp;0.040&nbsp;=&nbsp;<span data-ex="m15-alloc-three-parts" data-key="worst_case" data-dp="3">0.115</span>&nbsp;mm, the same as before to three decimals). RSS rises only from 0.0687 to <span data-ex="m15-alloc-three-parts" data-key="rss" data-dp="4">0.0737</span>&nbsp;mm &mdash; a real increase, but still comfortably inside the 0.100&nbsp;mm spec half-width &mdash; even though A was loosened by 20&nbsp;% (10% more room for the hard-to-hold machined feature). Squaring a large tolerance and squaring a small one do not cost the same: loosening the part that already carried the largest tolerance costs relatively little RSS budget, while tightening the part with the smallest tolerance buys back a smaller absolute amount than the same percentage change would on a larger tolerance. With the more typical Cpk&nbsp;=&nbsp;1.33 assumption, predicted stack Cpk here is <span data-ex="m15-alloc-three-parts" data-key="cpk_predicted" data-dp="3">1.806</span>; simulated with the same kind of 0.5&sigma; centring bias used in Exercise 1 below, it comes in at <span data-ex="m15-alloc-three-parts" data-key="simulated.cpk" data-dp="3">1.544</span> (about <span data-ex="m15-alloc-three-parts" data-key="simulated.ppm" data-dp="0">5</span> per million outside spec) &mdash; still comfortably capable. The reallocation bought real relief on the expensive part without meaningfully hurting the assembly.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul class="mistakes">
+      <li><strong>Using RSS tolerancing without checking that each part's process is actually independent and centred.</strong> Consequence: Worked example 1's exact failure mode &mdash; a stack that looks comfortably capable on paper and is not, once real (even modest) centring bias is accounted for. Fix: state the centring assumption explicitly whenever RSS is used, and check it against actual process data, not just a nominal drawing.</li>
+      <li><strong>Treating "passes RSS" as a guarantee rather than a probabilistic prediction.</strong> Consequence: RSS was designed to replace an overly conservative worst-case guarantee with a realistic prediction; treating its output as a new guarantee reintroduces the same overconfidence in a different place. Fix: report RSS results with the assumptions attached (independence, centring, approximate normality), not as a bare pass/fail.</li>
+      <li><strong>Reading a capability index in isolation from the spec limit's cost structure.</strong> Consequence: two processes with the same Cpk can carry very different real cost if one is centred and the other is not, exactly Worked example 2's point. Fix: pair a capability index with a target-sensitive view (Cpm, or the loss function directly) whenever centring is in question.</li>
+      <li><strong>Tightening every tolerance in a stack equally instead of reallocating.</strong> Consequence: wastes money tightening parts that were already cheap to hold, while the genuinely expensive part stays tight too. Fix: use RSS's quadratic relationship to loosen the expensive-to-hold part and tighten the cheap-to-hold one, as in Worked example 3.</li>
+      <li><strong>Treating robust design as "just do a DOE."</strong> Consequence: a standard factorial finds which factors move the mean and which move the variance, but robust design specifically asks whether a design (control) factor can be set to make the response insensitive to noise factors the customer cannot control &mdash; a different question than optimizing the mean alone. Fix: separate control factors from noise factors explicitly before designing the experiment.</li>
+      <li><strong>Using Taguchi's original signal-to-noise ratio statistics without knowing they have been challenged.</strong> Consequence: presenting a contested statistical method as settled practice. Fix: analyze the mean and the log-variance as separate responses, the more defensible route this course teaches, and cite the SN-ratio critique if the original ratios come up.</li>
+      <li><strong>Presenting the Sony story's specific numbers as independently verified.</strong> Consequence: repeating a widely told but not fully re-sourced anecdote as if it were audited data. Fix: label it as reported (this page does), and use Worked example 2's fully traceable numbers to make the same point when a verified figure is needed.</li>
+    </ul>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a two-part shaft-in-bore clearance</h3>
+    <p class="example-label">Constructed example, not a real production assembly.</p>
+    <p>A bore (D) and a shaft (E) form a clearance, clearance = D &minus; E, spec 0.050&nbsp;mm &plusmn; 0.045&nbsp;mm.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Two-part clearance stack (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Nominal (mm)</th><th>Tolerance (&plusmn;mm)</th></tr></thead>
+        <tbody>
+          <tr><td>D, bore</td><td>20.000</td><td>0.030</td></tr>
+          <tr><td>E, shaft</td><td>19.950</td><td>0.020</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute the worst-case and RSS stack tolerances, and check each against the 0.045&nbsp;mm spec half-width. (b) Assuming each part runs at Cpk&nbsp;=&nbsp;1.33, compute the predicted stack Cpk assuming centring. (c) A Monte Carlo simulation with a 0.5&sigma; centring bias on each part gives a simulated Cpk. Would you expect it higher or lower than (b)'s prediction, and why?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Worst case = 0.030 + 0.020 = <span data-ex="m15-ex1-stack" data-key="worst_case" data-dp="3">0.050</span>&nbsp;mm, which exceeds the 0.045&nbsp;mm spec half-width. RSS = &radic;(0.030&sup2; + 0.020&sup2;) = <span data-ex="m15-ex1-stack" data-key="rss" data-dp="5">0.03606</span>&nbsp;mm, which is within spec.</p>
+      <p><strong>(b)</strong> Predicted stack Cpk (centred) = <span data-ex="m15-ex1-stack" data-key="cpk_predicted" data-dp="3">1.660</span>.</p>
+      <p><strong>(c)</strong> Lower, for the same structural reason as Worked example 1: any consistent off-centre bias uses up some of the margin RSS's centred assumption implicitly claimed. The simulated Cpk here is <span data-ex="m15-ex1-stack" data-key="simulated.cpk" data-dp="3">1.428</span>, about <span data-ex="m15-ex1-stack" data-key="simulated.ppm" data-dp="0">20</span> per million outside spec &mdash; still comfortably capable, because a 0.5&sigma; bias at a starting Cpk of 1.33 leaves more margin than Worked example 1's harder case (a full 1&sigma; bias starting from Cpk&nbsp;1.0). The direction of the effect is the lesson: centring bias always pulls the real Cpk below the centred prediction; how much depends on how large the bias is and how much margin the centred prediction started with.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: Taguchi loss for a fill-weight process</h3>
+    <p class="example-label">Constructed example, not a real production run. Setting: packaged fill weight (g), target 250.0&nbsp;g, spec &plusmn;3.0&nbsp;g, 25 packages, each weighed to 0.01&nbsp;g. Cost figures are illustrative cost units, not a real currency.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Fill weight, 25 packages (constructed data).</caption>
+        <thead><tr><th>#</th><th>g</th><th>#</th><th>g</th><th>#</th><th>g</th><th>#</th><th>g</th><th>#</th><th>g</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>249.46</td><td>6</td><td>249.77</td><td>11</td><td>248.49</td><td>16</td><td>248.35</td><td>21</td><td>249.13</td></tr>
+          <tr><td>2</td><td>249.13</td><td>7</td><td>251.00</td><td>12</td><td>249.35</td><td>17</td><td>248.59</td><td>22</td><td>251.08</td></tr>
+          <tr><td>3</td><td>250.13</td><td>8</td><td>250.53</td><td>13</td><td>246.28</td><td>18</td><td>248.89</td><td>23</td><td>248.44</td></tr>
+          <tr><td>4</td><td>249.44</td><td>9</td><td>248.39</td><td>14</td><td>249.02</td><td>19</td><td>249.84</td><td>24</td><td>249.76</td></tr>
+          <tr><td>5</td><td>248.60</td><td>10</td><td>247.65</td><td>15</td><td>247.68</td><td>20</td><td>250.66</td><td>25</td><td>250.47</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> With A&#8320;&nbsp;=&nbsp;20 cost units at the spec limit (&delta;&#8320;&nbsp;=&nbsp;3.0&nbsp;g): (a) compute k. (b) Compute the mean and the average loss, split into its variance and off-centre components. (c) What fraction of the average loss comes from the process running below target, rather than from spread?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> k = 20 / 3.0&sup2; = <span data-ex="m15-ex2-loss" data-key="k" data-dp="3">2.222</span> cost units per g&sup2;.</p>
+      <p><strong>(b)</strong> Mean = <span data-ex="m15-ex2-loss" data-key="mean" data-dp="3">249.205</span>&nbsp;g (s&nbsp;=&nbsp;<span data-ex="m15-ex2-loss" data-key="s" data-dp="3">1.135</span>&nbsp;g), against a target of 250.0&nbsp;g. Variance component = <span data-ex="m15-ex2-loss" data-key="var_component" data-dp="3">2.748</span>; off-centre component = <span data-ex="m15-ex2-loss" data-key="offcenter_component" data-dp="3">1.404</span>; average loss = <span data-ex="m15-ex2-loss" data-key="avg_loss" data-dp="3">4.152</span> cost units per package. Total loss over the 25 packages: <span data-ex="m15-ex2-loss" data-key="total_loss" data-dp="2">103.80</span>.</p>
+      <p><strong>(c)</strong> <span data-ex="m15-ex2-loss" data-key="pct_from_offcenter" data-dp="2">33.81</span>&nbsp;% of the average loss comes from the process running under target (249.205&nbsp;g vs. 250.0&nbsp;g), a materially larger off-centre share than Worked example 2's bore data (about 25&nbsp;%). Unlike a pass/fail spec check, which would treat any package inside 247.0-253.0&nbsp;g identically, the loss function is already saying this process has real, quantifiable room to save cost simply by shifting its target up, before touching its spread at all.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="15">
+      <fieldset class="q" data-answer="c">
+        <legend>1. Worst-case tolerancing assumes</legend>
+        <label><input type="radio" name="q1" value="a"> every part is perfectly centred on nominal</label>
+        <label><input type="radio" name="q1" value="b"> parts are never independent</label>
+        <label><input type="radio" name="q1" value="c"> every part lands at its own tolerance limit at once, in the worst direction</label>
+        <label><input type="radio" name="q1" value="d"> the assembly tolerance is always smaller than any single part's</label>
+        <p class="explain" hidden>Worst case guarantees the assembly even in that rare simultaneous-limit combination, which is why it is conservative.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. RSS combines individual tolerances by</legend>
+        <label><input type="radio" name="q2" value="a"> simple addition</label>
+        <label><input type="radio" name="q2" value="b"> the square root of the sum of squares</label>
+        <label><input type="radio" name="q2" value="c"> taking the largest single tolerance</label>
+        <label><input type="radio" name="q2" value="d"> averaging the tolerances</label>
+        <p class="explain" hidden>RSS tolerance = √(Σ tolerance²), always ≤ the worst-case sum.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. In Worked example 1, RSS predicted a comfortable Cpk of 1.455, but a Monte Carlo with a 1σ centring bias per part gave a simulated Cpk of only 0.901, because</legend>
+        <label><input type="radio" name="q3" value="a"> the Monte Carlo used a different spec</label>
+        <label><input type="radio" name="q3" value="b"> RSS's spread prediction was wrong</label>
+        <label><input type="radio" name="q3" value="c"> the parts were not independent</label>
+        <label><input type="radio" name="q3" value="d"> RSS's prediction assumed every part stays centred, and the simulation deliberately violated that assumption</label>
+        <p class="explain" hidden>The simulated spread (sd) matched RSS's prediction closely; the entire gap was the centring assumption.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. Reallocating a stack's tolerance budget (Worked example 3) works because</legend>
+        <label><input type="radio" name="q4" value="a"> RSS combines tolerances in quadrature, so loosening an already-large tolerance costs relatively little of the total</label>
+        <label><input type="radio" name="q4" value="b"> worst-case tolerancing allows it and RSS does not</label>
+        <label><input type="radio" name="q4" value="c"> the nominal stack value changes</label>
+        <label><input type="radio" name="q4" value="d"> it only works when all tolerances are exactly equal</label>
+        <p class="explain" hidden>Squaring a large tolerance and squaring a small one do not cost the total the same amount.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>5. Robust design's core idea is to</legend>
+        <label><input type="radio" name="q5" value="a"> tighten every tolerance until the process is capable</label>
+        <label><input type="radio" name="q5" value="b"> replace tolerancing with inspection</label>
+        <label><input type="radio" name="q5" value="c"> find design settings that make the response insensitive to noise the customer cannot control, before tolerancing</label>
+        <label><input type="radio" name="q5" value="d"> only apply to electronic products</label>
+        <p class="explain" hidden>Parameter design (reduce sensitivity to noise) comes before tolerance design in Taguchi's framing.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. The Taguchi loss function's key structural feature, versus a plain pass/fail spec check, is that it</legend>
+        <label><input type="radio" name="q6" value="a"> only applies at the spec limit</label>
+        <label><input type="radio" name="q6" value="b"> rises continuously with distance from target, with no discontinuity at the spec limit</label>
+        <label><input type="radio" name="q6" value="c"> is identical to a Cpk calculation</label>
+        <label><input type="radio" name="q6" value="d"> ignores the process mean entirely</label>
+        <p class="explain" hidden>A pass/fail view treats every in-spec part identically; the loss function does not.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>7. In Worked example 2, the average loss's two components (variance and off-centre) require which convention for s² in the variance term?</legend>
+        <label><input type="radio" name="q7" value="a"> the sample standard deviation squared, dividing by n − 1</label>
+        <label><input type="radio" name="q7" value="b"> the range divided by d₂</label>
+        <label><input type="radio" name="q7" value="c"> it does not matter which convention is used</label>
+        <label><input type="radio" name="q7" value="d"> the population (biased, dividing by n) mean square, for the decomposition identity to hold exactly</label>
+        <p class="explain" hidden>mean((x−target)²) = variance(biased) + (mean−target)² only holds exactly with the n-divisor convention.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>8. In Worked example 2, the single worst bore reading carried a loss of exactly A₀ because</legend>
+        <label><input type="radio" name="q8" value="a"> that reading landed exactly at the spec limit, which is what A₀ is calibrated against</label>
+        <label><input type="radio" name="q8" value="b"> A₀ is always the maximum possible loss</label>
+        <label><input type="radio" name="q8" value="c"> that reading was outside the spec limit</label>
+        <label><input type="radio" name="q8" value="d"> it was a coincidence unrelated to the spec</label>
+        <p class="explain" hidden>The loss function is calibrated so L(target ± δ₀) = A₀ exactly; a reading exactly at that distance costs exactly A₀.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. The published critique of Taguchi's original signal-to-noise ratios argues that they</legend>
+        <label><input type="radio" name="q9" value="a"> are mathematically impossible to compute</label>
+        <label><input type="radio" name="q9" value="b"> apply only to attribute data</label>
+        <label><input type="radio" name="q9" value="c"> can confound location and dispersion effects in ways a separate analysis of mean and log-variance does not</label>
+        <label><input type="radio" name="q9" value="d"> were never actually used in industry</label>
+        <p class="explain" hidden>This is the specific, published statistical objection this course cites and follows.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. The Sony television story in this module is presented</legend>
+        <label><input type="radio" name="q10" value="a"> as independently verified, audited data</label>
+        <label><input type="radio" name="q10" value="b"> as reported by Taguchi and Clausing and by Phadke, with the underlying figures not independently re-verified here</label>
+        <label><input type="radio" name="q10" value="c"> as a fabricated illustration invented for this course</label>
+        <label><input type="radio" name="q10" value="d"> as a case this course's author worked on directly</label>
+        <p class="explain" hidden>Labelled per SOURCES.md's decision: as reported, not independently verified, with the same argument also shown on fully traceable constructed numbers (Worked example 2).</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Every part at its own limit at once, worst direction.</li>
+        <li>b. Square root of the sum of squares.</li>
+        <li>d. RSS assumed centring, which the simulation violated.</li>
+        <li>a. Quadrature combination makes loosening a large tolerance cheap.</li>
+        <li>c. Insensitivity to uncontrollable noise, before tolerancing.</li>
+        <li>b. Rises continuously, no discontinuity at the spec limit.</li>
+        <li>d. Population (biased, n-divisor) mean square.</li>
+        <li>a. That reading landed exactly at the spec limit.</li>
+        <li>c. Can confound location and dispersion effects.</li>
+        <li>b. As reported, not independently re-verified here.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Worst-case tolerancing (Σ tolerances) guarantees an assembly even in the rare simultaneous-limit case; RSS (√Σ tolerance²) predicts a realistic, usually much tighter, assembly tolerance assuming independence and centring.</li>
+      <li>RSS's centring assumption is often the one that actually matters: Worked example 1 showed a stack RSS predicted as comfortably capable (Cpk 1.455) turn out much less capable (Cpk 0.901) once a realistic per-part centring bias was simulated, while the predicted spread stayed almost exactly right.</li>
+      <li>Because RSS combines in quadrature, a stack's tolerance budget can be reallocated: loosen the part that is expensive to hold tight, tighten the part that is cheap to hold tight, and the total RSS moves only modestly.</li>
+      <li>Robust design (parameter design before tolerance design) asks whether a design can be made insensitive to noise before tightening any tolerance; Taguchi's original SN-ratio statistics have a real, published critique, so this course prefers analyzing mean and log-variance separately.</li>
+      <li>The Taguchi loss function is calibrated so loss equals a stated cost A₀ exactly at the spec limit, and splits cleanly into a variance component and an off-centre component &mdash; two separately actionable causes of the same total cost.</li>
+      <li>A pass/fail spec check cannot distinguish a part near target from one near the spec limit; the loss function, and the Sony story it is built to explain, both make the case that this distinction has real, continuous cost.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10 (Phase A) unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">Evans, D. H. (1974&ndash;1975). Statistical tolerancing: the state of the art. Parts I&ndash;III. <em>Journal of Quality Technology</em>, 6(4), 188&ndash;195; 7(1), 1&ndash;12; 7(2), 72&ndash;76. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.1975.11980657">https://www.tandfonline.com/doi/abs/10.1080/00224065.1975.11980657</a> <span class="tag">(abstract-level: linear propagation/RSS, non-linear methods, and Part III's treatment of shifts and drifts confirmed at this depth)</span></li>
+      <li id="ref-2">Chase, K. W., &amp; Parkinson, A. R. (1991). A survey of research in the application of tolerance analysis to the design of mechanical assemblies. <em>Research in Engineering Design</em>, 3, 23&ndash;37. <a href="https://link.springer.com/article/10.1007/BF01580066">https://link.springer.com/article/10.1007/BF01580066</a> <span class="tag">(abstract-level)</span></li>
+      <li id="ref-3">ASME Y14.5-2018. <em>Dimensioning and Tolerancing</em>. ASME. <a href="https://www.asme.org/codes-standards/find-codes-standards/y14-5-dimensioning-tolerancing/2018">https://www.asme.org/codes-standards/find-codes-standards/y14-5-dimensioning-tolerancing/2018</a> <span class="tag">(catalogue-level: existence and edition; statistical-tolerancing symbol details are not read at this depth)</span></li>
+      <li id="ref-4">Taguchi, G. (1986). <em>Introduction to Quality Engineering: Designing Quality into Products and Processes</em>. Asian Productivity Organization. <a href="https://archive.org/details/introductiontoqu0000tagu">https://archive.org/details/introductiontoqu0000tagu</a> <span class="tag">(catalogue-level; the quadratic loss function, parameter and tolerance design)</span></li>
+      <li id="ref-5">Creveling, C. M. (1997). <em>Tolerance Design: A Handbook for Developing Optimal Specifications</em>. Addison-Wesley. <a href="https://searchworks.stanford.edu/view/3399329">https://searchworks.stanford.edu/view/3399329</a> <span class="tag">(catalogue-level; links the loss function and capability)</span></li>
+      <li id="ref-6">Simpson, T. W. "IE 466: Concurrent Engineering, 32.3 Taguchi's robust design method" (Penn State course handout). <a href="https://www.me.psu.edu/simpson/courses/ie466/ie466.robust.handout.pdf">https://www.me.psu.edu/simpson/courses/ie466/ie466.robust.handout.pdf</a> <span class="tag">(the Sony USA vs Sony Japan colour-density story, citing Phadke 1989; the most directly readable source found for this story)</span></li>
+      <li id="ref-7">Taguchi, G., &amp; Clausing, D. (1990). Robust quality. <em>Harvard Business Review</em>, 68(1), 65&ndash;75. <a href="https://hbr.org/1990/01/robust-quality">https://hbr.org/1990/01/robust-quality</a> <span class="tag">(secondary, paywalled beyond title and lead; the Sony comparison and loss-function argument, presented as reported per this course's standing decision, underlying 1979 data not independently verified)</span></li>
+      <li id="ref-8">Box, G. E. P. (1988). Signal-to-noise ratios, performance criteria, and transformations (with discussion). <em>Technometrics</em>, 30(1), 1&ndash;40. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1988.10488313">https://www.tandfonline.com/doi/abs/10.1080/00401706.1988.10488313</a> <span class="tag">(abstract-level; the published statistical critique of Taguchi's SN-ratio statistics &mdash; a log transformation achieves the same result more simply)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

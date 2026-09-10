@@ -1,0 +1,19 @@
+{
+ "id": "m15-loss-bore",
+ "module": "15",
+ "kind": "taguchi_loss",
+ "title": "Taguchi loss for the Module 7 bore data (Cpk about 1.1)",
+ "source": "constructed (reuses m07-bore's 125 raw values)",
+ "setting": "reamed bore \u00d812.000 +/- 0.025 mm, the same 125 values as m07-bore",
+ "params": {
+  "target": 12.0,
+  "a0": 40.0,
+  "delta0": 0.025,
+  "units_x": "mm",
+  "cost_units": "illustrative cost units, not a real currency"
+ },
+ "columns": [
+  "x"
+ ],
+ "n_rows": 125
+}
