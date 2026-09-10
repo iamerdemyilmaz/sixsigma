@@ -1,0 +1,14 @@
+{
+ "id": "m19-pareto",
+ "module": "19",
+ "kind": "pareto",
+ "title": "Capstone: leak location of the 259 baseline leakers",
+ "source": "constructed (totals match m19-leak-baseline)",
+ "setting": "leak location recorded by the test operator for every leaking core of the baseline period",
+ "params": {},
+ "columns": [
+  "category",
+  "count"
+ ],
+ "n_rows": 5
+}

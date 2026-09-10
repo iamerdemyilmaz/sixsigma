@@ -1,0 +1,21 @@
+{
+ "id": "m19-grr",
+ "module": "19",
+ "kind": "grr",
+ "title": "Capstone: crossed gauge R&R on the joint-gap gauge, 10 x 3 x 2, tolerance 0.10 mm",
+ "source": "constructed",
+ "setting": "tube-to-header gap measured with a calibrated pin-gauge set to 0.001 mm on 10 cores spanning the range, 3 operators, 2 trials, randomised",
+ "params": {
+  "tolerance": 0.1,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "units": "mm"
+ },
+ "columns": [
+  "part",
+  "operator",
+  "trial",
+  "y"
+ ],
+ "n_rows": 60
+}

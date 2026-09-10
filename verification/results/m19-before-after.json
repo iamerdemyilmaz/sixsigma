@@ -1,0 +1,85 @@
+{
+ "id": "m19-before-after",
+ "kind": "chisq",
+ "params": {
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "alpha": 0.05
+ },
+ "source": "constructed (totals of m19-leak-baseline and m19-leak-after)",
+ "results": {
+  "rows": [
+   "Before",
+   "After"
+  ],
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "observed": [
+   [
+    259.0,
+    5778.0
+   ],
+   [
+    49.0,
+    5988.0
+   ]
+  ],
+  "expected": [
+   [
+    154.0,
+    5883.0
+   ],
+   [
+    154.0,
+    5883.0
+   ]
+  ],
+  "row_totals": [
+   6037.0,
+   6037.0
+  ],
+  "col_totals": [
+   308.0,
+   11766.0
+  ],
+  "n": 12074,
+  "row_proportions": [
+   [
+    0.042902103693887694,
+    0.9570978963061123
+   ],
+   [
+    0.008116614212357131,
+    0.9918833857876429
+   ]
+  ],
+  "col_overall_proportions": [
+   0.02550935895312241,
+   0.9744906410468775
+  ],
+  "contributions": [
+   [
+    71.5909090909091,
+    1.8740438551759306
+   ],
+   [
+    71.5909090909091,
+    1.8740438551759306
+   ]
+  ],
+  "chi2": 146.92990589217004,
+  "df": 1,
+  "p": 8.129319099863097e-34,
+  "chi2_crit": 3.841458820694124,
+  "alpha": 0.05,
+  "cramer_v": 0.11031371602253659,
+  "min_expected": 154.0,
+  "cells_expected_below_5": 0
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

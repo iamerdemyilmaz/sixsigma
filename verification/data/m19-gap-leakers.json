@@ -1,0 +1,18 @@
+{
+ "id": "m19-gap-leakers",
+ "module": "19",
+ "kind": "ttest2",
+ "title": "Capstone: header-joint gap on 20 leaking and 20 passing cores, two-sample t",
+ "source": "constructed",
+ "setting": "gap at the leaking joint (or the corresponding joint on a passing core) measured after sectioning, mm to 0.001",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "mm"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 40
+}

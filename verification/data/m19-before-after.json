@@ -1,0 +1,21 @@
+{
+ "id": "m19-before-after",
+ "module": "19",
+ "kind": "chisq",
+ "title": "Capstone: leak results before and after, 2 x 2 chi-square (equivalent to a two-proportion test)",
+ "source": "constructed (totals of m19-leak-baseline and m19-leak-after)",
+ "setting": "leak and pass counts over the 30 baseline shifts and the 30 shifts after the change",
+ "params": {
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "alpha": 0.05
+ },
+ "columns": [
+  "row",
+  "Leak",
+  "Pass"
+ ],
+ "n_rows": 2
+}

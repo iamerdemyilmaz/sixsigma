@@ -1,0 +1,27 @@
+{
+ "id": "m19-doe",
+ "module": "19",
+ "kind": "factorial",
+ "title": "Capstone: 2^3 factorial with 2 replicates on the braze process, response mean joint gap",
+ "source": "constructed",
+ "setting": "A fixture clamp force 2/4 kN, B tube expansion standard/increased (mandrel +0.05 mm), C furnace peak temperature 595/605 \u00b0C; 16 cores in random order, response the mean tube-to-header gap per core in mm",
+ "params": {
+  "k": 3,
+  "replicates": 2,
+  "factors": [
+   "A",
+   "B",
+   "C"
+  ],
+  "units": "mm"
+ },
+ "columns": [
+  "run",
+  "rep",
+  "A",
+  "B",
+  "C",
+  "y"
+ ],
+ "n_rows": 16
+}

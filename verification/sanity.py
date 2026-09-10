@@ -444,6 +444,14 @@ def check_dnom(ex_id, r, data):
     check(sum(v["n"] for v in r["parts"].values()) == len(dev), f"{tag}: part counts")
 
 
+def check_pareto(ex_id, r, data):
+    tag = ex_id
+    check(r["total"] == sum(int(v) for v in data["count"]), f"{tag}: total")
+    check(all(r["counts"][i] >= r["counts"][i + 1] for i in range(len(r["counts"]) - 1)), f"{tag}: not sorted")
+    check(near(sum(r["pct"]), 100.0, 1e-9) and near(r["cum_pct"][-1], 100.0, 1e-9), f"{tag}: percentages")
+    check(1 <= r["n_for_80pct"] <= len(r["counts"]), f"{tag}: 80 % count")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -479,6 +487,7 @@ def check_results():
         elif kind == "arl": check_arl(ex_id, r)
         elif kind == "p_prime": check_p_prime(ex_id, r, data)
         elif kind == "dnom": check_dnom(ex_id, r, data)
+        elif kind == "pareto": check_pareto(ex_id, r, data)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

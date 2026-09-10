@@ -132,7 +132,9 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   // Module 17: the Laney p' chart and the short-run DNOM chart are taught as
   // hand computations (the control-chart builder draws the classic p chart and
   // an I-MR chart of pasted deviations, which is the DNOM chart's mechanics).
-  p_prime: true, dnom: true };
+  p_prime: true, dnom: true,
+  // Module 19: a Pareto count table is arithmetic on printed counts.
+  pareto: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

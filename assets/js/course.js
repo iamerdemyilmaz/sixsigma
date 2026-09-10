@@ -29,7 +29,7 @@
     { num: "16", slug: "16-spc-1", title: "Statistical process control I", built: true },
     { num: "17", slug: "17-spc-2", title: "Statistical process control II", built: true },
     { num: "18", slug: "18-control-plans", title: "Control plans and sustaining gains", built: false },
-    { num: "19", slug: "19-capstone", title: "Capstone: a DMAIC project end to end", built: false }
+    { num: "19", slug: "19-capstone", title: "Capstone: a DMAIC project end to end", built: true }
   ];
 
   /* Supporting pages. `built` false shows the title as "not yet published". */

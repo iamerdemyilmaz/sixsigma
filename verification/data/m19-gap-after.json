@@ -1,0 +1,21 @@
+{
+ "id": "m19-gap-after",
+ "module": "19",
+ "kind": "capability",
+ "title": "Capstone after improvement: tube-to-header gap, 25 subgroups of 5, Cpk about 1.7",
+ "source": "constructed",
+ "setting": "as m19-gap-baseline, after the tube-expansion change, 25 hours of production",
+ "params": {
+  "usl": 0.15,
+  "lsl": 0.05,
+  "target": 0.1,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 125
+}

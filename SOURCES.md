@@ -403,7 +403,7 @@ Verified sources are counted at any depth (full, abstract, scope, catalog). Cata
 
 **Outline.** A brazed aluminium heat-exchanger line with a 4.2 % leak-test reject rate. Datasets provided: leak results by lot (attribute), braze joint gap (0.10 ± 0.05 mm, variable), furnace temperature log, gap gauge R&R, a 2³ DOE, and post-improvement data. Every tool used at least once, in DMAIC order, with the learner working it and a full solution in collapsible blocks.
 
-**Invented examples:** the `ex19-*` family generated from one seeded script so that the datasets are mutually consistent (the DOE effects explain the gap shift that explains the leak rate).
+**Invented examples (built 2026-09-10 as the `m19-*` family, one block in generate.py):** `m19-leak-baseline` (30 lots, p̂ 4.29 %, stable; the Module 3 charter's 42 per 1,000 sits inside its interval), `m19-pareto` (leak locations of the 259 baseline leakers, header joint 65 %; new `pareto` kind), `m19-grr` (gap gauge, 10 × 3 × 2, %R&R 12 % of study variation and 18 % of tolerance, ndc 11), `m19-gap-baseline` (X̄-R stable, normal, Cpk 0.89, CI 0.76–1.01; the 0.15 mm limit is looser than the 0.14 mm bridging limit, which reconciles 0.4 % out of spec with a 4 % leak rate), `m19-furnace` (I-MR stable), `m19-gap-leakers` (sectioned leakers vs passers, +25 µm, d 2.0, p < 0.0001), `m19-doe` (2³ × 2: expansion −0.024 mm, clamp −0.013, AB interaction; furnace nil; the production cell reproduces the baseline mean), `m19-gap-after` (Cpk 1.79, CI 1.56–2.02), `m19-leak-after` (p̂ 0.81 %, CI 0.61–1.07 %, goal met at the point estimate), `m19-before-after` (2 × 2 χ² 147); `m03-charter-leak` and `m03-charter-goal` declared. Real case cited in Why this matters: S-C46 with its published figures.
 
 ---
 

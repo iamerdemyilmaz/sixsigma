@@ -1044,6 +1044,191 @@ register(id="m17-ex2-ewma", module="17", kind="ewma",
          columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_e2)])
 
 
+# ---------------------------------------------------------------------------
+# Module 19: Capstone (prefix m19-). One consistent story: a brazed aluminium
+# heat-exchanger line with a 4.2 % leak-test reject rate (the Module 3
+# charter baseline), driven by the braze-joint gap at the tube-to-header
+# joint (specification 0.10 ± 0.05 mm). The baseline process runs at high
+# clamp force with standard tube expansion (the DOE's "a" cell); the DOE finds
+# that increased expansion (B) closes the gap, and the post-improvement data
+# sit near the DOE's "ab" cell.
+# ---------------------------------------------------------------------------
+_GAP = {"usl": 0.15, "lsl": 0.05, "target": 0.10, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"}
+# Baseline leak-test results, 30 lots.
+_rng = np.random.default_rng(1)
+_bn = [int(v) for v in _rng.integers(150, 251, 30)]; _bd = [int(_rng.binomial(v, 0.042)) for v in _bn]
+register(id="m19-leak-baseline", module="19", kind="attribute_capability",
+         title="Capstone baseline: leak-test rejects, 30 lots, p about 4.3 %",
+         source="constructed (the charter baseline of Module 3 is 42 per 1,000)", setting="brazed aluminium heat-exchanger cores, 100 % helium leak test at final inspection, one lot per shift for 30 shifts",
+         params={"precision_e": 0.005, "units": "cores"}, columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_bn, _bd))])
+# Where the leaks were: the same 259 leakers by location (Pareto).
+_pareto_counts = {"Tube-to-header joint": 168, "Tube-to-tube joint": 41, "Baffle joint": 22, "Manifold weld": 17, "Other / not located": 11}
+assert sum(_pareto_counts.values()) == sum(_bd)
+register(id="m19-pareto", module="19", kind="pareto",
+         title="Capstone: leak location of the 259 baseline leakers",
+         source="constructed (totals match m19-leak-baseline)", setting="leak location recorded by the test operator for every leaking core of the baseline period",
+         params={}, columns=["category", "count"], rows=[[k, v] for k, v in _pareto_counts.items()])
+# Gauge R&R on the gap gauge: 10 cores spanning the range, 3 operators, 2 trials.
+_rng = np.random.default_rng(4)
+_gp = np.linspace(0.075, 0.150, 10) + _rng.normal(0, 0.003, 10); _gob = [0.0, 0.0015, -0.001]
+_g19 = []
+for _p in range(10):
+    for _o in range(3):
+        for _t in range(2):
+            _g19.append([_p + 1, "ABC"[_o], _t + 1, round(float(_gp[_p] + _gob[_o] + _rng.normal(0, 0.0025)), 3)])
+register(id="m19-grr", module="19", kind="grr",
+         title="Capstone: crossed gauge R&R on the joint-gap gauge, 10 x 3 x 2, tolerance 0.10 mm",
+         source="constructed", setting="tube-to-header gap measured with a calibrated pin-gauge set to 0.001 mm on 10 cores spanning the range, 3 operators, 2 trials, randomised",
+         params={"tolerance": 0.10, "study_var_k": 6.0, "alpha_remove": 0.05, "units": "mm"},
+         columns=["part", "operator", "trial", "y"], rows=_g19)
+# Baseline gap capability study, 25 subgroups of 5 cores.
+_rng = np.random.default_rng(2)
+_gb = []
+for _g in range(1, 26):
+    for _ in range(5):
+        _gb.append([_g, round(float(_rng.normal(0.112, 0.0145)), 3)])
+register(id="m19-gap-baseline", module="19", kind="capability",
+         title="Capstone baseline: tube-to-header gap, 25 subgroups of 5 cores, Cpk about 0.9",
+         source="constructed", setting="mean tube-to-header gap per core (six joints) in mm, pin gauge to 0.001 mm, five consecutive cores every hour for 25 hours, specification 0.10 ± 0.05 mm",
+         params=dict(_GAP), columns=["subgroup", "x"], rows=_gb)
+# Furnace peak temperature log, 40 cores.
+_rng = np.random.default_rng(4)
+register(id="m19-furnace", module="19", kind="imr",
+         title="Capstone: furnace peak temperature, 40 consecutive cores, stable",
+         source="constructed", setting="peak core temperature in °C from the braze furnace's travelling thermocouple, one core per hour for 40 hours",
+         params={"units": "°C"}, columns=["i", "x"], rows=[[i + 1, round(float(v), 1)] for i, v in enumerate(_rng.normal(600.0, 1.5, 40))])
+# Gap at the header joint on 20 leaking and 20 passing cores.
+_rng = np.random.default_rng(2)
+_la = np.round(_rng.normal(0.137, 0.012, 20), 3); _lb = np.round(_rng.normal(0.110, 0.014, 20), 3)
+register(id="m19-gap-leakers", module="19", kind="ttest2",
+         title="Capstone: header-joint gap on 20 leaking and 20 passing cores, two-sample t",
+         source="constructed", setting="gap at the leaking joint (or the corresponding joint on a passing core) measured after sectioning, mm to 0.001",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "mm"},
+         columns=["group", "x"], rows=[["Leak", float(v)] for v in _la] + [["Pass", float(v)] for v in _lb])
+# The 2^3 DOE with 2 replicates: A clamp force, B tube expansion, C furnace peak temperature; response mean gap per core.
+_rng = np.random.default_rng(9)
+_d19 = []; _run = 0
+for (_a, _b, _c) in _STD3:
+    for _rep in (1, 2):
+        _run += 1
+        _d19.append([_run, _rep, _a, _b, _c, round(float(0.112 - 0.006 * _a - 0.014 * _b + 0.001 * _c + 0.004 * _a * _b + _rng.normal(0, 0.004)), 3)])
+register(id="m19-doe", module="19", kind="factorial",
+         title="Capstone: 2^3 factorial with 2 replicates on the braze process, response mean joint gap",
+         source="constructed", setting="A fixture clamp force 2/4 kN, B tube expansion standard/increased (mandrel +0.05 mm), C furnace peak temperature 595/605 °C; 16 cores in random order, response the mean tube-to-header gap per core in mm",
+         params={"k": 3, "replicates": 2, "factors": ["A", "B", "C"], "units": "mm"},
+         columns=["run", "rep", "A", "B", "C", "y"], rows=_d19)
+# After the change (increased expansion, clamp kept high): gap capability and leak rate.
+_rng = np.random.default_rng(2)
+_ga = []
+for _g in range(1, 26):
+    for _ in range(5):
+        _ga.append([_g, round(float(_rng.normal(0.100, 0.0095)), 3)])
+register(id="m19-gap-after", module="19", kind="capability",
+         title="Capstone after improvement: tube-to-header gap, 25 subgroups of 5, Cpk about 1.7",
+         source="constructed", setting="as m19-gap-baseline, after the tube-expansion change, 25 hours of production",
+         params=dict(_GAP), columns=["subgroup", "x"], rows=_ga)
+_rng = np.random.default_rng(1)
+_an2 = [int(v) for v in _rng.integers(150, 251, 30)]; _ad2 = [int(_rng.binomial(v, 0.008)) for v in _an2]
+register(id="m19-leak-after", module="19", kind="attribute_capability",
+         title="Capstone after improvement: leak-test rejects, 30 lots, p about 0.8 %",
+         source="constructed", setting="as m19-leak-baseline, the 30 shifts after the change",
+         params={"precision_e": 0.004, "units": "cores"}, columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_an2, _ad2))])
+# Before/after as a 2 x 2 table.
+register(id="m19-before-after", module="19", kind="chisq",
+         title="Capstone: leak results before and after, 2 x 2 chi-square (equivalent to a two-proportion test)",
+         source="constructed (totals of m19-leak-baseline and m19-leak-after)", setting="leak and pass counts over the 30 baseline shifts and the 30 shifts after the change",
+         params={"columns": ["Leak", "Pass"], "alpha": 0.05},
+         columns=["row", "Leak", "Pass"], rows=[["Before", sum(_bd), sum(_bn) - sum(_bd)], ["After", sum(_ad2), sum(_an2) - sum(_ad2)]])
+
+
+# ---------------------------------------------------------------------------
+# Module 4: Measurement systems analysis (prefix m04-)
+# New kind this module: attribute_agreement (columns part, appraiser, trial,
+# rating; params standard = {part_id: true_rating}). See compute.py.
+# ---------------------------------------------------------------------------
+# A second, tighter crossed gauge R&R: a checkweigher on fill weight, spec
+# 248.0 to 254.0 g (tolerance 6.0 g), %GRR about 7 % of study variation -
+# the "good gauge" contrast to m04-grr-bore's conditional 24 %.
+_rng = np.random.default_rng(1)
+_parts4 = np.linspace(248.6, 253.4, 10) + _rng.normal(0, 0.15, 10)
+_opbias4 = [0.0, float(_rng.normal(0, 0.05)), float(_rng.normal(0, 0.05))]
+_g4s = []
+for p in range(10):
+    for o in range(3):
+        for t in range(3):
+            _g4s.append([p + 1, "ABC"[o], t + 1, round(float(_parts4[p] + _opbias4[o] + _rng.normal(0, 0.12)), 1)])
+register(id="m04-grr-scale", module="04", kind="grr",
+         title="Crossed gauge R&R on the checkweigher, 10 parts x 3 operators x 3 trials, %GRR about 7 %",
+         source="constructed", setting="checkweigher for fill weight 248.0 to 254.0 g (tolerance 6.0 g), 10 filled containers spanning the range, 3 operators, 3 trials each, to 0.1 g",
+         params={"tolerance": 6.0, "study_var_k": 6.0, "alpha_remove": 0.05, "units": "g"},
+         columns=["part", "operator", "trial", "y"], rows=_g4s)
+
+# Bias: 15 repeat readings of one certified reference standard (12.010 mm)
+# on the bore gauge. A small, statistically detectable positive bias.
+_rng = np.random.default_rng(5)
+_bias_x = [round(float(v), 3) for v in _rng.normal(12.010 + 0.0028, 0.0015, 15)]
+register(id="m04-bias", module="04", kind="ttest1",
+         title="Bias study: 15 readings of a 12.010 mm reference standard on the bore gauge",
+         source="constructed", setting="certified reference standard, nominal 12.010 mm, bore gauge to 0.001 mm, 15 repeat readings in one sitting",
+         params={"mu0": 12.010, "alpha": 0.05, "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_bias_x)])
+
+# Linearity: 5 reference standards spanning the tolerance, 4 replicate
+# readings each; bias regressed against the reference value. A small but
+# statistically detectable linearity trend (slope about 0.12).
+_rng = np.random.default_rng(1)
+_lin_levels = (11.985, 11.995, 12.005, 12.015, 12.025)
+_lin_center = sum(_lin_levels) / len(_lin_levels)
+_lin_rows = []
+for _lv in _lin_levels:
+    _true_bias = 0.0015 + 0.14 * (_lv - _lin_center)
+    for _ in range(4):
+        _measured = round(float(_lv + _true_bias + _rng.normal(0, 0.0015)), 3)
+        _lin_rows.append([_lv, _measured, round(_measured - _lv, 4)])
+register(id="m04-linearity", module="04", kind="regression",
+         title="Linearity study: 5 reference standards x 4 replicates, bias vs reference value",
+         source="constructed", setting="5 certified reference standards spanning 11.985 to 12.025 mm, bore gauge to 0.001 mm, 4 repeat readings per standard",
+         params={"alpha": 0.05, "units": "mm"},
+         columns=["x", "measured", "y"], rows=_lin_rows)
+
+# Stability: the same 12.010 mm reference measured once per shift for 24
+# shifts. Stable: no special cause, even though the gauge carries a small
+# bias and a small linearity effect (stability is a separate question).
+_rng = np.random.default_rng(1)
+_stab_x = [round(float(v), 3) for v in _rng.normal(12.010 + 0.0028, 0.0015, 24)]
+register(id="m04-stability", module="04", kind="imr",
+         title="Stability study: the 12.010 mm reference standard, one reading per shift for 24 shifts",
+         source="constructed", setting="certified reference standard, nominal 12.010 mm, bore gauge to 0.001 mm, one reading logged at the start of each of 24 shifts",
+         params={"units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_stab_x)])
+
+# Attribute agreement: 3 inspectors x 30 braze-fillet appearance parts x 2
+# trials (accept 0 / reject 1). 6 of the 30 parts are borderline (a known,
+# constructed "true" state exists for every part, established separately
+# from the inspectors' own calls, so effectiveness against that standard can
+# be reported alongside inter-appraiser agreement). Target Fleiss' kappa
+# (3 appraisers) about 0.6 - moderate agreement, not suspiciously clean.
+_rng = np.random.default_rng(9)
+_n_parts4 = 30
+_truth4 = np.array([0] * (_n_parts4 - 8) + [1] * 8)
+_rng.shuffle(_truth4)
+_border4 = set(_rng.choice(_n_parts4, 6, replace=False).tolist())
+_pcorrect4 = np.full(_n_parts4, 0.93)
+for _i in _border4:
+    _pcorrect4[_i] = 0.55
+_attr_rows = []
+for _i in range(_n_parts4):
+    for _a in range(3):
+        for _t in range(2):
+            _r = int(_truth4[_i]) if _rng.random() < _pcorrect4[_i] else 1 - int(_truth4[_i])
+            _attr_rows.append([_i + 1, "ABC"[_a], _t + 1, _r])
+register(id="m04-attribute-braze", module="04", kind="attribute_agreement",
+         title="Attribute agreement: braze fillet appearance, 3 inspectors x 30 parts x 2 trials",
+         source="constructed", setting="visual accept/reject call on a braze fillet, 3 inspectors, 30 parts (6 deliberately borderline), 2 trials per inspector in randomised, blind order",
+         params={"standard": {str(_i + 1): int(_truth4[_i]) for _i in range(_n_parts4)}},
+         columns=["part", "appraiser", "trial", "rating"], rows=_attr_rows)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

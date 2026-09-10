@@ -1,0 +1,18 @@
+{
+ "id": "m19-leak-after",
+ "module": "19",
+ "kind": "attribute_capability",
+ "title": "Capstone after improvement: leak-test rejects, 30 lots, p about 0.8 %",
+ "source": "constructed",
+ "setting": "as m19-leak-baseline, the 30 shifts after the change",
+ "params": {
+  "precision_e": 0.004,
+  "units": "cores"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 30
+}

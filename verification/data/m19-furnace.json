@@ -1,0 +1,16 @@
+{
+ "id": "m19-furnace",
+ "module": "19",
+ "kind": "imr",
+ "title": "Capstone: furnace peak temperature, 40 consecutive cores, stable",
+ "source": "constructed",
+ "setting": "peak core temperature in \u00b0C from the braze furnace's travelling thermocouple, one core per hour for 40 hours",
+ "params": {
+  "units": "\u00b0C"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

@@ -1,0 +1,42 @@
+{
+ "id": "m19-pareto",
+ "kind": "pareto",
+ "params": {},
+ "source": "constructed (totals match m19-leak-baseline)",
+ "results": {
+  "total": 259,
+  "categories": [
+   "Tube-to-header joint",
+   "Tube-to-tube joint",
+   "Baffle joint",
+   "Manifold weld",
+   "Other / not located"
+  ],
+  "counts": [
+   168,
+   41,
+   22,
+   17,
+   11
+  ],
+  "pct": [
+   64.86486486486487,
+   15.83011583011583,
+   8.494208494208495,
+   6.563706563706564,
+   4.2471042471042475
+  ],
+  "cum_pct": [
+   64.86486486486487,
+   80.6949806949807,
+   89.1891891891892,
+   95.75289575289575,
+   100.0
+  ],
+  "top1_pct": 64.86486486486487,
+  "top2_pct": 80.6949806949807,
+  "n_for_80pct": 2
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

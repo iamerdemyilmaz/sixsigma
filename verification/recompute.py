@@ -1114,6 +1114,15 @@ def r_dnom(cols):
     return out
 
 
+def r_pareto(cols):
+    pairs = sorted(zip([str(v) for v in cols["category"]], [int(v) for v in cols["count"]]), key=lambda t: -t[1])
+    total = sum(c for _, c in pairs)
+    pct = [100.0 * c / total for _, c in pairs]
+    cum = [sum(pct[:i + 1]) for i in range(len(pct))]
+    return {"total": total, "counts": [c for _, c in pairs], "pct": pct, "cum_pct": cum, "top1_pct": pct[0],
+            "top2_pct": cum[1] if len(cum) > 1 else cum[0], "n_for_80pct": next(i + 1 for i, v in enumerate(cum) if v >= 80.0 - 1e-9)}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1188,6 +1197,7 @@ def recompute_one(ex_id):
     elif kind == "arl": mine = r_arl(meta)
     elif kind == "p_prime": mine = r_p_prime(cols)
     elif kind == "dnom": mine = r_dnom(cols)
+    elif kind == "pareto": mine = r_pareto(cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

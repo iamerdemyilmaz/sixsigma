@@ -1,0 +1,18 @@
+{
+ "id": "m19-leak-baseline",
+ "module": "19",
+ "kind": "attribute_capability",
+ "title": "Capstone baseline: leak-test rejects, 30 lots, p about 4.3 %",
+ "source": "constructed (the charter baseline of Module 3 is 42 per 1,000)",
+ "setting": "brazed aluminium heat-exchanger cores, 100 % helium leak test at final inspection, one lot per shift for 30 shifts",
+ "params": {
+  "precision_e": 0.005,
+  "units": "cores"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 30
+}

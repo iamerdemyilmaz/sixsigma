@@ -1194,6 +1194,26 @@ def dnom_chart(cols):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 19 (and Module 9): Pareto table from category counts
+#   pareto  columns category, count: sorted counts, percentages, cumulative
+# --------------------------------------------------------------------------
+def pareto(cols):
+    cats = [str(v) for v in cols["category"]]; counts = [int(v) for v in cols["count"]]
+    order = sorted(range(len(cats)), key=lambda i: -counts[i])
+    total = sum(counts)
+    out = {"total": total, "categories": [cats[i] for i in order], "counts": [counts[i] for i in order]}
+    out["pct"] = [100.0 * c / total for c in out["counts"]]
+    cum = []; run = 0.0
+    for v in out["pct"]:
+        run += v; cum.append(run)
+    out["cum_pct"] = cum
+    out["top1_pct"] = out["pct"][0]
+    out["top2_pct"] = cum[1] if len(cum) > 1 else cum[0]
+    out["n_for_80pct"] = next(i + 1 for i, v in enumerate(cum) if v >= 80.0 - 1e-9)
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1280,6 +1300,8 @@ def compute_one(ex_id):
         res = p_prime_chart(cols["n"], cols["defectives"])
     elif kind == "dnom":
         res = dnom_chart(cols)
+    elif kind == "pareto":
+        res = pareto(cols)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []
