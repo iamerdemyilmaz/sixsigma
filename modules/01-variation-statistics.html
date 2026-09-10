@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1: Variation and basic statistics · Six Sigma Course</title>
+<meta name="description" content="Types of data, mean and median, range and standard deviation and why n − 1, histograms, the normal distribution and its limits, lognormal, Weibull, binomial and Poisson, sample versus population, and the central limit theorem shown on data and by simulation.">
+<meta name="examples" content="m01-shaft, m01-shaft-means, m01-flatness, m01-flatness-means, m01-binomial, m01-ex1-torque, m01-anscombe-1, m01-anscombe-2, m01-anscombe-3, m01-anscombe-4, m00-sigma-table">
+<!-- allowed-numbers: conventions and hand-arithmetic intermediates that are not stored in verification/results/.
+     Each intermediate below was computed by the build script from the results values before it was typed here. -->
+<meta name="allowed-numbers" content="-2.8 0.00001968 0.001 0.004 0.008 0.01 0.015 0.02 0.03 0.05 0.078 0.08144 0.1 0.11 0.13 0.135 0.27 0.4 0.98 1.0 1.00 1.2 1.4 1.5 1.7 1.96 11.0 12.0 13.0 19.1 2.236 2.24 2.5 2.89 22.3 3.05 3.6 3.87 3.96 32.4 36.4 4.4 40.019 68.27 7.17 7.2 7.875 7.9 7.985 8.000 8.015 95.45 99.73">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="01">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 1 · Foundations</p>
+    <h1>Variation and basic statistics</h1>
+    <p class="lead">Every tool in this course is a way of describing variation, and every one of them rests on a handful of ideas: a centre, a spread, a shape, and the difference between the parts you measured and the process that made them. This module builds those ideas from printed data with the arithmetic shown, so that when a piece of software prints a standard deviation you know exactly what it did.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Classify</strong> a measurement as continuous, a count, or an attribute, and say what each one allows you to compute.</li>
+      <li><strong>Compute</strong> the mean, median, range, sample variance and sample standard deviation of a dataset by hand, and explain why the standard deviation divides by n − 1.</li>
+      <li><strong>Read</strong> a histogram, choose a sensible bin width, and recognise skew, truncation and a second mode.</li>
+      <li><strong>Use</strong> the normal distribution to convert a distance from the mean into a fraction of parts, and recognise the characteristics for which the normal model is wrong.</li>
+      <li><strong>State</strong> the central limit theorem and show, on data and in a simulation, what it does to the means of subgroups.</li>
+      <li><strong>Distinguish</strong> a sample from the process that produced it, and an enumerative question from an analytic one.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>In 1973 Francis Anscombe published four small datasets in <em>The American Statistician</em>. Each has eleven pairs of x and y. All four have the same mean of x, the same mean of y, the same variances, the same correlation, the same fitted straight line and the same R². Plotted, they are four different stories: a clean linear relationship, a curve, a line with one outlier, and ten identical x-values plus one point that decides everything.<sup class="cite"><a href="#ref-7">[7]</a><a href="#ref-9">[9]</a></sup> The full data are printed in Section 4 and every summary statistic is recomputed there; you will see the numbers agree to the second decimal while the pictures disagree completely.</p>
+    <p>Anscombe's point is the point of this module. Summary statistics are compressions. They are indispensable, because nobody can read 200 measurements, but they throw away the shape of the data, and the shape is often where the engineering is. A mean and a standard deviation describe a symmetric, single-peaked distribution well and describe a skewed, bounded or two-mode distribution badly, and a capability index computed from the wrong description predicts a defect rate that is simply wrong. So the module works in both directions: the arithmetic of the summaries, so that you can trust them, and the habit of looking at the data first, so that you know when not to.</p>
+    <p>The second idea that runs through the module is Deming's distinction between an enumerative study, which asks about the items in front of you, and an analytic study, which aims at action on the process that will make the items of the future.<sup class="cite"><a href="#ref-10">[10]</a></sup> Almost everything you will do as an engineer is analytic. The sample of sixty shafts in Section 2 is not interesting as sixty shafts; it is interesting as evidence about the grinder, and that changes what the statistics are allowed to claim.</p>
+
+    <h2 id="types">1. Types of data</h2>
+    <p>The first question about any measurement is what kind of number it is, because that decides which summaries, which distribution and which control chart apply.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. The three kinds of data an engineer records, and what each supports.</caption>
+        <thead><tr><th>Kind</th><th>Examples</th><th>What you can compute</th><th>Where it goes later</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Continuous</strong> (variables)</td><td>Diameter in mm, weight in g, torque in N·m, temperature in °C, pull strength in N</td><td>Mean, standard deviation, histogram, capability index; the richest kind, because every part carries a value</td><td>Capability (Modules 7 and 8), X̄-R and I-MR charts (Module 16)</td></tr>
+          <tr><td><strong>Count</strong> (discrete)</td><td>Defects per board, scratches per panel, leaks per assembly</td><td>Rates and averages; the Poisson distribution</td><td>DPU and DPMO (Module 6), c and u charts (Module 17)</td></tr>
+          <tr><td><strong>Attribute</strong> (pass or fail)</td><td>Leak test passed, go/no-go gauge accepted, visual inspection rejected</td><td>Proportions; the binomial distribution</td><td>Attribute capability (Module 8), p and np charts (Module 17)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Continuous data carry far more information per part than the other two. A bore measured to 0.001 mm tells you how close it came to the limit; a plug gauge tells you only which side of it the bore fell on. When you have a choice of gauge, measure the value. A rule of thumb from the amount of information involved: a study on attribute data needs something like ten times as many parts as one on variables data to reach the same confidence about the process, which is why Modules 8 and 17 treat attribute data as the fallback rather than the norm.</p>
+
+    <h2 id="centre">2. Where the data sit: mean and median</h2>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. Setting: a ground shaft of Ø8.000 ± 0.015 mm, measured with a micrometer reading to 0.001 mm, 60 consecutive parts in production order.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Shaft diameter, mm, 60 consecutive parts in production order, read left to right then down (constructed data).</caption><thead><tr><th>Values</th>
+<th>+0</th><th>+1</th><th>+2</th><th>+3</th><th>+4</th><th>+5</th><th>+6</th><th>+7</th><th>+8</th><th>+9</th>
+</tr></thead><tbody>
+<tr><td>1–10</td><td>8.004</td><td>8.009</td><td>7.994</td><td>8.010</td><td>8.002</td><td>7.998</td><td>7.998</td><td>7.997</td><td>8.001</td><td>8.006</td></tr>
+<tr><td>11–20</td><td>8.005</td><td>8.005</td><td>7.994</td><td>7.995</td><td>8.009</td><td>8.006</td><td>8.012</td><td>8.007</td><td>7.997</td><td>8.008</td></tr>
+<tr><td>21–30</td><td>8.005</td><td>8.003</td><td>7.998</td><td>8.002</td><td>8.001</td><td>8.006</td><td>8.003</td><td>8.009</td><td>7.999</td><td>8.004</td></tr>
+<tr><td>31–40</td><td>8.004</td><td>7.998</td><td>7.997</td><td>8.007</td><td>8.004</td><td>8.001</td><td>8.004</td><td>7.999</td><td>8.003</td><td>7.999</td></tr>
+<tr><td>41–50</td><td>8.003</td><td>8.006</td><td>8.000</td><td>8.006</td><td>7.997</td><td>8.001</td><td>7.996</td><td>8.002</td><td>8.002</td><td>8.001</td></tr>
+<tr><td>51–60</td><td>8.001</td><td>8.008</td><td>8.008</td><td>7.997</td><td>8.007</td><td>7.994</td><td>7.999</td><td>8.001</td><td>8.002</td><td>7.997</td></tr>
+</tbody></table></div>
+    <div class="formula">x̄ = Σx<sub>i</sub> / n
+      <span class="where">The arithmetic mean: add every value and divide by the number of values. For the 60 shafts, Σx = <span data-ex="m01-shaft" data-key="descriptive.sum" data-dp="3">480.131</span> mm and x̄ = <span data-ex="m01-shaft" data-key="descriptive.mean" data-dp="4">8.0022</span> mm.</span>
+    </div>
+    <p>The median is the middle value when the data are sorted: with 60 values it is the average of the 30th and 31st, here <span data-ex="m01-shaft" data-key="descriptive.median" data-dp="3">8.002</span> mm. The mean and the median agree to a few microns because the data are symmetric. They separate when the data are skewed, and the gap between them is the first and cheapest test of shape: in Section 6 a flatness dataset has a mean of <span data-ex="m01-flatness" data-key="descriptive.mean" data-dp="3">7.875</span> µm and a median of <span data-ex="m01-flatness" data-key="descriptive.median" data-dp="1">7.2</span> µm, and that difference is the tail talking.</p>
+    <p>The mean is the right centre for a symmetric distribution and for anything that will be added up (weights, costs, times). The median is the right centre when a few extreme values would drag the mean somewhere no part actually sits. Report both when they differ, and then look at the histogram.</p>
+
+    <h2 id="spread">3. How far the data spread: range, variance, standard deviation</h2>
+    <p>The range is the largest value minus the smallest, <span data-ex="m01-shaft" data-key="descriptive.max" data-dp="3">8.012</span> − <span data-ex="m01-shaft" data-key="descriptive.min" data-dp="3">7.994</span> = <span data-ex="m01-shaft" data-key="descriptive.range" data-dp="3">0.018</span> mm for the shafts. It is simple, it is what a machinist sees, and it is what the R chart in Module 16 uses for small subgroups. Its weakness is that it grows with the sample size and depends on only two values.</p>
+    <p>The standard deviation uses every value. It is built in three steps: the deviation of each value from the mean, the average of the squared deviations, and the square root to get back to the original units.</p>
+    <div class="formula">s² = Σ(x<sub>i</sub> − x̄)² / (n − 1) &nbsp;&nbsp;&nbsp;&nbsp; s = √s²
+      <span class="where">s² is the sample variance, s the sample standard deviation. The numerator, the sum of squared deviations, is written SS. For the shafts SS = <span data-ex="m01-shaft" data-key="descriptive.ss" data-dp="7">0.0011610</span> mm², so s² = SS / 59 = 0.00001968 mm² and s = <span data-ex="m01-shaft" data-key="descriptive.s" data-dp="5">0.00444</span> mm.</span>
+    </div>
+    <h3 id="nminus1">Why n − 1 and not n</h3>
+    <p>If you knew the true process mean µ, the average squared deviation from µ over n values would be an unbiased estimate of the process variance, and you would divide by n. You do not know µ; you use x̄, and x̄ is the one number that makes the sum of squared deviations of <em>this sample</em> as small as it can be. The deviations from x̄ are therefore, on average, a little smaller than the deviations from µ, and dividing by n underestimates the variance. Dividing by n − 1 corrects the bias exactly. The usual way of saying it is that one degree of freedom was spent estimating the mean.</p>
+    <p>For the shafts the two versions are s = <span data-ex="m01-shaft" data-key="descriptive.s" data-dp="5">0.00444</span> mm with n − 1 and <span data-ex="m01-shaft" data-key="descriptive.sd_pop" data-dp="5">0.00440</span> mm with n, a difference of less than 1 % at n = 60. At n = 5, the subgroup size of most X̄-R charts, the difference is about 12 %, which is why the choice matters on small samples and why spreadsheet functions come in two versions (in Excel, STDEV.S and STDEV.P). This course always means the n − 1 version when it writes s, and it says so whenever a within-subgroup estimate such as R̄/d₂ is used instead (Module 7).</p>
+    <p>Two more habits. The variance is in squared units and is the quantity that adds: if two independent sources of variation act on a part, their variances add, their standard deviations do not (Module 15 uses this for tolerance stacks, Module 4 for gauge error). And the standard deviation of the mean of n values, called the standard error, is s/√n; for the shafts <span data-ex="m01-shaft" data-key="descriptive.sem" data-dp="5">0.00057</span> mm. That √n is the central limit theorem in Section 8, and it is the reason a control chart on subgroup means has such narrow limits.</p>
+
+    <h3 id="calc-shaft">Calculator: descriptive statistics and histogram</h3>
+    <p>Pre-loaded with the 60 shaft diameters and the drawing limits. Every value in the output table is one of the statistics defined above, computed from the data you see in the box.</p>
+    <div class="calc" data-calc="descriptive" id="calc-desc-shaft">
+      <h3>Descriptive statistics and histogram</h3>
+      <p class="calc-intro">Paste any list of numbers. The specification limits are optional and only draw lines on the histogram and count the values outside them. Nothing leaves your browser.</p>
+      <script type="application/json" class="calc-data">{"x":[8.004,8.009,7.994,8.01,8.002,7.998,7.998,7.997,8.001,8.006,8.005,8.005,7.994,7.995,8.009,8.006,8.012,8.007,7.997,8.008,8.005,8.003,7.998,8.002,8.001,8.006,8.003,8.009,7.999,8.004,8.004,7.998,7.997,8.007,8.004,8.001,8.004,7.999,8.003,7.999,8.003,8.006,8.0,8.006,7.997,8.001,7.996,8.002,8.002,8.001,8.001,8.008,8.008,7.997,8.007,7.994,7.999,8.001,8.002,7.997],"usl":8.015,"lsl":7.985,"units":"mm","label":"m01-shaft"}</script>
+    </div>
+
+    <h2 id="histogram">4. Looking at the data: histograms, quartiles, and Anscombe</h2>
+    <p>A histogram divides the range of the data into bins of equal width and draws a bar whose height is the number of values in each bin. It is the single most useful picture in this course and the first thing to draw with any new dataset. Three things to know about it.</p>
+    <ul>
+      <li><strong>Bin width decides what you see.</strong> Too few bins and every distribution looks like a smooth hump; too many and the noise of individual values dominates. A starting rule this course uses is about √n bins, so 8 for 60 values and 14 for 200, then adjust by eye. Bins narrower than the gauge resolution produce comb-like gaps that mean nothing.</li>
+      <li><strong>Shape is the message.</strong> One peak and symmetric tails: the normal model may do. A long tail to one side: skew, probably from a physical bound (Section 6). A cliff at one edge: sorting or truncation, someone removed the parts beyond a limit. Two peaks: two streams mixed, two machines, two lots, two operators. A histogram cannot tell you which, but it tells you to go and find out.</li>
+      <li><strong>It hides time.</strong> A histogram of a process that drifted looks like a wide, normal-ish hump. Only a plot against time order shows the drift. Module 9 covers the run chart and Module 16 the control chart; the rule until then is that a histogram is read together with a time plot, never instead of one.</li>
+    </ul>
+    <p>Quartiles give a compact numerical version of the shape. The first quartile Q1 has a quarter of the data below it, the third quartile Q3 three quarters; for the shafts Q1 = <span data-ex="m01-shaft" data-key="descriptive.q1" data-dp="3">7.998</span> and Q3 = <span data-ex="m01-shaft" data-key="descriptive.q3" data-dp="3">8.006</span> mm, so the middle half of the parts lie within 0.008 mm of each other. The box plot, which draws the quartiles as a box with the median inside and whiskers to the extremes, is Tukey's invention and is the tool of choice for comparing several groups side by side (Module 9).<sup class="cite"><a href="#ref-12">[12]</a></sup> Several conventions exist for interpolating a quartile between two data values; the calculators in this course use the one that Minitab and Excel's QUARTILE.EXC use, so that your numbers agree with theirs. Skewness, a signed number that is zero for a symmetric distribution, is <span data-ex="m01-shaft" data-key="descriptive.skewness" data-dp="2">0.03</span> for the shafts and <span data-ex="m01-flatness" data-key="descriptive.skewness" data-dp="2">1.40</span> for the flatness data in Section 6; the calculator prints it, and a value beyond about ±1 is a strong hint that the normal model will fail.</p>
+
+    <h3 id="anscombe">Worked example 1: Anscombe's quartet, four datasets with one set of statistics</h3>
+    <p class="example-label">Real data, published by Anscombe in 1973.<sup class="cite"><a href="#ref-7">[7]</a></sup> The values are as reproduced in two secondary sources,<sup class="cite"><a href="#ref-8">[8]</a><a href="#ref-9">[9]</a></sup> because the original article is available only as a scanned image; the transcription was checked by recomputing every property the paper reports. No units are given in the source.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 2. Anscombe's quartet (real data, 1973). Four pairs of columns; sets I to III share the same x-values.</caption><thead><tr><th>Row</th><th>x<sub>I</sub></th><th>y<sub>I</sub></th><th>x<sub>II</sub></th><th>y<sub>II</sub></th><th>x<sub>III</sub></th><th>y<sub>III</sub></th><th>x<sub>IV</sub></th><th>y<sub>IV</sub></th></tr></thead><tbody><tr><td>1</td><td>10.0</td><td>8.04</td><td>10.0</td><td>9.14</td><td>10.0</td><td>7.46</td><td>8.0</td><td>6.58</td></tr>
+<tr><td>2</td><td>8.0</td><td>6.95</td><td>8.0</td><td>8.14</td><td>8.0</td><td>6.77</td><td>8.0</td><td>5.76</td></tr>
+<tr><td>3</td><td>13.0</td><td>7.58</td><td>13.0</td><td>8.74</td><td>13.0</td><td>12.74</td><td>8.0</td><td>7.71</td></tr>
+<tr><td>4</td><td>9.0</td><td>8.81</td><td>9.0</td><td>8.77</td><td>9.0</td><td>7.11</td><td>8.0</td><td>8.84</td></tr>
+<tr><td>5</td><td>11.0</td><td>8.33</td><td>11.0</td><td>9.26</td><td>11.0</td><td>7.81</td><td>8.0</td><td>8.47</td></tr>
+<tr><td>6</td><td>14.0</td><td>9.96</td><td>14.0</td><td>8.10</td><td>14.0</td><td>8.84</td><td>8.0</td><td>7.04</td></tr>
+<tr><td>7</td><td>6.0</td><td>7.24</td><td>6.0</td><td>6.13</td><td>6.0</td><td>6.08</td><td>8.0</td><td>5.25</td></tr>
+<tr><td>8</td><td>4.0</td><td>4.26</td><td>4.0</td><td>3.10</td><td>4.0</td><td>5.39</td><td>19.0</td><td>12.50</td></tr>
+<tr><td>9</td><td>12.0</td><td>10.84</td><td>12.0</td><td>9.13</td><td>12.0</td><td>8.15</td><td>8.0</td><td>5.56</td></tr>
+<tr><td>10</td><td>7.0</td><td>4.82</td><td>7.0</td><td>7.26</td><td>7.0</td><td>6.42</td><td>8.0</td><td>7.91</td></tr>
+<tr><td>11</td><td>5.0</td><td>5.68</td><td>5.0</td><td>4.74</td><td>5.0</td><td>5.73</td><td>8.0</td><td>6.89</td></tr></tbody></table></div>
+    <p>Section 3's statistics, plus the correlation and fitted line that Module 12 explains, come out the same for all four sets to the precision Anscombe reported. The verification scripts and the regression engine behind Module 12's calculator produce Table 3 from the data above.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Summary statistics of the four Anscombe datasets, computed from Table 2. Anscombe reported the shared values as mean x = 9.0, mean y = 7.5, regression y = 3 + 0.5x, correlation 0.82; the fourth set's correlation is 0.8165, which rounds to 0.817 at three decimals.</caption>
+        <thead><tr><th>Statistic</th><th>Set I</th><th>Set II</th><th>Set III</th><th>Set IV</th></tr></thead>
+        <tbody>
+          <tr><td>n</td><td class="num"><span data-ex="m01-anscombe-1" data-key="n" data-dp="0">11</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="n" data-dp="0">11</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="n" data-dp="0">11</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="n" data-dp="0">11</span></td></tr>
+          <tr><td>Mean of x</td><td class="num"><span data-ex="m01-anscombe-1" data-key="mean_x" data-dp="2">9.00</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="mean_x" data-dp="2">9.00</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="mean_x" data-dp="2">9.00</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="mean_x" data-dp="2">9.00</span></td></tr>
+          <tr><td>Mean of y</td><td class="num"><span data-ex="m01-anscombe-1" data-key="mean_y" data-dp="2">7.50</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="mean_y" data-dp="2">7.50</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="mean_y" data-dp="2">7.50</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="mean_y" data-dp="2">7.50</span></td></tr>
+          <tr><td>Slope of fitted line</td><td class="num"><span data-ex="m01-anscombe-1" data-key="slope" data-dp="3">0.500</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="slope" data-dp="3">0.500</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="slope" data-dp="3">0.500</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="slope" data-dp="3">0.500</span></td></tr>
+          <tr><td>Intercept</td><td class="num"><span data-ex="m01-anscombe-1" data-key="intercept" data-dp="2">3.00</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="intercept" data-dp="2">3.00</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="intercept" data-dp="2">3.00</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="intercept" data-dp="2">3.00</span></td></tr>
+          <tr><td>Correlation r</td><td class="num"><span data-ex="m01-anscombe-1" data-key="r" data-dp="3">0.816</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="r" data-dp="3">0.816</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="r" data-dp="3">0.816</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="r" data-dp="3">0.817</span></td></tr>
+          <tr><td>R²</td><td class="num"><span data-ex="m01-anscombe-1" data-key="r2" data-dp="2">0.67</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="r2" data-dp="2">0.67</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="r2" data-dp="2">0.67</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="r2" data-dp="2">0.67</span></td></tr>
+          <tr><td>Residual standard deviation</td><td class="num"><span data-ex="m01-anscombe-1" data-key="s" data-dp="2">1.24</span></td><td class="num"><span data-ex="m01-anscombe-2" data-key="s" data-dp="2">1.24</span></td><td class="num"><span data-ex="m01-anscombe-3" data-key="s" data-dp="2">1.24</span></td><td class="num"><span data-ex="m01-anscombe-4" data-key="s" data-dp="2">1.24</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure><svg viewBox="0 0 660 420" role="img" aria-labelledby="fig2-t fig2-d">
+<title id="fig2-t">Scatter plots of the four Anscombe datasets with the common fitted line</title>
+<desc id="fig2-d">Four panels. Set I: points scattered evenly about a rising straight line. Set II: points on a smooth arch, curving up then down, with the straight line cutting through it. Set III: ten points on a perfect straight line and one point well above it, which tilts the fitted line. Set IV: ten points stacked vertically at x equals 8 and one point far to the right at x equals 19 that alone determines the line.</desc>
+<g fill="none" stroke="currentColor" stroke-width="1"><path d="M40 190 H320 M40 20 V190"/></g>
+<text x="48" y="34" class="chart-text small">Set I</text>
+<g class="chart-center"><path d="M55.6 154.6 L320.0 34.1"/></g>
+<g class="chart-point"><circle cx="164.4" cy="104.4" r="3.5"/><circle cx="133.3" cy="119.9" r="3.5"/><circle cx="211.1" cy="111.0" r="3.5"/><circle cx="148.9" cy="93.5" r="3.5"/><circle cx="180.0" cy="100.3" r="3.5"/><circle cx="226.7" cy="77.2" r="3.5"/><circle cx="102.2" cy="115.8" r="3.5"/><circle cx="71.1" cy="158.0" r="3.5"/><circle cx="195.6" cy="64.8" r="3.5"/><circle cx="117.8" cy="150.1" r="3.5"/><circle cx="86.7" cy="137.9" r="3.5"/></g>
+<text x="86.7" y="204" text-anchor="middle" class="chart-text small muted">5</text>
+<text x="164.4" y="204" text-anchor="middle" class="chart-text small muted">10</text>
+<text x="242.2" y="204" text-anchor="middle" class="chart-text small muted">15</text>
+<text x="320.0" y="204" text-anchor="middle" class="chart-text small muted">20</text>
+<text x="34" y="165.7" text-anchor="end" class="chart-text small muted">4</text>
+<text x="34" y="109.0" text-anchor="end" class="chart-text small muted">8</text>
+<text x="34" y="52.3" text-anchor="end" class="chart-text small muted">12</text>
+<g fill="none" stroke="currentColor" stroke-width="1"><path d="M360 190 H640 M360 20 V190"/></g>
+<text x="368" y="34" class="chart-text small">Set II</text>
+<g class="chart-center"><path d="M375.6 154.6 L640.0 34.2"/></g>
+<g class="chart-point"><circle cx="484.4" cy="88.8" r="3.5"/><circle cx="453.3" cy="103.0" r="3.5"/><circle cx="531.1" cy="94.5" r="3.5"/><circle cx="468.9" cy="94.1" r="3.5"/><circle cx="500.0" cy="87.2" r="3.5"/><circle cx="546.7" cy="103.6" r="3.5"/><circle cx="422.2" cy="131.5" r="3.5"/><circle cx="391.1" cy="174.4" r="3.5"/><circle cx="515.6" cy="89.0" r="3.5"/><circle cx="437.8" cy="115.5" r="3.5"/><circle cx="406.7" cy="151.2" r="3.5"/></g>
+<text x="406.7" y="204" text-anchor="middle" class="chart-text small muted">5</text>
+<text x="484.4" y="204" text-anchor="middle" class="chart-text small muted">10</text>
+<text x="562.2" y="204" text-anchor="middle" class="chart-text small muted">15</text>
+<text x="640.0" y="204" text-anchor="middle" class="chart-text small muted">20</text>
+<text x="354" y="165.7" text-anchor="end" class="chart-text small muted">4</text>
+<text x="354" y="109.0" text-anchor="end" class="chart-text small muted">8</text>
+<text x="354" y="52.3" text-anchor="end" class="chart-text small muted">12</text>
+<g fill="none" stroke="currentColor" stroke-width="1"><path d="M40 390 H320 M40 220 V390"/></g>
+<text x="48" y="234" class="chart-text small">Set III</text>
+<g class="chart-center"><path d="M55.6 354.6 L320.0 234.2"/></g>
+<g class="chart-point"><circle cx="164.4" cy="312.6" r="3.5"/><circle cx="133.3" cy="322.4" r="3.5"/><circle cx="211.1" cy="237.8" r="3.5"/><circle cx="148.9" cy="317.6" r="3.5"/><circle cx="180.0" cy="307.7" r="3.5"/><circle cx="226.7" cy="293.1" r="3.5"/><circle cx="102.2" cy="332.2" r="3.5"/><circle cx="71.1" cy="342.0" r="3.5"/><circle cx="195.6" cy="302.9" r="3.5"/><circle cx="117.8" cy="327.4" r="3.5"/><circle cx="86.7" cy="337.2" r="3.5"/></g>
+<text x="86.7" y="404" text-anchor="middle" class="chart-text small muted">5</text>
+<text x="164.4" y="404" text-anchor="middle" class="chart-text small muted">10</text>
+<text x="242.2" y="404" text-anchor="middle" class="chart-text small muted">15</text>
+<text x="320.0" y="404" text-anchor="middle" class="chart-text small muted">20</text>
+<text x="34" y="365.7" text-anchor="end" class="chart-text small muted">4</text>
+<text x="34" y="309.0" text-anchor="end" class="chart-text small muted">8</text>
+<text x="34" y="252.3" text-anchor="end" class="chart-text small muted">12</text>
+<g fill="none" stroke="currentColor" stroke-width="1"><path d="M360 390 H640 M360 220 V390"/></g>
+<text x="368" y="234" class="chart-text small">Set IV</text>
+<g class="chart-center"><path d="M375.6 354.6 L640.0 234.2"/></g>
+<g class="chart-point"><circle cx="453.3" cy="325.1" r="3.5"/><circle cx="453.3" cy="336.7" r="3.5"/><circle cx="453.3" cy="309.1" r="3.5"/><circle cx="453.3" cy="293.1" r="3.5"/><circle cx="453.3" cy="298.3" r="3.5"/><circle cx="453.3" cy="318.6" r="3.5"/><circle cx="453.3" cy="344.0" r="3.5"/><circle cx="624.4" cy="241.2" r="3.5"/><circle cx="453.3" cy="339.6" r="3.5"/><circle cx="453.3" cy="306.3" r="3.5"/><circle cx="453.3" cy="320.7" r="3.5"/></g>
+<text x="406.7" y="404" text-anchor="middle" class="chart-text small muted">5</text>
+<text x="484.4" y="404" text-anchor="middle" class="chart-text small muted">10</text>
+<text x="562.2" y="404" text-anchor="middle" class="chart-text small muted">15</text>
+<text x="640.0" y="404" text-anchor="middle" class="chart-text small muted">20</text>
+<text x="354" y="365.7" text-anchor="end" class="chart-text small muted">4</text>
+<text x="354" y="309.0" text-anchor="end" class="chart-text small muted">8</text>
+<text x="354" y="252.3" text-anchor="end" class="chart-text small muted">12</text>
+<text x="330" y="416" text-anchor="middle" class="chart-text muted small">x (no units given in the source); vertical axis y; the line is y = 3.00 + 0.500x in every panel</text>
+</svg><figcaption>Figure 2. Anscombe's quartet plotted from Table 2, each panel with its own fitted line (they coincide to two decimals). Same statistics, four different processes.</figcaption></figure>
+    <p>Read the four panels against Table 3. Set I is what the statistics describe. Set II is a curve, and a straight line through it is the wrong model however good its R². Set III is a perfect straight line with one point off it, and that one point has bent the fitted line away from the other ten. Set IV has no relationship at all among ten of its points; the eleventh creates the correlation single-handed. An engineer who receives Table 3 without Table 2 or the plots cannot tell which of the four processes is in front of them. This is why every analysis in this course starts with a picture, why Module 9 exists, and why the calculators draw before they compute.</p>
+
+    <h2 id="normal">5. The normal distribution and what it lets you do</h2>
+    <p>Many continuous characteristics, when the process is stable and the variation comes from many small independent causes, have a histogram close to the familiar bell. The normal distribution is the mathematical form of that bell. It is defined by two numbers, its mean µ and its standard deviation σ, and its density is</p>
+    <div class="formula">f(x) = (1 / (σ√(2π))) · exp[ −(x − µ)² / (2σ²) ]
+      <span class="where">The curve is symmetric about µ, and σ sets its width: the points of inflection, where the curve changes from bulging out to curving in, sit exactly one σ either side of the mean.<sup class="cite"><a href="#ref-1">[1]</a></sup></span>
+    </div>
+    <p>What makes the normal useful is that the fraction of the distribution beyond any point depends only on the distance from the mean measured in standard deviations, the Z-value of Module 0: Z = (x − µ)/σ. There is no closed formula for that fraction,<sup class="cite"><a href="#ref-1">[1]</a></sup> which is why textbooks carry a Z table, but every calculator in this course computes it directly to better than one part in ten million (the algorithm and its test against scipy are described in the code), so you never need the table. Three values are worth memorising:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. The empirical rule: fraction of a normal distribution within ±Z standard deviations of the mean. Tail areas from the sigma-level table verified in Module 0.</caption>
+        <thead><tr><th>±Z</th><th>Outside, both tails (PPM)</th><th>Inside</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td class="num"><span data-ex="m00-sigma-table" data-key="ppm_centered_two_sided.0" data-dp="0">317,311</span></td><td class="num">68.27 %</td><td>The standard error interval; zone C on a control chart</td></tr>
+          <tr><td class="num">2</td><td class="num"><span data-ex="m00-sigma-table" data-key="ppm_centered_two_sided.1" data-dp="0">45,500</span></td><td class="num">95.45 %</td><td>The "95 %" of a confidence interval is 1.96σ, not 2</td></tr>
+          <tr><td class="num">3</td><td class="num"><span data-ex="m00-sigma-table" data-key="ppm_centered_two_sided.2" data-dp="0">2,700</span></td><td class="num">99.73 %</td><td>Control limits (Module 16); the 6σ "natural" width in Cp (Module 7)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <svg viewBox="0 0 660 250" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">The normal curve with the one, two and three sigma bands</title>
+        <desc id="fig1-d">A bell curve on a horizontal axis marked from minus four to plus four standard deviations. Vertical lines at plus and minus one, two and three sigma divide it into bands, labelled with the fraction of the area inside each: 68.27 percent within one sigma, 95.45 within two, 99.73 within three.</desc>
+        <g fill="none" stroke="currentColor" stroke-width="1"><path d="M40 200 H620"/></g>
+        <g class="chart-text small muted">
+          <text x="90" y="220" text-anchor="middle">−4σ</text><text x="145" y="220" text-anchor="middle">−3σ</text><text x="200" y="220" text-anchor="middle">−2σ</text><text x="255" y="220" text-anchor="middle">−1σ</text>
+          <text x="310" y="220" text-anchor="middle">µ</text>
+          <text x="365" y="220" text-anchor="middle">+1σ</text><text x="420" y="220" text-anchor="middle">+2σ</text><text x="475" y="220" text-anchor="middle">+3σ</text><text x="530" y="220" text-anchor="middle">+4σ</text>
+        </g>
+        <g class="chart-curve">
+          <path d="M60 199.5 L90 199.3 L118 198.4 L145 195.2 L172 185.6 L200 166.4 L227 134.9 L255 95.4 L282 62.6 L310 50 L338 62.6 L365 95.4 L393 134.9 L420 166.4 L448 185.6 L475 195.2 L502 198.4 L530 199.3 L560 199.5"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3">
+          <path d="M255 95 V200 M365 95 V200 M200 166 V200 M420 166 V200 M145 195 V200 M475 195 V200"/>
+        </g>
+        <g class="chart-center"><path d="M310 50 V200"/></g>
+        <g class="chart-text small">
+          <text x="310" y="120" text-anchor="middle">68.27 %</text>
+          <text x="310" y="150" text-anchor="middle">95.45 % within ±2σ</text>
+          <text x="310" y="180" text-anchor="middle">99.73 % within ±3σ</text>
+        </g>
+        <g class="chart-text small bad">
+          <text x="130" y="185" text-anchor="end">0.135 % beyond −3σ</text>
+          <text x="490" y="185" text-anchor="start">0.135 % beyond +3σ</text>
+        </g>
+        <text x="330" y="242" text-anchor="middle" class="chart-text muted small">Distance from the mean in standard deviations</text>
+      </svg>
+      <figcaption>Figure 1. The empirical rule. The area within ±1σ, ±2σ and ±3σ is 68.27 %, 95.45 % and 99.73 %; each 3σ tail holds 0.135 %, or 1,350 parts per million.</figcaption>
+    </figure>
+    <p>Applied to the shafts: the mean is <span data-ex="m01-shaft" data-key="descriptive.mean" data-dp="4">8.0022</span> mm and s = <span data-ex="m01-shaft" data-key="descriptive.s" data-dp="5">0.00444</span> mm, so the upper limit of 8.015 sits Z = (8.015 − <span data-ex="m01-shaft" data-key="descriptive.mean" data-dp="4">8.0022</span>) / <span data-ex="m01-shaft" data-key="descriptive.s" data-dp="5">0.00444</span> = 2.89 standard deviations above the mean, and the lower limit 3.87 below. Both are beyond 2.5σ, so a normal model puts well under 1 % of shafts outside the tolerance in total; the sample shows <span data-ex="m01-shaft" data-key="observed.n_out" data-dp="0">0</span> of 60 outside. Module 7 turns that Z into a capability index. Module 0's Table 1 turns it into a sigma level.</p>
+    <h3 id="normal-limits">Where the normal model stops</h3>
+    <p>The normal distribution is a model, and three kinds of characteristic break it as a matter of physics, not of bad luck.</p>
+    <ul>
+      <li><strong>Bounded characteristics.</strong> Flatness, runout, roughness, concentricity, leak rate, particle count, time to failure: all are zero or positive, and a good process sits close to zero. A symmetric bell cannot fit against a wall; the distribution piles up near the bound and trails off away from it. Section 6's example is one of these.</li>
+      <li><strong>Mixtures.</strong> Two machines, two cavities, two lots, two shifts, each roughly normal, produce together a distribution that is wider than either and may have two peaks. Stratification (Module 9) separates them.</li>
+      <li><strong>Sorted or truncated output.</strong> Parts that were 100 % inspected against a limit show a distribution cut off at that limit. The mean and standard deviation of what was shipped say little about what was made.</li>
+    </ul>
+    <p>The test this course uses to ask "is a normal model reasonable?" is the Anderson-Darling test, whose p-value the calculator prints; Module 11 explains what a p-value is, and for now read a p below 0.05 as "the data depart from the normal shape by more than chance would explain, find out why". The shafts give p = <span data-ex="m01-shaft" data-key="descriptive.ad_p" data-dp="2">0.38</span>. The flatness data in the next section give p <span data-claim data-ex="m01-flatness" data-key="descriptive.ad_p" data-max="0.001">below 0.001</span>. A histogram and the skewness usually tell you the same thing before the test does, and the physical reason is what you act on.</p>
+
+    <h2 id="others">6. The other distributions an engineer meets</h2>
+    <h3 id="lognormal">Lognormal, and worked example 2: a bounded characteristic</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the flatness of a milled face on an aluminium housing, measured on a CMM to 0.1 µm, 200 consecutive parts. Flatness cannot be negative and a perfect face would read zero.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 5. Flatness, µm, 200 consecutive parts in production order, read left to right then down (constructed data).</caption><thead><tr><th>Values</th>
+<th>+0</th><th>+1</th><th>+2</th><th>+3</th><th>+4</th><th>+5</th><th>+6</th><th>+7</th><th>+8</th><th>+9</th>
+</tr></thead><tbody>
+<tr><td>1–10</td><td>4.9</td><td>5.8</td><td>5.6</td><td>9.0</td><td>7.2</td><td>8.5</td><td>11.7</td><td>11.8</td><td>9.9</td><td>6.5</td></tr>
+<tr><td>11–20</td><td>5.7</td><td>5.5</td><td>6.9</td><td>7.8</td><td>5.2</td><td>4.8</td><td>9.2</td><td>3.5</td><td>7.4</td><td>9.7</td></tr>
+<tr><td>21–30</td><td>5.1</td><td>4.8</td><td>5.7</td><td>10.7</td><td>7.5</td><td>3.4</td><td>6.6</td><td>12.6</td><td>12.5</td><td>10.6</td></tr>
+<tr><td>31–40</td><td>7.2</td><td>3.5</td><td>8.6</td><td>7.4</td><td>8.3</td><td>16.0</td><td>8.7</td><td>9.1</td><td>10.5</td><td>7.1</td></tr>
+<tr><td>41–50</td><td>5.9</td><td>5.7</td><td>11.3</td><td>10.0</td><td>6.4</td><td>13.4</td><td>8.7</td><td>4.4</td><td>10.5</td><td>7.5</td></tr>
+<tr><td>51–60</td><td>4.4</td><td>10.1</td><td>6.9</td><td>6.7</td><td>10.4</td><td>3.0</td><td>4.5</td><td>6.6</td><td>8.9</td><td>5.9</td></tr>
+<tr><td>61–70</td><td>5.1</td><td>5.0</td><td>7.6</td><td>10.8</td><td>4.2</td><td>3.1</td><td>7.0</td><td>6.7</td><td>5.3</td><td>10.5</td></tr>
+<tr><td>71–80</td><td>11.5</td><td>6.2</td><td>6.9</td><td>10.3</td><td>6.6</td><td>4.3</td><td>7.8</td><td>5.3</td><td>9.3</td><td>6.4</td></tr>
+<tr><td>81–90</td><td>7.3</td><td>10.1</td><td>7.6</td><td>6.0</td><td>5.1</td><td>17.4</td><td>13.2</td><td>4.1</td><td>5.0</td><td>10.4</td></tr>
+<tr><td>91–100</td><td>6.1</td><td>8.1</td><td>11.5</td><td>8.5</td><td>7.5</td><td>6.5</td><td>7.7</td><td>9.5</td><td>17.5</td><td>12.9</td></tr>
+<tr><td>101–110</td><td>7.3</td><td>12.1</td><td>8.4</td><td>4.1</td><td>7.6</td><td>12.5</td><td>6.1</td><td>12.2</td><td>7.0</td><td>8.1</td></tr>
+<tr><td>111–120</td><td>4.7</td><td>20.3</td><td>9.8</td><td>12.6</td><td>6.5</td><td>4.1</td><td>13.8</td><td>5.8</td><td>16.8</td><td>7.4</td></tr>
+<tr><td>121–130</td><td>16.6</td><td>5.8</td><td>3.6</td><td>11.0</td><td>7.8</td><td>8.0</td><td>12.8</td><td>5.4</td><td>4.5</td><td>4.7</td></tr>
+<tr><td>131–140</td><td>3.8</td><td>3.5</td><td>4.5</td><td>5.2</td><td>6.5</td><td>4.6</td><td>7.5</td><td>11.1</td><td>7.1</td><td>9.5</td></tr>
+<tr><td>141–150</td><td>5.2</td><td>8.9</td><td>9.6</td><td>5.8</td><td>3.9</td><td>7.0</td><td>7.6</td><td>14.4</td><td>6.3</td><td>15.6</td></tr>
+<tr><td>151–160</td><td>2.6</td><td>6.5</td><td>6.0</td><td>6.2</td><td>5.8</td><td>7.2</td><td>15.3</td><td>6.9</td><td>12.5</td><td>7.0</td></tr>
+<tr><td>161–170</td><td>7.7</td><td>2.5</td><td>7.6</td><td>9.6</td><td>4.4</td><td>5.6</td><td>5.0</td><td>18.8</td><td>4.7</td><td>5.3</td></tr>
+<tr><td>171–180</td><td>2.2</td><td>3.6</td><td>8.0</td><td>4.1</td><td>2.1</td><td>6.4</td><td>7.6</td><td>8.2</td><td>8.6</td><td>5.5</td></tr>
+<tr><td>181–190</td><td>25.2</td><td>5.7</td><td>8.8</td><td>4.1</td><td>5.5</td><td>3.7</td><td>8.0</td><td>6.1</td><td>4.7</td><td>3.0</td></tr>
+<tr><td>191–200</td><td>9.3</td><td>10.5</td><td>10.5</td><td>7.0</td><td>9.9</td><td>10.9</td><td>9.2</td><td>13.9</td><td>6.8</td><td>8.1</td></tr>
+</tbody></table></div>
+    <p>The summary statistics: mean <span data-ex="m01-flatness" data-key="descriptive.mean" data-dp="3">7.875</span> µm, median <span data-ex="m01-flatness" data-key="descriptive.median" data-dp="1">7.2</span> µm, s = <span data-ex="m01-flatness" data-key="descriptive.s" data-dp="3">3.566</span> µm, minimum <span data-ex="m01-flatness" data-key="descriptive.min" data-dp="1">2.1</span>, maximum <span data-ex="m01-flatness" data-key="descriptive.max" data-dp="1">25.2</span>, Q1 = <span data-ex="m01-flatness" data-key="descriptive.q1" data-dp="3">5.425</span>, Q3 = <span data-ex="m01-flatness" data-key="descriptive.q3" data-dp="3">9.675</span> µm, skewness <span data-ex="m01-flatness" data-key="descriptive.skewness" data-dp="2">1.40</span>. The mean is above the median, the upper quartile is further from the median than the lower, and the skewness is well above 1: three signs of a right-hand tail before you draw anything. The Anderson-Darling p-value is <span data-claim data-ex="m01-flatness" data-key="descriptive.ad_p" data-max="0.001">below 0.001</span>. And a normal model with this mean and standard deviation would place its lower 3σ point at −2.8 µm, a negative flatness, which is the model telling you it does not apply.</p>
+    <p>A characteristic bounded at zero with a long right tail is often described well by the <strong>lognormal</strong> distribution: X is lognormal if ln X is normal.<sup class="cite"><a href="#ref-4">[4]</a></sup> The recipe is to take the natural logarithm of every value and look again. For these 200 values, ln x has mean <span data-ex="m01-flatness" data-key="log.mean" data-dp="3">1.970</span>, standard deviation <span data-ex="m01-flatness" data-key="log.s" data-dp="3">0.435</span>, skewness <span data-ex="m01-flatness" data-key="log.skewness" data-dp="2">-0.05</span> and an Anderson-Darling p-value of <span data-ex="m01-flatness" data-key="log.ad_p" data-dp="2">0.98</span>: on the log scale the data are as normal as anyone could ask. The mean of the logs converted back, e<sup><span data-ex="m01-flatness" data-key="log.mean" data-dp="3">1.970</span></sup> = <span data-ex="m01-flatness" data-key="log.geometric_mean" data-dp="2">7.17</span> µm, is the geometric mean, and it sits near the median (<span data-ex="m01-flatness" data-key="descriptive.median" data-dp="1">7.2</span> µm) rather than the arithmetic mean (<span data-ex="m01-flatness" data-key="descriptive.mean" data-dp="3">7.875</span> µm); for a skewed distribution the geometric mean or the median is the honest "typical part".</p>
+    <p>Module 8 shows what to do with capability for such a characteristic: fit the lognormal or transform, or better, report the fraction beyond the limit from the percentiles of the data themselves. The one thing not to do is to compute mean ± 3s and read a defect rate off it.</p>
+    <div class="calc" data-calc="descriptive" id="calc-desc-flat">
+      <h3>Example 2 in the calculator (inputs collapsed; expand to edit)</h3>
+      <script type="application/json" class="calc-data">{"x":[4.9,5.8,5.6,9.0,7.2,8.5,11.7,11.8,9.9,6.5,5.7,5.5,6.9,7.8,5.2,4.8,9.2,3.5,7.4,9.7,5.1,4.8,5.7,10.7,7.5,3.4,6.6,12.6,12.5,10.6,7.2,3.5,8.6,7.4,8.3,16.0,8.7,9.1,10.5,7.1,5.9,5.7,11.3,10.0,6.4,13.4,8.7,4.4,10.5,7.5,4.4,10.1,6.9,6.7,10.4,3.0,4.5,6.6,8.9,5.9,5.1,5.0,7.6,10.8,4.2,3.1,7.0,6.7,5.3,10.5,11.5,6.2,6.9,10.3,6.6,4.3,7.8,5.3,9.3,6.4,7.3,10.1,7.6,6.0,5.1,17.4,13.2,4.1,5.0,10.4,6.1,8.1,11.5,8.5,7.5,6.5,7.7,9.5,17.5,12.9,7.3,12.1,8.4,4.1,7.6,12.5,6.1,12.2,7.0,8.1,4.7,20.3,9.8,12.6,6.5,4.1,13.8,5.8,16.8,7.4,16.6,5.8,3.6,11.0,7.8,8.0,12.8,5.4,4.5,4.7,3.8,3.5,4.5,5.2,6.5,4.6,7.5,11.1,7.1,9.5,5.2,8.9,9.6,5.8,3.9,7.0,7.6,14.4,6.3,15.6,2.6,6.5,6.0,6.2,5.8,7.2,15.3,6.9,12.5,7.0,7.7,2.5,7.6,9.6,4.4,5.6,5.0,18.8,4.7,5.3,2.2,3.6,8.0,4.1,2.1,6.4,7.6,8.2,8.6,5.5,25.2,5.7,8.8,4.1,5.5,3.7,8.0,6.1,4.7,3.0,9.3,10.5,10.5,7.0,9.9,10.9,9.2,13.9,6.8,8.1],"usl":null,"lsl":null,"units":"µm","collapsed":true}</script>
+    </div>
+    <h3 id="weibull">Weibull</h3>
+    <p>The Weibull distribution has a shape parameter that lets one family cover distributions from steeply right-skewed to nearly symmetric, and a scale parameter that sets the size; both the Weibull and the lognormal are, in NIST's words, used extensively in reliability applications to model failure times.<sup class="cite"><a href="#ref-5">[5]</a><a href="#ref-6">[6]</a></sup> You will meet it in fatigue and life testing, in the cycles-to-failure of a spring or a switch, and occasionally as a fit for a bounded process characteristic (Module 8). Its arithmetic is not needed in this course; what is needed is to recognise it as the standard answer to "what distribution do lifetimes follow?".</p>
+    <h3 id="discrete">Binomial and Poisson, and worked example 3: what a clean sample proves</h3>
+    <p class="example-label">Arithmetic on two standard distributions, computed by the verification scripts; not data. The settings are illustrative.</p>
+    <p>Attribute data follow the <strong>binomial</strong> distribution: if each of n parts independently has probability p of being defective, the number of defectives in the sample has mean np and standard deviation √(np(1 − p)), and the probability of exactly x defectives is C(n, x) p<sup>x</sup> (1 − p)<sup>n − x</sup>, where C(n, x) counts the ways of choosing which x parts.<sup class="cite"><a href="#ref-2">[2]</a></sup> Counts of defects follow the <strong>Poisson</strong> distribution: if defects occur at an average rate λ per unit, the probability of exactly x on a unit is e<sup>−λ</sup> λ<sup>x</sup> / x!, and the mean and the variance are both λ.<sup class="cite"><a href="#ref-3">[3]</a></sup> The p and np charts of Module 17 are built on the first, the c and u charts on the second, and Module 6's yield formula e<sup>−DPU</sup> is the Poisson probability of zero defects.</p>
+    <p>Suppose a supplier's lot is running at 2 % defective and you pull a sample of 50. The expected number of defectives is np = <span data-ex="m01-binomial" data-key="binomial.mean" data-dp="1">1.0</span>, with standard deviation <span data-ex="m01-binomial" data-key="binomial.sd" data-dp="2">0.99</span>. The probabilities:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 6. Binomial probabilities for n = 50, p = 0.02, and Poisson probabilities for λ = 1.5 defects per board.</caption>
+        <thead><tr><th>x</th><th>Binomial P(x defectives)</th><th>Binomial P(≤ x)</th><th>Poisson P(x defects)</th><th>Poisson P(≤ x)</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.0" data-dp="3">0.364</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.0" data-dp="3">0.364</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.0" data-dp="3">0.223</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.0" data-dp="3">0.223</span></td></tr>
+          <tr><td class="num">1</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.1" data-dp="3">0.372</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.1" data-dp="3">0.736</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.1" data-dp="3">0.335</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.1" data-dp="3">0.558</span></td></tr>
+          <tr><td class="num">2</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.2" data-dp="3">0.186</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.2" data-dp="3">0.922</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.2" data-dp="3">0.251</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.2" data-dp="3">0.809</span></td></tr>
+          <tr><td class="num">3</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.3" data-dp="3">0.061</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.3" data-dp="3">0.982</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.3" data-dp="3">0.126</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.3" data-dp="3">0.934</span></td></tr>
+          <tr><td class="num">4</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.4" data-dp="3">0.015</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.4" data-dp="3">0.997</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.4" data-dp="3">0.047</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.4" data-dp="3">0.981</span></td></tr>
+          <tr><td class="num">5</td><td class="num"><span data-ex="m01-binomial" data-key="binomial.pmf.5" data-dp="3">0.003</span></td><td class="num"><span data-ex="m01-binomial" data-key="binomial.cdf.5" data-dp="3">1.000</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.pmf.5" data-dp="3">0.014</span></td><td class="num"><span data-ex="m01-binomial" data-key="poisson.cdf.5" data-dp="3">0.996</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Read the first row. A sample of 50 from a lot that is 2 % defective contains no defectives 36.4 % of the time. "We checked 50 and found nothing" is therefore weak evidence that the lot is clean: it is what you would see more than a third of the time from a lot that is not. The probability of three or more, 1 − <span data-ex="m01-binomial" data-key="binomial.cdf.2" data-dp="3">0.922</span> = 0.078, is about 8 %, so three defectives in fifty is unusual but not remarkable at 2 %. Sample sizes for attribute decisions are large for exactly this reason. The Poisson columns tell the same story for defects: a board with an average of 1.5 defects comes out clean 22.3 % of the time, and shows three or more 19.1 % of the time.</p>
+
+    <h2 id="sample">7. Sample, population, and process</h2>
+    <p>Statistics textbooks speak of a sample drawn from a population, and estimate the population's mean and standard deviation from the sample's. That picture fits a warehouse: 5,000 shafts in stock, 60 pulled at random, and the question "how many of the 5,000 are out of tolerance?" Deming called this an enumerative study: the population exists, is finite, and could in principle be measured completely.<sup class="cite"><a href="#ref-10">[10]</a></sup></p>
+    <p>An engineer's question is almost never that one. It is "what will the grinder make tomorrow, and what should we change?" The 60 shafts are not a sample from a population; they are a sample from a process in time, and the population they are supposed to represent, next week's output, does not exist yet. Deming's term is an analytic study: one that aims at action on the cause system to improve the product of the future.<sup class="cite"><a href="#ref-10">[10]</a></sup> Two consequences follow, and the rest of the course keeps returning to them.</p>
+    <ul>
+      <li><strong>No statistical formula can bridge from this sample to the future unless the process stays as it was.</strong> A confidence interval on the mean assumes the process has a mean, one value, that persists. If the grinder's wheel is wearing, there is no such value, and the interval is precise about nothing. This is why Module 7 will not report a capability index until a control chart shows the process was stable, and why Module 16 exists.</li>
+      <li><strong>How the sample was taken matters more than how big it is.</strong> Sixty consecutive shafts from one hour tell you about that hour. Sixty shafts spread over a week with the time recorded tell you whether the hours differ. Module 5 is about designing the sample so that the analytic question can be answered.</li>
+    </ul>
+
+    <h2 id="clt">8. The central limit theorem</h2>
+    <p>Take any distribution with a mean µ and a standard deviation σ, whatever its shape. Draw subgroups of n values and average each subgroup. The averages have their own distribution, and the central limit theorem says three things about it: its mean is µ; its standard deviation is σ/√n; and its shape approaches the normal as n grows, whatever the parent looked like.<sup class="cite"><a href="#ref-1">[1]</a></sup> The third statement is the remarkable one, and it is the reason the X̄ chart works on data whose individual values are not normal at all.</p>
+    <h3 id="clt-data">Worked example 4: the theorem on the flatness data</h3>
+    <p class="example-label">The same constructed flatness data as worked example 2, taken in consecutive subgroups of 2, 5 and 10.</p>
+    <p>The 200 individual values are strongly right-skewed (skewness <span data-ex="m01-flatness-means" data-key="individuals.skewness" data-dp="2">1.40</span>) with s = <span data-ex="m01-flatness-means" data-key="individuals.s" data-dp="3">3.566</span> µm. Averaging consecutive values gives 100 means of 2, 40 means of 5 and 20 means of 10. Table 7 compares each set of means with what the theorem predicts.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 7. Means of consecutive subgroups of the 200 flatness values. Every subgroup mean can be reproduced from Table 5; the statistics are computed from those means.</caption>
+        <thead><tr><th>Subgroup size n</th><th>Number of means k</th><th>Mean of the means (µm)</th><th>Standard deviation of the means (µm)</th><th>Predicted s/√n (µm)</th><th>Ratio</th><th>Skewness of the means</th><th>Anderson-Darling p of the means</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1 (individuals)</td><td class="num"><span data-ex="m01-flatness-means" data-key="individuals.n" data-dp="0">200</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="individuals.mean" data-dp="3">7.875</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="individuals.s" data-dp="3">3.566</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="individuals.s" data-dp="3">3.566</span></td><td class="num">1.00</td><td class="num"><span data-ex="m01-flatness-means" data-key="individuals.skewness" data-dp="2">1.40</span></td><td class="num"><span data-claim data-ex="m01-flatness-means" data-key="individuals.ad_p" data-max="0.001">&lt; 0.001</span></td></tr>
+          <tr><td class="num">2</td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.k" data-dp="0">100</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.mean_of_means" data-dp="3">7.875</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.sd_of_means" data-dp="3">2.497</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.s_over_sqrt_n" data-dp="3">2.521</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.ratio" data-dp="2">0.99</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.skewness_of_means" data-dp="2">0.52</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n2.ad_p" data-dp="2">0.21</span></td></tr>
+          <tr><td class="num">5</td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.k" data-dp="0">40</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.mean_of_means" data-dp="3">7.875</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.sd_of_means" data-dp="3">1.752</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.s_over_sqrt_n" data-dp="3">1.595</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.ratio" data-dp="2">1.10</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.skewness_of_means" data-dp="2">-0.15</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n5.ad_p" data-dp="2">0.28</span></td></tr>
+          <tr><td class="num">10</td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.k" data-dp="0">20</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.mean_of_means" data-dp="3">7.875</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.sd_of_means" data-dp="3">1.184</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.s_over_sqrt_n" data-dp="3">1.128</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.ratio" data-dp="2">1.05</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.skewness_of_means" data-dp="2">0.08</span></td><td class="num"><span data-ex="m01-flatness-means" data-key="n10.ad_p" data-dp="2">0.88</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>All three predictions hold on printed data. The mean of the means is the mean of the individuals, exactly, because averaging averages is averaging. The spread of the means shrinks as √n: the ratio column stays near 1, and it is not exactly 1 because 20 or 40 means give a rough estimate of a standard deviation. And the shape moves toward the normal: skewness falls from <span data-ex="m01-flatness-means" data-key="individuals.skewness" data-dp="2">1.40</span> to about zero by n = 5, and the Anderson-Darling test, which rejects the individuals decisively, finds nothing wrong with the means of 5 or 10. This is the theorem doing exactly what it promises, on a characteristic that could not be less normal.</p>
+    <p>Two cautions that Module 16 will repeat. The theorem is about the means, not the parts. A control chart of subgroup means will behave well on this flatness process; a histogram of individual parts against a specification will not, and a capability index that assumes normal individuals will be wrong. And the theorem needs the subgroups to be drawn from one distribution; if the process shifts between subgroups, the means carry the shift, which is precisely what the X̄ chart is designed to detect.</p>
+    <h3 id="calc-clt">Simulator: draw subgroups from a skewed parent and watch the means</h3>
+    <p>The simulator below draws subgroups from a parent distribution of your choice, plots the distribution of the subgroup means beside the parent, and reports their standard deviation against σ/√n. It also lets you add a shift and see how many subgroups a chart of means takes to notice it, which is Module 16's subject. The random numbers are seeded, so the same seed reproduces the same picture.</p>
+    <div class="calc" data-calc="simulator" id="calc-clt">
+      <h3>Central limit theorem and shift-detection simulator</h3>
+      <p class="calc-intro">Start with the exponential parent and n = 5, then try n = 2 and n = 10 and compare with Table 7. The parent distributions are scaled to σ = 1 so that the predicted standard deviation of the means is simply 1/√n.</p>
+      <script type="application/json" class="calc-data">{"parent":"exponential","n":5,"k":40,"shift":1.0,"shiftAt":25,"seed":7,"repeats":200}</script>
+    </div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Reporting a mean and standard deviation without a histogram.</strong> Consequence: Anscombe's four processes look identical, and a skewed or two-mode process is described as a bell. Fix: draw first; the calculator does it for you.</li>
+      <li><strong>Dividing by n on a small sample.</strong> Consequence: a standard deviation about 12 % too small at n = 5, and a capability index inflated by the same amount. Fix: n − 1 for a sample; know which function your spreadsheet is using.</li>
+      <li><strong>Adding standard deviations.</strong> Consequence: a tolerance stack or a gauge-plus-process error that is far too pessimistic. Fix: variances add; take the square root afterwards (Modules 4 and 15).</li>
+      <li><strong>Applying the empirical rule to a bounded characteristic.</strong> Consequence: a predicted lower limit below zero and a defect rate that means nothing. Fix: recognise flatness, runout, roughness and leak rate as skewed by physics; use the log scale or the data's own percentiles (Module 8).</li>
+      <li><strong>Treating a clean small sample as proof.</strong> Consequence: "50 checked, none found" is read as zero defectives when a 2 % lot would give the same result 36 % of the time. Fix: compute the binomial probability, and size attribute samples accordingly.</li>
+      <li><strong>Using bins narrower than the gauge.</strong> Consequence: a comb-like histogram whose gaps are artefacts of the resolution. Fix: bins at least as wide as the resolution, about √n of them to start.</li>
+      <li><strong>Reading a histogram as if time did not exist.</strong> Consequence: a drifting process looks like a wide, stable one. Fix: plot in time order first (Module 9), chart before you summarise (Module 16).</li>
+      <li><strong>Answering an analytic question with an enumerative answer.</strong> Consequence: a confidence interval on last week's mean is presented as a forecast of next week's. Fix: show stability before extrapolating, and design the sample to cover the sources of change (Module 5).</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: descriptive statistics by hand</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the tightening torque of a bolted joint, specified as 12.0 ± 1.0 N·m, measured with a torque analyser reading to 0.01 N·m, 30 consecutive joints.</p>
+    <div class="table-wrap"><table class="data"><caption>Exercise 1 data. Tightening torque, N·m, 30 consecutive joints in production order, read left to right then down (constructed data).</caption><thead><tr><th>Values</th>
+<th>+0</th><th>+1</th><th>+2</th><th>+3</th><th>+4</th><th>+5</th><th>+6</th><th>+7</th><th>+8</th><th>+9</th>
+</tr></thead><tbody>
+<tr><td>1–10</td><td>12.20</td><td>12.00</td><td>12.03</td><td>11.47</td><td>12.65</td><td>12.47</td><td>12.06</td><td>12.37</td><td>12.23</td><td>11.99</td></tr>
+<tr><td>11–20</td><td>12.42</td><td>12.06</td><td>12.06</td><td>11.93</td><td>12.28</td><td>12.12</td><td>12.30</td><td>11.98</td><td>12.19</td><td>11.90</td></tr>
+<tr><td>21–30</td><td>12.39</td><td>12.20</td><td>12.24</td><td>12.26</td><td>11.87</td><td>12.37</td><td>12.73</td><td>11.69</td><td>11.67</td><td>11.73</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Compute the sum, the mean and the median. (b) Compute the sum of squared deviations, the sample variance and the sample standard deviation, and the population version of the standard deviation; comment on the difference. (c) Find the minimum, maximum, range and quartiles, and describe the shape from these numbers alone. (d) Using a normal model with the sample mean and standard deviation, how many standard deviations away is each specification limit, and roughly what fraction of joints would be out of tolerance? How many of the 30 are?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Σx = <span data-ex="m01-ex1-torque" data-key="descriptive.sum" data-dp="2">363.86</span> N·m; x̄ = <span data-ex="m01-ex1-torque" data-key="descriptive.sum" data-dp="2">363.86</span> / 30 = <span data-ex="m01-ex1-torque" data-key="descriptive.mean" data-dp="4">12.1287</span> N·m. Sorted, the 15th and 16th values average to a median of <span data-ex="m01-ex1-torque" data-key="descriptive.median" data-dp="3">12.155</span> N·m. Mean and median differ by about 0.03 N·m, a tenth of a standard deviation: no sign of skew.</p>
+      <p><strong>(b)</strong> SS = Σ(x − x̄)² = <span data-ex="m01-ex1-torque" data-key="descriptive.ss" data-dp="4">2.3617</span> (N·m)². s² = SS / 29 = 0.08144, s = <span data-ex="m01-ex1-torque" data-key="descriptive.s" data-dp="4">0.2854</span> N·m. With n instead of n − 1: √(SS / 30) = <span data-ex="m01-ex1-torque" data-key="descriptive.sd_pop" data-dp="4">0.2806</span> N·m, about 1.7 % smaller. The sample version is the right one: the 30 joints are a sample from the process, not the whole population of joints.</p>
+      <p><strong>(c)</strong> Minimum <span data-ex="m01-ex1-torque" data-key="descriptive.min" data-dp="2">11.47</span>, maximum <span data-ex="m01-ex1-torque" data-key="descriptive.max" data-dp="2">12.73</span>, range <span data-ex="m01-ex1-torque" data-key="descriptive.range" data-dp="2">1.26</span> N·m. Q1 = <span data-ex="m01-ex1-torque" data-key="descriptive.q1" data-dp="4">11.9675</span>, Q3 = <span data-ex="m01-ex1-torque" data-key="descriptive.q3" data-dp="4">12.3175</span> N·m; the median sits close to the middle of the box (Q1 to Q3), the range is about 4.4 standard deviations, which is ordinary for 30 normal values, and the skewness is <span data-ex="m01-ex1-torque" data-key="descriptive.skewness" data-dp="2">-0.15</span>. Symmetric and single-peaked as far as the numbers can tell; the calculator's histogram and Anderson-Darling p = <span data-ex="m01-ex1-torque" data-key="descriptive.ad_p" data-dp="2">0.91</span> agree.</p>
+      <p><strong>(d)</strong> Upper limit: Z = (13.0 − <span data-ex="m01-ex1-torque" data-key="descriptive.mean" data-dp="4">12.1287</span>) / <span data-ex="m01-ex1-torque" data-key="descriptive.s" data-dp="4">0.2854</span> = 3.05; lower limit: Z = (<span data-ex="m01-ex1-torque" data-key="descriptive.mean" data-dp="4">12.1287</span> − 11.0) / <span data-ex="m01-ex1-torque" data-key="descriptive.s" data-dp="4">0.2854</span> = 3.96. The normal tails beyond those are about 0.11 % above and 0.004 % below, a little over one joint in a thousand in total; <span data-ex="m01-ex1-torque" data-key="observed.n_out" data-dp="0">0</span> of the 30 are out. The process is running about 0.13 N·m above nominal, so the upper limit is the nearer one; a small adjustment of the tool would centre it. Whether this sample of 30 from one run says anything about next week is Section 7's question, and the answer needs a time plot.</p>
+      <div class="calc" data-calc="descriptive" id="calc-desc-torque">
+        <h3>Exercise 1 in the calculator</h3>
+        <script type="application/json" class="calc-data">{"x":[12.2,12.0,12.03,11.47,12.65,12.47,12.06,12.37,12.23,11.99,12.42,12.06,12.06,11.93,12.28,12.12,12.3,11.98,12.19,11.9,12.39,12.2,12.24,12.26,11.87,12.37,12.73,11.69,11.67,11.73],"usl":13.0,"lsl":11.0,"units":"N·m","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: the central limit theorem on the shaft data</h3>
+    <p class="example-label">The constructed shaft diameters of Table 1, taken in twelve consecutive subgroups of five (parts 1 to 5, 6 to 10, and so on).</p>
+    <p><strong>Tasks.</strong> (a) Compute the mean of the first subgroup by hand. (b) Compute all twelve subgroup means and their mean and standard deviation. (c) Compare the standard deviation of the means with s/√5 from Section 3. (d) Which of the two, the individual values or the subgroup means, would you expect to be closer to normal, and why does the answer matter for a control chart?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Parts 1 to 5 read 8.004, 8.009, 7.994, 8.010, 8.002 mm; their sum is 40.019 and the mean <span data-ex="m01-shaft-means" data-key="n5.means.0" data-dp="4">8.0038</span> mm.</p>
+      <p><strong>(b)</strong> The twelve means, in order:</p>
+      <div class="table-wrap"><table class="data"><caption>Exercise 2. Means of the twelve consecutive subgroups of five shafts, mm (computed from Table 1).</caption><thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead><tbody><tr><td>Mean</td><td><span data-ex="m01-shaft-means" data-key="n5.means.0" data-dp="4">8.0038</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.1" data-dp="4">8.0000</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.2" data-dp="4">8.0016</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.3" data-dp="4">8.0060</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.4" data-dp="4">8.0018</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.5" data-dp="4">8.0042</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.6" data-dp="4">8.0020</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.7" data-dp="4">8.0012</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.8" data-dp="4">8.0024</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.9" data-dp="4">8.0004</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.10" data-dp="4">8.0042</span></td><td><span data-ex="m01-shaft-means" data-key="n5.means.11" data-dp="4">7.9986</span></td></tr></tbody></table></div>
+      <p>Their mean is <span data-ex="m01-shaft-means" data-key="n5.mean_of_means" data-dp="4">8.0022</span> mm, identical to the mean of the 60 individuals, and their standard deviation is <span data-ex="m01-shaft-means" data-key="n5.sd_of_means" data-dp="5">0.00208</span> mm.</p>
+      <p><strong>(c)</strong> s/√5 = <span data-ex="m01-shaft-means" data-key="individuals.s" data-dp="5">0.00444</span> / 2.236 = <span data-ex="m01-shaft-means" data-key="n5.s_over_sqrt_n" data-dp="5">0.00198</span> mm. The observed spread of the means is <span data-ex="m01-shaft-means" data-key="n5.ratio" data-dp="2">1.05</span> times the prediction. Twelve means give a rough estimate of a standard deviation, so agreement within about 20 % is as good as the sample can show; the point is that the means are roughly √5 = 2.24 times tighter than the parts. This is why an X̄ chart's limits are so much narrower than the tolerance, and why specification limits must never be drawn on it (Module 7 said this once already; Module 16 will say it again).</p>
+      <p><strong>(d)</strong> The means. The individuals here are already close to normal (Anderson-Darling p = <span data-ex="m01-shaft-means" data-key="individuals.ad_p" data-dp="2">0.38</span>), and the means of five are at least as close (p = <span data-ex="m01-shaft-means" data-key="n5.ad_p" data-dp="2">0.88</span>, skewness <span data-ex="m01-shaft-means" data-key="n5.skewness_of_means" data-dp="2">0.16</span>). For the flatness data the difference was dramatic. A chart of subgroup means can therefore use normal-based limits with confidence on almost any process; a chart of individual values, and any capability calculation on individual values, cannot, and must check the shape first.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="01">
+      <fieldset class="q" data-answer="b">
+        <legend>1. The sample standard deviation divides the sum of squared deviations by n − 1 because</legend>
+        <label><input type="radio" name="q1" value="a"> one value is always an outlier</label>
+        <label><input type="radio" name="q1" value="b"> deviations are measured from the sample mean, which makes them smaller on average than deviations from the true mean</label>
+        <label><input type="radio" name="q1" value="c"> the first value is used to set the scale</label>
+        <label><input type="radio" name="q1" value="d"> n − 1 is easier to compute</label>
+        <p class="explain" hidden>The sample mean minimises the sum of squared deviations of the sample; dividing by n would underestimate the variance. One degree of freedom was spent on the mean.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="2.5" data-tolerance="0.01">
+        <legend>2. Five values have a sum of squared deviations of 10. What is the sample variance?</legend>
+        <input type="number" name="q2" step="any">
+        <p class="explain" hidden>s² = 10 / (5 − 1) = 2.5.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>3. A dataset has mean 7.9, median 7.2 and skewness 1.4. The most likely explanation is</legend>
+        <label><input type="radio" name="q3" value="a"> a mistake in the arithmetic</label>
+        <label><input type="radio" name="q3" value="b"> a symmetric distribution with a large standard deviation</label>
+        <label><input type="radio" name="q3" value="c"> a right-hand tail, as with a characteristic bounded at zero</label>
+        <label><input type="radio" name="q3" value="d"> two identical machines</label>
+        <p class="explain" hidden>Mean above median and positive skewness are the signs of a right tail; flatness in Section 6 is the example.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. Anscombe's four datasets share the same</legend>
+        <label><input type="radio" name="q4" value="a"> scatter plots</label>
+        <label><input type="radio" name="q4" value="b"> outliers</label>
+        <label><input type="radio" name="q4" value="c"> curvature</label>
+        <label><input type="radio" name="q4" value="d"> means, variances, correlation and fitted line</label>
+        <p class="explain" hidden>The statistics agree to two decimals; the pictures are four different stories.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="99.73" data-tolerance="0.1">
+        <legend>5. What percentage of a normal distribution lies within ±3 standard deviations of the mean? (Two decimals.)</legend>
+        <input type="number" name="q5" step="any">
+        <p class="explain" hidden>99.73 %, leaving 0.27 % or 2,700 PPM in the two tails.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>6. A sample of 50 from a lot that is 2 % defective contains no defectives. This</legend>
+        <label><input type="radio" name="q6" value="a"> happens about 36 % of the time, so it is weak evidence that the lot is clean</label>
+        <label><input type="radio" name="q6" value="b"> proves the lot is better than 2 %</label>
+        <label><input type="radio" name="q6" value="c"> is impossible at 2 %</label>
+        <label><input type="radio" name="q6" value="d"> shows the sample was not random</label>
+        <p class="explain" hidden>Binomial P(0) = 0.98⁵⁰ ≈ 0.364, Table 6.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>7. Individual values have standard deviation 3.6. Means of subgroups of 9 will have a standard deviation of about</legend>
+        <label><input type="radio" name="q7" value="a"> 3.6</label>
+        <label><input type="radio" name="q7" value="b"> 0.4</label>
+        <label><input type="radio" name="q7" value="c"> 1.2</label>
+        <label><input type="radio" name="q7" value="d"> 32.4</label>
+        <p class="explain" hidden>σ/√n = 3.6/3 = 1.2.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>8. The central limit theorem justifies normal-based limits on</legend>
+        <label><input type="radio" name="q8" value="a"> a histogram of individual flatness values</label>
+        <label><input type="radio" name="q8" value="b"> a chart of subgroup means, even when the individual values are skewed</label>
+        <label><input type="radio" name="q8" value="c"> a capability index computed from individual values</label>
+        <label><input type="radio" name="q8" value="d"> any sample of at least 30 parts</label>
+        <p class="explain" hidden>The theorem is about means. It says nothing about the shape of the individuals, which capability and individuals charts depend on.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>9. "What will this grinder produce next week?" is, in Deming's terms,</legend>
+        <label><input type="radio" name="q9" value="a"> an enumerative question about a finite population</label>
+        <label><input type="radio" name="q9" value="b"> a question answered by a larger random sample</label>
+        <label><input type="radio" name="q9" value="c"> a question a confidence interval settles</label>
+        <label><input type="radio" name="q9" value="d"> an analytic question, answerable only if the process is shown to be stable</label>
+        <p class="explain" hidden>The future output does not exist to be sampled; the bridge from the sample to it is stability, shown by a control chart.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>10. For the flatness data, the mean of the logarithms converted back gave 7.17 µm, close to the median of 7.2 and below the mean of 7.875. The 7.17 is the</legend>
+        <label><input type="radio" name="q10" value="a"> geometric mean, the natural "typical part" for a lognormal characteristic</label>
+        <label><input type="radio" name="q10" value="b"> standard error</label>
+        <label><input type="radio" name="q10" value="c"> first quartile</label>
+        <label><input type="radio" name="q10" value="d"> mode of the normal fit</label>
+        <p class="explain" hidden>e to the power of the mean of ln x is the geometric mean; for a lognormal it equals the median in the limit.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. Deviations from the sample mean are too small on average.</li>
+        <li>2.5.</li>
+        <li>c. A right tail.</li>
+        <li>d. The summary statistics.</li>
+        <li>99.73.</li>
+        <li>a. About 36 % of the time.</li>
+        <li>c. 1.2.</li>
+        <li>b. Subgroup means.</li>
+        <li>d. Analytic; needs stability.</li>
+        <li>a. Geometric mean.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Continuous data carry the most information; counts follow the Poisson, pass/fail the binomial. Measure the value when you can.</li>
+      <li>The mean and the median agree for symmetric data and separate when there is a tail. Report both, then look.</li>
+      <li>s divides the sum of squared deviations by n − 1 because the sample mean was estimated from the same data. Variances add; standard deviations do not.</li>
+      <li>A histogram with about √n bins is the first picture of any dataset. Anscombe's quartet shows why the picture cannot be skipped: identical statistics, four different processes.</li>
+      <li>The normal model gives 68.27 %, 95.45 % and 99.73 % within ±1σ, ±2σ and ±3σ, and it fails by physics for bounded characteristics, mixtures and sorted output. Flatness on a log scale is normal; flatness is not.</li>
+      <li>A sample of 50 from a 2 % lot is clean 36 % of the time. Attribute evidence is weak per part.</li>
+      <li>The central limit theorem makes subgroup means normal with standard deviation σ/√n whatever the parent; it protects the X̄ chart, not the capability index. And no formula bridges from a sample to the future without stability: that is Deming's analytic problem and the reason for control charts.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown. Books cited by catalogue record are cited only for their existence, edition and general subject.</p>
+    <ol class="references">
+      <li id="ref-1">NIST/SEMATECH. "1.3.6.6.1. Normal Distribution." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm</a></li>
+      <li id="ref-2">NIST/SEMATECH. "1.3.6.6.18. Binomial Distribution." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm</a></li>
+      <li id="ref-3">NIST/SEMATECH. "1.3.6.6.19. Poisson Distribution." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm</a></li>
+      <li id="ref-4">NIST/SEMATECH. "1.3.6.6.9. Lognormal Distribution." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm</a></li>
+      <li id="ref-5">NIST/SEMATECH. "1.3.6.6.8. Weibull Distribution." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda3668.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda3668.htm</a></li>
+      <li id="ref-6">NIST/SEMATECH. "8.1.6. What are the basic lifetime distribution models used for non-repairable populations?" <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/apr/section1/apr16.htm">https://www.itl.nist.gov/div898/handbook/apr/section1/apr16.htm</a></li>
+      <li id="ref-7">Anscombe, F. J. "Graphs in Statistical Analysis." <em>The American Statistician</em> 27(1):17 to 21, 1973. <a href="https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf">https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf</a> <span class="tag">(scanned copy; the front page was read, the data were transcribed from [8] and checked against the paper's stated properties)</span></li>
+      <li id="ref-8">Wikipedia. "Anscombe's quartet." <a href="https://en.wikipedia.org/wiki/Anscombe%27s_quartet">https://en.wikipedia.org/wiki/Anscombe%27s_quartet</a> <span class="tag">(secondary: source of the transcribed values and the stated shared statistics)</span></li>
+      <li id="ref-9">R Core Team. "anscombe: Anscombe's Quartet of 'Identical' Simple Linear Regressions." R <em>datasets</em> package documentation. <a href="https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/anscombe.html">https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/anscombe.html</a></li>
+      <li id="ref-10">Deming, W. E. "On Probability as a Basis for Action." <em>The American Statistician</em> 29(4):146 to 152, 1975. <a href="https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf">https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf</a></li>
+      <li id="ref-11">Montgomery, D. C. <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley, 2019. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(catalogue record; the standard textbook treatment of the material in this module, including the derivation of the n − 1 correction)</span></li>
+      <li id="ref-12">Tukey, J. W. <em>Exploratory Data Analysis</em>. Addison-Wesley, 1977. <a href="https://www.scirp.org/reference/referencespapers?referenceid=1482121">https://www.scirp.org/reference/referencespapers?referenceid=1482121</a> <span class="tag">(catalogue record; origin of the box plot)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>Montgomery [11], chapters 3 and 4, for the distributions in this module with their derivations and more worked examples.</li>
+      <li>Deming [10] is short, readable, and the clearest statement of why process data are not a random sample from anything.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a histogram that told you something the mean did not, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

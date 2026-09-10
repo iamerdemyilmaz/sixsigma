@@ -1,0 +1,42 @@
+{
+ "id": "m01-anscombe-4",
+ "module": "01",
+ "kind": "regression",
+ "title": "Anscombe's quartet, data set 4 (real data)",
+ "source": "S-C28 Anscombe 1973, The American Statistician 27(1):17-21; values as reproduced in S-E35 (Wikipedia) and the properties as stated in S-E36 (R datasets)",
+ "setting": "published data, no units",
+ "params": {
+  "alpha": 0.05
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "expected": {
+  "mean_x": [
+   9.0,
+   1e-09
+  ],
+  "mean_y": [
+   7.5,
+   0.005
+  ],
+  "slope": [
+   0.5,
+   0.0005
+  ],
+  "intercept": [
+   3.0,
+   0.005
+  ],
+  "r": [
+   0.816,
+   0.001
+  ],
+  "r2": [
+   0.67,
+   0.005
+  ]
+ },
+ "n_rows": 11
+}

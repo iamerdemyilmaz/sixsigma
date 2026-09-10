@@ -237,8 +237,10 @@
     for (const v of x) { const d = v - m; m2 += d * d; m3 += d * d * d; m4 += d * d * d * d; }
     m2 /= n; m3 /= n; m4 /= n;
     const g1 = m3 / Math.pow(m2, 1.5), g2 = m4 / (m2 * m2) - 3;
+    let sum = 0; for (const v of x) sum += v;
     const out = {
       n: n, mean: m, median: median(x), s: s, variance: s * s,
+      sd_pop: Math.sqrt(m2), ss: m2 * n, sum: sum,
       min: Math.min.apply(null, x), max: Math.max.apply(null, x), range: Math.max.apply(null, x) - Math.min.apply(null, x),
       q1: quantileWeibull(x, 0.25), q3: quantileWeibull(x, 0.75),
       skewness: n > 2 ? Math.sqrt(n * (n - 1)) / (n - 2) * g1 : NaN,
@@ -247,6 +249,50 @@
     };
     if (n >= 8) { const ad = S.andersonDarling(x); out.ad_A2 = ad.A2; out.ad_A2_adjusted = ad.A2_adjusted; out.ad_p = ad.p; }
     return out;
+  };
+
+  // Module 1: descriptive block (histogram, optional count outside limits,
+  // optional statistics of ln x), subgroup means for the central limit
+  // theorem, and binomial / Poisson probabilities.
+  S.descriptiveBlock = function (x, params) {
+    params = params || {};
+    const out = { descriptive: S.descriptive(x), histogram: S.histogram(x) };
+    const U = params.usl, L = params.lsl;
+    if ((U !== undefined && U !== null) || (L !== undefined && L !== null)) {
+      const nout = x.filter(function (v) { return (U !== undefined && U !== null && v > U) || (L !== undefined && L !== null && v < L); }).length;
+      out.observed = { n_out: nout, fraction_out: nout / x.length };
+    }
+    if (params.log) {
+      const lx = x.map(Math.log);
+      out.log = S.descriptive(lx);
+      out.log.geometric_mean = Math.exp(mean(lx));
+    }
+    return out;
+  };
+  S.subgroupMeans = function (x, params) {
+    const d = S.descriptive(x), N = x.length;
+    const out = { individuals: { n: N, mean: d.mean, s: d.s, skewness: d.skewness, ad_p: d.ad_p } };
+    for (const n of params.sizes) {
+      const k = Math.floor(N / n), m = [];
+      for (let i = 0; i < k; i++) m.push(mean(x.slice(i * n, (i + 1) * n)));
+      const dm = S.descriptive(m);
+      const blk = { n: n, k: k, means: m, mean_of_means: dm.mean, sd_of_means: dm.s, s_over_sqrt_n: d.s / Math.sqrt(n),
+        ratio: dm.s / (d.s / Math.sqrt(n)), skewness_of_means: dm.skewness };
+      if (k >= 8) blk.ad_p = dm.ad_p;
+      out["n" + n] = blk;
+    }
+    return out;
+  };
+  // Binomial and Poisson pmf through lgamma (exact to about 1e-14 relative for the sizes used here).
+  S.binomPmf = function (k, n, p) { return Math.exp(S.lgamma(n + 1) - S.lgamma(k + 1) - S.lgamma(n - k + 1) + k * Math.log(p) + (n - k) * Math.log(1 - p)); };
+  S.poissonPmf = function (k, lam) { return Math.exp(-lam + k * Math.log(lam) - S.lgamma(k + 1)); };
+  S.binomialPoisson = function (params) {
+    const n = params.n, p = params.p, lam = params.lambda, ks = params.k.map(Number);
+    function cum(f) { return ks.map(function (k) { let t = 0; for (let j = 0; j <= k; j++) t += f(j); return t; }); }
+    return {
+      binomial: { n: n, p: p, k: ks, mean: n * p, sd: Math.sqrt(n * p * (1 - p)), pmf: ks.map(function (k) { return S.binomPmf(k, n, p); }), cdf: cum(function (j) { return S.binomPmf(j, n, p); }) },
+      poisson: { lambda: lam, k: ks, mean: lam, sd: Math.sqrt(lam), pmf: ks.map(function (k) { return S.poissonPmf(k, lam); }), cdf: cum(function (j) { return S.poissonPmf(j, lam); }) }
+    };
   };
 
   S.histogram = function (x, k) {

@@ -1,0 +1,18 @@
+{
+ "id": "m01-shaft-means",
+ "module": "01",
+ "kind": "subgroup_means",
+ "title": "Means of consecutive subgroups of 5 from m01-shaft (exercise 2)",
+ "source": "constructed",
+ "setting": "the m01-shaft values in subgroups of 5 consecutive parts",
+ "params": {
+  "sizes": [
+   5
+  ]
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 60
+}

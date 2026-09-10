@@ -222,6 +222,33 @@ def check_tests(ex_id, r, kind):
         check(near(norm_sf(r["sigma_long_term"]) * 1e6, r["dpmo"], 1e-6), f"{tag}: Z vs DPMO tail")
         check(near(r["sigma_level_shifted"] - r["sigma_long_term"], 1.5), f"{tag}: shift is 1.5")
         check(0 <= r["yield_fty"] <= 1, f"{tag}: yield range")
+    elif kind == "descriptive":
+        d = r["descriptive"]
+        check(d["min"] <= d["q1"] <= d["median"] <= d["q3"] <= d["max"], f"{tag}: order statistics")
+        check(0 < d["sd_pop"] < d["s"], f"{tag}: population sd below sample s")
+        check(near(d["s"] ** 2 * (d["n"] - 1), d["ss"]), f"{tag}: ss vs s")
+        check(sum(r["histogram"]["counts"]) == d["n"], f"{tag}: histogram counts")
+        if "ad_p" in d: in01(d["ad_p"], f"{tag}: AD p")
+        if "log" in r:
+            check(r["log"]["geometric_mean"] <= d["mean"] + 1e-12, f"{tag}: geometric mean above arithmetic mean")
+            check(abs(r["log"]["skewness"]) < abs(d["skewness"]), f"{tag}: log transform did not reduce skewness")
+    elif kind == "subgroup_means":
+        s = r["individuals"]["s"]
+        for key, blk in r.items():
+            if not key.startswith("n"): continue
+            check(blk["k"] * blk["n"] <= r["individuals"]["n"], f"{tag}: {key} subgroup count")
+            check(blk["sd_of_means"] < s, f"{tag}: {key} means not tighter than individuals")
+            check(0.5 < blk["ratio"] < 1.6, f"{tag}: {key} sd of means far from s/sqrt(n) (ratio {blk['ratio']:.2f})")
+            check(near(blk["mean_of_means"], sum(blk["means"]) / blk["k"]), f"{tag}: {key} mean of means")
+            if "ad_p" in blk: in01(blk["ad_p"], f"{tag}: {key} AD p")
+    elif kind == "binomial_poisson":
+        for name in ("binomial", "poisson"):
+            b = r[name]
+            check(all(0 <= v <= 1 for v in b["pmf"] + b["cdf"]), f"{tag}: {name} probabilities in [0, 1]")
+            check(all(b["cdf"][i] <= b["cdf"][i + 1] + 1e-12 for i in range(len(b["cdf"]) - 1)), f"{tag}: {name} cdf monotone")
+            if list(b["k"]) == list(range(len(b["k"]))):
+                check(all(near(b["cdf"][i], sum(b["pmf"][:i + 1]), 1e-9) for i in range(len(b["k"]))), f"{tag}: {name} cdf is the running sum of the pmf")
+        check(near(r["binomial"]["mean"], r["params"]["n"] * r["params"]["p"]), f"{tag}: binomial mean")
     elif kind == "sigma_table":
         for i, k in enumerate(r["levels"]):
             c2, s1, s2 = r["ppm_centered_two_sided"][i], r["ppm_shifted_one_sided"][i], r["ppm_shifted_two_sided"][i]

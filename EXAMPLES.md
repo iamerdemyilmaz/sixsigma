@@ -64,7 +64,7 @@ Totals on 2026-09-09: 25 examples; 63 published values matched; 686 quantities a
 
 ## Course examples
 
-Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 40 examples, 1,285 quantities agree between Check 1 and Check 2, 3,386 values agree between Check 1 and the JavaScript engines, 159 page checks).
+Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 50 examples, 1,548 quantities agree between Check 1 and Check 2, 3,998 values agree between Check 1 and the JavaScript engines, 333 page checks).
 
 | id | Module | Kind | Setting and the point it makes | Dataset | Check 1 | Check 2 | Check 3 | Check 4 | Pages |
 |---|---|---|---|---|---|---|---|---|---|
@@ -73,6 +73,13 @@ Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed dat
 | m00-dpmo-leak-1, m00-dpmo-leak-6 | 0 | DPMO (parameters only) | 23 leak-test failures in 1,250 brazed assemblies counted with 1 and with 6 opportunities per unit: DPMO 18,400 vs 3,067, "sigma level" 3.59 vs 4.24, same DPU 0.0184 | none | pass | pass | pass | pass | 00 |
 | m00-ex1-dpmo | 0 | DPMO (parameters only) | 331 solder-joint defects on 4,800 boards of 120 joints: DPU 0.069, DPMO 575, FTY 93.3 %, Z 3.25 / 4.75; exercise 1 | none | pass | pass | pass | pass | 00 |
 | m00-ex2-pull | 0 | capability, I-MR, one-sided, 60 individuals | wire-bond pull strength, minimum 8.0 N, tester to 0.01 N; stable, 1 of 60 below, Z 2.07, 19,078 PPM predicted; exercise 2 | `m00-ex2-pull.csv` | pass | pass | pass | pass | 00 |
+| m01-shaft | 1 | descriptive, 60 individuals | ground shaft Ø8.000 ± 0.015 mm, micrometer to 0.001 mm; near-normal (AD p 0.38), x̄ 8.0022, s 0.00444 (n − 1) vs 0.00440 (n); the by-hand mean, median, SS and s example | `m01-shaft.csv` | pass | pass | pass | pass | 01 |
+| m01-shaft-means | 1 | subgroup means, n = 5 | the same 60 values in 12 consecutive subgroups: sd of means 0.00208 vs s/√5 0.00198 (ratio 1.05); exercise 2 | `m01-shaft-means.csv` | pass | pass | pass | pass | 01 |
+| m01-flatness | 1 | descriptive with log statistics, 200 individuals | milled-face flatness, µm, CMM to 0.1 µm, lognormal by construction: mean 7.875 vs median 7.2, skewness 1.40, AD p < 0.001; ln x: skewness −0.05, AD p 0.98, geometric mean 7.17 | `m01-flatness.csv` | pass | pass | pass | pass | 01 |
+| m01-flatness-means | 1 | subgroup means, n = 2, 5, 10 | the same 200 values: sd of means vs s/√n ratios 0.99, 1.10, 1.05; skewness 1.40 → 0.52, −0.15, 0.08; AD p of the means 0.21, 0.28, 0.88 (the central limit theorem on printed data) | `m01-flatness-means.csv` | pass | pass | pass | pass | 01 |
+| m01-binomial | 1 | binomial and Poisson (parameters only) | n 50, p 0.02: P(0) 0.364, P(≥3) 0.078; λ 1.5: P(0) 0.223, P(≥3) 0.191 | none | pass | pass | pass | pass | 01 |
+| m01-ex1-torque | 1 | descriptive, 30 individuals | tightening torque 12.0 ± 1.0 N·m, analyser to 0.01 N·m; x̄ 12.1287, s 0.2854 vs 0.2806 (n); exercise 1 | `m01-ex1-torque.csv` | pass | pass | pass | pass | 01 |
+| m01-anscombe-1 … -4 | 1 | simple linear regression (**real data**, S-C28 via S-E35, S-E36) | Anscombe's quartet; published shared properties checked: mean x 9, mean y 7.50, slope 0.500, intercept 3.00, r 0.816 (set 4 gives 0.8165), R² 0.67 | `m01-anscombe-N.csv` | pass (6 published values each) | pass | pass | pass | 01 |
 | m07-bore | 7 | capability, X̄-R, 25 × 5 | reamed bore Ø12.000 ± 0.025 mm, bore micrometer to 0.001 mm; stable, normal, Cwk 1.06 / Ppk 1.04 with 95 % CI 0.90–1.18: the "not close enough" case | `m07-bore.csv` | pass | pass | pass | pass | 07, calculators |
 | m07-bore-30 | 7 | capability, first 6 subgroups | the same process from 30 values: Ppk 1.07 with 95 % CI 0.77–1.37 | `m07-bore-30.csv` | pass | pass | pass | pass | 07 |
 | m07-fill | 7 | capability, I-MR, one-sided | powder fill, declared minimum 250.0 g, 100 individuals; Ppl 0.75, 12,500 PPM predicted, 1 of 100 observed | `m07-fill.csv` | pass | pass | pass | pass | 07 |

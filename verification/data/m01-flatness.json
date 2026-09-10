@@ -1,0 +1,17 @@
+{
+ "id": "m01-flatness",
+ "module": "01",
+ "kind": "descriptive",
+ "title": "Flatness, 200 individuals, right-skewed (lognormal) with log statistics",
+ "source": "constructed",
+ "setting": "flatness of a milled face, \u00b5m, CMM to 0.1 \u00b5m, 200 consecutive parts; no upper limit given here",
+ "params": {
+  "log": true,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 200
+}

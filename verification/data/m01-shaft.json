@@ -1,0 +1,18 @@
+{
+ "id": "m01-shaft",
+ "module": "01",
+ "kind": "descriptive",
+ "title": "Shaft diameter, 60 individuals, descriptive statistics",
+ "source": "constructed",
+ "setting": "ground shaft \u00d88.000 \u00b1 0.015 mm, micrometer to 0.001 mm, 60 consecutive parts",
+ "params": {
+  "usl": 8.015,
+  "lsl": 7.985,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 60
+}

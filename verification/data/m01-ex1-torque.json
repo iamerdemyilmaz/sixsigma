@@ -1,0 +1,18 @@
+{
+ "id": "m01-ex1-torque",
+ "module": "01",
+ "kind": "descriptive",
+ "title": "Tightening torque, 30 individuals (exercise 1)",
+ "source": "constructed",
+ "setting": "tightening torque of a bolted joint, 12.0 \u00b1 1.0 N\u00b7m, torque analyser to 0.01 N\u00b7m, 30 consecutive joints",
+ "params": {
+  "usl": 13.0,
+  "lsl": 11.0,
+  "units": "N\u00b7m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 30
+}

@@ -314,22 +314,71 @@ def ppm(mean_, sig, usl, lsl):
     return pu * 1e6, pl * 1e6, (pu + pl) * 1e6
 
 
+def r_descriptive(x, prefix="descriptive."):
+    n = len(x); m = mean(x); s = sd(x)
+    ss = sum((v - m) ** 2 for v in x)
+    out = {"n": n, "mean": m, "s": s, "median": median(x), "sd_pop": math.sqrt(ss / n), "ss": ss, "sum": sum(x),
+           "min": min(x), "max": max(x), "range": max(x) - min(x),
+           "q1": quantile_weibull(x, 0.25), "q3": quantile_weibull(x, 0.75), "sem": s / math.sqrt(n)}
+    m2 = ss / n; m3 = sum((v - m) ** 3 for v in x) / n; m4 = sum((v - m) ** 4 for v in x) / n
+    g1 = m3 / m2 ** 1.5; g2 = m4 / m2 ** 2 - 3
+    if n > 2: out["skewness"] = math.sqrt(n * (n - 1)) / (n - 2) * g1
+    if n > 3: out["kurtosis_excess"] = (n - 1) / ((n - 2) * (n - 3)) * ((n + 1) * g2 + 6)
+    if n >= 8:
+        a2, a2s, adp = ad_normal(x)
+        out["ad_A2"] = a2; out["ad_A2_adjusted"] = a2s; out["ad_p"] = adp
+    return {prefix + k: v for k, v in out.items()}
+
+
+def r_descriptive_block(meta, cols):
+    p = meta["params"]; x = cols["x"]
+    out = r_descriptive(x)
+    usl, lsl = p.get("usl"), p.get("lsl")
+    if usl is not None or lsl is not None:
+        n_out = sum(1 for v in x if (usl is not None and v > usl) or (lsl is not None and v < lsl))
+        out["observed.n_out"] = n_out; out["observed.fraction_out"] = n_out / len(x)
+    if p.get("log"):
+        lx = [math.log(v) for v in x]
+        out.update(r_descriptive(lx, "log."))
+        out["log.geometric_mean"] = math.exp(mean(lx))
+    return out
+
+
+def r_subgroup_means(meta, cols):
+    x = cols["x"]; s = sd(x); N = len(x)
+    out = {"individuals.n": N, "individuals.mean": mean(x), "individuals.s": s}
+    out["individuals.skewness"] = r_descriptive(x)["descriptive.skewness"]
+    for n in meta["params"]["sizes"]:
+        k = N // n
+        m = [mean(x[i * n:(i + 1) * n]) for i in range(k)]
+        dm = r_descriptive(m, "")
+        pre = f"n{n}."
+        out[pre + "n"] = n; out[pre + "k"] = k; out[pre + "means"] = m
+        out[pre + "mean_of_means"] = dm["mean"]; out[pre + "sd_of_means"] = dm["s"]
+        out[pre + "s_over_sqrt_n"] = s / math.sqrt(n); out[pre + "ratio"] = dm["s"] / (s / math.sqrt(n))
+        out[pre + "skewness_of_means"] = dm["skewness"]
+        if k >= 8: out[pre + "ad_p"] = dm["ad_p"]
+    return out
+
+
+def r_binomial_poisson(meta):
+    p = meta["params"]; n, pr, lam, ks = p["n"], p["p"], p["lambda"], [int(k) for k in p["k"]]
+    def bpmf(k): return math.comb(n, k) * pr ** k * (1 - pr) ** (n - k)
+    def ppmf(k): return math.exp(-lam) * lam ** k / math.factorial(k)
+    out = {"binomial.mean": n * pr, "binomial.sd": math.sqrt(n * pr * (1 - pr)), "poisson.mean": lam, "poisson.sd": math.sqrt(lam)}
+    for i, k in enumerate(ks):
+        out[f"binomial.pmf.{i}"] = bpmf(k); out[f"binomial.cdf.{i}"] = sum(bpmf(j) for j in range(k + 1))
+        out[f"poisson.pmf.{i}"] = ppmf(k); out[f"poisson.cdf.{i}"] = sum(ppmf(j) for j in range(k + 1))
+    return out
+
+
 def r_capability(meta, cols):
     p = meta["params"]; x = cols["x"]
     usl, lsl, tgt = p.get("usl"), p.get("lsl"), p.get("target")
     nl, nu = p.get("natural_lower"), p.get("natural_upper")
     chart = p.get("chart", "imr" if p.get("subgroup_size", 1) == 1 else "xbar_r")
     n = len(x); m = mean(x); s = sd(x)
-    out = {"descriptive.n": n, "descriptive.mean": m, "descriptive.s": s, "descriptive.median": median(x),
-           "descriptive.min": min(x), "descriptive.max": max(x), "descriptive.range": max(x) - min(x),
-           "descriptive.q1": quantile_weibull(x, 0.25), "descriptive.q3": quantile_weibull(x, 0.75),
-           "descriptive.sem": s / math.sqrt(n)}
-    m2 = sum((v - m) ** 2 for v in x) / n; m3 = sum((v - m) ** 3 for v in x) / n; m4 = sum((v - m) ** 4 for v in x) / n
-    g1 = m3 / m2 ** 1.5; g2 = m4 / m2 ** 2 - 3
-    out["descriptive.skewness"] = math.sqrt(n * (n - 1)) / (n - 2) * g1
-    out["descriptive.kurtosis_excess"] = (n - 1) / ((n - 2) * (n - 3)) * ((n + 1) * g2 + 6)
-    a2, a2s, adp = ad_normal(x)
-    out["descriptive.ad_A2"] = a2; out["descriptive.ad_A2_adjusted"] = a2s; out["descriptive.ad_p"] = adp
+    out = r_descriptive(x)
     if chart == "imr": ch, sw = r_imr(x, "chart.")
     elif chart == "xbar_s": ch, sw = r_xbar_s(x, cols["subgroup"], "chart.")
     else: ch, sw = r_xbar_r(x, cols["subgroup"], "chart.")
@@ -708,6 +757,9 @@ def recompute_one(ex_id):
     elif kind == "samplesize": mine = r_samplesize(meta)
     elif kind == "dpmo": mine = r_dpmo(meta)
     elif kind == "sigma_table": mine = r_sigma_table(meta)
+    elif kind == "descriptive": mine = r_descriptive_block(meta, cols)
+    elif kind == "subgroup_means": mine = r_subgroup_means(meta, cols)
+    elif kind == "binomial_poisson": mine = r_binomial_poisson(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

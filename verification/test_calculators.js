@@ -103,6 +103,9 @@ function run(meta, cols) {
     case "samplesize": return Stats.sampleSize(p);
     case "dpmo": return Stats.dpmo(p.defects, p.units, p.opportunities);
     case "sigma_table": return Stats.sigmaTable(p);
+    case "descriptive": return Stats.descriptiveBlock(cols.x, p);
+    case "subgroup_means": return Stats.subgroupMeans(cols.x, p);
+    case "binomial_poisson": return Stats.binomialPoisson(p);
     default: throw new Error("unknown kind " + meta.kind);
   }
 }

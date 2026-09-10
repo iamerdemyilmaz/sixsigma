@@ -22,6 +22,9 @@ Kinds handled by compute.py / recompute.py / stats.js:
   factorial    2^k design, columns run, rep, A, B[, C], y
   ttest2, anova1, paired, ttest1, regression
   samplesize   no CSV; params only
+  dpmo, sigma_table, binomial_poisson   no CSV; params only
+  descriptive  x; optional usl/lsl (count outside) and log (statistics of ln x)
+  subgroup_means  x; params sizes (means of consecutive subgroups, CLT on data)
 """
 import csv
 import json
@@ -455,6 +458,69 @@ register(id="m00-ex2-pull", module="00", kind="capability",
          source="constructed", setting="wire-bond pull strength, minimum 8.0 N, pull tester to 0.01 N, 60 consecutive joints",
          params={"usl": None, "lsl": 8.0, "target": None, "subgroup_size": 1, "chart": "imr", "units": "N"},
          columns=["i", "x"], rows=[[i + 1, round(float(v), 2)] for i, v in enumerate(_rng.normal(9.25, 0.55, 60))])
+
+
+# ---------------------------------------------------------------------------
+# Module 1: Variation and basic statistics (prefix m01-)
+# ---------------------------------------------------------------------------
+# Ground shaft Ø8.000 ± 0.015 mm, 60 consecutive parts, micrometer to 0.001 mm:
+# an ordinary, close-to-normal sample for mean, median, s and the histogram.
+_rng = np.random.default_rng(21)
+_shaft = [[i + 1, round(float(v), 3)] for i, v in enumerate(_rng.normal(8.002, 0.0045, 60))]
+register(id="m01-shaft", module="01", kind="descriptive",
+         title="Shaft diameter, 60 individuals, descriptive statistics",
+         source="constructed", setting="ground shaft Ø8.000 ± 0.015 mm, micrometer to 0.001 mm, 60 consecutive parts",
+         params={"usl": 8.015, "lsl": 7.985, "units": "mm"}, columns=["i", "x"], rows=_shaft)
+register(id="m01-shaft-means", module="01", kind="subgroup_means",
+         title="Means of consecutive subgroups of 5 from m01-shaft (exercise 2)",
+         source="constructed", setting="the m01-shaft values in subgroups of 5 consecutive parts",
+         params={"sizes": [5]}, columns=["i", "x"], rows=_shaft)
+
+# Flatness of a milled face in µm, 200 consecutive parts, CMM to 0.1 µm. A
+# lognormal characteristic: bounded at zero, right-skewed; ln(x) is normal.
+_rng = np.random.default_rng(10)
+_flat = [[i + 1, round(float(v), 1)] for i, v in enumerate(np.exp(_rng.normal(np.log(8.0), 0.45, 200)))]
+register(id="m01-flatness", module="01", kind="descriptive",
+         title="Flatness, 200 individuals, right-skewed (lognormal) with log statistics",
+         source="constructed", setting="flatness of a milled face, µm, CMM to 0.1 µm, 200 consecutive parts; no upper limit given here",
+         params={"log": True, "units": "µm"}, columns=["i", "x"], rows=_flat)
+register(id="m01-flatness-means", module="01", kind="subgroup_means",
+         title="Means of consecutive subgroups of 2, 5 and 10 from m01-flatness (central limit theorem on data)",
+         source="constructed", setting="the m01-flatness values in consecutive subgroups",
+         params={"sizes": [2, 5, 10]}, columns=["i", "x"], rows=_flat)
+
+# Binomial and Poisson: a lot 2 % defective sampled 50 at a time; solder defects
+# per board averaging 1.5.
+register(id="m01-binomial", module="01", kind="binomial_poisson",
+         title="Binomial (n 50, p 0.02) and Poisson (lambda 1.5) probabilities for k = 0 to 5",
+         source="arithmetic on the binomial and Poisson distributions (NIST 1.3.6.6.18 and 1.3.6.6.19)",
+         setting="parameters only", params={"n": 50, "p": 0.02, "lambda": 1.5, "k": [0, 1, 2, 3, 4, 5]},
+         columns=None, rows=None)
+
+# Exercise 1: tightening torque, 30 readings, torque analyser to 0.01 N·m.
+_rng = np.random.default_rng(2)
+register(id="m01-ex1-torque", module="01", kind="descriptive",
+         title="Tightening torque, 30 individuals (exercise 1)",
+         source="constructed", setting="tightening torque of a bolted joint, 12.0 ± 1.0 N·m, torque analyser to 0.01 N·m, 30 consecutive joints",
+         params={"usl": 13.0, "lsl": 11.0, "units": "N·m"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 2)] for i, v in enumerate(_rng.normal(12.15, 0.28, 30))])
+
+# Anscombe's quartet (real data, S-C28), typed from the tables reproduced in
+# S-E35 and S-E36; the published shared properties are the known-answer check.
+_ANS_X = [10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0]
+_ANS = {
+    1: (_ANS_X, [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]),
+    2: (_ANS_X, [9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74]),
+    3: (_ANS_X, [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]),
+    4: ([8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 19.0, 8.0, 8.0, 8.0], [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]),
+}
+for _i, (_ax, _ay) in _ANS.items():
+    register(id=f"m01-anscombe-{_i}", module="01", kind="regression",
+             title=f"Anscombe's quartet, data set {_i} (real data)",
+             source="S-C28 Anscombe 1973, The American Statistician 27(1):17-21; values as reproduced in S-E35 (Wikipedia) and the properties as stated in S-E36 (R datasets)",
+             setting="published data, no units", params={"alpha": 0.05},
+             columns=["x", "y"], rows=[[a, b] for a, b in zip(_ax, _ay)],
+             expected={"mean_x": [9.0, 1e-9], "mean_y": [7.50, 5e-3], "slope": [0.500, 5e-4], "intercept": [3.00, 5e-3], "r": [0.816, 1e-3], "r2": [0.67, 5e-3]})
 
 
 def main():

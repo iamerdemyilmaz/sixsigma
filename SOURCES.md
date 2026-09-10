@@ -70,6 +70,10 @@ Publisher pages at tandfonline.com, iso.org, asq.org, and link.springer.com retu
 | S-B16 | 1.3.6.7.4 Critical Values of the Chi-Square Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm | verified | full | Upper-tail and lower-tail tables; sampled entries (df 10: 18.307, 23.209, lower 3.940; df 1: 3.841; df 5: 11.070; df 30: 43.773; df 20 at 0.01: 37.566) checked in tables.py. |
 | S-B17 | 6.3.3.1 Counts Control Charts (c chart) | https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc331.htm | verified | full | c chart limits c̄ ± 3√c̄; worked example 25 wafers, c̄ = 400/25 = 16, UCL 28, LCL 4. Note: the NIST page numbering puts the c chart in 6.3.3.1 and the p chart in 6.3.3.2. |
 | S-B18 | 6.3.3.2 Proportions Control Charts (p chart) | https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc332.htm | verified | full | p chart limits p̄ ± 3√(p̄(1−p̄)/n), p̄ = ΣD_i/(mn); worked example 30 samples of 50 chips, p̄ ≈ 0.24, UCL ≈ 0.43, LCL ≈ 0.05. The np and u chart formulas follow the same binomial and Poisson logic (S-A2 10.3.6 prefers exact binomial and Poisson limits; the course teaches the 3-sigma form and says so). |
+| S-B19 | 1.3.6.6.18 Binomial Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm | verified | full (2026-09-09, Module 1) | pmf C(n,x)p^x(1−p)^(n−x); mean np, variance np(1−p); "probably the most commonly used discrete distribution"; two mutually exclusive outcomes per trial. |
+| S-B20 | 1.3.6.6.19 Poisson Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm | verified | full (2026-09-09, Module 1) | pmf e^(−λ)λ^x/x!; λ is the average number of events in the interval; mean and variance both λ; models the number of events in a given interval. |
+| S-B21 | 1.3.6.6.9 Lognormal Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm | verified | full (2026-09-09, Module 1) | X is lognormal if ln X is normal; shape σ, location θ, scale m (the median); positively skewed, more so as σ grows; used extensively in reliability to model failure times. |
+| S-B22 | 1.3.6.6.8 Weibull Distribution | https://www.itl.nist.gov/div898/handbook/eda/section3/eda3668.htm | verified | full (2026-09-09, Module 1) | pdf with shape γ, scale α, location μ; used extensively in reliability applications to model failure times. |
 
 ### C. Journal articles
 
@@ -202,6 +206,8 @@ Publisher pages at tandfonline.com, iso.org, asq.org, and link.springer.com retu
 | S-E32 | West, G. (2005). Better approximations to cumulative normal functions. *Wilmott Magazine*, 70–76. | (not read; algorithm widely reproduced) | secondary | – | Hart (1968) double-precision rational approximation of the normal CDF used in stats.js; accuracy established by the scipy comparison (max error 1e-16 at 268 points). |
 | S-E33 | Acklam, P. J. (2003). An algorithm for computing the inverse normal cumulative distribution function. | https://web.archive.org/web/20151030215612/http://home.online.no/~pjacklam/notes/invnorm/ | secondary | – | Rational approximation (relative error 1.15e-9) with one refinement step, used in stats.js; accuracy established by the scipy comparison. |
 | S-E34 | University of Washington, STAT 502 lecture notes. "The 2ᵏ Factorial Design (Montgomery chap. 6; BHH chap. 5)." | https://sites.stat.washington.edu/pds/stat502/LectureNotes/2k.factorial.intro.pdf | verified | full | Reproduces the Montgomery plasma etch 2³ data, the contrast effects, and the R lm/anova output (SS, F, p, residual SE 47.46, R² 0.9661). Supports S-D33. |
+| S-E35 | Wikipedia. "Anscombe's quartet." | https://en.wikipedia.org/wiki/Anscombe%27s_quartet | secondary | – (2026-09-09, Module 1) | The four data sets (11 rows each) and the shared summary statistics (mean x 9, var x 11, mean y 7.50, var y 4.125 ± 0.003, r 0.816, y = 3.00 + 0.500x, R² 0.67). The original paper (S-C28) is available only as a scanned image; the values typed into `generate.py` reproduce every published property by script, which is the check on the transcription. |
+| S-E36 | R Core Team. "anscombe: Anscombe's Quartet of 'Identical' Simple Linear Regressions." R *datasets* package documentation. | https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/anscombe.html | verified | full (2026-09-09, Module 1) | Cites Anscombe 1973 as the source; states that the four sets share mean, variance, correlation and regression line (mean y 7.5, sd y 2.03) while being quite different when plotted. |
 
 ---
 
@@ -220,11 +226,11 @@ Verified sources are counted at any depth (full, abstract, scope, catalog). Cata
 
 ### Module 1. Variation and basic statistics
 
-**Verified sources (6):** S-B10, S-B11, S-B0, S-C28, S-C43, S-D1. **Secondary:** S-D31.
+**Verified sources (11):** S-B10, S-B11, S-B0, S-B19, S-B20, S-B21, S-B22, S-C28, S-C43, S-D1, S-E36. **Secondary:** S-D31, S-E35.
 
 **Outline.** Types of data (continuous, discrete, attribute). Mean, median, range, sample vs population standard deviation, why n−1. Histograms and what bin width does. The normal distribution and the empirical rule, with the CDF computed, not looked up. Distributions engineers actually meet: lognormal (surface roughness, flatness), Weibull (fatigue life), binomial (defectives), Poisson (defects). Sampling versus population; enumerative vs analytic studies (Deming 1975) as the reason SPC is not just sampling theory. Central limit theorem shown by simulation in the browser (Calculator 9). Anscombe's quartet as the argument for plotting.
 
-**Real-world examples:** Anscombe's quartet data, embedded verbatim (S-C28). Deming's enumerative/analytic distinction (S-C43).
+**Real-world examples:** Anscombe's quartet data, embedded verbatim (S-C28; values transcribed from S-E35 and checked against the published properties by script, since the paper is available only as a scanned image; S-E36 corroborates). Deming's enumerative/analytic distinction (S-C43). Built 2026-09-09 as `m01-anscombe-1` to `-4`; the planned invented examples became `m01-shaft`, `m01-flatness` (with `m01-flatness-means` for the CLT on data) and `m01-ex1-torque`; a `m01-binomial` parameter example was added for the binomial and Poisson section.
 **Invented examples:** `ex01-shaft-descriptives` – 60 shaft diameters (Ø8.000 ± 0.015 mm, micrometer to 0.001 mm), mean, median, sd by hand and by script. `ex01-fill-weight-lognormal` – 80 fill weights (g, to 0.1 g) with mild right skew, to show a distribution that is not normal and why. `ex01-clt-sim` – seeded simulation from a skewed parent, subgroup sizes 2, 5, 10.
 
 ### Module 2. Process thinking

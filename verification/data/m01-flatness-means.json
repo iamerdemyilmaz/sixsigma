@@ -1,0 +1,20 @@
+{
+ "id": "m01-flatness-means",
+ "module": "01",
+ "kind": "subgroup_means",
+ "title": "Means of consecutive subgroups of 2, 5 and 10 from m01-flatness (central limit theorem on data)",
+ "source": "constructed",
+ "setting": "the m01-flatness values in consecutive subgroups",
+ "params": {
+  "sizes": [
+   2,
+   5,
+   10
+  ]
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 200
+}

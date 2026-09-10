@@ -65,6 +65,7 @@ def descriptive(x):
     out = {"n": n, "mean": float(x.mean()), "median": float(np.median(x)),
            "s": float(x.std(ddof=1)) if n > 1 else float("nan"),
            "variance": float(x.var(ddof=1)) if n > 1 else float("nan"),
+           "sd_pop": float(x.std(ddof=0)), "ss": float(((x - x.mean()) ** 2).sum()), "sum": float(x.sum()),
            "min": float(x.min()), "max": float(x.max()), "range": float(x.max() - x.min()),
            "q1": float(np.percentile(x, 25, method="weibull")),
            "q3": float(np.percentile(x, 75, method="weibull")),
@@ -78,6 +79,53 @@ def descriptive(x):
         out["ad_A2_adjusted"] = a2 * (1.0 + 0.75 / n + 2.25 / n ** 2)
         out["ad_p"] = float(p)
     return out
+
+
+def descriptive_block(x, params):
+    """Plain descriptive statistics with a histogram; optional count outside
+    specification limits and optional statistics of ln(x) (for a lognormal
+    check). No capability index: Module 1 only summarises."""
+    x = np.asarray(x, float)
+    out = {"descriptive": descriptive(x), "histogram": histogram(x)}
+    usl, lsl = params.get("usl"), params.get("lsl")
+    if usl is not None or lsl is not None:
+        n_out = int(sum(1 for v in x if (usl is not None and v > usl) or (lsl is not None and v < lsl)))
+        out["observed"] = {"n_out": n_out, "fraction_out": n_out / len(x)}
+    if params.get("log"):
+        lx = np.log(x)
+        out["log"] = descriptive(lx)
+        out["log"]["geometric_mean"] = float(math.exp(lx.mean()))
+    return out
+
+
+def subgroup_means(x, params):
+    """Means of consecutive subgroups of the given sizes, to show the central
+    limit theorem on printed data: the spread of the means against s/sqrt(n)
+    and the skewness of the means against that of the individuals."""
+    x = np.asarray(x, float)
+    d = descriptive(x)
+    out = {"individuals": {"n": int(len(x)), "mean": d["mean"], "s": d["s"], "skewness": d["skewness"], "ad_p": d["ad_p"]}}
+    for n in params["sizes"]:
+        k = len(x) // n
+        m = x[:k * n].reshape(k, n).mean(axis=1)
+        dm = descriptive(m)
+        blk = {"n": int(n), "k": int(k), "means": [float(v) for v in m], "mean_of_means": dm["mean"],
+               "sd_of_means": dm["s"], "s_over_sqrt_n": d["s"] / math.sqrt(n), "ratio": dm["s"] / (d["s"] / math.sqrt(n)),
+               "skewness_of_means": dm["skewness"]}
+        if k >= 8:
+            blk["ad_p"] = dm["ad_p"]
+        out[f"n{n}"] = blk
+    return out
+
+
+def binomial_poisson(params):
+    """Binomial and Poisson probabilities for a list of counts k."""
+    n, p, lam, ks = params["n"], params["p"], params["lambda"], [int(k) for k in params["k"]]
+    b = {"n": n, "p": p, "k": ks, "mean": n * p, "sd": math.sqrt(n * p * (1 - p)),
+         "pmf": [float(stats.binom.pmf(k, n, p)) for k in ks], "cdf": [float(stats.binom.cdf(k, n, p)) for k in ks]}
+    po = {"lambda": lam, "k": ks, "mean": lam, "sd": math.sqrt(lam),
+          "pmf": [float(stats.poisson.pmf(k, lam)) for k in ks], "cdf": [float(stats.poisson.cdf(k, lam)) for k in ks]}
+    return {"binomial": b, "poisson": po}
 
 
 def histogram(x, k=None):
@@ -738,6 +786,12 @@ def compute_one(ex_id):
         res = dpmo_block(params["defects"], params["units"], params["opportunities"])
     elif kind == "sigma_table":
         res = sigma_table(params)
+    elif kind == "descriptive":
+        res = descriptive_block(cols["x"], params)
+    elif kind == "subgroup_means":
+        res = subgroup_means(cols["x"], params)
+    elif kind == "binomial_poisson":
+        res = binomial_poisson(params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []
