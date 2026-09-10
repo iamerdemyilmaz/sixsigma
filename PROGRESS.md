@@ -1,8 +1,146 @@
 # PROGRESS.md
 
-**Resume here:** **Phase D is complete.** The author asked (2026-09-10) for Modules 3, 4, 5, 6, 9, 10, 12, 14, 15 and 18 in one session (an explicit exception to the usual one-module-per-session rule); all ten are built, verified, and committed. Combined with the parallel session's own list (8, 11, 13, 16, 17, 19) and the modules built in earlier sessions (0, 1, 2, 7), **every module from 0 through 19 is now built, verified, and linked** (`course.js`: all 20 entries `built: true`; the nav pager runs end to end from the introduction through the capstone with no gaps). This is a bigger milestone than the author's specific request: the request is done, and so is the phase it was part of. **Do not start Phase E (the verification pass) or Phase F (ship) without the author asking** — tell the author Phase D is complete and wait for direction, per this project's standing "do not ask permission to continue routine building, but do not start a new phase unprompted" balance. If a future session is told to continue with no more specific instruction than "keep going," the reasonable next step is Phase E as CLAUDE.md defines it (reread every module against: every number traceable to `results/`; every example labelled real-with-source or illustrative; every citation resolves; sigma estimate stated for every index; stability shown before every capability; p-values explained correctly everywhere; metric units only; no employer content; no placeholders; every quiz scores correctly; every calculator reproduces its page's example) — but confirm with the author first rather than assuming.
+**Resume here:** **Phases E and F are complete. The course is finished.** All 20 modules, all 7
+supporting pages (`index`, `calculators`, `tables`, `formulas`, `glossary`, `references`, `about`), the
+9 calculators, the verification suite and `README.md` are built, verified and committed.
+`bash verification/verify_all.sh` passes: 172 examples, 4,829 quantities agreeing between the two
+independent Python routes, 9,655 values agreeing between Python and the JavaScript engines, 1,573 page
+checks. There is no next unit of work queued. If the author asks for more, the open items are the
+judgement calls listed under "Open decisions waiting on the author" below (they are review requests,
+not blockers) and any correction the author finds when reading the live site.
 
-**Published (2026-09-10):** at the author's request the course was pushed to GitHub as `iamerdemyilmaz/sixsigma` and is served by GitHub Pages at https://erdemyilmaz.me/sixsigma/ (project site under the portfolio's custom domain), listed as a card on the portfolio home page. Cloudflare Web Analytics beacon (cookieless, aggregate counts) added to all 22 pages. Phase E (the full verification reread) has **not** been run; the course is live on the strength of the per-module `verify_all.sh` passes. Running Phase E is the recommended next step and any corrections it produces are deployed by pushing to `main`.
+**Recommended model:** whatever suits the specific request. There is no phase in progress. Content
+corrections and new modules would want the strongest available model for the statistics and the
+sources; a mid-tier model is fine for copy edits, deployment and README work.
+
+**To deploy the Phase E and F changes:** push `main`. GitHub Pages serves
+`https://erdemyilmaz.me/sixsigma/` from the repository root, so nothing else is needed.
+
+---
+
+## Phase E: the verification pass (2026-09-10)
+
+Run as CLAUDE.md defines it: every module reread against every number tracing to `results/`, every
+example labelled real-with-source or illustrative, every citation resolving, the sigma estimate stated
+for every index, stability shown before every capability, p-values explained correctly, metric units
+only, no employer content, no placeholders, every quiz scoring correctly, every calculator reproducing
+its page's example. The mechanical parts were done by scripts written for the pass (kept in the session
+scratchpad, not the repo, because they are one-off audits rather than part of the build): a page audit
+for structure, citations, links, units, placeholders and SVG accessibility; a dataset-printing check; a
+numeric-quiz-answer traceability check; and an external link checker.
+
+**What passed unchanged.** No broken internal links, no dangling anchors, no `<svg>` missing a
+`<title>` or `<desc>`, no hotlinked image, no CDN or external stylesheet, no placeholder text, no
+non-metric unit anywhere in the course, no employer-derived content, and 32 `<!-- AUTHOR: -->` hooks in
+place across the 20 modules. Of 152 unique external URLs, none is dead: the 39 that do not return 2xx
+are publisher and standards-body paywalls (Taylor & Francis, Oxford, ISO, ASQ, Wiley, Sage, INFORMS,
+PubMed, Emerald) returning 403 to an automated request, which is bot protection rather than link rot.
+Every capability example on every page already showed a control chart or an explicit stability
+statement of the same data first. The "control limits are not specification limits" point is made
+explicitly in Modules 7, 16 and 18, as the brief requires. Every p-value explanation in the course is
+correct; the audit's remaining flags on Modules 11, `formulas.html` and `glossary.html` are the
+*negations* ("it is **not** the probability that the hypothesis is true"), which is the wording the
+brief asks for.
+
+**What was wrong, and was fixed.**
+
+1. **A wrong quiz answer.** Module 13, quiz question 2: a 2² design with cell means 12, 14, 13, 20 was
+   keyed as a main effect of A of 4.75, tolerance ±0.02. The correct value is
+   ((14 + 20) − (12 + 13))/2 = 4.5, so a learner who did it right was marked wrong. Answer, explanation
+   and answer key corrected. This was the only wrong answer in the course: all 218 questions across the
+   26 quizzes were then graded in the browser against their declared answers and all scored 100 %, with
+   every explanation revealing.
+2. **Five supporting pages did not exist.** `tables.html`, `formulas.html`, `glossary.html`,
+   `references.html` and `about.html` were in `course.js`'s `PAGES` array as `built: false` and had
+   never been written. All five are now built and marked built. `tables.html` (Z, t, chi-square, F and
+   the control chart constants for n = 2 to 25) is generated from `verification/results/_tables.json`,
+   so it is computed rather than copied, as rule 3 requires. `references.html` (152 unique sources, 209
+   citations) is generated from the modules' own References lists, so it cannot drift out of step with
+   them. `glossary.html` has 50 entries, `formulas.html` 10 formula blocks covering every formula the
+   course uses, and `about.html` states what the course is and is not, how the numbers are verified and
+   the licence.
+3. **Module 12 was below the brief on structure.** It had two worked examples where the brief requires
+   three, and one exercise where it requires two. Added Worked example 3 (a pooled regression whose
+   slope reverses sign when stratified by spray nozzle: Simpson's paradox on continuous data, with a
+   new two-panel figure drawn from the actual data) and Exercise 2 (an r of −0.146 over a strong
+   relationship with an interior optimum, resolved with a quadratic fit). Five new verified datasets.
+4. **Module 10 had two worked examples, not three.** Added Worked example 3: verifying a candidate root
+   cause by turning it off and on, with a two-sample t-test on the braze gap before and after replacing
+   a worn fixture pin. This also supplies the discipline the module's own 5 Whys section calls its whole
+   value but had not previously demonstrated with data.
+5. **Fourteen datasets were used but never printed.** The brief requires every dataset to be embedded
+   on its page so a learner can reproduce the numbers. `m04-grr-scale`, `m05-rounding-fine`,
+   `m05-ex1-naive`/`-rational`, `m09-boxplot-shift1/2/3`, `m09-ex2-multivari`, `m12-mreg-fillet`,
+   `m12-ex1-mreg`, `m18-month1` to `-month5` and `m18-ex2-montha/b/c` are now printed as collapsible
+   data tables. The print stylesheet already expands closed `<details>` blocks, so they survive
+   printing. Datasets printed in the module that introduces them and reused later by reference, the
+   published NIST and Montgomery check datasets (cited to the source that holds them), and the Monte
+   Carlo simulations (whose seed and parameters are embedded instead) were left as they were.
+6. **Twenty-six References entries were never cited inline.** Each was either given its inline citation
+   at the claim it actually supports (the AIAG MSA bands' two corroborating secondaries in Module 4;
+   NIST's normal-distribution and c/p chart pages in Modules 6 and 17; Harry 1988 and Harry & Schroeder
+   at the 1.5σ shift's origin; Deming's *Out of the Crisis* at operational definitions; Wheeler &
+   Chambers at rational subgrouping; NIST 4.4.4 at model fit; Chase & Parkinson at statistical
+   tolerancing; the two AIAG SPC manual editions at Module 18's Cp-versus-Pp naming, which also gained a
+   paragraph explaining why that module reports Ppk) or explicitly marked as further reading that no
+   single claim rests on. The audit script now recognises that marking, so the convention is
+   enforceable.
+7. **Three modules were below the 2,500-word body-text target** (6, 9 and 10, at 2,283, 2,167 and
+   2,315). Each gained a substantive section rather than padding: "Which metric to report, and to whom"
+   in Module 6, "When to stop looking and start testing" plus "Reading a plot honestly" in Module 9, and
+   Module 10's new worked example. All three are now between 2,640 and 2,780.
+8. **Smaller corrections.** Module 12 printed R² as "0.5 × 100, i.e. about 48 %" (an artefact of quoting
+   a rounded value through the traceability spans) and mislabelled a plain R² of 0.876 as an adjusted
+   R², with a footnote apologising for it; both fixed, the second by using the simple fit's own
+   `r2_adj`. Module 18 twice described constructed data as "real numbers", now "the computed intervals".
+   Modules 8 and 17 had eight key takeaways where the brief allows five to seven; two pairs merged.
+   `index.html` no longer says modules are published as they are finished, and now links the five new
+   reference pages.
+
+**Deviations from the brief, recorded as required.**
+
+- **Word counts.** The brief targets 2,500 to 4,500 words of body text per module and allows Modules 7,
+  8, 9, 17 and 18 to run longer. Over target: 7 (5,312), 8 (5,790), 17 (4,819) and 16 (4,570), all
+  explicitly permitted as the capability and SPC core; and 0 (4,842), 1 (4,846) and 11 (4,890), which
+  are not on that list. Those three are left long deliberately: Module 0 carries the historical and
+  critique material that the rest of the course cites rather than repeating, Module 1 is the statistics
+  refresher every later module leans on, and Module 11 covers eight tests. Under target: Module 19
+  (1,807 words of prose), which is the capstone; the brief specifies it as a project the learner works
+  with the solution in collapsible blocks, and its twelve `<details>` solution blocks, which the count
+  excludes, are the bulk of the module.
+- **Module 19 has no `id="exercises"` section.** The whole module is the exercise, as the brief
+  specifies for the capstone.
+- Word counts above are prose only: text inside `<p>`, `<li>`, `<h1>` to `<h3>`, `<dt>` and `<dd>`
+  within `<main>`, excluding tables, figures, forms and `<details>` blocks, which the brief counts
+  separately ("plus tables, figures, examples, exercises, and quiz").
+
+## Phase F: ship (2026-09-10)
+
+`README.md` written: what is in the repository, deploying to GitHub Pages (including the custom-domain
+arrangement actually in use) and to Netlify, running `verify_all.sh` and what its output means,
+previewing locally, editing a module, why numbers may not be edited by hand and what the
+`data-ex`/`data-key`/`data-dp` contract does, how to add an example, a quiz question or a page, the
+conventions the course commits to, and how to send a correction.
+
+**Final figures.** 20 modules and 7 supporting pages. About 74,000 words of body prose across the
+modules, plus tables, figures, exercises and quizzes. 152 unique sources with 209 citations, every one
+resolving and every one carrying its reading depth in `SOURCES.md`; 3 sources marked unverified there
+and none of them used. 172 verified examples and datasets, all constructed ones labelled as constructed
+and all real ones cited. 26 quizzes, 218 questions, all grading correctly. 9 calculators, each tested
+against `scipy` and against every dataset in the course. `verify_all.sh`: 4,829 quantities agreeing
+between the two independent Python routes, 9,655 between Python and JavaScript, 1,573 page checks, all
+passing.
+
+**Claims removed or relabelled because they could not be verified:** none in this pass. That work was
+done as the modules were built and is recorded in `SOURCES.md` (the Motorola 1988 annual report, too
+large to fetch, is marked unverified and unused; commercial training sites are excluded outright; the
+red bead experiment's box and paddle numbers are presented as the course's own constructed parameters
+because no credible source states them; the Sony television story is told as reported by Taguchi and
+Clausing and by Phadke and labelled not independently verified).
+
+---
+
+## Earlier phases (kept for reference)
 
 **Method used throughout Phase D** (kept here for Phase E or any future module work, e.g. if the curriculum changes): read `SOURCES.md`'s "### Module N" section for the outline/sources/planned examples, register datasets in `generate.py` with prefix `m0N-`/`m1N-` (confirm the exact file slug against `course.js`'s `MODULES` array before naming any new page — Module 14's slug turned out to be `14-lean-tools`, not the longer name first assumed, and this recurred more than once), add any new `kind` to `compute.py` + `recompute.py` + `sanity.py` together (only add a `stats.js`/`calculators.js` engine if one of the nine required calculators actually fits, or if an existing kind already has one and simply gets reused, as Module 14's `ttest2`/`p` and Module 18's `capability` did), write the page following the reference module's structure (numbers computed by script, quoted via `data-ex`/`data-key`/`data-dp` spans, hand intermediates go in `allowed-numbers` after being computed by script — and always read a table's values from the actual generated CSV, never from memory of a script's printed summary statistics; Module 15's exercise 2 hand-fabricated a data table from memory and `sanity.py` caught it), set `built: true` in `course.js`, run `bash verification/verify_all.sh` in the background (by the end of Phase D this took several minutes, growing slower as `tolerance_stack`'s Monte Carlo simulations added real runtime) and do other useful work while waiting rather than polling repeatedly, spot-check the page in a browser (`.claude/launch.json` `"static"` config serves the repo on port **8781**, renegotiated between sessions — check the file's current content before assuming a port; the Browser pane may report itself "hidden," in which case use `read_page`/`get_page_text`/`javascript_tool` DOM checks instead of screenshots, and grade the quiz via `window.SIXSIGMA.gradeQuiz(form)` or by filling in radios and clicking submit), update `EXAMPLES.md` and this file, check `git status --short` for concurrent-session changes before every `git add`, commit.
 
