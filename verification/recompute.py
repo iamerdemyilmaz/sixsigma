@@ -1123,6 +1123,59 @@ def r_pareto(cols):
             "top2_pct": cum[1] if len(cum) > 1 else cum[0], "n_for_80pct": next(i + 1 for i, v in enumerate(cum) if v >= 80.0 - 1e-9)}
 
 
+def r_attribute_agreement(meta, cols):
+    """Independent route: plain dict lookups and loops, no pandas pivot/groupby
+    (compute.py's attribute_agreement uses pandas throughout)."""
+    parts_c = [str(int(v)) if isinstance(v, float) else str(v) for v in cols["part"]]
+    app_c = [str(v) for v in cols["appraiser"]]
+    trial_c = [int(v) for v in cols["trial"]]; rate_c = [int(v) for v in cols["rating"]]
+    n = len(parts_c)
+    parts = sorted(set(parts_c), key=lambda p: int(p))
+    appraisers = sorted(set(app_c))
+    n_trials = max(trial_c)
+    lookup = {(parts_c[i], app_c[i], trial_c[i]): rate_c[i] for i in range(n)}
+    out = {"n_parts": len(parts), "n_appraisers": len(appraisers), "n_trials": n_trials, "n_ratings": n}
+
+    within_vals = []
+    for a in appraisers:
+        matches = sum(1 for p in parts if len({lookup[(p, a, t)] for t in range(1, n_trials + 1)}) == 1)
+        v = matches / len(parts)
+        out[f"within_appraiser.{a}"] = v
+        within_vals.append(v)
+    out["within_appraiser_mean"] = sum(within_vals) / len(within_vals)
+
+    standard = meta["params"].get("standard")
+    if standard:
+        correct = sum(1 for i in range(n) if rate_c[i] == standard[parts_c[i]])
+        out["overall_effectiveness"] = correct / n
+        for a in appraisers:
+            idx = [i for i in range(n) if app_c[i] == a]
+            out[f"appraiser_effectiveness.{a}"] = sum(1 for i in idx if rate_c[i] == standard[parts_c[i]]) / len(idx)
+            t1r = [lookup[(p, a, 1)] for p in parts]; t1t = [standard[p] for p in parts]
+            npair = len(parts)
+            po = sum(1 for j in range(npair) if t1r[j] == t1t[j]) / npair
+            pa1 = sum(t1r) / npair; pb1 = sum(t1t) / npair
+            pe = pa1 * pb1 + (1 - pa1) * (1 - pb1)
+            out[f"cohen_kappa_vs_standard.{a}.kappa"] = (po - pe) / (1 - pe) if pe < 1 else float("nan")
+            out[f"cohen_kappa_vs_standard.{a}.po"] = po
+            out[f"cohen_kappa_vs_standard.{a}.pe"] = pe
+
+    nr = len(appraisers); N = len(parts)
+    Pi_list = []; n0_total = n1_total = 0
+    for p in parts:
+        vals = [lookup[(p, a, 1)] for a in appraisers]
+        c0 = vals.count(0); c1 = vals.count(1)
+        n0_total += c0; n1_total += c1
+        Pi_list.append((c0 * c0 + c1 * c1 - nr) / (nr * (nr - 1)))
+    Pbar = sum(Pi_list) / N
+    p0 = n0_total / (N * nr); p1 = n1_total / (N * nr)
+    Pe = p0 * p0 + p1 * p1
+    out["fleiss.kappa"] = (Pbar - Pe) / (1 - Pe)
+    out["fleiss.p_bar"] = Pbar; out["fleiss.pe_bar"] = Pe; out["fleiss.p0"] = p0; out["fleiss.p1"] = p1
+    out["fleiss_kappa_appraisers"] = out["fleiss.kappa"]
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1198,6 +1251,7 @@ def recompute_one(ex_id):
     elif kind == "p_prime": mine = r_p_prime(cols)
     elif kind == "dnom": mine = r_dnom(cols)
     elif kind == "pareto": mine = r_pareto(cols)
+    elif kind == "attribute_agreement": mine = r_attribute_agreement(meta, cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

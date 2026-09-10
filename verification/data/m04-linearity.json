@@ -1,0 +1,18 @@
+{
+ "id": "m04-linearity",
+ "module": "04",
+ "kind": "regression",
+ "title": "Linearity study: 5 reference standards x 4 replicates, bias vs reference value",
+ "source": "constructed",
+ "setting": "5 certified reference standards spanning 11.985 to 12.025 mm, bore gauge to 0.001 mm, 4 repeat readings per standard",
+ "params": {
+  "alpha": 0.05,
+  "units": "mm"
+ },
+ "columns": [
+  "x",
+  "measured",
+  "y"
+ ],
+ "n_rows": 20
+}

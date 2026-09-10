@@ -1,0 +1,18 @@
+{
+ "id": "m04-bias",
+ "module": "04",
+ "kind": "ttest1",
+ "title": "Bias study: 15 readings of a 12.010 mm reference standard on the bore gauge",
+ "source": "constructed",
+ "setting": "certified reference standard, nominal 12.010 mm, bore gauge to 0.001 mm, 15 repeat readings in one sitting",
+ "params": {
+  "mu0": 12.01,
+  "alpha": 0.05,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 15
+}

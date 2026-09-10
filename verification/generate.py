@@ -1228,6 +1228,38 @@ register(id="m04-attribute-braze", module="04", kind="attribute_agreement",
          params={"standard": {str(_i + 1): int(_truth4[_i]) for _i in range(_n_parts4)}},
          columns=["part", "appraiser", "trial", "rating"], rows=_attr_rows)
 
+# Exercise 1: bias study, a caliper checking a keyway reference standard
+# (6.015 mm), 12 readings, a small but statistically detectable negative bias.
+_rng = np.random.default_rng(1)
+_ex1_x = [round(float(v), 3) for v in _rng.normal(6.015 - 0.006, 0.003, 12)]
+register(id="m04-ex1-bias", module="04", kind="ttest1",
+         title="Exercise 1: bias study, keyway caliper on a 6.015 mm reference, 12 readings",
+         source="constructed", setting="certified reference standard, nominal 6.015 mm, dial caliper to 0.001 mm, 12 repeat readings",
+         params={"mu0": 6.015, "alpha": 0.05, "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ex1_x)])
+
+# Exercise 2: attribute agreement, 2 inspectors x 20 parts x 2 trials, a
+# simpler design than the main braze example; target kappa about 0.73 (substantial).
+_rng = np.random.default_rng(5)
+_n_ex2, _n_border_ex2 = 20, 3
+_truth_ex2 = np.array([0] * (_n_ex2 - 5) + [1] * 5)
+_rng.shuffle(_truth_ex2)
+_border_ex2 = set(_rng.choice(_n_ex2, _n_border_ex2, replace=False).tolist())
+_pcorrect_ex2 = np.full(_n_ex2, 0.95)
+for _i in _border_ex2:
+    _pcorrect_ex2[_i] = 0.6
+_ex2_rows = []
+for _i in range(_n_ex2):
+    for _a in range(2):
+        for _t in range(2):
+            _r = int(_truth_ex2[_i]) if _rng.random() < _pcorrect_ex2[_i] else 1 - int(_truth_ex2[_i])
+            _ex2_rows.append([_i + 1, "AB"[_a], _t + 1, _r])
+register(id="m04-ex2-attribute", module="04", kind="attribute_agreement",
+         title="Exercise 2: attribute agreement, 2 inspectors x 20 parts x 2 trials",
+         source="constructed", setting="visual accept/reject call on a connector housing, 2 inspectors, 20 parts (3 deliberately borderline), 2 trials each",
+         params={"standard": {str(_i + 1): int(_truth_ex2[_i]) for _i in range(_n_ex2)}},
+         columns=["part", "appraiser", "trial", "rating"], rows=_ex2_rows)
+
 
 def main():
     for ex in EXAMPLES:

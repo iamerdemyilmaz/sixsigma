@@ -14,7 +14,7 @@
     { num: "01", slug: "01-variation-statistics", title: "Variation and basic statistics", built: true },
     { num: "02", slug: "02-process-thinking", title: "Process thinking", built: true },
     { num: "03", slug: "03-defining-a-project", title: "Defining a project", built: true },
-    { num: "04", slug: "04-measurement-systems", title: "Measurement systems analysis", built: false },
+    { num: "04", slug: "04-measurement-systems", title: "Measurement systems analysis", built: true },
     { num: "05", slug: "05-data-collection", title: "Data collection and sampling", built: false },
     { num: "06", slug: "06-sigma-level-dpmo", title: "Sigma level, DPMO, DPU, RTY", built: false },
     { num: "07", slug: "07-capability-1", title: "Process capability I", built: true },

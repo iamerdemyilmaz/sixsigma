@@ -1,0 +1,16 @@
+{
+ "id": "m04-stability",
+ "module": "04",
+ "kind": "imr",
+ "title": "Stability study: the 12.010 mm reference standard, one reading per shift for 24 shifts",
+ "source": "constructed",
+ "setting": "certified reference standard, nominal 12.010 mm, bore gauge to 0.001 mm, one reading logged at the start of each of 24 shifts",
+ "params": {
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 24
+}

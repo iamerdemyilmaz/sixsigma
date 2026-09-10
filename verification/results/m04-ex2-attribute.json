@@ -1,0 +1,67 @@
+{
+ "id": "m04-ex2-attribute",
+ "kind": "attribute_agreement",
+ "params": {
+  "standard": {
+   "1": 0,
+   "2": 1,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 1,
+   "7": 1,
+   "8": 0,
+   "9": 0,
+   "10": 0,
+   "11": 0,
+   "12": 1,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 1,
+   "17": 0,
+   "18": 0,
+   "19": 0,
+   "20": 0
+  }
+ },
+ "source": "constructed",
+ "results": {
+  "n_parts": 20,
+  "n_appraisers": 2,
+  "n_trials": 2,
+  "n_ratings": 80,
+  "within_appraiser": {
+   "A": 0.9,
+   "B": 0.8
+  },
+  "within_appraiser_mean": 0.8500000000000001,
+  "overall_effectiveness": 0.9,
+  "appraiser_effectiveness": {
+   "A": 0.9,
+   "B": 0.9
+  },
+  "cohen_kappa_vs_standard": {
+   "A": {
+    "kappa": 0.8749999999999999,
+    "po": 0.95,
+    "pe": 0.5999999999999999
+   },
+   "B": {
+    "kappa": 0.6666666666666666,
+    "po": 0.85,
+    "pe": 0.5499999999999999
+   }
+  },
+  "fleiss": {
+   "kappa": 0.5604395604395604,
+   "p_bar": 0.8,
+   "pe_bar": 0.545,
+   "p0": 0.65,
+   "p1": 0.35
+  },
+  "fleiss_kappa_appraisers": 0.5604395604395604
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

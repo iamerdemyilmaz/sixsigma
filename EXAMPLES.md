@@ -147,6 +147,15 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m19-leak-after | 19 | attribute capability, 30 lots | 49 of 6,037, p̂ 0.81 % (Wilson 0.61–1.07 %), 8,117 DPMO; stable by rule 1 (one rule-2 flag) | `m19-leak-after.csv` | pass | pass | pass | n/a | 19 |
 | m19-before-after | 19 | chi-square 2 × 2 | 259/5,778 vs 49/5,988: χ² 146.9, p ≈ 0, reduction 3.48 points (CI 2.92–4.04), factor 5.3 | `m19-before-after.csv` | pass | pass | pass | n/a | 19 |
 
+| m04-grr-bore | 4 | crossed gauge R&R 10 × 3 × 3 (registered Phase C) | bore gauge, tolerance 0.050 mm; %GRR 23.9 % of study variation, 29.8 % of tolerance, ndc 5, interaction pooled (p 0.229) | `m04-grr-bore.csv` | pass | pass | pass | pass | 04, calculators |
+| m04-grr-scale | 4 | crossed gauge R&R 10 × 3 × 3 | checkweigher, tolerance 6.0 g; %GRR 7.0 % of study variation, 11.4 % of tolerance, ndc 20, interaction pooled (p 0.162): the "good gauge" contrast to the bore gauge | `m04-grr-scale.csv` | pass | pass | pass | pass | 04 |
+| m04-bias | 4 | one-sample t (new use of `ttest1`) | bore gauge on a 12.010 mm reference, 15 readings: bias +0.0028 mm, t 7.61, p < 0.001 | `m04-bias.csv` | pass | pass | pass | pass | 04 |
+| m04-linearity | 4 | simple regression (new use of `regression`) | bore gauge, 5 reference levels × 4 replicates: bias vs reference slope 0.1225 (p < 0.001), R² 0.823 | `m04-linearity.csv` | pass | pass | pass | pass | 04 |
+| m04-stability | 4 | I-MR (new use of `imr`) | bore gauge, 12.010 mm reference, 24 shifts: stable, no rule fired | `m04-stability.csv` | pass | pass | pass | pass | 04 |
+| m04-attribute-braze | 4 | attribute agreement (new kind `attribute_agreement`) | 3 inspectors × 30 parts × 2 trials on braze fillet appearance: Fleiss' κ 0.626 (substantial), per-inspector Cohen's κ vs standard 0.645–0.772, overall effectiveness 85 % | `m04-attribute-braze.csv` | pass | pass | pass | n/a (no calculator fits; SKIP_KIND) | 04 |
+| m04-ex1-bias | 4 | one-sample t | keyway caliper on a 6.015 mm reference, 12 readings: bias −0.0053 mm (17.7 % of the 0.030 mm tolerance), t −9.61, p < 0.001; exercise 1 | `m04-ex1-bias.csv` | pass | pass | pass | pass | 04 |
+| m04-ex2-attribute | 4 | attribute agreement | 2 inspectors × 20 parts × 2 trials: Fleiss' κ 0.560 (moderate), within-inspector repeatability 0.90 / 0.80; exercise 2 | `m04-ex2-attribute.csv` | pass | pass | pass | n/a (no calculator fits) | 04 |
+
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 
-Totals on 2026-09-10 (after Module 3): 65 examples; 2,171 quantities agree between Check 1 and Check 2; 4,494 values agree between Check 1 and the JavaScript engines; 435 page checks.
+Totals on 2026-09-10 (after Module 4, both sessions combined): 118 examples; 3,315 quantities agree between Check 1 and Check 2; 7,330 values agree between Check 1 and the JavaScript engines (96 examples with a calculator engine); 1,126 page checks.

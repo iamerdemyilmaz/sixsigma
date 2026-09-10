@@ -1,0 +1,21 @@
+{
+ "id": "m04-grr-scale",
+ "module": "04",
+ "kind": "grr",
+ "title": "Crossed gauge R&R on the checkweigher, 10 parts x 3 operators x 3 trials, %GRR about 7 %",
+ "source": "constructed",
+ "setting": "checkweigher for fill weight 248.0 to 254.0 g (tolerance 6.0 g), 10 filled containers spanning the range, 3 operators, 3 trials each, to 0.1 g",
+ "params": {
+  "tolerance": 6.0,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "units": "g"
+ },
+ "columns": [
+  "part",
+  "operator",
+  "trial",
+  "y"
+ ],
+ "n_rows": 90
+}

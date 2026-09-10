@@ -1214,6 +1214,66 @@ def pareto(cols):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 4: attribute agreement analysis (Cohen's and Fleiss' kappa)
+#   attribute_agreement  columns part, appraiser, trial, rating (0/1);
+#                        params standard = {part_id: true_rating}, optional
+# --------------------------------------------------------------------------
+def cohen_kappa_binary(a, b):
+    """Cohen's kappa between two equal-length lists of 0/1 ratings."""
+    a = np.asarray(a); b = np.asarray(b)
+    po = float(np.mean(a == b))
+    pa1 = float(np.mean(a == 1)); pb1 = float(np.mean(b == 1))
+    pe = pa1 * pb1 + (1 - pa1) * (1 - pb1)
+    return {"kappa": (po - pe) / (1 - pe) if pe < 1 else float("nan"), "po": po, "pe": pe}
+
+
+def fleiss_kappa_binary(matrix):
+    """matrix: N subjects x n raters (numpy array of 0/1). Returns kappa and the intermediates."""
+    N, n = matrix.shape
+    n0 = (matrix == 0).sum(axis=1); n1 = (matrix == 1).sum(axis=1)
+    Pi = (n0.astype(float) ** 2 + n1.astype(float) ** 2 - n) / (n * (n - 1))
+    Pbar = float(Pi.mean())
+    p0 = float(n0.sum()) / (N * n); p1 = float(n1.sum()) / (N * n)
+    Pe = p0 ** 2 + p1 ** 2
+    return {"kappa": (Pbar - Pe) / (1 - Pe), "p_bar": Pbar, "pe_bar": Pe, "p0": p0, "p1": p1}
+
+
+def attribute_agreement(cols, params):
+    df = pd.DataFrame({"part": [str(int(v)) if isinstance(v, float) else str(v) for v in cols["part"]],
+                       "appraiser": [str(v) for v in cols["appraiser"]],
+                       "trial": [int(v) for v in cols["trial"]], "rating": [int(v) for v in cols["rating"]]})
+    parts = sorted(df.part.unique().tolist(), key=lambda p: int(p))
+    appraisers = sorted(df.appraiser.unique().tolist())
+    n_trials = int(df.trial.max())
+    out = {"n_parts": len(parts), "n_appraisers": len(appraisers), "n_trials": n_trials, "n_ratings": len(df)}
+
+    within = {}
+    for a in appraisers:
+        piv = df[df.appraiser == a].pivot(index="part", columns="trial", values="rating")
+        within[a] = float((piv.nunique(axis=1) == 1).mean())
+    out["within_appraiser"] = within
+    out["within_appraiser_mean"] = float(np.mean(list(within.values())))
+
+    standard = params.get("standard")
+    if standard:
+        df["truth"] = df["part"].map(lambda p: standard[p]).astype(int)
+        out["overall_effectiveness"] = float((df["rating"] == df["truth"]).mean())
+        eff, cohen = {}, {}
+        for a in appraisers:
+            sub = df[df.appraiser == a]
+            eff[a] = float((sub["rating"] == sub["truth"]).mean())
+            t1 = sub[sub.trial == 1].set_index("part").loc[parts]
+            cohen[a] = cohen_kappa_binary(t1["rating"].values, t1["truth"].values)
+        out["appraiser_effectiveness"] = eff
+        out["cohen_kappa_vs_standard"] = cohen
+
+    t1 = df[df.trial == 1].pivot(index="part", columns="appraiser", values="rating").loc[parts, appraisers]
+    out["fleiss"] = fleiss_kappa_binary(t1.values)
+    out["fleiss_kappa_appraisers"] = out["fleiss"]["kappa"]
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1300,6 +1360,8 @@ def compute_one(ex_id):
         res = p_prime_chart(cols["n"], cols["defectives"])
     elif kind == "dnom":
         res = dnom_chart(cols)
+    elif kind == "attribute_agreement":
+        res = attribute_agreement(cols, params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

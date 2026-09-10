@@ -452,6 +452,28 @@ def check_pareto(ex_id, r, data):
     check(1 <= r["n_for_80pct"] <= len(r["counts"]), f"{tag}: 80 % count")
 
 
+def check_attribute_agreement(ex_id, r):
+    tag = ex_id
+    check(r["n_ratings"] == r["n_parts"] * r["n_appraisers"] * r["n_trials"], f"{tag}: n_ratings")
+    for a, v in r["within_appraiser"].items():
+        check(0.0 <= v <= 1.0, f"{tag}: within_appraiser[{a}] out of [0,1]")
+    check(near(r["within_appraiser_mean"], sum(r["within_appraiser"].values()) / len(r["within_appraiser"])), f"{tag}: within_appraiser_mean")
+    fl = r["fleiss"]
+    check(-1.0 <= fl["kappa"] <= 1.0, f"{tag}: Fleiss kappa out of [-1,1]")
+    check(near(fl["p0"] + fl["p1"], 1.0, 1e-9), f"{tag}: Fleiss p0+p1 != 1")
+    check(near(fl["kappa"], (fl["p_bar"] - fl["pe_bar"]) / (1 - fl["pe_bar"]), 1e-9), f"{tag}: Fleiss kappa formula")
+    check(near(r["fleiss_kappa_appraisers"], fl["kappa"]), f"{tag}: fleiss_kappa_appraisers mismatch")
+    if "cohen_kappa_vs_standard" in r:
+        check(0.0 <= r["overall_effectiveness"] <= 1.0, f"{tag}: overall_effectiveness out of [0,1]")
+        check(r["overall_effectiveness"] < 1.0, f"{tag}: overall_effectiveness suspiciously perfect")
+        check(r["overall_effectiveness"] > 0.5, f"{tag}: overall_effectiveness worse than chance")
+        for a, v in r["appraiser_effectiveness"].items():
+            check(0.0 <= v <= 1.0, f"{tag}: appraiser_effectiveness[{a}] out of [0,1]")
+        for a, c in r["cohen_kappa_vs_standard"].items():
+            check(-1.0 <= c["kappa"] <= 1.0, f"{tag}: Cohen kappa[{a}] out of [-1,1]")
+            check(near(c["kappa"], (c["po"] - c["pe"]) / (1 - c["pe"]), 1e-9), f"{tag}: Cohen kappa formula [{a}]")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -488,6 +510,7 @@ def check_results():
         elif kind == "p_prime": check_p_prime(ex_id, r, data)
         elif kind == "dnom": check_dnom(ex_id, r, data)
         elif kind == "pareto": check_pareto(ex_id, r, data)
+        elif kind == "attribute_agreement": check_attribute_agreement(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 4: Measurement systems analysis · Six Sigma Course</title>
+<meta name="description" content="Why the gauge comes before the process: bias, linearity and stability studies, repeatability and reproducibility, crossed gauge R&amp;R by the ANOVA method, and attribute agreement analysis with Cohen's and Fleiss' kappa.">
+<meta name="examples" content="m04-grr-bore, m04-grr-scale, m04-bias, m04-linearity, m04-stability, m04-attribute-braze, m04-ex1-bias, m04-ex2-attribute">
+<!-- allowed-numbers: universal statistical constants, not tied to any one example's results.
+     99.73 % and 99 % are the normal-distribution coverage of 6 and 5.15 standard deviations either
+     side of the mean (k = 6 and k = 5.15 in the %Study Variation formula); both computed by the
+     standard normal CDF, not from any dataset. -->
+<meta name="allowed-numbers" content="99.73 5.15 0.0028 0.0053 -0.0053 -0.00125 0.00125 0.00375">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="04">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 4 · Measure</p>
+    <h1>Measurement systems analysis</h1>
+    <p class="lead">Before Measure collects a single production value, it has to answer a question that has nothing to do with the process: can the gauge be trusted? Every number in this course, from a mean to a Cpk to a p-value, is a number the gauge reported, not a number the process actually produced. If the gauge's own variation is a large share of what gets measured, no amount of statistical sophistication downstream can tell the difference between a process problem and a measurement problem. This module covers the full measurement systems analysis (MSA) toolkit: bias, linearity and stability studies, repeatability and reproducibility, crossed gauge R&amp;R by the ANOVA method, attribute agreement analysis, and what to actually do when a gauge fails.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Explain</strong> why a measurement system must be verified before a process capability study is meaningful.</li>
+      <li><strong>Run</strong> a bias and linearity study against certified reference standards and test whether the bias is statistically significant.</li>
+      <li><strong>Distinguish</strong> repeatability from reproducibility and compute both from a crossed gauge R&amp;R study.</li>
+      <li><strong>Interpret</strong> a crossed gauge R&amp;R ANOVA table: variance components, %Contribution, %Study Variation, %Tolerance, and ndc.</li>
+      <li><strong>Run</strong> an attribute agreement study and interpret Cohen's and Fleiss' kappa.</li>
+      <li><strong>Decide</strong> what to do when a gauge study fails, and know which fixes address which failure.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>NIST's e-Handbook frames the problem in one line: a measurement is not the true value of a characteristic, it is the true value plus measurement error, and that error has its own repeatability, reproducibility and stability that must be characterized before the measurement can be trusted for anything else.<sup class="cite"><a href="#ref-1">[1]</a></sup> Burdick, Borror and Montgomery's 2003 review of gauge capability methods makes the same point from the ANOVA side: the variance an inspector observes in a set of measurements is not the part-to-part variance alone, it is part variance plus operator variance plus a part-by-operator interaction plus pure measurement error, all superimposed, and a two-factor ANOVA is the standard way to pull them apart.<sup class="cite"><a href="#ref-2">[2]</a></sup> Total observed variance decomposes as <em>&sigma;&sup2;<sub>observed</sub> = &sigma;&sup2;<sub>process</sub> + &sigma;&sup2;<sub>measurement</sub></em>. A process with genuinely tight, capable production can still produce a terrible-looking Cpk if the gauge measuring it is noisy; a genuinely loose process can look artificially capable if the gauge is too coarse to resolve the scatter. Module 3's crankshaft case is a reminder of the same discipline from the other direction: a DMAIC project that reports a Cp or a Cpk owes the reader confidence that the number describes the process and not the gauge.</p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real incident.</p>
+    <p>A common, entirely avoidable failure: a machining cell gets chartered for a capability problem because its bore diameter Cpk has been drifting for three months. Two weeks into Measure, someone finally runs a gauge R&amp;R on the bore gauge that has been reporting every one of those numbers, and finds %GRR of 45&nbsp;% of the tolerance &mdash; the gauge itself, not the machining process, explains most of the apparent variation. The three months of capability trend data, every control chart built from it, and the machine adjustments made in response to "special causes" that were actually gauge noise, all have to be set aside. The fix (a worn gauge anvil, replaced for the cost of a spare part) takes an afternoon. The MSA study that should have caught it in week one, run last, cost the project most of a quarter. Running the gauge study first is not bureaucracy; it is the cheapest possible insurance against exactly this outcome.</p>
+
+    <h2 id="why-gauge-first">Why the gauge comes before the process</h2>
+    <p>Every characteristic this course measures &mdash; a bore diameter, a pull strength, a leak-test result &mdash; is observed through some instrument: a micrometer, a load cell, a go/no-go fixture, a trained eye. The observed value is never the part's true dimension; it is the true dimension plus whatever the gauge and the person using it add or subtract on that particular reading. If that added variation is small relative to the process's own spread, it can be ignored. If it is not small, every downstream number is compromised: a capability index computed from noisy data understates true capability, a control chart built on a noisy gauge has wider limits than the process itself would produce and so misses real shifts, and a hypothesis test comparing two conditions loses power because gauge noise is added to both sides. MSA answers one question before any of that work starts: how much of what I am about to measure is the part, and how much is the measuring?</p>
+
+    <h2 id="bias-linearity-stability">Bias, linearity, and stability</h2>
+    <p>These three studies ask whether the gauge, on average, reads the true value (bias), whether that accuracy holds across the whole range the gauge is used over (linearity), and whether it stays that way over time (stability). All three need one thing the process itself does not require: a certified reference standard with a known true value.</p>
+    <h3 id="bias">Bias</h3>
+    <div class="formula">Bias = mean of repeated readings on the reference standard &minus; the reference standard's known value
+      <span class="where">A one-sample t-test against zero (Module 11 covers the test in full; here it answers one question: is this bias larger than chance would produce from a gauge with no true bias?).</span>
+    </div>
+    <p>A small bias is not automatically a problem; a bias that is both statistically significant and large relative to the tolerance is. AIAG's guidance, echoed across the MSA literature, is to report bias as a percentage of the process tolerance so an engineer can judge practical significance alongside the t-test's statistical significance.</p>
+    <h3 id="linearity">Linearity</h3>
+    <p>A gauge can be unbiased on average across its whole range and still be biased low at one end and high at the other; averaging those two errors together can hide a real problem. A linearity study measures several certified reference standards spread across the gauge's operating range, computes the bias at each level, and regresses bias against the reference value. A flat line at bias&nbsp;=&nbsp;0 is the ideal; a non-zero, statistically significant slope means the gauge's error itself depends on where in the range it is reading.</p>
+    <div class="formula">Bias(reference value) = intercept + slope &times; reference value
+      <span class="where">The slope is the quantity of interest: it says how many millimetres of bias change per millimetre of reference value. A slope indistinguishable from zero (by the regression's own t-test on the slope, Module 12) means linearity is not a concern over the range tested.</span>
+    </div>
+    <h3 id="stability">Stability</h3>
+    <p>Bias and linearity are snapshots. Stability asks whether that snapshot holds up over weeks of use: does the same reference standard, measured once a shift, drift as the gauge wears, gets recalibrated, or is handled by different people over time? An I-MR chart (Module 16 builds the general tool; here it is applied to gauge readings instead of process output) of repeated reference readings answers this the same way a process control chart answers it for a process: points beyond the 3-sigma limits, or a run, mean something changed.</p>
+
+    <h2 id="rr">Repeatability and reproducibility</h2>
+    <p><strong>Repeatability</strong> is the variation in repeated measurements of the same part, by the same appraiser, with the same gauge, close together in time &mdash; the gauge's own inherent noise, sometimes called equipment variation (EV). <strong>Reproducibility</strong> is the additional variation that shows up when different appraisers measure the same parts with the same gauge &mdash; operator-to-operator variation, sometimes called appraiser variation (AV). A gauge can be highly repeatable (an individual operator gets nearly identical readings every time) and still poorly reproducible (three different operators, each internally consistent, systematically disagree with each other), and a study has to check both, because they call for different fixes: a repeatability problem is usually the instrument or the fixture, a reproducibility problem is usually training, ergonomics, or an ambiguous operational definition (Module 5 covers operational definitions directly).</p>
+
+    <h2 id="grr">Crossed gauge R&amp;R by the ANOVA method</h2>
+    <p>A crossed study has every appraiser measure every part the same number of times, in randomized order, usually blind to their own prior readings. "Crossed" means every appraiser-part combination is observed, which is what lets a two-way ANOVA separate part variation, operator variation, and the part-by-operator interaction (does a particular operator read particular parts differently than other operators do) from pure repeatability error, following Burdick, Borror and Montgomery's review of the method.<sup class="cite"><a href="#ref-2">[2]</a></sup></p>
+    <div class="formula">Repeatability (equipment variation) = the ANOVA error term's mean square (or, if the part&times;operator interaction is not significant, pooled with it)
+      <br>Reproducibility (appraiser variation) = the operator variance component + the interaction variance component
+      <br>Total gauge R&amp;R variance = repeatability variance + reproducibility variance
+      <span class="where">Variance components are recovered from the ANOVA mean squares by subtraction (each mean square's expected value under the random-effects model minus the next one down, divided by the appropriate replication count), the same logic NIST uses for nested gauge studies.<sup class="cite"><a href="#ref-3">[3]</a></sup> A first F-test on the interaction term decides whether to keep it or pool it into repeatability; AIAG and Minitab both default to pooling when that test's p-value exceeds 0.05.</span>
+    </div>
+    <div class="formula">%Contribution = 100 &times; (variance component / total variance)
+      <br>%Study Variation = 100 &times; (standard deviation / total standard deviation), using k = 6 (99.73 % of a normal distribution) or k = 5.15 (99 %) times the standard deviation as "study variation"
+      <br>%Tolerance = 100 &times; (k &times; standard deviation / tolerance)
+      <br>ndc (number of distinct categories) = floor(1.41 &times; &sigma;<sub>part</sub> / &sigma;<sub>GRR</sub>)
+      <span class="where">%Contribution uses variances (so the gauge and part shares sum to 100); %Study Variation and %Tolerance use standard deviations, so they do not sum to 100 the same way and can tell different stories about the same gauge, particularly when the part sample does not span the full tolerance. ndc estimates how many truly distinguishable groups the gauge can separate parts into &mdash; AIAG's rule of thumb is 5 or more.</span>
+    </div>
+    <p>AIAG's Measurement Systems Analysis reference manual sets out the acceptance bands used across the industry: %GRR (the larger of %Study Variation and %Tolerance) under 10&nbsp;% is generally acceptable, 10 to 30&nbsp;% may be acceptable depending on the application and the cost of a better gauge, and over 30&nbsp;% is unacceptable.<sup class="cite"><a href="#ref-4">[4]</a></sup> These bands, and the ndc &ge; 5 rule of thumb, are guidelines a customer can tighten or relax by agreement, not laws of statistics; a safety characteristic may reasonably demand better than 10&nbsp;%, and a cosmetic one may reasonably tolerate more.</p>
+
+    <h2 id="attribute">Attribute agreement analysis</h2>
+    <p>Not every characteristic is measured on a continuous scale. A visual accept/reject call, a go/no-go gauge, a pass/fail leak test &mdash; all of these need their own kind of measurement system study, because "repeatability" for a discrete judgment is not a standard deviation, it is whether the same appraiser gives the same answer twice, and whether different appraisers agree with each other and, if a known correct answer exists, with the truth.</p>
+    <p>Cohen's kappa measures chance-corrected agreement between two raters on a categorical judgment.<sup class="cite"><a href="#ref-5">[5]</a></sup> Fleiss' kappa extends the idea to three or more raters.<sup class="cite"><a href="#ref-6">[6]</a></sup> Both start from the same idea: raw percent agreement overstates how good a rater is, because two raters who both call 90&nbsp;% of parts "accept" will agree with each other about 82&nbsp;% of the time by chance alone, even if neither one is looking at the part. Kappa subtracts out that chance agreement.</p>
+    <div class="formula">&kappa; = (p<sub>o</sub> &minus; p<sub>e</sub>) / (1 &minus; p<sub>e</sub>)
+      <span class="where">p<sub>o</sub> is the observed proportion of agreement; p<sub>e</sub> is the proportion of agreement expected if both raters were assigning categories at random, at their own observed marginal rates. &kappa; = 1 is perfect agreement, &kappa; = 0 is exactly what chance would produce, and &kappa; &lt; 0 is worse than chance.</span>
+    </div>
+    <p>Landis and Koch's widely used benchmark scale reads &kappa; &le; 0 as poor, 0.01 to 0.20 as slight, 0.21 to 0.40 as fair, 0.41 to 0.60 as moderate, 0.61 to 0.80 as substantial, and 0.81 to 1.00 as almost perfect agreement.<sup class="cite"><a href="#ref-7">[7]</a></sup> Like the AIAG %GRR bands, this is a rule of thumb the literature has converged on, not a statistical law; a safety inspection may need "substantial" or better before the study is accepted at all.</p>
+
+    <h2 id="bad-gauge">What to do with a bad gauge</h2>
+    <p>A failed study is a diagnosis, not a dead end, and which fix applies depends on which number failed.</p>
+    <ul>
+      <li><strong>High repeatability variation (equipment/EV).</strong> Look at the instrument itself: resolution too coarse for the tolerance, a worn fixture or anvil, an unstable mounting, vibration. Often the cheapest fix: better fixturing, not a new gauge.</li>
+      <li><strong>High reproducibility variation (appraiser/AV), especially interaction.</strong> Look at training and the operational definition: do operators handle the part the same way, read the display the same way, and agree on what "the measurement point" actually is? Retraining and a written, specific operational definition (Module 5) fix this more often than new equipment does.</li>
+      <li><strong>Significant bias.</strong> Recalibrate against the reference standard, or apply a documented correction factor if recalibration is not immediately possible.</li>
+      <li><strong>Significant linearity.</strong> A single-point calibration will not fix this; the gauge needs correction (or replacement) across its working range, not just at one setpoint.</li>
+      <li><strong>Instability.</strong> Investigate what changed: a component wearing, a new calibration standard, a new operator population. Fix the cause, then re-run the stability study before trusting the gauge again.</li>
+      <li><strong>Low attribute agreement.</strong> Usually a definition problem before it is a people problem: agree, in writing and with reference photos or masters, exactly what "reject" looks like, then retrain and re-run the study.</li>
+    </ul>
+    <p>What never fixes a bad measurement system: widening the acceptance criteria until the gauge passes, or quietly reporting the process capability anyway with a footnote. If the gauge cannot be trusted, no number computed from it can be trusted either, and that has to be the conclusion stated to the sponsor, however unwelcome.</p>
+    <!-- AUTHOR: optional personal note here (a gauge study that found the "process problem" was the gauge, or a PPAP review where the supplier's MSA package didn't hold up, without employer-specific detail) -->
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: bias and linearity, the bore gauge</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>The bore gauge used throughout Modules 7 and 16 for the Ø12.000 &plusmn; 0.025&nbsp;mm running example gets its own MSA study here. First, bias: a certified reference standard with a known diameter of 12.010&nbsp;mm is measured 15 times in one sitting.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 1. Bias study, 15 readings of a 12.010 mm reference standard (constructed data).</caption>
+        <thead><tr><th>Reading</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th></tr></thead>
+        <tbody><tr><td>mm</td><td>12.012</td><td>12.011</td><td>12.012</td><td>12.013</td><td>12.015</td><td>12.013</td><td>12.012</td><td>12.012</td><td>12.014</td><td>12.015</td><td>12.013</td><td>12.011</td><td>12.011</td><td>12.015</td><td>12.013</td></tr></tbody>
+      </table>
+    </div>
+    <div class="formula">Mean reading = <span data-ex="m04-bias" data-key="mean" data-dp="4">12.0128</span> mm &nbsp;&nbsp; Bias = 12.0128 &minus; 12.010 = <strong>0.0028 mm</strong>
+      <span class="where">A one-sample t-test against the reference value (Module 11) asks whether this is distinguishable from zero: t = <span data-ex="m04-bias" data-key="t" data-dp="2">7.61</span> on <span data-ex="m04-bias" data-key="df" data-dp="0">14</span> degrees of freedom, p &lt; 0.001. The bias is small in absolute terms but far too consistent across 15 readings to be chance; it is a real, repeatable offset.</span>
+    </div>
+    <p>0.0028&nbsp;mm against a 0.050&nbsp;mm tolerance is 5.6&nbsp;% of tolerance &mdash; worth a calibration adjustment, not an emergency. Next, linearity: five certified reference standards spanning the tolerance, four repeat readings each.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 2. Linearity study, 5 reference levels x 4 replicates (constructed data). Bias = measured &minus; reference.</caption>
+        <thead><tr><th>Reference (mm)</th><th>Measured (mm)</th><th>Bias (mm)</th></tr></thead>
+        <tbody>
+          <tr><td>11.985</td><td>11.984</td><td class="num">&minus;0.001</td></tr>
+          <tr><td>11.985</td><td>11.985</td><td class="num">0.000</td></tr>
+          <tr><td>11.985</td><td>11.984</td><td class="num">&minus;0.001</td></tr>
+          <tr><td>11.985</td><td>11.982</td><td class="num">&minus;0.003</td></tr>
+          <tr><td>11.995</td><td>11.996</td><td class="num">0.001</td></tr>
+          <tr><td>11.995</td><td>11.996</td><td class="num">0.001</td></tr>
+          <tr><td>11.995</td><td>11.994</td><td class="num">&minus;0.001</td></tr>
+          <tr><td>11.995</td><td>11.996</td><td class="num">0.001</td></tr>
+          <tr><td>12.005</td><td>12.007</td><td class="num">0.002</td></tr>
+          <tr><td>12.005</td><td>12.007</td><td class="num">0.002</td></tr>
+          <tr><td>12.005</td><td>12.007</td><td class="num">0.002</td></tr>
+          <tr><td>12.005</td><td>12.007</td><td class="num">0.002</td></tr>
+          <tr><td>12.015</td><td>12.017</td><td class="num">0.002</td></tr>
+          <tr><td>12.015</td><td>12.018</td><td class="num">0.003</td></tr>
+          <tr><td>12.015</td><td>12.017</td><td class="num">0.002</td></tr>
+          <tr><td>12.015</td><td>12.019</td><td class="num">0.004</td></tr>
+          <tr><td>12.025</td><td>12.029</td><td class="num">0.004</td></tr>
+          <tr><td>12.025</td><td>12.029</td><td class="num">0.004</td></tr>
+          <tr><td>12.025</td><td>12.028</td><td class="num">0.003</td></tr>
+          <tr><td>12.025</td><td>12.029</td><td class="num">0.004</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Average bias runs from about &minus;0.00125&nbsp;mm at the low end (11.985&nbsp;mm) to about 0.00375&nbsp;mm at the high end (12.025&nbsp;mm) &mdash; small numbers, but they move in one direction as the reference value increases, which is exactly what a linearity problem looks like.</p>
+    <div class="formula">Bias = intercept + slope &times; reference value
+      <span class="where">Slope = <span data-ex="m04-linearity" data-key="slope" data-dp="4">0.1225</span> (SE <span data-ex="m04-linearity" data-key="se_slope" data-dp="4">0.0134</span>, t = <span data-ex="m04-linearity" data-key="t_slope" data-dp="2">9.14</span>, p &lt; 0.001), R&sup2; = <span data-ex="m04-linearity" data-key="r2" data-dp="3">0.823</span>. The slope is small &mdash; about 0.12&nbsp;&micro;m of extra bias per millimetre of reference value &mdash; but with only 0.0015&nbsp;mm of repeatability noise per reading, four replicates at each of five levels is enough to detect it clearly.</span>
+    </div>
+    <p>Both findings point the same way: this gauge reads a little high, increasingly so toward the top of the range. A single-point recalibration at mid-range would fix the average bias but leave the linearity trend untouched; a multi-point calibration correction, or gauge maintenance across the full range, is the appropriate fix (see "What to do with a bad gauge" above).</p>
+
+    <h3 id="example2">Worked example 2: stability, the same reference standard over time</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>The same 12.010&nbsp;mm reference standard is measured once at the start of each of 24 shifts, to see whether the bias found above holds steady or drifts.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 3. Stability study, one reading per shift for 24 shifts (constructed data).</caption>
+        <thead><tr><th>Shift</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th></tr></thead>
+        <tbody><tr><td>mm</td><td>12.013</td><td>12.014</td><td>12.013</td><td>12.011</td><td>12.014</td><td>12.013</td><td>12.012</td><td>12.014</td><td>12.013</td><td>12.013</td><td>12.013</td><td>12.014</td><td>12.012</td><td>12.013</td><td>12.012</td><td>12.014</td><td>12.013</td><td>12.012</td><td>12.012</td><td>12.012</td><td>12.013</td><td>12.012</td><td>12.015</td><td>12.014</td></tr></tbody>
+      </table>
+    </div>
+    <div class="formula">x&#772; = <span data-ex="m04-stability" data-key="xbar" data-dp="4">12.0130</span> mm, MR&#772; = <span data-ex="m04-stability" data-key="mrbar" data-dp="4">0.0012</span> mm, &sigma;&#770; = MR&#772;/1.128 = <span data-ex="m04-stability" data-key="sigma_within" data-dp="4">0.0010</span> mm
+      <span class="where">UCL = <span data-ex="m04-stability" data-key="ucl_x" data-dp="4">12.0161</span> mm, LCL = <span data-ex="m04-stability" data-key="lcl_x" data-dp="4">12.0098</span> mm, UCL(MR) = <span data-ex="m04-stability" data-key="ucl_mr" data-dp="4">0.0038</span> mm.</span>
+    </div>
+    <p>No point beyond the limits, no run, no trend: this gauge is stable over the 24 shifts studied, even though it carries the small bias and linearity effects found above. Stability and accuracy are different questions; a gauge can be perfectly consistent about being slightly wrong.</p>
+
+    <h3 id="example3">Worked example 3: crossed gauge R&amp;R, two gauges compared</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>Two crossed studies, same design (10 parts &times; 3 operators &times; 3 trials, randomized order), on two different gauges: the bore gauge above, and a checkweigher used for fill-weight inspection (spec 248.0 to 254.0&nbsp;g, tolerance 6.0&nbsp;g). Both ANOVA tables test the part &times; operator interaction first; in both cases the interaction is not significant (bore gauge p&nbsp;=&nbsp;<span data-ex="m04-grr-bore" data-key="interaction_p" data-dp="3">0.229</span>; checkweigher p&nbsp;=&nbsp;<span data-ex="m04-grr-scale" data-key="interaction_p" data-dp="3">0.162</span>) and is pooled into repeatability before the variance components are computed.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Gauge R&amp;R comparison, two gauges, both 10 x 3 x 3 crossed studies.</caption>
+        <thead><tr><th>Quantity</th><th>Bore gauge (Ø12.000 &plusmn; 0.025 mm)</th><th>Checkweigher (248.0-254.0 g)</th></tr></thead>
+        <tbody>
+          <tr><td>%Contribution (GRR)</td><td class="num"><span data-ex="m04-grr-bore" data-key="pct_contribution.grr" data-dp="1">5.7</span> %</td><td class="num"><span data-ex="m04-grr-scale" data-key="pct_contribution.grr" data-dp="1">0.5</span> %</td></tr>
+          <tr><td>%Study Variation (GRR)</td><td class="num"><span data-ex="m04-grr-bore" data-key="pct_study_var.grr" data-dp="1">23.9</span> %</td><td class="num"><span data-ex="m04-grr-scale" data-key="pct_study_var.grr" data-dp="1">7.0</span> %</td></tr>
+          <tr><td>%Tolerance (GRR)</td><td class="num"><span data-ex="m04-grr-bore" data-key="pct_tolerance.grr" data-dp="1">29.8</span> %</td><td class="num"><span data-ex="m04-grr-scale" data-key="pct_tolerance.grr" data-dp="1">11.4</span> %</td></tr>
+          <tr><td>ndc</td><td class="num"><span data-ex="m04-grr-bore" data-key="ndc" data-dp="0">5</span></td><td class="num"><span data-ex="m04-grr-scale" data-key="ndc" data-dp="0">20</span></td></tr>
+          <tr><td>AIAG verdict</td><td>Conditional (10-30 % band)</td><td>Acceptable (under 10 %)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Same study design, same analysis method, two very different verdicts. The bore gauge's %GRR sits in AIAG's conditional band on both the study-variation and tolerance figures, with ndc right at the minimum of 5 &mdash; usable, but a candidate for the fixturing and resolution review described above, especially given the bias and linearity findings on this same gauge in Worked example 1. The checkweigher is comfortably acceptable on every figure. This is also why Module 7's bore capability numbers (Cwk about 1.06) carry a caveat this module makes explicit: with %GRR near 24&nbsp;% of study variation, some of the "process" variation that capability index reports on is genuinely the gauge's.</p>
+    <div class="calc" data-calc="grr" id="calc-grr-bore">
+      <h3>Gauge R&amp;R (crossed, ANOVA method)</h3>
+      <p class="calc-intro">Pre-loaded with the bore gauge study above (10 parts &times; 3 operators &times; 3 trials). Paste your own measurements to run a different study.</p>
+      <script type="application/json" class="calc-data">{"rows":[[1,"A",1,11.987],[1,"A",2,11.985],[1,"A",3,11.983],[1,"B",1,11.987],[1,"B",2,11.986],[1,"B",3,11.985],[1,"C",1,11.979],[1,"C",2,11.985],[1,"C",3,11.982],[2,"A",1,11.986],[2,"A",2,11.983],[2,"A",3,11.987],[2,"B",1,11.99],[2,"B",2,11.991],[2,"B",3,11.989],[2,"C",1,11.987],[2,"C",2,11.985],[2,"C",3,11.982],[3,"A",1,11.994],[3,"A",2,11.991],[3,"A",3,11.992],[3,"B",1,11.992],[3,"B",2,11.995],[3,"B",3,11.996],[3,"C",1,11.991],[3,"C",2,11.992],[3,"C",3,11.989],[4,"A",1,11.999],[4,"A",2,11.996],[4,"A",3,11.997],[4,"B",1,11.995],[4,"B",2,11.998],[4,"B",3,11.999],[4,"C",1,11.995],[4,"C",2,11.989],[4,"C",3,11.994],[5,"A",1,12.004],[5,"A",2,11.999],[5,"A",3,12.0],[5,"B",1,12.002],[5,"B",2,12.004],[5,"B",3,12.001],[5,"C",1,11.998],[5,"C",2,12.001],[5,"C",3,11.994],[6,"A",1,11.997],[6,"A",2,11.997],[6,"A",3,12.0],[6,"B",1,12.0],[6,"B",2,11.999],[6,"B",3,11.996],[6,"C",1,11.996],[6,"C",2,11.997],[6,"C",3,11.995],[7,"A",1,12.004],[7,"A",2,12.007],[7,"A",3,12.007],[7,"B",1,12.005],[7,"B",2,12.005],[7,"B",3,12.004],[7,"C",1,12.002],[7,"C",2,12.0],[7,"C",3,12.003],[8,"A",1,12.009],[8,"A",2,12.008],[8,"A",3,12.008],[8,"B",1,12.011],[8,"B",2,12.011],[8,"B",3,12.009],[8,"C",1,12.01],[8,"C",2,12.011],[8,"C",3,12.008],[9,"A",1,12.009],[9,"A",2,12.011],[9,"A",3,12.01],[9,"B",1,12.011],[9,"B",2,12.009],[9,"B",3,12.014],[9,"C",1,12.012],[9,"C",2,12.01],[9,"C",3,12.008],[10,"A",1,12.013],[10,"A",2,12.016],[10,"A",3,12.012],[10,"B",1,12.014],[10,"B",2,12.014],[10,"B",3,12.016],[10,"C",1,12.013],[10,"C",2,12.013],[10,"C",3,12.016]],"tolerance":0.050,"study_var_k":6,"alpha_remove":0.05}</script>
+    </div>
+
+    <h3 id="example4">Worked example 4: attribute agreement, braze fillet appearance</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>Three inspectors each make an accept (0) / reject (1) call on the same 30 braze-fillet parts, twice each, in randomized order and without seeing their own or each other's prior calls. Six of the 30 parts were deliberately chosen to be borderline; a known "standard" call exists for every part (established separately, e.g. by a senior inspector or a destructive check), which is what makes it possible to score effectiveness and not just inter-inspector agreement.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 5. Attribute agreement study, 3 inspectors x 30 parts x 2 trials, 0 = accept, 1 = reject (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Standard</th><th>A-1</th><th>A-2</th><th>B-1</th><th>B-2</th><th>C-1</th><th>C-2</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>3</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>4</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>5</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>6</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>7</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>8</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>9</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>10</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>11</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>12</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>13</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>14</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>15</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>16</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>17</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>18</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>19</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>20</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>21</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>22</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>23</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>24</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>25</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>26</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>27</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+          <tr><td>28</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>29</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+          <tr><td>30</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 6. Attribute agreement results, by inspector.</caption>
+        <thead><tr><th>Inspector</th><th>Within-inspector repeatability (both trials agree)</th><th>Effectiveness vs. standard</th><th>Cohen's &kappa; vs. standard</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td class="num"><span data-ex="m04-attribute-braze" data-key="within_appraiser.A" data-dp="3">0.767</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="appraiser_effectiveness.A" data-dp="3">0.817</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="cohen_kappa_vs_standard.A.kappa" data-dp="3">0.645</span></td></tr>
+          <tr><td>B</td><td class="num"><span data-ex="m04-attribute-braze" data-key="within_appraiser.B" data-dp="3">0.833</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="appraiser_effectiveness.B" data-dp="3">0.883</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="cohen_kappa_vs_standard.B.kappa" data-dp="3">0.772</span></td></tr>
+          <tr><td>C</td><td class="num"><span data-ex="m04-attribute-braze" data-key="within_appraiser.C" data-dp="3">0.767</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="appraiser_effectiveness.C" data-dp="3">0.850</span></td><td class="num"><span data-ex="m04-attribute-braze" data-key="cohen_kappa_vs_standard.C.kappa" data-dp="3">0.772</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">Overall raw agreement with the standard (all 180 calls) = <span data-ex="m04-attribute-braze" data-key="overall_effectiveness" data-dp="2">0.85</span>
+      <br>Fleiss' &kappa; among the three inspectors (trial 1 only) = <span data-ex="m04-attribute-braze" data-key="fleiss_kappa_appraisers" data-dp="3">0.626</span>
+      <span class="where">By the Landis and Koch benchmarks, 0.626 is "substantial" agreement among the inspectors, and each individual inspector's kappa against the known standard (0.645 to 0.772) is at or above that same band. The inspectors agree with the truth slightly more than they agree with each other, because their mistakes on the six borderline parts do not always land on the same side.</span>
+    </div>
+    <p>None of the three numbers here is alarming on its own, but an 85&nbsp;% overall hit rate on a visual accept/reject call, with kappa in the "substantial" rather than "almost perfect" band, is exactly the signal that a written, photo-referenced operational definition of "reject" (Module 5) would likely move the needle more than more training alone.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Running a capability study before checking the gauge.</strong> Consequence: an apparent process problem that is really a measurement problem, and weeks of the wrong corrective action (the illustrative failure above). Fix: MSA is the first Measure-phase deliverable, not an afterthought.</li>
+      <li><strong>Treating repeatability and reproducibility as interchangeable.</strong> Consequence: a reproducibility problem (training, definition) gets "fixed" by buying new equipment, or a repeatability problem (a worn fixture) gets "fixed" by retraining operators who were never the issue. Fix: read the ANOVA table; it tells you which one is large.</li>
+      <li><strong>Checking bias at only one point in the range.</strong> Consequence: a gauge that is accurate at the calibration point but biased at the extremes passes a single-point check and then mis-measures every part near the tolerance limits, which is exactly where the capability decision matters most. Fix: a linearity study across the full operating range, not a single bias check.</li>
+      <li><strong>Dropping the part &times; operator interaction from the ANOVA without checking its significance.</strong> Consequence: a real operator-by-part effect (one appraiser reads certain part geometries differently than others do) gets silently folded into repeatability, understating reproducibility. Fix: test the interaction first; pool it only when its p-value says it is not distinguishable from noise.</li>
+      <li><strong>Quoting %Study Variation and %Tolerance as if they always agree.</strong> Consequence: a gauge can look "acceptable" by one figure and "conditional" by the other, particularly when the parts sampled for the study do not span the full tolerance range. Fix: report both, and understand that %Tolerance needs parts spanning the range to mean anything.</li>
+      <li><strong>Treating the AIAG 10/30 bands and ndc &ge; 5 as universal laws.</strong> Consequence: an over-strict rejection of a gauge that is genuinely adequate for a non-critical characteristic, or an under-strict acceptance of one used on a safety characteristic. Fix: these are guidelines; state them as such and let the characteristic's risk set the bar.</li>
+      <li><strong>Running an attribute study with no known standard.</strong> Consequence: inter-rater kappa can be computed, but "how often is the team actually right" cannot be, which is usually the question that matters most. Fix: establish a reference/expert call for every part in the study before the appraisers rate them.</li>
+      <li><strong>Reading raw percent agreement instead of kappa.</strong> Consequence: two appraisers who both call almost everything "accept" look like they agree 90&nbsp;%+ of the time even if their judgment adds nothing, because chance agreement alone is high when one category dominates. Fix: always report kappa, which corrects for exactly this.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+
+    <h3 id="ex1">Exercise 1: bias study on a second gauge</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>A dial caliper used to check a keyway width is checked against a certified reference standard of 6.015&nbsp;mm, 12 repeat readings in one sitting.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Exercise 1 data. 12 readings of a 6.015 mm reference standard (constructed data).</caption>
+        <thead><tr><th>Reading</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead>
+        <tbody><tr><td>mm</td><td>6.010</td><td>6.011</td><td>6.010</td><td>6.005</td><td>6.012</td><td>6.010</td><td>6.007</td><td>6.011</td><td>6.010</td><td>6.010</td><td>6.009</td><td>6.011</td></tr></tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute the mean reading and the bias against the 6.015&nbsp;mm reference. (b) Is the bias distinguishable from zero? (c) The keyway's tolerance is 6.000 +0.030/0&nbsp;mm (a 0.030&nbsp;mm tolerance band). Express the bias as a percentage of tolerance and say whether it is a practical concern.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Mean = <span data-ex="m04-ex1-bias" data-key="mean" data-dp="4">6.0097</span> mm. Bias = 6.0097 &minus; 6.015 = <strong>&minus;0.0053 mm</strong> (the gauge reads low).</p>
+      <p><strong>(b)</strong> One-sample t-test against 6.015: t = <span data-ex="m04-ex1-bias" data-key="t" data-dp="2">-9.61</span> on <span data-ex="m04-ex1-bias" data-key="df" data-dp="0">11</span> degrees of freedom, p &lt; 0.001. Yes &mdash; this is a real, repeatable negative bias, not chance scatter.</p>
+      <p><strong>(c)</strong> 0.0053 / 0.030 = 17.7&nbsp;% of tolerance. Unlike Worked example 1's bore-gauge bias (5.6&nbsp;% of tolerance), this is large enough to matter: a part that is genuinely 0.005&nbsp;mm inside the lower boundary of the keyway tolerance could be measured as passing when the true dimension is out of spec at the edge. This gauge needs recalibration before it is used for acceptance decisions.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a smaller attribute agreement study</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>Two inspectors call accept (0) / reject (1) on 20 connector-housing parts, twice each.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Exercise 2 data. 2 inspectors x 20 parts x 2 trials, 0 = accept, 1 = reject (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Standard</th><th>A-1</th><th>A-2</th><th>B-1</th><th>B-2</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>3</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>4</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>5</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>6</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>7</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>8</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>9</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+          <tr><td>10</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+          <tr><td>11</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>12</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>13</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>14</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>15</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>16</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>17</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>18</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+          <tr><td>19</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>20</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute each inspector's within-inspector repeatability (fraction of parts where their two trials agree). (b) Compute the overall raw agreement with the standard, across both inspectors and both trials. (c) Compute Fleiss' kappa between the two inspectors (using trial 1 only) and classify it on the Landis and Koch scale.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Inspector A: <span data-ex="m04-ex2-attribute" data-key="within_appraiser.A" data-dp="2">0.90</span> (18 of 20 parts). Inspector B: <span data-ex="m04-ex2-attribute" data-key="within_appraiser.B" data-dp="2">0.80</span> (16 of 20 parts) &mdash; B is visibly less repeatable than A, disagreeing with themself on parts 9, 10, 18 and 20.</p>
+      <p><strong>(b)</strong> Overall effectiveness against the standard, all 80 calls: <span data-ex="m04-ex2-attribute" data-key="overall_effectiveness" data-dp="2">0.90</span>.</p>
+      <p><strong>(c)</strong> Fleiss' &kappa; (trial 1, both inspectors) = <span data-ex="m04-ex2-attribute" data-key="fleiss.kappa" data-dp="3">0.560</span>. On the Landis and Koch scale that falls in the "moderate" band (0.41 to 0.60), a step below Worked example 4's three-inspector study (0.626, "substantial"). With only two inspectors and 20 parts, this study is also smaller than a production attribute study would normally be run at; the point of this exercise is the calculation, not a claim that 20 parts is an adequate sample size for a real acceptance decision.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="04">
+      <fieldset class="q" data-answer="c">
+        <legend>1. A measurement system analysis is run before a capability study because</legend>
+        <label><input type="radio" name="q1" value="a"> MSA is required by ISO 9001 regardless of the process</label>
+        <label><input type="radio" name="q1" value="b"> capability indices cannot be computed without it</label>
+        <label><input type="radio" name="q1" value="c"> observed variation is process variation plus measurement variation, and a capability number computed from a noisy gauge does not describe the process</label>
+        <label><input type="radio" name="q1" value="d"> it is faster than collecting process data</label>
+        <p class="explain" hidden>&sigma;&sup2;<sub>observed</sub> = &sigma;&sup2;<sub>process</sub> + &sigma;&sup2;<sub>measurement</sub>; a capability index is only meaningful once the measurement share is known to be small.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. Repeatability is best described as</legend>
+        <label><input type="radio" name="q2" value="a"> agreement between different appraisers</label>
+        <label><input type="radio" name="q2" value="b"> variation in repeated readings of the same part by the same appraiser with the same gauge</label>
+        <label><input type="radio" name="q2" value="c"> the gauge's bias against a reference standard</label>
+        <label><input type="radio" name="q2" value="d"> whether the gauge drifts over weeks of use</label>
+        <p class="explain" hidden>Repeatability (equipment variation) is the gauge's own inherent noise under identical conditions; reproducibility is the appraiser-to-appraiser difference.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. A gauge is unbiased on average across its range but reads low at the low end and high at the high end. This is a</legend>
+        <label><input type="radio" name="q3" value="a"> repeatability problem</label>
+        <label><input type="radio" name="q3" value="b"> reproducibility problem</label>
+        <label><input type="radio" name="q3" value="c"> stability problem</label>
+        <label><input type="radio" name="q3" value="d"> linearity problem</label>
+        <p class="explain" hidden>A non-zero, significant slope of bias against reference value across the operating range is exactly what a linearity study is designed to catch.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. In a crossed gauge R&amp;R ANOVA, the part &times; operator interaction term is tested first in order to</legend>
+        <label><input type="radio" name="q4" value="a"> decide whether to pool it into repeatability or keep it as part of reproducibility</label>
+        <label><input type="radio" name="q4" value="b"> compute the tolerance</label>
+        <label><input type="radio" name="q4" value="c"> decide the number of parts needed</label>
+        <label><input type="radio" name="q4" value="d"> determine whether the study was crossed or nested</label>
+        <p class="explain" hidden>If the interaction's F-test p-value is not significant (commonly p &gt; 0.05), it is pooled into the repeatability (error) term, following AIAG and Minitab's default.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>5. AIAG's %GRR acceptance guideline is generally stated as</legend>
+        <label><input type="radio" name="q5" value="a"> under 30 % acceptable, over 30 % unacceptable, no middle band</label>
+        <label><input type="radio" name="q5" value="b"> under 50 % acceptable</label>
+        <label><input type="radio" name="q5" value="c"> under 10 % generally acceptable, 10-30 % may be acceptable depending on the application, over 30 % unacceptable</label>
+        <label><input type="radio" name="q5" value="d"> exactly 0 % required for any safety characteristic</label>
+        <p class="explain" hidden>These are AIAG MSA guidelines, not statistical laws; a customer may tighten or relax them by agreement.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. The number of distinct categories, ndc, estimates</legend>
+        <label><input type="radio" name="q6" value="a"> how many operators took part in the study</label>
+        <label><input type="radio" name="q6" value="b"> how many truly distinguishable groups the gauge can separate parts into</label>
+        <label><input type="radio" name="q6" value="c"> the number of parts needed for a valid study</label>
+        <label><input type="radio" name="q6" value="d"> the gauge's resolution in the same units as the tolerance</label>
+        <p class="explain" hidden>ndc = floor(1.41 &times; &sigma;<sub>part</sub> / &sigma;<sub>GRR</sub>); AIAG's rule of thumb asks for 5 or more.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>7. Cohen's kappa improves on raw percent agreement between two raters because it</legend>
+        <label><input type="radio" name="q7" value="a"> always produces a higher number</label>
+        <label><input type="radio" name="q7" value="b"> only applies to three or more raters</label>
+        <label><input type="radio" name="q7" value="c"> ignores which category was assigned</label>
+        <label><input type="radio" name="q7" value="d"> subtracts out the agreement that chance alone would produce given each rater's own marginal rates</label>
+        <p class="explain" hidden>Raw percent agreement is inflated whenever one category dominates; kappa corrects for exactly that.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>8. Fleiss' kappa, compared with Cohen's kappa, is used when</legend>
+        <label><input type="radio" name="q8" value="a"> there are three or more raters instead of exactly two</label>
+        <label><input type="radio" name="q8" value="b"> the data are continuous rather than categorical</label>
+        <label><input type="radio" name="q8" value="c"> a known reference standard exists for every part</label>
+        <label><input type="radio" name="q8" value="d"> the gauge is a variable gauge rather than an attribute gauge</label>
+        <p class="explain" hidden>Fleiss' kappa generalises Cohen's two-rater kappa to any number of raters.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. A gauge R&amp;R study shows very high reproducibility variation (large operator effect) but low repeatability variation. The most appropriate first response is to</legend>
+        <label><input type="radio" name="q9" value="a"> buy a new, more precise instrument</label>
+        <label><input type="radio" name="q9" value="b"> increase the number of trials per part</label>
+        <label><input type="radio" name="q9" value="c"> review operator training and the operational definition of the measurement</label>
+        <label><input type="radio" name="q9" value="d"> widen the tolerance</label>
+        <p class="explain" hidden>High reproducibility with low repeatability points at people/definition issues, not the instrument itself.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. If a gauge study fails its acceptance criteria, the correct response is to</legend>
+        <label><input type="radio" name="q10" value="a"> relax the %GRR threshold until the study passes</label>
+        <label><input type="radio" name="q10" value="b"> diagnose which component failed (bias, linearity, stability, repeatability, or reproducibility) and apply the matching fix before trusting any downstream capability number</label>
+        <label><input type="radio" name="q10" value="c"> report the process capability anyway with a footnote about the gauge</label>
+        <label><input type="radio" name="q10" value="d"> switch to an attribute gauge instead</label>
+        <p class="explain" hidden>A failed MSA study is a diagnosis; the fix depends on which specific component failed, and no capability number computed from a failed gauge can be trusted.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Observed = process + measurement variation.</li>
+        <li>b. Same part, same appraiser, same gauge.</li>
+        <li>d. Linearity.</li>
+        <li>a. Pool into repeatability or keep as reproducibility.</li>
+        <li>c. Under 10 % / 10-30 % / over 30 %.</li>
+        <li>b. Distinguishable groups the gauge can separate.</li>
+        <li>d. Subtracts out chance agreement.</li>
+        <li>a. Three or more raters.</li>
+        <li>c. Training and operational definition.</li>
+        <li>b. Diagnose the specific failed component and fix that.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Observed variation is process variation plus measurement variation; a capability index means nothing until the measurement share is known to be small.</li>
+      <li>Bias, linearity and stability studies each ask a different question: is the gauge accurate on average, does that accuracy hold across the range, and does it hold over time.</li>
+      <li>Repeatability (same appraiser, same gauge) and reproducibility (different appraisers) are different sources of variation with different fixes: instrument and fixturing for repeatability, training and operational definitions for reproducibility.</li>
+      <li>A crossed gauge R&amp;R ANOVA separates part, operator, interaction and repeatability variance; %Contribution, %Study Variation, %Tolerance and ndc each answer a slightly different question and can disagree.</li>
+      <li>AIAG's %GRR bands (under 10 % / 10-30 % / over 30 %) and ndc &ge; 5 are guidelines subject to customer agreement, not statistical laws.</li>
+      <li>Attribute agreement analysis uses Cohen's kappa (two raters) or Fleiss' kappa (three or more) to correct raw percent agreement for chance; without a known standard, effectiveness against the truth cannot be computed, only inter-rater agreement.</li>
+      <li>A failed gauge study is a diagnosis, not a dead end: which number failed (bias, linearity, stability, repeatability, reproducibility) decides which fix applies.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10 as noted. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown.</p>
+    <ol class="references">
+      <li id="ref-1">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 2.4 "Gauge R&amp;R studies" and 2.4.4 "Analysis of variability". NIST. <a href="https://www.itl.nist.gov/div898/handbook/mpc/section4/mpc4.htm">https://www.itl.nist.gov/div898/handbook/mpc/section4/mpc4.htm</a></li>
+      <li id="ref-2">Burdick, R. K., Borror, C. M., &amp; Montgomery, D. C. (2003). A review of methods for measurement systems capability analysis. <em>Journal of Quality Technology</em>, 35(4), 342&ndash;354. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.2003.11980232">https://www.tandfonline.com/doi/abs/10.1080/00224065.2003.11980232</a></li>
+      <li id="ref-3">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 2.4 "Gauge R&amp;R studies" (nested and crossed variance-component estimation). NIST. <a href="https://www.itl.nist.gov/div898/handbook/mpc/section4/mpc4.htm">https://www.itl.nist.gov/div898/handbook/mpc/section4/mpc4.htm</a></li>
+      <li id="ref-4">AIAG. <em>Measurement Systems Analysis (MSA) Reference Manual</em>, 4th ed., June 2010. AIAG. <a href="https://www.aiag.org/training-and-resources/manuals/details/MSA-4">https://www.aiag.org/training-and-resources/manuals/details/MSA-4</a> <span class="tag">(the %GRR acceptance bands and ndc &ge; 5 guideline are confirmed via secondary sources [8], [9])</span></li>
+      <li id="ref-5">Cohen, J. (1960). A coefficient of agreement for nominal scales. <em>Educational and Psychological Measurement</em>, 20(1), 37&ndash;46. <a href="https://journals.sagepub.com/doi/10.1177/001316446002000104">https://journals.sagepub.com/doi/10.1177/001316446002000104</a></li>
+      <li id="ref-6">Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters. <em>Psychological Bulletin</em>, 76(5), 378&ndash;382. <a href="https://doi.org/10.1037/h0031619">https://doi.org/10.1037/h0031619</a></li>
+      <li id="ref-7">Landis, J. R., &amp; Koch, G. G. (1977). The measurement of observer agreement for categorical data. <em>Biometrics</em>, 33(1), 159&ndash;174. <a href="https://pubmed.ncbi.nlm.nih.gov/843571/">https://pubmed.ncbi.nlm.nih.gov/843571/</a> <span class="tag">(secondary: the benchmark scale quoted here is confirmed via citation-listing sources, not a direct reading of the paywalled original)</span></li>
+      <li id="ref-8">SPC for Excel. "Acceptance criteria for measurement systems analysis." <a href="https://www.spcforexcel.com/knowledge/measurement-systems-analysis-gage-rr/acceptance-criteria-for-msa/">https://www.spcforexcel.com/knowledge/measurement-systems-analysis-gage-rr/acceptance-criteria-for-msa/</a> <span class="tag">(secondary: restates the AIAG MSA manual's bands)</span></li>
+      <li id="ref-9">QualityEngineer.ai. "Gauge R&amp;R acceptance criteria: %GRR, NDC, and what AIAG MSA requires." <a href="https://app.qualityengineer.ai/blog/gauge-rr-acceptance-criteria">https://app.qualityengineer.ai/blog/gauge-rr-acceptance-criteria</a> <span class="tag">(secondary: corroborates [8])</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>
