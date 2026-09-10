@@ -1,0 +1,14 @@
+{
+ "id": "m09-ex1-pareto",
+ "module": "09",
+ "kind": "pareto",
+ "title": "Exercise 1: Pareto of final-assembly defects, 5 categories",
+ "source": "constructed",
+ "setting": "wire-harness sub-assembly, 112 defects logged over one month at final inspection",
+ "params": {},
+ "columns": [
+  "category",
+  "count"
+ ],
+ "n_rows": 5
+}

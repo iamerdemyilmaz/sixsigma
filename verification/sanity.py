@@ -482,6 +482,23 @@ def check_attribute_agreement(ex_id, r):
             check(near(c["kappa"], (c["po"] - c["pe"]) / (1 - c["pe"]), 1e-9), f"{tag}: Cohen kappa formula [{a}]")
 
 
+def check_multivari(ex_id, r):
+    tag = ex_id
+    check(len(r["time_means"]) == r["T"], f"{tag}: time_means length != T")
+    for name in ("positional", "cyclical"):
+        b = r[name]
+        check(b["sigma"] >= 0, f"{tag}: {name} sigma negative")
+        check(near(b["sigma"], b["rbar"] / b["d2"], 1e-9), f"{tag}: {name} sigma != rbar/d2")
+    check(r["temporal"]["sigma"] >= 0, f"{tag}: temporal sigma negative")
+    check(near(r["positional"]["d2"], CONST[str(r["K"])]["d2"]), f"{tag}: positional d2 does not match constants.json for K={r['K']}")
+    check(near(r["cyclical"]["d2"], CONST[str(r["P"])]["d2"]), f"{tag}: cyclical d2 does not match constants.json for P={r['P']}")
+    total = r["positional"]["sigma"] + r["cyclical"]["sigma"] + r["temporal"]["sigma"]
+    check(near(r["sigma_sum"], total, 1e-9), f"{tag}: sigma_sum != positional + cyclical + temporal")
+    check(near(r["pct_positional"] + r["pct_cyclical"] + r["pct_temporal"], 100.0, 1e-6), f"{tag}: percentages do not sum to 100")
+    for k in ("pct_positional", "pct_cyclical", "pct_temporal"):
+        check(0.0 <= r[k] <= 100.0, f"{tag}: {k} out of [0,100]")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -519,6 +536,7 @@ def check_results():
         elif kind == "dnom": check_dnom(ex_id, r, data)
         elif kind == "pareto": check_pareto(ex_id, r, data)
         elif kind == "attribute_agreement": check_attribute_agreement(ex_id, r)
+        elif kind == "multivari": check_multivari(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

@@ -1189,6 +1189,53 @@ def r_rty_chain(meta):
             "cumulative_rty": cumulative}
 
 
+def r_multivari(cols):
+    """Independent route: plain dict grouping and loops, no pandas groupby."""
+    times_c = cols["time"]; parts_c = [str(int(v)) if isinstance(v, float) else str(v) for v in cols["part"]]
+    xs = cols["x"]
+    n = len(xs)
+    # group by (time, part)
+    groups = {}
+    seen_times = set()
+    for i in range(n):
+        t = times_c[i]
+        seen_times.add(t)
+        key = (t, parts_c[i])
+        groups.setdefault(key, []).append(xs[i])
+    order_times = sorted(seen_times)
+    K = len(next(iter(groups.values())))
+    ranges_pos = [max(v) - min(v) for v in groups.values()]
+    rbar_pos = mean(ranges_pos)
+    d2_k = CONST[str(K)]["d2"]
+    sigma_positional = rbar_pos / d2_k
+
+    # part means, then range of part means within each time
+    part_means = {key: mean(v) for key, v in groups.items()}
+    by_time = {}
+    for (t, p), m in part_means.items():
+        by_time.setdefault(t, []).append(m)
+    P = len(next(iter(by_time.values())))
+    ranges_cyc = [max(v) - min(v) for v in by_time.values()]
+    rbar_cyc = mean(ranges_cyc)
+    d2_p = CONST[str(P)]["d2"]
+    sigma_cyclical = rbar_cyc / d2_p
+
+    # temporal: sd of time-period means (all K*P raw values per time)
+    time_vals = {}
+    for i in range(n):
+        time_vals.setdefault(times_c[i], []).append(xs[i])
+    time_means = [mean(time_vals[t]) for t in order_times]
+    sigma_temporal = sd(time_means)
+
+    total = sigma_positional + sigma_cyclical + sigma_temporal
+    return {"T": len(order_times), "P": P, "K": K, "grand_mean": mean(xs),
+            "positional.rbar": rbar_pos, "positional.sigma": sigma_positional,
+            "cyclical.rbar": rbar_cyc, "cyclical.sigma": sigma_cyclical,
+            "temporal.sigma": sigma_temporal, "sigma_sum": total,
+            "pct_positional": 100.0 * sigma_positional / total, "pct_cyclical": 100.0 * sigma_cyclical / total,
+            "pct_temporal": 100.0 * sigma_temporal / total, "time_means": time_means}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1266,6 +1313,7 @@ def recompute_one(ex_id):
     elif kind == "pareto": mine = r_pareto(cols)
     elif kind == "attribute_agreement": mine = r_attribute_agreement(meta, cols)
     elif kind == "rty_chain": mine = r_rty_chain(meta)
+    elif kind == "multivari": mine = r_multivari(cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

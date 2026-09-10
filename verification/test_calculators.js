@@ -138,7 +138,10 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   pareto: true,
   // Module 4: attribute agreement analysis (Cohen's/Fleiss' kappa) has no
   // calculator among the nine required ones; covered by Checks 1-3 only.
-  attribute_agreement: true };
+  attribute_agreement: true,
+  // Module 9: multi-vari charts (a range-based positional/cyclical/temporal
+  // decomposition) have no calculator among the nine required ones either.
+  multivari: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

@@ -19,7 +19,7 @@
     { num: "06", slug: "06-sigma-level-dpmo", title: "Sigma level, DPMO, DPU, RTY", built: true },
     { num: "07", slug: "07-capability-1", title: "Process capability I", built: true },
     { num: "08", slug: "08-capability-2", title: "Process capability II", built: true },
-    { num: "09", slug: "09-graphical-analysis", title: "Graphical analysis", built: false },
+    { num: "09", slug: "09-graphical-analysis", title: "Graphical analysis", built: true },
     { num: "10", slug: "10-root-cause", title: "Root cause analysis", built: false },
     { num: "11", slug: "11-hypothesis-testing", title: "Hypothesis testing", built: true },
     { num: "12", slug: "12-correlation-regression", title: "Correlation and regression", built: false },

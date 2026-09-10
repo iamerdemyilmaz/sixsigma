@@ -1,0 +1,41 @@
+{
+ "id": "m09-ex2-multivari",
+ "kind": "multivari",
+ "params": {},
+ "source": "constructed",
+ "results": {
+  "T": 3,
+  "P": 3,
+  "K": 3,
+  "grand_mean": 0.8009259259259258,
+  "positional": {
+   "rbar": 0.033555555555555484,
+   "d2": 1.693,
+   "sigma": 0.01982017457504754
+  },
+  "cyclical": {
+   "rbar": 0.01722222222222225,
+   "d2": 1.693,
+   "sigma": 0.010172606156067483
+  },
+  "temporal": {
+   "sigma": 0.0018470307614505803
+  },
+  "sigma_sum": 0.0318398114925656,
+  "pct_positional": 62.24966055366071,
+  "pct_cyclical": 31.949329092110748,
+  "pct_temporal": 5.801010354228543,
+  "time_means": [
+   0.8006666666666667,
+   0.7992222222222223,
+   0.8028888888888889
+  ],
+  "times": [
+   1.0,
+   2.0,
+   3.0
+  ]
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

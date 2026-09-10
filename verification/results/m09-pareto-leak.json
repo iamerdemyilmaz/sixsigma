@@ -1,0 +1,46 @@
+{
+ "id": "m09-pareto-leak",
+ "kind": "pareto",
+ "params": {},
+ "source": "constructed",
+ "results": {
+  "total": 169,
+  "categories": [
+   "Header joint",
+   "Fin-to-tube joint",
+   "End cap seal",
+   "Braze void",
+   "Flux residue",
+   "Handling damage"
+  ],
+  "counts": [
+   87,
+   34,
+   21,
+   12,
+   9,
+   6
+  ],
+  "pct": [
+   51.4792899408284,
+   20.118343195266274,
+   12.42603550295858,
+   7.100591715976331,
+   5.325443786982248,
+   3.5502958579881656
+  ],
+  "cum_pct": [
+   51.4792899408284,
+   71.59763313609467,
+   84.02366863905326,
+   91.12426035502959,
+   96.44970414201184,
+   100.0
+  ],
+  "top1_pct": 51.4792899408284,
+  "top2_pct": 71.59763313609467,
+  "n_for_80pct": 3
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

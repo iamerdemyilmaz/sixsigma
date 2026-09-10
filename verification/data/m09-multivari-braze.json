@@ -1,0 +1,15 @@
+{
+ "id": "m09-multivari-braze",
+ "module": "09",
+ "kind": "multivari",
+ "title": "Multi-vari chart: braze fillet width, 5 time points x 4 parts x 3 positions",
+ "source": "constructed",
+ "setting": "braze fillet width (mm) at the header joint, 3 positions measured around each fillet, 4 consecutive parts sampled at each of 5 points across one shift",
+ "params": {},
+ "columns": [
+  "time",
+  "part",
+  "x"
+ ],
+ "n_rows": 60
+}

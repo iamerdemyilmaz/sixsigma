@@ -1,0 +1,14 @@
+{
+ "id": "m09-pareto-leak",
+ "module": "09",
+ "kind": "pareto",
+ "title": "Pareto of leak-test reject causes, 6 categories",
+ "source": "constructed",
+ "setting": "brazed heat-exchanger cores, 169 leak-test rejects over one quarter, root cause assigned at teardown",
+ "params": {},
+ "columns": [
+  "category",
+  "count"
+ ],
+ "n_rows": 6
+}

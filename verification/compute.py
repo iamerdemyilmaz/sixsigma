@@ -1290,6 +1290,51 @@ def rty_chain(params):
             "total_dpu": -math.log(rty), "cumulative_rty": cumulative}
 
 
+# --------------------------------------------------------------------------
+# Module 9: multi-vari chart (simplified, range-based decomposition)
+#   multivari  columns time, part, x; K position-replicates per (time, part)
+#              group, P parts per time, T time periods (balanced design).
+#              A graphical/exploratory decomposition in the same Rbar/d2
+#              style as the rest of the course, not a formal ANOVA F-test
+#              (Module 9 precedes hypothesis testing in Module 11).
+# --------------------------------------------------------------------------
+def multivari(cols, params):
+    df = pd.DataFrame({"time": cols["time"], "part": cols["part"], "x": cols["x"]})
+    times = sorted(df.time.unique())
+    T = len(times)
+    K = int(df.groupby(["time", "part"])["x"].size().iloc[0])
+    P = int(df.groupby("time")["part"].nunique().iloc[0])
+
+    # positional: range of the K positions within each (time, part), averaged
+    ranges_pos = df.groupby(["time", "part"])["x"].agg(lambda s: s.max() - s.min())
+    rbar_pos = float(ranges_pos.mean())
+    d2_k = CONST[str(K)]["d2"]
+    sigma_positional = rbar_pos / d2_k
+
+    # cyclical (part-to-part): range of part means within each time, averaged
+    part_means = df.groupby(["time", "part"])["x"].mean().reset_index()
+    ranges_cyc = part_means.groupby("time")["x"].agg(lambda s: s.max() - s.min())
+    rbar_cyc = float(ranges_cyc.mean())
+    d2_p = CONST[str(P)]["d2"]
+    sigma_cyclical = rbar_cyc / d2_p
+
+    # temporal (time-to-time): plain sample sd of the T time-period means
+    time_means = df.groupby("time")["x"].mean()
+    sigma_temporal = float(time_means.std(ddof=1))
+
+    grand_mean = float(df["x"].mean())
+    total = sigma_positional + sigma_cyclical + sigma_temporal
+    return {"T": T, "P": P, "K": K, "grand_mean": grand_mean,
+            "positional": {"rbar": rbar_pos, "d2": d2_k, "sigma": sigma_positional},
+            "cyclical": {"rbar": rbar_cyc, "d2": d2_p, "sigma": sigma_cyclical},
+            "temporal": {"sigma": sigma_temporal},
+            "sigma_sum": total,
+            "pct_positional": 100.0 * sigma_positional / total, "pct_cyclical": 100.0 * sigma_cyclical / total,
+            "pct_temporal": 100.0 * sigma_temporal / total,
+            "time_means": [float(v) for v in time_means],
+            "times": [float(t) if isinstance(t, (int, float)) else t for t in times]}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1380,6 +1425,8 @@ def compute_one(ex_id):
         res = attribute_agreement(cols, params)
     elif kind == "rty_chain":
         res = rty_chain(params)
+    elif kind == "multivari":
+        res = multivari(cols, params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

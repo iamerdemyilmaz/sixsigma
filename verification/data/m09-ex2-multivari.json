@@ -1,0 +1,15 @@
+{
+ "id": "m09-ex2-multivari",
+ "module": "09",
+ "kind": "multivari",
+ "title": "Exercise 2: multi-vari chart, 3 time points x 3 parts x 3 positions, positional variation dominant",
+ "source": "constructed",
+ "setting": "clamp fixture flatness deviation (mm), 3 positions per part, 3 parts per time point, 3 time points across a shift",
+ "params": {},
+ "columns": [
+  "time",
+  "part",
+  "x"
+ ],
+ "n_rows": 27
+}

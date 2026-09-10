@@ -168,6 +168,12 @@ Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calcula
 | m06-ex1-rty | 6 | RTY of a chain | 4-step board line, yields 99.5/96/98/99 %: RTY 92.67 %, normalised 98.12 %; exercise 1 | none | pass | pass | pass | pass | 06 |
 | m06-ex2-dpmo | 6 | DPMO (parameters only) | leak test, 33 defects / 3,000 units / 2 opportunities: DPU 0.011, DPMO 5,500, sigma level 4.04; exercise 2 | none | pass | pass | pass | pass | 06 |
 
+| m09-pareto-leak | 9 | Pareto (existing kind, first use in this module) | 169 leak-test rejects, 6 causes: header joint 87 (51.5 %), top 3 reach 84.0 %, n_for_80pct = 3 | none | pass | pass | pass | n/a (no calculator) | 09 |
+| m09-multivari-braze | 9 | multi-vari (new kind `multivari`) | braze fillet width, 5×4×3 design: positional 14.0 %, cyclical 21.0 %, temporal 65.0 % of σ̂ — temporal (a furnace trend) dominant | `m09-multivari-braze.csv` | pass | pass | pass | n/a (no calculator) | 09 |
+| m09-boxplot-shift1/2/3 | 9 | descriptive (new use, box plot) | bore diameter by shift, 30 each: shift 3 median 12.0085 vs shift 1's 11.9995 mm, s 0.0091 vs 0.0064; shift 3 max 12.028 mm exceeds the 12.020 mm USL | `m09-boxplot-shift1.csv` etc. | pass | pass | pass | pass | 09 |
+| m09-ex1-pareto | 9 | Pareto | 112 assembly defects, 5 causes; top 3 reach 87.5 %; exercise 1 | none | pass | pass | pass | n/a | 09 |
+| m09-ex2-multivari | 9 | multi-vari | 3×3×3 design, positional dominant this time (62.2 % vs 31.9 % cyclical, 5.8 % temporal) — the contrasting case to the main example; exercise 2 | `m09-ex2-multivari.csv` | pass | pass | pass | n/a | 09 |
+
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.
 
-Totals on 2026-09-10 (after Module 6, both sessions combined): 131 examples; 3,689 quantities agree between Check 1 and Check 2; 8,106 values agree between Check 1 and the JavaScript engines (109 examples with a calculator engine); 1,178 page checks.
+Totals on 2026-09-10 (after Module 9, both sessions combined): 138 examples; 3,791 quantities agree between Check 1 and Check 2; 8,211 values agree between Check 1 and the JavaScript engines (112 examples with a calculator engine); 1,252 page checks.

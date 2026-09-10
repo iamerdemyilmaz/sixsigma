@@ -1412,6 +1412,72 @@ register(id="m06-ex2-dpmo", module="06", kind="dpmo",
          params={"defects": 33, "units": 3000, "opportunities": 2}, columns=None, rows=None)
 
 
+# ---------------------------------------------------------------------------
+# Module 9: Graphical analysis (prefix m09-)
+# New kind this module: multivari (see compute.py). `pareto` already exists
+# (added in Phase D for Module 19); box plots reuse `descriptive` once per
+# shift; Anscombe reuses the existing m01-anscombe-1..4.
+# ---------------------------------------------------------------------------
+register(id="m09-pareto-leak", module="09", kind="pareto",
+         title="Pareto of leak-test reject causes, 6 categories",
+         source="constructed", setting="brazed heat-exchanger cores, 169 leak-test rejects over one quarter, root cause assigned at teardown",
+         params={}, columns=["category", "count"],
+         rows=[["Header joint", 87], ["Fin-to-tube joint", 34], ["End cap seal", 21],
+               ["Braze void", 12], ["Flux residue", 9], ["Handling damage", 6]])
+
+# Multi-vari: braze fillet width, mm. T=5 time points across a shift, P=4
+# parts per time point, K=3 positions per part. Seed chosen so that
+# time-to-time (temporal) variation dominates (about 65 %), consistent with
+# a furnace temperature trend across the shift.
+def _m09_multivari(seed, T, P, K, base, trend, pos_sd, cyc_sd, temp_extra_sd):
+    rng = np.random.default_rng(seed)
+    rows = []
+    for ti in range(T):
+        time_effect = trend * ti + rng.normal(0, temp_extra_sd)
+        for pi in range(P):
+            part_effect = rng.normal(0, cyc_sd)
+            for _ in range(K):
+                x = base + time_effect + part_effect + rng.normal(0, pos_sd)
+                rows.append([ti + 1, f"P{pi + 1}", round(float(x), 3)])
+    return rows
+
+
+_m09_rows = _m09_multivari(8, T=5, P=4, K=3, base=1.20, trend=0.008, pos_sd=0.004, cyc_sd=0.006, temp_extra_sd=0.010)
+register(id="m09-multivari-braze", module="09", kind="multivari",
+         title="Multi-vari chart: braze fillet width, 5 time points x 4 parts x 3 positions",
+         source="constructed", setting="braze fillet width (mm) at the header joint, 3 positions measured around each fillet, 4 consecutive parts sampled at each of 5 points across one shift",
+         params={}, columns=["time", "part", "x"], rows=_m09_rows)
+
+# Box plot by shift: bore diameter, 3 shifts of 30, the night shift running
+# high and more variable.
+_rng = np.random.default_rng(8)
+_bp1 = [round(float(v), 3) for v in _rng.normal(12.000, 0.006, 30)]
+_bp2 = [round(float(v), 3) for v in _rng.normal(12.001, 0.006, 30)]
+_bp3 = [round(float(v), 3) for v in _rng.normal(12.006, 0.009, 30)]
+for _i, _bp in enumerate((_bp1, _bp2, _bp3), start=1):
+    register(id=f"m09-boxplot-shift{_i}", module="09", kind="descriptive",
+             title=f"Bore diameter, shift {_i}, 30 individuals",
+             source="constructed", setting=f"bore Ø12.000 ± 0.020 mm, bore gauge to 0.001 mm, shift {_i} of 3, 30 consecutive parts",
+             params={"usl": 12.020, "lsl": 11.980, "units": "mm"},
+             columns=["i", "x"], rows=[[j + 1, v] for j, v in enumerate(_bp)])
+
+# Exercise 1: a second Pareto, assembly defects.
+register(id="m09-ex1-pareto", module="09", kind="pareto",
+         title="Exercise 1: Pareto of final-assembly defects, 5 categories",
+         source="constructed", setting="wire-harness sub-assembly, 112 defects logged over one month at final inspection",
+         params={}, columns=["category", "count"],
+         rows=[["Missing clip", 58], ["Mislabelled harness", 24], ["Crimp pull-out", 16],
+               ["Wrong connector", 9], ["Damaged insulation", 5]])
+
+# Exercise 2: a smaller multi-vari, positional variation dominant this time
+# (an unevenly clamping fixture), for contrast with the main worked example.
+_m09_ex2_rows = _m09_multivari(2, T=3, P=3, K=3, base=0.800, trend=0.0, pos_sd=0.018, cyc_sd=0.004, temp_extra_sd=0.003)
+register(id="m09-ex2-multivari", module="09", kind="multivari",
+         title="Exercise 2: multi-vari chart, 3 time points x 3 parts x 3 positions, positional variation dominant",
+         source="constructed", setting="clamp fixture flatness deviation (mm), 3 positions per part, 3 parts per time point, 3 time points across a shift",
+         params={}, columns=["time", "part", "x"], rows=_m09_ex2_rows)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

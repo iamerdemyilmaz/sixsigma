@@ -1,0 +1,18 @@
+{
+ "id": "m09-boxplot-shift3",
+ "module": "09",
+ "kind": "descriptive",
+ "title": "Bore diameter, shift 3, 30 individuals",
+ "source": "constructed",
+ "setting": "bore \u00d812.000 \u00b1 0.020 mm, bore gauge to 0.001 mm, shift 3 of 3, 30 consecutive parts",
+ "params": {
+  "usl": 12.02,
+  "lsl": 11.98,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 30
+}

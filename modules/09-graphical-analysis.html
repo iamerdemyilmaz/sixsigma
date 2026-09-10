@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 9: Graphical analysis · Six Sigma Course</title>
+<meta name="description" content="Pareto charts, box plots, scatter plots, stratification, multi-vari charts, and time series plots — why you look at data before you test it, with Anscombe's quartet as the argument and a full multi-vari worked example.">
+<meta name="examples" content="m09-pareto-leak, m09-multivari-braze, m09-boxplot-shift1, m09-boxplot-shift2, m09-boxplot-shift3, m01-anscombe-1, m01-anscombe-2, m01-anscombe-3, m01-anscombe-4, m09-ex1-pareto, m09-ex2-multivari">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="09">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 9 · Analyze</p>
+    <h1>Graphical analysis</h1>
+    <p class="lead">Analyze opens with pictures, not tests, and that order is deliberate. A histogram, a Pareto chart, a scatter plot or a multi-vari chart can show a pattern in thirty seconds that a table of summary statistics hides completely, and looking first keeps you from running a sophisticated test on data that a two-minute plot would have told you not to trust. This module covers the graphical toolkit Analyze reaches for before Module 11's hypothesis tests: Pareto charts, box plots, scatter plots, stratification, multi-vari charts, and time series plots, with Anscombe's quartet as the standing argument for why the look-first discipline exists at all.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Build</strong> a Pareto chart and use it to separate the vital few contributors from the trivial many.</li>
+      <li><strong>Read</strong> a box plot's five-number summary and use it to compare groups at a glance.</li>
+      <li><strong>Use</strong> a scatter plot to check a relationship visually before any regression (Module 12) is run.</li>
+      <li><strong>Stratify</strong> a dataset by a suspected source of variation before drawing a conclusion from the pooled data.</li>
+      <li><strong>Build and interpret</strong> a multi-vari chart, separating positional, cyclical and temporal sources of variation.</li>
+      <li><strong>Explain</strong>, using Anscombe's quartet, why graphical analysis has to come before, not after, a statistical test.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Joseph Juran's 1975 note is a small piece of intellectual honesty worth remembering every time someone reaches for the "80/20 rule": Juran named the pattern of a few contributors accounting for most of a problem "the vital few and the trivial many," and attributed it to the economist Vilfredo Pareto's observations on wealth distribution. He later admitted the attribution was his own error &mdash; Pareto never made the general statement Juran's tool is named after &mdash; and published a "mea culpa" saying so in print.<sup class="cite"><a href="#ref-1">[1]</a></sup> The tool itself is unaffected: sorting causes by frequency and looking at where the cumulative line bends is exactly as useful as it always was. What the story is worth remembering for is the habit it models &mdash; check the thing you are about to repeat as received wisdom, even the name of your own tool &mdash; which is the same habit graphical analysis asks of the data itself, look before repeating a summary statistic as if it were the whole story.</p>
+    <p>Francis Anscombe made the sharper version of that argument in 1973, with four small, real datasets, each eleven points, each sharing the same mean, variance, correlation, and regression line to two or three decimal places &mdash; and each looking completely different on a scatter plot: one a clean linear relationship, one a clear curve that a straight-line fit misses entirely, one a perfect line broken by a single outlier, one a single vertical cluster with all its apparent "relationship" created by one extreme point.<sup class="cite"><a href="#ref-2">[2]</a></sup> Module 1 introduced this dataset; this module is where its lesson becomes a standing habit rather than a one-time demonstration.</p>
+
+    <h2 id="pareto">Pareto charts</h2>
+    <p>A Pareto chart sorts categories by frequency (or cost, or any other measure of impact) from largest to smallest, as bars, with a cumulative-percentage line overlaid. The chart answers one question directly: how many categories account for most of the problem? Ishikawa listed the Pareto chart among the seven basic quality tools precisely because that question is usually answerable at a glance, without any further analysis.<sup class="cite"><a href="#ref-6">[6]</a></sup></p>
+    <div class="formula">Cumulative % after category k = 100 &times; (sum of the k largest counts) / (total count)
+      <span class="where">There is no fixed rule that the top 20&nbsp;% of categories must account for 80&nbsp;% of the total &mdash; that specific ratio is folklore attached to the tool, not a property it guarantees. What is reliably true is that sorting by frequency, rather than looking at an alphabetical or chronological list, is what reveals whether a few causes dominate.</span>
+    </div>
+
+    <h2 id="boxplot">Box plots</h2>
+    <p>John Tukey's box plot draws a five-number summary &mdash; minimum, first quartile, median, third quartile, maximum &mdash; as a box (the interquartile range, Q1 to Q3) with a line at the median and whiskers extending to the most extreme points within a set distance of the box, conventionally 1.5 times the interquartile range; points beyond that are drawn individually as candidate outliers.<sup class="cite"><a href="#ref-3">[3]</a></sup> A box plot's real strength is comparison: several groups' box plots side by side show shifted medians, unequal spreads, and skew, all at once, in a way a table of means and standard deviations does not communicate nearly as quickly.</p>
+
+    <h2 id="scatter">Scatter plots</h2>
+    <p>A scatter plot of one variable against another is the single most direct check of whether a linear relationship (Module 12) is even a reasonable model to fit: a plot showing a curve, a broken relationship, or a pattern driven by one or two points warns against trusting a correlation coefficient or a regression line computed blind. Anscombe's quartet is the standing proof that the summary numbers alone cannot tell you this &mdash; only the picture can.</p>
+
+    <h2 id="stratification">Stratification</h2>
+    <p>Stratification means splitting a dataset by a suspected source of variation &mdash; shift, machine, operator, lot, cavity &mdash; before drawing a conclusion from the pooled data, rather than after. Module 5's rational subgrouping lesson is stratification applied to control charts specifically; the same discipline applies just as directly to a histogram, a box plot, or a simple average: a pooled histogram that looks unremarkable can be two cleanly separated, non-overlapping distributions once split by the right factor, exactly as Worked example 3 below shows for bore diameter by shift.</p>
+
+    <h2 id="multivari">Multi-vari charts</h2>
+    <p>A multi-vari chart is a structured, deliberately stratified sampling plan built to answer one question before any formal test is run: of the variation this process shows, how much comes from within one part (positional), how much from part to part at roughly the same time (cyclical), and how much from time to time (temporal)? The method originates with Leonard Seder's 1950 two-part article.<sup class="cite"><a href="#ref-4">[4]</a></sup> The sampling plan is deliberate: measure several positions on each of several parts, repeated at several points across a shift or a day, so that all three sources of variation are represented in one dataset instead of confounded together.</p>
+    <div class="formula">Positional &sigma;&#770; = R&#772;<sub>within-part</sub> / d&#8322;(K) &nbsp;&nbsp; Cyclical &sigma;&#770; = R&#772;<sub>part-to-part</sub> / d&#8322;(P) &nbsp;&nbsp; Temporal &sigma;&#770; = sample sd of the time-period means
+      <span class="where">This course estimates all three from ranges, in the same R&#772;/d&#8322; style used throughout for within-subgroup sigma (Modules 7 and 16), because a multi-vari chart is a graphical, exploratory tool that precedes formal hypothesis testing (Module 11), not a substitute for a designed ANOVA study. Whichever source turns out largest points directly at where to look next: positional points at the part or the fixture, cyclical points at part-to-part or machine-to-machine differences, temporal points at drift, warm-up, or a process input that changes over the shift.</span>
+    </div>
+
+    <h2 id="timeseries">Time series plots</h2>
+    <p>A simple run chart &mdash; the measured value plotted in time order, nothing more &mdash; is the plot every other graphical tool in this module implicitly depends on being meaningful: it is what confirms (or refutes) that the time order in the data is real and worth stratifying by, and it is the direct precursor to the control chart Modules 16 and 17 build from the same time-ordered data with limits added.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: Pareto of leak-test reject causes</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>169 leak-test rejects on the brazed heat-exchanger line over one quarter, root cause assigned at teardown.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Leak-test reject causes, sorted by frequency (constructed data).</caption>
+        <thead><tr><th>Cause</th><th>Count</th><th>%</th><th>Cumulative %</th></tr></thead>
+        <tbody>
+          <tr><td>Header joint</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.0" data-dp="0">87</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.0" data-dp="1">51.5</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="cum_pct.0" data-dp="1">51.5</span></td></tr>
+          <tr><td>Fin-to-tube joint</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.1" data-dp="0">34</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.1" data-dp="1">20.1</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="cum_pct.1" data-dp="1">71.6</span></td></tr>
+          <tr><td>End cap seal</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.2" data-dp="0">21</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.2" data-dp="1">12.4</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="cum_pct.2" data-dp="1">84.0</span></td></tr>
+          <tr><td>Braze void</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.3" data-dp="0">12</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.3" data-dp="1">7.1</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="cum_pct.3" data-dp="1">91.1</span></td></tr>
+          <tr><td>Flux residue</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.4" data-dp="0">9</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.4" data-dp="1">5.3</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="cum_pct.4" data-dp="1">96.4</span></td></tr>
+          <tr><td>Handling damage</td><td class="num"><span data-ex="m09-pareto-leak" data-key="counts.5" data-dp="0">6</span></td><td class="num"><span data-ex="m09-pareto-leak" data-key="pct.5" data-dp="1">3.6</span></td><td class="num">100.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <svg viewBox="0 0 620 280" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Pareto chart of leak-test reject causes</title>
+        <desc id="fig1-d">Six bars in descending order of count, header joint tallest at 87, down to handling damage at 6, with a cumulative percentage line overlaid rising from about 51 percent at the first bar to 100 percent at the last, crossing 80 percent between the second and third bars.</desc>
+        <g class="chart-text"><text x="10" y="16" class="chart-title">Leak-test rejects by cause (n = 169)</text></g>
+        <g class="chart-axis"><path d="M50 20 V220 H600"/></g>
+        <g class="chart-bar">
+          <rect x="60" y="20" width="70" height="200"/>
+          <rect x="150" y="141.7" width="70" height="78.3"/>
+          <rect x="240" y="171.6" width="70" height="48.4"/>
+          <rect x="330" y="192.4" width="70" height="27.6"/>
+          <rect x="420" y="199.3" width="70" height="20.7"/>
+          <rect x="510" y="206.2" width="70" height="13.8"/>
+        </g>
+        <g class="chart-text small" text-anchor="middle">
+          <text x="95" y="235">Header</text><text x="185" y="235">Fin-tube</text><text x="275" y="235">End cap</text><text x="365" y="235">Void</text><text x="455" y="235">Flux</text><text x="545" y="235">Handling</text>
+        </g>
+        <g class="chart-text small" text-anchor="middle">
+          <text x="95" y="15">87</text><text x="185" y="136.7">34</text><text x="275" y="166.6">21</text><text x="365" y="187.4">12</text><text x="455" y="194.3">9</text><text x="545" y="201.2">6</text>
+        </g>
+        <g fill="none" class="chart-curve" stroke-width="1.6">
+          <polyline points="95,117.0 185,76.8 275,52.0 365,37.8 455,27.1 545,20.0"/>
+        </g>
+        <g class="chart-point">
+          <circle cx="95" cy="117.0" r="3"/><circle cx="185" cy="76.8" r="3"/><circle cx="275" cy="52.0" r="3"/><circle cx="365" cy="37.8" r="3"/><circle cx="455" cy="27.1" r="3"/><circle cx="545" cy="20.0" r="3"/>
+        </g>
+        <g class="chart-text small accent" text-anchor="middle">
+          <text x="95" y="108">51%</text><text x="185" y="68">72%</text><text x="275" y="43">84%</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Pareto chart, leak-test reject causes. The cumulative line (right axis, 0 to 100 %, not drawn to scale in this simplified figure) crosses 80 % between the second and third bars.</figcaption>
+    </figure>
+    <p>The top <span data-ex="m09-pareto-leak" data-key="n_for_80pct" data-dp="0">3</span> of 6 categories &mdash; header joint, fin-to-tube joint, and end cap seal &mdash; account for <span data-ex="m09-pareto-leak" data-key="cum_pct.2" data-dp="1">84.0</span>&nbsp;% of all rejects. That is not the folklore "20&nbsp;% of categories, 80&nbsp;% of the problem" ratio exactly (3 of 6 is 50&nbsp;% of the categories), and it does not need to be: the header joint alone, one cause out of six, is already worth more corrective-action attention than the other five combined.</p>
+
+    <h3 id="example2">Worked example 2: multi-vari chart, braze fillet width</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>Braze fillet width at the header joint, measured at 3 positions around each fillet, on 4 consecutive parts sampled at each of 5 points spanning one shift.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 2. Multi-vari data, fillet width (mm), 4 parts x 3 positions x 5 time points (constructed data).</caption>
+        <thead><tr><th>Part</th><th>Position</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th></tr></thead>
+        <tbody>
+          <tr><td>P1</td><td>1</td><td>1.169</td><td>1.216</td><td>1.226</td><td>1.213</td><td>1.245</td></tr>
+          <tr><td>P1</td><td>2</td><td>1.173</td><td>1.219</td><td>1.217</td><td>1.226</td><td>1.237</td></tr>
+          <tr><td>P1</td><td>3</td><td>1.165</td><td>1.218</td><td>1.210</td><td>1.218</td><td>1.241</td></tr>
+          <tr><td>P2</td><td>1</td><td>1.178</td><td>1.214</td><td>1.208</td><td>1.239</td><td>1.249</td></tr>
+          <tr><td>P2</td><td>2</td><td>1.185</td><td>1.212</td><td>1.200</td><td>1.232</td><td>1.252</td></tr>
+          <tr><td>P2</td><td>3</td><td>1.185</td><td>1.212</td><td>1.197</td><td>1.228</td><td>1.256</td></tr>
+          <tr><td>P3</td><td>1</td><td>1.194</td><td>1.222</td><td>1.203</td><td>1.222</td><td>1.239</td></tr>
+          <tr><td>P3</td><td>2</td><td>1.191</td><td>1.214</td><td>1.203</td><td>1.229</td><td>1.233</td></tr>
+          <tr><td>P3</td><td>3</td><td>1.194</td><td>1.228</td><td>1.206</td><td>1.224</td><td>1.251</td></tr>
+          <tr><td>P4</td><td>1</td><td>1.189</td><td>1.208</td><td>1.213</td><td>1.234</td><td>1.246</td></tr>
+          <tr><td>P4</td><td>2</td><td>1.194</td><td>1.217</td><td>1.216</td><td>1.234</td><td>1.239</td></tr>
+          <tr><td>P4</td><td>3</td><td>1.191</td><td>1.223</td><td>1.212</td><td>1.234</td><td>1.248</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Reading down any one column (within a part, across its 3 positions) shows only a little scatter. Reading across a row's near neighbours (part to part, same time point) shows somewhat more. Reading across the table left to right (time point to time point) shows a clear, steady climb from about 1.18&nbsp;mm at T1 to about 1.24&nbsp;mm at T5 &mdash; consistent with a furnace running warmer as the shift goes on.</p>
+    <div class="formula">Positional R&#772; = <span data-ex="m09-multivari-braze" data-key="positional.rbar" data-dp="4">0.0082</span> mm, &sigma;&#770;<sub>positional</sub> = R&#772;/d&#8322;(3) = <span data-ex="m09-multivari-braze" data-key="positional.sigma" data-dp="4">0.0048</span> mm
+      <br>Cyclical R&#772; = <span data-ex="m09-multivari-braze" data-key="cyclical.rbar" data-dp="4">0.0150</span> mm, &sigma;&#770;<sub>cyclical</sub> = R&#772;/d&#8322;(4) = <span data-ex="m09-multivari-braze" data-key="cyclical.sigma" data-dp="4">0.0073</span> mm
+      <br>Temporal &sigma;&#770; = sample sd of the 5 time-period means = <span data-ex="m09-multivari-braze" data-key="temporal.sigma" data-dp="4">0.0225</span> mm
+      <span class="where">Time-period means: T1 <span data-ex="m09-multivari-braze" data-key="time_means.0" data-dp="4">1.1840</span>, T2 <span data-ex="m09-multivari-braze" data-key="time_means.1" data-dp="4">1.2169</span>, T3 <span data-ex="m09-multivari-braze" data-key="time_means.2" data-dp="4">1.2092</span>, T4 <span data-ex="m09-multivari-braze" data-key="time_means.3" data-dp="4">1.2278</span>, T5 <span data-ex="m09-multivari-braze" data-key="time_means.4" data-dp="4">1.2447</span> mm.</span>
+    </div>
+    <div class="formula">Positional <span data-ex="m09-multivari-braze" data-key="pct_positional" data-dp="1">14.0</span>&nbsp;% &nbsp;&nbsp; Cyclical <span data-ex="m09-multivari-braze" data-key="pct_cyclical" data-dp="1">21.0</span>&nbsp;% &nbsp;&nbsp; Temporal <span data-ex="m09-multivari-braze" data-key="pct_temporal" data-dp="1">65.0</span>&nbsp;% (shares of &sigma;<sub>positional</sub> + &sigma;<sub>cyclical</sub> + &sigma;<sub>temporal</sub>)</div>
+    <p>Temporal variation accounts for about two-thirds of the total, roughly three times either of the other two sources. The multi-vari chart does not, by itself, prove the furnace is the cause &mdash; it points at "something that changes over the course of a shift" as the dominant source and tells the team exactly where the next round of investigation (a furnace temperature log, Module 16's control chart applied to that log) should look first, instead of starting with fixture-to-fixture or part-to-part theories that this chart already shows are comparatively minor.</p>
+
+    <h3 id="example3">Worked example 3: box plot by shift</h3>
+    <p class="example-label">Constructed data, not a real production run.</p>
+    <p>Bore diameter, Ø12.000&nbsp;&plusmn;&nbsp;0.020&nbsp;mm, 30 consecutive parts from each of 3 shifts.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Five-number summary, bore diameter (mm) by shift (constructed data).</caption>
+        <thead><tr><th>Shift</th><th>Min</th><th>Q1</th><th>Median</th><th>Q3</th><th>Max</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td class="num"><span data-ex="m09-boxplot-shift1" data-key="descriptive.min" data-dp="3">11.986</span></td><td class="num"><span data-ex="m09-boxplot-shift1" data-key="descriptive.q1" data-dp="4">11.9947</span></td><td class="num"><span data-ex="m09-boxplot-shift1" data-key="descriptive.median" data-dp="4">11.9995</span></td><td class="num"><span data-ex="m09-boxplot-shift1" data-key="descriptive.q3" data-dp="3">12.005</span></td><td class="num"><span data-ex="m09-boxplot-shift1" data-key="descriptive.max" data-dp="3">12.009</span></td></tr>
+          <tr><td>2</td><td class="num"><span data-ex="m09-boxplot-shift2" data-key="descriptive.min" data-dp="3">11.986</span></td><td class="num"><span data-ex="m09-boxplot-shift2" data-key="descriptive.q1" data-dp="3">11.994</span></td><td class="num"><span data-ex="m09-boxplot-shift2" data-key="descriptive.median" data-dp="4">12.0005</span></td><td class="num"><span data-ex="m09-boxplot-shift2" data-key="descriptive.q3" data-dp="5">12.00625</span></td><td class="num"><span data-ex="m09-boxplot-shift2" data-key="descriptive.max" data-dp="3">12.016</span></td></tr>
+          <tr><td>3</td><td class="num"><span data-ex="m09-boxplot-shift3" data-key="descriptive.min" data-dp="3">11.987</span></td><td class="num"><span data-ex="m09-boxplot-shift3" data-key="descriptive.q1" data-dp="3">12.002</span></td><td class="num"><span data-ex="m09-boxplot-shift3" data-key="descriptive.median" data-dp="4">12.0085</span></td><td class="num"><span data-ex="m09-boxplot-shift3" data-key="descriptive.q3" data-dp="5">12.01625</span></td><td class="num"><span data-ex="m09-boxplot-shift3" data-key="descriptive.max" data-dp="3">12.028</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <svg viewBox="0 0 500 300" role="img" aria-labelledby="fig2-t fig2-d">
+        <title id="fig2-t">Box plots of bore diameter by shift</title>
+        <desc id="fig2-d">Three box plots side by side on a shared vertical scale from about 11.98 to 12.03 millimetres, one per shift, with a dashed red horizontal line at the upper specification limit of 12.020. Shift 1 and shift 2 sit comfortably below the line with similar, moderate boxes. Shift 3's box sits higher, is visibly taller, and its upper whisker extends above the specification line.</desc>
+        <g class="chart-axis"><path d="M55 30 V280 H460"/></g>
+        <g class="chart-text small muted" text-anchor="end">
+          <text x="50" y="34">12.030</text><text x="50" y="84">12.020</text><text x="50" y="134">12.010</text><text x="50" y="184">12.000</text><text x="50" y="234">11.990</text><text x="50" y="280">11.980</text>
+        </g>
+        <g class="chart-axis"><line x1="52" y1="30" x2="55" y2="30"/><line x1="52" y1="80" x2="55" y2="80"/><line x1="52" y1="130" x2="55" y2="130"/><line x1="52" y1="180" x2="55" y2="180"/><line x1="52" y1="230" x2="55" y2="230"/><line x1="52" y1="280" x2="55" y2="280"/></g>
+        <line x1="55" y1="80" x2="445" y2="80" class="chart-spec"/>
+        <text x="448" y="84" class="chart-text small bad">USL 12.020</text>
+        <g class="chart-box">
+          <line x1="120" y1="135" x2="120" y2="250"/>
+          <rect x="85" y="155" width="70" height="51.25" fill="none"/>
+          <line x1="85" y1="182.5" x2="155" y2="182.5" class="chart-center"/>
+          <line x1="102" y1="135" x2="138" y2="135"/><line x1="102" y1="250" x2="138" y2="250"/>
+        </g>
+        <g class="chart-box">
+          <line x1="250" y1="100" x2="250" y2="250"/>
+          <rect x="215" y="148.75" width="70" height="61.25" fill="none"/>
+          <line x1="215" y1="177.5" x2="285" y2="177.5" class="chart-center"/>
+          <line x1="232" y1="100" x2="268" y2="100"/><line x1="232" y1="250" x2="268" y2="250"/>
+        </g>
+        <g class="chart-box">
+          <line x1="380" y1="40" x2="380" y2="245"/>
+          <rect x="345" y="98.75" width="70" height="71.25" fill="none"/>
+          <line x1="345" y1="137.5" x2="415" y2="137.5" class="chart-center"/>
+          <line x1="362" y1="40" x2="398" y2="40"/><line x1="362" y1="245" x2="398" y2="245"/>
+        </g>
+        <g class="chart-text" text-anchor="middle">
+          <text x="120" y="296">Shift 1</text><text x="250" y="296">Shift 2</text><text x="380" y="296">Shift 3</text>
+        </g>
+      </svg>
+      <figcaption>Figure 2. Box plots of bore diameter by shift, same vertical scale, with the upper specification limit (12.020 mm) shown for reference (on a box plot, not a control chart, so this is not the rule violation Module 5 and Module 16 warn against). Shift 3 runs higher and more spread out, with its maximum above the specification limit.</figcaption>
+    </figure>
+    <p>Pooled into one histogram, these 90 values would show a somewhat wide, slightly right-skewed distribution and nothing more alarming than that. Stratified by shift, shift 3's box sits visibly higher (median <span data-ex="m09-boxplot-shift3" data-key="descriptive.median" data-dp="3">12.008</span>&nbsp;mm against shift 1's <span data-ex="m09-boxplot-shift1" data-key="descriptive.median" data-dp="3">12.000</span>&nbsp;mm) and taller (s = <span data-ex="m09-boxplot-shift3" data-key="descriptive.s" data-dp="4">0.0091</span>&nbsp;mm against shift 1's <span data-ex="m09-boxplot-shift1" data-key="descriptive.s" data-dp="4">0.0064</span>&nbsp;mm), and its single highest reading, 12.028&nbsp;mm, is over the 12.020&nbsp;mm upper specification limit &mdash; a genuine out-of-spec part that the pooled view would have buried in the tail of one wide-looking distribution instead of flagging as "whichever shift this came from is worth a visit."</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Running a hypothesis test before looking at a plot of the data.</strong> Consequence: Anscombe's quartet &mdash; identical summary statistics, wildly different underlying relationships; a test run blind can confidently answer the wrong question. Fix: plot first, always, no exceptions for data that "looks routine."</li>
+      <li><strong>Treating the 80/20 ratio as a rule the Pareto chart must obey.</strong> Consequence: real data that shows, say, three categories needed to reach 80&nbsp;% gets treated as if the tool failed, when the tool did exactly its job. Fix: read the cumulative line for what it actually shows, not for a folklore ratio.</li>
+      <li><strong>Comparing groups by their means alone, skipping the box plot.</strong> Consequence: two groups with nearly identical means but very different spreads, or different shapes, look "the same" in a table and completely different once plotted. Fix: box plot before, or alongside, any table of summary statistics.</li>
+      <li><strong>Fitting a regression line to a scatter plot that was never looked at.</strong> Consequence: Anscombe's set 2 (a curve) and set 3 (one outlier driving the whole fit) both produce a "good" linear fit by the numbers while the plot shows the model is wrong. Fix: look at the scatter plot before trusting r or r&sup2; (Module 12).</li>
+      <li><strong>Skipping stratification because the pooled histogram "looks fine."</strong> Consequence: Worked example 3 &mdash; a pooled distribution can look unremarkable while hiding two or three cleanly separated sub-populations. Fix: stratify by every suspected source (shift, machine, operator, lot) before concluding a distribution is homogeneous.</li>
+      <li><strong>Running a multi-vari study without a deliberate sampling plan.</strong> Consequence: sampling parts and positions haphazardly confounds the three sources of variation instead of separating them, and the chart cannot say which one dominates. Fix: decide the number of positions, parts and time points in advance, matching Module 5's sampling-plan discipline.</li>
+      <li><strong>Treating a multi-vari chart's result as a finished root cause, not a pointer.</strong> Consequence: "temporal variation dominates" identifies where to look next (what changes over time in this process), not the specific mechanism; stopping at the chart skips the investigation it was supposed to start. Fix: use the dominant source to scope the next round of data collection or a designed experiment (Module 13), not as the final answer.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a second Pareto chart</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>A wire-harness sub-assembly logged 112 defects over one month at final inspection: missing clip 58, mislabelled harness 24, crimp pull-out 16, wrong connector 9, damaged insulation 5. <strong>Tasks.</strong> (a) Compute each category's percentage and cumulative percentage. (b) How many categories are needed to reach at least 80&nbsp;% of the total? (c) Name one risk of stopping the investigation after fixing only the single largest category.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cause</th><th>Count</th><th>%</th><th>Cumulative %</th></tr></thead>
+          <tbody>
+            <tr><td>Missing clip</td><td class="num"><span data-ex="m09-ex1-pareto" data-key="counts.0" data-dp="0">58</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="pct.0" data-dp="1">51.8</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="cum_pct.0" data-dp="1">51.8</span></td></tr>
+            <tr><td>Mislabelled harness</td><td class="num"><span data-ex="m09-ex1-pareto" data-key="counts.1" data-dp="0">24</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="pct.1" data-dp="1">21.4</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="cum_pct.1" data-dp="1">73.2</span></td></tr>
+            <tr><td>Crimp pull-out</td><td class="num"><span data-ex="m09-ex1-pareto" data-key="counts.2" data-dp="0">16</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="pct.2" data-dp="1">14.3</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="cum_pct.2" data-dp="1">87.5</span></td></tr>
+            <tr><td>Wrong connector</td><td class="num"><span data-ex="m09-ex1-pareto" data-key="counts.3" data-dp="0">9</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="pct.3" data-dp="1">8.0</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="cum_pct.3" data-dp="1">95.5</span></td></tr>
+            <tr><td>Damaged insulation</td><td class="num"><span data-ex="m09-ex1-pareto" data-key="counts.4" data-dp="0">5</span></td><td class="num"><span data-ex="m09-ex1-pareto" data-key="pct.4" data-dp="1">4.5</span></td><td class="num">100.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>(b)</strong> <span data-ex="m09-ex1-pareto" data-key="n_for_80pct" data-dp="0">3</span> categories (missing clip, mislabelled harness, crimp pull-out) reach <span data-ex="m09-ex1-pareto" data-key="cum_pct.2" data-dp="1">87.5</span>&nbsp;%, already past 80&nbsp;%.</p>
+      <p><strong>(c)</strong> Fixing only "missing clip" leaves 46.2&nbsp;% of defects (the remaining four categories) completely unaddressed; the vital-few logic identifies where to start, not where to stop.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a multi-vari chart with a different dominant source</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>Clamp fixture flatness deviation (mm), 3 positions per part, 3 parts per time point, 3 time points across a shift. <strong>Tasks.</strong> (a) Without seeing the numbers, name one plausible physical cause each for positional, cyclical, and temporal variation dominating in a fixture-flatness study. (b) The computed shares are positional <span data-ex="m09-ex2-multivari" data-key="pct_positional" data-dp="1">62.2</span>&nbsp;%, cyclical <span data-ex="m09-ex2-multivari" data-key="pct_cyclical" data-dp="1">31.9</span>&nbsp;%, temporal <span data-ex="m09-ex2-multivari" data-key="pct_temporal" data-dp="1">5.8</span>&nbsp;%. Which source dominates, and what would you investigate first?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Positional: the fixture clamps unevenly, so different spots on the same part read differently every time. Cyclical: parts themselves vary (incoming material or a prior process step). Temporal: something drifts over the shift (temperature, fixture wear, operator fatigue).</p>
+      <p><strong>(b)</strong> Positional dominates, at nearly two-thirds of the total (<span data-ex="m09-ex2-multivari" data-key="positional.sigma" data-dp="4">0.0198</span>&nbsp;mm of &sigma;&#770;, against <span data-ex="m09-ex2-multivari" data-key="cyclical.sigma" data-dp="4">0.0102</span>&nbsp;mm cyclical and only <span data-ex="m09-ex2-multivari" data-key="temporal.sigma" data-dp="4">0.0018</span>&nbsp;mm temporal). This is the opposite pattern from Worked example 2 (where temporal dominated): the fixture itself, not the furnace or the incoming parts, is where the next investigation should start &mdash; consistent with an unevenly clamping fixture, one of the (a) hypotheses.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="09">
+      <fieldset class="q" data-answer="c">
+        <legend>1. Anscombe's quartet demonstrates that</legend>
+        <label><input type="radio" name="q1" value="a"> summary statistics are always sufficient to describe a dataset</label>
+        <label><input type="radio" name="q1" value="b"> regression should never be used</label>
+        <label><input type="radio" name="q1" value="c"> datasets with identical summary statistics can have completely different structures, visible only by plotting</label>
+        <label><input type="radio" name="q1" value="d"> correlation always implies causation</label>
+        <p class="explain" hidden>Four datasets, same mean, variance, correlation and regression line, four very different scatter plots.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. Juran's "vital few and trivial many" naming</legend>
+        <label><input type="radio" name="q2" value="a"> is an exact quote from Pareto's own writing</label>
+        <label><input type="radio" name="q2" value="b"> was later admitted by Juran himself to be a misattribution to Pareto, in print</label>
+        <label><input type="radio" name="q2" value="c"> was invented by Ishikawa</label>
+        <label><input type="radio" name="q2" value="d"> has since been proven mathematically false</label>
+        <p class="explain" hidden>Juran published a "mea culpa" correcting his own earlier attribution; the tool itself remains valid.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. A Pareto chart's cumulative percentage line is used to</legend>
+        <label><input type="radio" name="q3" value="a"> compute a control limit</label>
+        <label><input type="radio" name="q3" value="b"> show that exactly 80 % of the problem always comes from 20 % of categories</label>
+        <label><input type="radio" name="q3" value="c"> replace the bar chart entirely</label>
+        <label><input type="radio" name="q3" value="d"> show how many top categories are needed to account for a given share of the total</label>
+        <p class="explain" hidden>There is no fixed 80/20 guarantee; the cumulative line shows whatever the real data shows.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. A box plot's box spans</legend>
+        <label><input type="radio" name="q4" value="a"> the interquartile range, Q1 to Q3</label>
+        <label><input type="radio" name="q4" value="b"> the full range, minimum to maximum</label>
+        <label><input type="radio" name="q4" value="c"> plus or minus one standard deviation</label>
+        <label><input type="radio" name="q4" value="d"> the specification limits</label>
+        <p class="explain" hidden>The box is Q1 to Q3; whiskers extend to the most extreme non-outlier points.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>5. In Worked example 3, stratifying bore diameter by shift instead of pooling all 90 values revealed</legend>
+        <label><input type="radio" name="q5" value="a"> no difference between shifts</label>
+        <label><input type="radio" name="q5" value="b"> that the gauge was miscalibrated</label>
+        <label><input type="radio" name="q5" value="c"> that shift 3 ran higher and more variable, with a part above the upper specification limit</label>
+        <label><input type="radio" name="q5" value="d"> that all three shifts were identical except for sample size</label>
+        <p class="explain" hidden>Shift 3's box sat visibly higher and taller, and its maximum exceeded the 12.020 mm USL.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. A multi-vari chart's three sources of variation are</legend>
+        <label><input type="radio" name="q6" value="a"> mean, median, and mode</label>
+        <label><input type="radio" name="q6" value="b"> positional (within a part), cyclical (part to part), and temporal (time to time)</label>
+        <label><input type="radio" name="q6" value="c"> bias, linearity, and stability</label>
+        <label><input type="radio" name="q6" value="d"> repeatability, reproducibility, and accuracy</label>
+        <p class="explain" hidden>Positional, cyclical and temporal are Seder's original three categories.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>7. In Worked example 2, temporal variation accounting for about two-thirds of the total means</legend>
+        <label><input type="radio" name="q7" value="a"> the fixture is definitely the root cause</label>
+        <label><input type="radio" name="q7" value="b"> no further investigation is needed</label>
+        <label><input type="radio" name="q7" value="c"> the gauge needs a new MSA study</label>
+        <label><input type="radio" name="q7" value="d"> something that changes over the course of a shift is the leading suspect, worth investigating first</label>
+        <p class="explain" hidden>A multi-vari chart points at where to look next, not a proven root cause by itself.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>8. This course estimates multi-vari variance components using</legend>
+        <label><input type="radio" name="q8" value="a"> a range-based (R̄/d₂-style) decomposition, the same style used for within-subgroup sigma elsewhere in the course</label>
+        <label><input type="radio" name="q8" value="b"> a full ANOVA F-test with p-values</label>
+        <label><input type="radio" name="q8" value="c"> a regression model</label>
+        <label><input type="radio" name="q8" value="d"> Cohen's kappa</label>
+        <p class="explain" hidden>Chosen deliberately because Module 9 is graphical/exploratory and precedes formal hypothesis testing in Module 11.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. Stratification means</legend>
+        <label><input type="radio" name="q9" value="a"> removing outliers from a dataset</label>
+        <label><input type="radio" name="q9" value="b"> converting attribute data to variables data</label>
+        <label><input type="radio" name="q9" value="c"> splitting a dataset by a suspected source of variation before drawing conclusions</label>
+        <label><input type="radio" name="q9" value="d"> the same thing as rolled throughput yield</label>
+        <p class="explain" hidden>Splitting by shift, machine, operator or lot before analysis, not after.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. A time series (run) plot is best described as</legend>
+        <label><input type="radio" name="q10" value="a"> a control chart with limits removed for privacy</label>
+        <label><input type="radio" name="q10" value="b"> the value plotted in time order with no limits, the direct precursor to a control chart</label>
+        <label><input type="radio" name="q10" value="c"> only usable for attribute data</label>
+        <label><input type="radio" name="q10" value="d"> a replacement for a box plot</label>
+        <p class="explain" hidden>Modules 16 and 17 add limits to the same time-ordered data to build a control chart.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Same statistics, different structures, visible only by plotting.</li>
+        <li>b. Juran's own later correction.</li>
+        <li>d. How many categories reach a given cumulative share.</li>
+        <li>a. Q1 to Q3.</li>
+        <li>c. Shift 3 higher, more variable, one part over USL.</li>
+        <li>b. Positional, cyclical, temporal.</li>
+        <li>d. Points at where to look next.</li>
+        <li>a. Range-based decomposition, R̄/d₂ style.</li>
+        <li>c. Splitting by a suspected source before conclusions.</li>
+        <li>b. Time-ordered plot, precursor to a control chart.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Graphical analysis comes before hypothesis testing (Module 11) because summary statistics alone can look identical for data that is structurally very different &mdash; Anscombe's quartet is the standing proof.</li>
+      <li>A Pareto chart sorts categories by impact and reads the cumulative line; there is no rule that exactly 80&nbsp;% must come from 20&nbsp;% of categories, and even the tool's own name is a documented misattribution Juran corrected himself.</li>
+      <li>A box plot's five-number summary compares groups' medians, spreads and skew at a glance, faster and more completely than a table of means and standard deviations.</li>
+      <li>Stratification &mdash; splitting data by a suspected source before drawing a conclusion &mdash; can reveal that a pooled, unremarkable-looking distribution is really two or three separated sub-populations.</li>
+      <li>A multi-vari chart uses a deliberate sampling plan to separate positional, cyclical and temporal variation, pointing at where to look next rather than delivering a finished root cause.</li>
+      <li>A time series (run) plot is the precursor to a control chart: it is what confirms that time order in the data is real and worth stratifying by.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">Juran, J. M. (1975). The non-Pareto principle; mea culpa. <em>Quality Progress</em>, 8(5), 8&ndash;9. <a href="https://www.juran.com/wp-content/uploads/2021/03/The-Non-Pareto-Principle-1974.pdf">https://www.juran.com/wp-content/uploads/2021/03/The-Non-Pareto-Principle-1974.pdf</a></li>
+      <li id="ref-2">Anscombe, F. J. (1973). Graphs in statistical analysis. <em>The American Statistician</em>, 27(1), 17&ndash;21. Values as reproduced in Wikipedia and the R <code>datasets</code> package documentation (Module 1, S-E35, S-E36). <a href="https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf">https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf</a></li>
+      <li id="ref-3">Tukey, J. W. (1977). <em>Exploratory Data Analysis</em>. Addison-Wesley. <a href="https://www.scirp.org/reference/referencespapers?referenceid=1482121">https://www.scirp.org/reference/referencespapers?referenceid=1482121</a> <span class="tag">(catalogue-level; box plot origin)</span></li>
+      <li id="ref-4">Seder, L. A. (1950). Diagnosis with diagrams, Parts I and II. <em>Industrial Quality Control</em>, 6(4) and 6(5). <a href="https://asq.org/quality-progress/articles/case-studies/the-multi-vari-chart-an-underutilized-quality-tool?id=d23574b44b3d49b88e9dcdddc4785cbb">https://asq.org/quality-progress/articles/case-studies/the-multi-vari-chart-an-underutilized-quality-tool?id=d23574b44b3d49b88e9dcdddc4785cbb</a> <span class="tag">(secondary: the original 1950 articles were not located; the attribution and method description are via this ASQ case study and corroborating sources)</span></li>
+      <li id="ref-5">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 4.4.4 "How can I tell if a model fits my data?". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm">https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm</a></li>
+      <li id="ref-6">Ishikawa, K. (1976). <em>Guide to Quality Control</em>. Asian Productivity Organization. <a href="https://openlibrary.org/books/OL4595409M/Guide_to_quality_control">https://openlibrary.org/books/OL4595409M/Guide_to_quality_control</a> <span class="tag">(catalogue-level; the seven basic quality tools, of which the Pareto chart is one)</span></li>
+      <li id="ref-7">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>
