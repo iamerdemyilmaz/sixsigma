@@ -1,0 +1,21 @@
+{
+ "id": "m07-bore-30",
+ "module": "07",
+ "kind": "capability",
+ "title": "The first 6 subgroups (30 values) of m07-bore, for the confidence-interval point",
+ "source": "constructed",
+ "setting": "first 30 values of m07-bore",
+ "params": {
+  "usl": 12.025,
+  "lsl": 11.975,
+  "target": 12.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 30
+}

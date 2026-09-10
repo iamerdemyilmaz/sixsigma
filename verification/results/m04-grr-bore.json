@@ -1,0 +1,133 @@
+{
+ "id": "m04-grr-bore",
+ "kind": "grr",
+ "params": {
+  "tolerance": 0.05,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "units": "mm"
+ },
+ "source": "constructed",
+ "results": {
+  "parts": 10,
+  "operators": 3,
+  "replicates": 3,
+  "N": 90,
+  "ss_full": {
+   "part": 0.008250266666664488,
+   "operator": 0.00013962222222246092,
+   "interaction": 8.593333333333753e-05,
+   "repeatability": 0.00022266666666665317,
+   "total": 0.008698488888886942
+  },
+  "ms_full": {
+   "part": 0.0009166962962960543,
+   "operator": 6.981111111123046e-05,
+   "interaction": 4.774074074074307e-06,
+   "repeatability": 3.711111111110886e-06
+  },
+  "df_full": {
+   "part": 9,
+   "operator": 2,
+   "interaction": 18,
+   "repeatability": 60
+  },
+  "ms_reduced": {
+   "part": 0.0009166962962960543,
+   "operator": 6.981111111123046e-05,
+   "repeatability": 3.9564102564100765e-06
+  },
+  "df_reduced": {
+   "part": 9,
+   "operator": 2,
+   "repeatability": 78
+  },
+  "grand_mean": 11.999511111111113,
+  "interaction_F": 1.2864271457087237,
+  "interaction_p": 0.2294204079255363,
+  "interaction_removed": true,
+  "alpha_remove": 0.05,
+  "anova_used": "reduced (interaction pooled into repeatability)",
+  "F_operator": 17.645063728698066,
+  "F_part": 231.69899906382204,
+  "p_operator": 4.766492942149971e-07,
+  "p_part": 1.8019004739487578e-52,
+  "varcomp": {
+   "repeatability": 3.9564102564100765e-06,
+   "reproducibility": 2.1951566951606795e-06,
+   "operator": 2.1951566951606795e-06,
+   "interaction": 0.0,
+   "grr": 6.151566951570756e-06,
+   "part": 0.0001014155428932938,
+   "total": 0.00010756710984486455
+  },
+  "pct_contribution": {
+   "repeatability": 3.6780854873911655,
+   "reproducibility": 2.0407322445741816,
+   "operator": 2.0407322445741816,
+   "interaction": 0.0,
+   "grr": 5.718817731965347,
+   "part": 94.28118226803467,
+   "total": 100.0
+  },
+  "sd": {
+   "repeatability": 0.001989072712700588,
+   "reproducibility": 0.0014816061201144788,
+   "operator": 0.0014816061201144788,
+   "interaction": 0.0,
+   "grr": 0.002480235261335254,
+   "part": 0.010070528431680922,
+   "total": 0.010371456495828565
+  },
+  "study_var_k": 6.0,
+  "study_var": {
+   "repeatability": 0.011934436276203528,
+   "reproducibility": 0.008889636720686872,
+   "operator": 0.008889636720686872,
+   "interaction": 0.0,
+   "grr": 0.014881411568011524,
+   "part": 0.060423170590085534,
+   "total": 0.06222873897497139
+  },
+  "pct_study_var": {
+   "repeatability": 19.17833540063153,
+   "reproducibility": 14.285419995835548,
+   "operator": 14.285419995835548,
+   "interaction": 0.0,
+   "grr": 23.91404970297868,
+   "part": 97.09849755173079,
+   "total": 100.00000000000001
+  },
+  "tolerance": 0.05,
+  "pct_tolerance": {
+   "repeatability": 23.868872552407055,
+   "reproducibility": 17.779273441373746,
+   "operator": 17.779273441373746,
+   "interaction": 0.0,
+   "grr": 29.762823136023048,
+   "part": 120.84634118017107,
+   "total": 124.45747794994277
+  },
+  "ndc": 5,
+  "ndc_exact": 5.725039600084436,
+  "operator_means": {
+   "A": 11.999699999999999,
+   "B": 12.000933333333334,
+   "C": 11.9979
+  },
+  "part_means": {
+   "1": 11.984333333333332,
+   "10": 12.014111111111111,
+   "2": 11.986666666666666,
+   "3": 11.992444444444445,
+   "4": 11.995777777777779,
+   "5": 12.000333333333334,
+   "6": 11.997444444444445,
+   "7": 12.004111111111111,
+   "8": 12.009444444444444,
+   "9": 12.010444444444444
+  }
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

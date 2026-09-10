@@ -1,0 +1,21 @@
+{
+ "id": "m07-cpm",
+ "module": "07",
+ "kind": "capability",
+ "title": "Shoulder length off target, Cpk 1.4 but Cpm 0.76",
+ "source": "constructed",
+ "setting": "turned shoulder length 25.000 \u00b1 0.030 mm, CMM to 0.001 mm, 50 consecutive parts",
+ "params": {
+  "usl": 25.03,
+  "lsl": 24.97,
+  "target": 25.0,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 50
+}

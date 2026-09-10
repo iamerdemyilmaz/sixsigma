@@ -64,4 +64,18 @@ Totals on 2026-09-09: 25 examples; 63 published values matched; 686 quantities a
 
 ## Course examples
 
-(none yet; added module by module from Phase C)
+Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 34 examples, 1,119 quantities agree between Check 1 and Check 2, 2,960 values agree between Check 1 and the JavaScript engines, 100 page checks).
+
+| id | Module | Kind | Setting and the point it makes | Dataset | Check 1 | Check 2 | Check 3 | Check 4 | Pages |
+|---|---|---|---|---|---|---|---|---|---|
+| m07-bore | 7 | capability, X̄-R, 25 × 5 | reamed bore Ø12.000 ± 0.025 mm, bore micrometer to 0.001 mm; stable, normal, Cwk 1.06 / Ppk 1.04 with 95 % CI 0.90–1.18: the "not close enough" case | `m07-bore.csv` | pass | pass | pass | pass | 07, calculators |
+| m07-bore-30 | 7 | capability, first 6 subgroups | the same process from 30 values: Ppk 1.07 with 95 % CI 0.77–1.37 | `m07-bore-30.csv` | pass | pass | pass | pass | 07 |
+| m07-fill | 7 | capability, I-MR, one-sided | powder fill, declared minimum 250.0 g, 100 individuals; Ppl 0.75, 12,500 PPM predicted, 1 of 100 observed | `m07-fill.csv` | pass | pass | pass | pass | 07 |
+| m07-cpm | 7 | capability, I-MR, off target | shoulder length 25.000 ± 0.030 mm, 50 individuals; Ppk 1.40 but Cpm 0.76 | `m07-cpm.csv` | pass | pass | pass | pass | 07 |
+| m07-ex1-keyway | 7 | capability, X̄-R, 20 × 4 | keyway 6.000 +0.030/0 mm, stable, Cwk 0.97 / Ppk 0.94; exercise 1 | `m07-ex1-keyway.csv` | pass | pass | pass | pass | 07 |
+| m07-ex2-wall | 7 | capability, X̄-R, 30 × 3, shift at 21 | die-cast wall 2.50 ± 0.15 mm; not stable (rule 1 at 22, 23, 26), Cwk 1.36 vs Ppk 0.95; exercise 2 | `m07-ex2-wall.csv` | pass | pass | pass | pass | 07 |
+| m04-grr-bore | 4 (registered in Phase C) | crossed gauge R&R 10 × 3 × 3 | bore gauge, tolerance 0.050 mm; %GRR 23.9 % of study variation, 29.8 % of tolerance, ndc 5, interaction pooled (p 0.23) | `m04-grr-bore.csv` | pass | pass | pass | pass | calculators |
+| m11-ttest2-pull | 11 (registered in Phase C) | two-sample t | solder pull strength N, suppliers A and B, 12 each; Welch p 0.010, d −1.16 | `m11-ttest2-pull.csv` | pass | pass | pass | pass | calculators |
+| m11-anova-machines | 11 (registered in Phase C) | one-way ANOVA | cycle time s on three machines, 10 each; F 5.60, p 0.009, η² 0.29 | `m11-anova-machines.csv` | pass | pass | pass | pass | calculators |
+
+The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.

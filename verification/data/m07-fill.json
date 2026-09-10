@@ -1,0 +1,21 @@
+{
+ "id": "m07-fill",
+ "module": "07",
+ "kind": "capability",
+ "title": "Fill weight, lower specification only, 100 individuals",
+ "source": "constructed",
+ "setting": "powder fill, declared minimum 250.0 g, checkweigher to 0.1 g, 100 consecutive containers",
+ "params": {
+  "usl": null,
+  "lsl": 250.0,
+  "target": null,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "g"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 100
+}

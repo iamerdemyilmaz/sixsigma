@@ -298,6 +298,120 @@ register(id="hb-samplesize-2", module="B", kind="samplesize", title="harness: tw
          columns=None, rows=None)
 
 
+# ---------------------------------------------------------------------------
+# Module 7: Process capability I (constructed course examples, prefix m07-)
+# Seeds were chosen so that each dataset has the property the text teaches;
+# the data are otherwise ordinary seeded normal samples rounded to the gauge.
+# ---------------------------------------------------------------------------
+def _m07_bore():
+    # Bore Ø12.000 ± 0.025 mm, 25 subgroups of 5, micrometer to 0.001 mm.
+    # Slightly above nominal, small subgroup-to-subgroup drift (fixture
+    # warm-up) so that overall s is a little larger than Rbar/d2.
+    rng = np.random.default_rng(26)
+    rows = []
+    for g in range(1, 26):
+        mu = 12.0035 + rng.normal(0, 0.0018)
+        for _ in range(5):
+            rows.append([g, round(float(rng.normal(mu, 0.0060)), 3)])
+    return rows
+
+_m07b = _m07_bore()
+_P_BORE = {"usl": 12.025, "lsl": 11.975, "target": 12.000, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"}
+register(id="m07-bore", module="07", kind="capability",
+         title="Bore diameter, 25 subgroups of 5, stable, Cpk about 1.1",
+         source="constructed", setting="reamed bore Ø12.000 ± 0.025 mm in an aluminium housing, bore micrometer to 0.001 mm, 5 consecutive parts every 30 min",
+         params=dict(_P_BORE), columns=["subgroup", "x"], rows=_m07b)
+register(id="m07-bore-30", module="07", kind="capability",
+         title="The first 6 subgroups (30 values) of m07-bore, for the confidence-interval point",
+         source="constructed", setting="first 30 values of m07-bore",
+         params=dict(_P_BORE), columns=["subgroup", "x"], rows=_m07b[:30])
+
+# Fill weight with a one-sided lower specification (declared minimum 250.0 g),
+# 100 consecutive containers, scale to 0.1 g. Ppl about 0.75.
+_rng = np.random.default_rng(121)
+register(id="m07-fill", module="07", kind="capability",
+         title="Fill weight, lower specification only, 100 individuals",
+         source="constructed", setting="powder fill, declared minimum 250.0 g, checkweigher to 0.1 g, 100 consecutive containers",
+         params={"usl": None, "lsl": 250.0, "target": None, "subgroup_size": 1, "chart": "imr", "units": "g"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 1)] for i, v in enumerate(_rng.normal(251.9, 0.85, 100))])
+
+# Shoulder length, off target but well inside the tolerance: Cpk looks fine,
+# Cpm does not. 50 individuals from a CMM, to 0.001 mm.
+_rng = np.random.default_rng(217)
+register(id="m07-cpm", module="07", kind="capability",
+         title="Shoulder length off target, Cpk 1.4 but Cpm 0.76",
+         source="constructed", setting="turned shoulder length 25.000 ± 0.030 mm, CMM to 0.001 mm, 50 consecutive parts",
+         params={"usl": 25.030, "lsl": 24.970, "target": 25.000, "subgroup_size": 1, "chart": "imr", "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 3)] for i, v in enumerate(_rng.normal(25.013, 0.0042, 50))])
+
+# Exercise 1: keyway width with a unilateral tolerance 6.000 +0.030/0 mm,
+# 20 subgroups of 4, stable, Cpk just under 1.
+_rng = np.random.default_rng(314)
+_kw = []
+for g in range(1, 21):
+    for _ in range(4):
+        _kw.append([g, round(float(_rng.normal(6.017, 0.0045)), 3)])
+register(id="m07-ex1-keyway", module="07", kind="capability",
+         title="Exercise 1: keyway width, unilateral tolerance, 20 subgroups of 4",
+         source="constructed", setting="milled keyway width 6.000 +0.030/0 mm (target at mid-tolerance 6.015), gauge to 0.001 mm",
+         params={"usl": 6.030, "lsl": 6.000, "target": 6.015, "subgroup_size": 4, "chart": "xbar_r", "units": "mm"},
+         columns=["subgroup", "x"], rows=_kw)
+
+# Exercise 2: die-cast wall thickness, 30 subgroups of 3, a shift after
+# subgroup 20 (die temperature drifted). Not stable: Cwk looks good, Ppk does not.
+_rng = np.random.default_rng(417)
+_wt = []
+for g in range(1, 31):
+    mu = 2.505 if g <= 20 else 2.565
+    for _ in range(3):
+        _wt.append([g, round(float(_rng.normal(mu, 0.028)), 2)])
+register(id="m07-ex2-wall", module="07", kind="capability",
+         title="Exercise 2: die-cast wall thickness with a shift at subgroup 21",
+         source="constructed", setting="die-cast housing wall 2.50 ± 0.15 mm, ultrasonic gauge to 0.01 mm, 3 parts per shot",
+         params={"usl": 2.65, "lsl": 2.35, "target": 2.50, "subgroup_size": 3, "chart": "xbar_r", "units": "mm"},
+         columns=["subgroup", "x"], rows=_wt)
+
+
+# ---------------------------------------------------------------------------
+# Datasets registered in Phase C so that calculators.html has verified
+# preloaded data for the gauge R&R and hypothesis-test calculators. They are
+# the planned examples of Modules 4 and 11 (SOURCES.md Part 2) and will be
+# taught there; until then they appear only on calculators.html.
+# ---------------------------------------------------------------------------
+_rng = np.random.default_rng(500)
+_parts = np.linspace(11.984, 12.016, 10) + _rng.normal(0, 0.0015, 10)
+_opbias = [0.0, 0.0018, -0.0012]
+_g4 = []
+for p in range(10):
+    for o in range(3):
+        for t in range(3):
+            _g4.append([p + 1, "ABC"[o], t + 1, round(float(_parts[p] + _opbias[o] + _rng.normal(0, 0.0021)), 3)])
+register(id="m04-grr-bore", module="04", kind="grr",
+         title="Crossed gauge R&R on the bore gauge, 10 parts x 3 operators x 3 trials, %GRR about 24 %",
+         source="constructed", setting="bore gauge for Ø12.000 ± 0.025 mm (tolerance 0.050 mm), 10 parts spanning the tolerance, 3 operators, 3 trials each, randomised order",
+         params={"tolerance": 0.050, "study_var_k": 6.0, "alpha_remove": 0.05, "units": "mm"},
+         columns=["part", "operator", "trial", "y"], rows=_g4)
+
+_rng = np.random.default_rng(603)
+_ta = [round(float(v), 1) for v in _rng.normal(46.5, 2.4, 12)]
+_tb = [round(float(v), 1) for v in _rng.normal(48.9, 2.9, 12)]
+register(id="m11-ttest2-pull", module="11", kind="ttest2",
+         title="Solder joint pull strength from two suppliers, two-sample t",
+         source="constructed", setting="pull strength in N of a soldered terminal, 12 joints from supplier A and 12 from supplier B, tester to 0.1 N",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "N"},
+         columns=["group", "x"], rows=[["A", v] for v in _ta] + [["B", v] for v in _tb])
+
+_rng = np.random.default_rng(700)
+_am = []
+for g, mu in zip(["M1", "M2", "M3"], [42.0, 42.3, 43.1]):
+    for v in _rng.normal(mu, 0.9, 10):
+        _am.append([g, round(float(v), 1)])
+register(id="m11-anova-machines", module="11", kind="anova1",
+         title="Cycle time on three machines, one-way ANOVA",
+         source="constructed", setting="cycle time in s of the same operation on three nominally identical machines, 10 cycles each",
+         params={"alpha": 0.05, "units": "s"}, columns=["group", "x"], rows=_am)
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

@@ -1,0 +1,17 @@
+{
+ "id": "m11-anova-machines",
+ "module": "11",
+ "kind": "anova1",
+ "title": "Cycle time on three machines, one-way ANOVA",
+ "source": "constructed",
+ "setting": "cycle time in s of the same operation on three nominally identical machines, 10 cycles each",
+ "params": {
+  "alpha": 0.05,
+  "units": "s"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 30
+}

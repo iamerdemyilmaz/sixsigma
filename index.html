@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Six Sigma for Engineers: Process Capability, SPC, and DMAIC in Practice</title>
+<meta name="description" content="A free, practitioner-written online course on process capability, statistical process control, measurement systems analysis, and DMAIC for junior and mid-level manufacturing engineers. Every number is verified by script.">
+<link rel="stylesheet" href="assets/css/course.css">
+</head>
+<body data-root="" data-page="index">
+
+<header class="site-header">
+  <a class="brand" href="index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Online course</p>
+    <h1>Six Sigma for Engineers: Process Capability, SPC, and DMAIC in Practice</h1>
+    <p class="lead">A practical statistics course for engineers who have to run a capability study, read a gauge R&amp;R report, set up a control chart, and lead or support a DMAIC project. Written by a practising manufacturing engineer for engineers with roughly zero to five years of experience. Not a certification course, but it covers what a Green Belt is expected to know.</p>
+
+    <h2>Who this is for</h2>
+    <p>You took one statistics class and remember the shape of the normal curve. You can use Excel, and perhaps Python or Minitab. What you have probably not yet done is defend a Cpk in front of a customer, explain to a program manager why 1.1 is not "close enough", or decide whether a supplier's capability report means anything. This course is built around those situations.</p>
+    <p>Every formula is given, explained in words, and immediately applied to numbers you can copy into your own tools. Every dataset on every page is printed in full, and every statistic computed from it has been checked three independent ways by script before it was allowed on the page. Real-world claims are cited to a source you can read. Where practice varies or experts disagree, the course says so and shows both sides.</p>
+
+    <h2>Your progress</h2>
+    <div class="progress" data-progress></div>
+
+    <h2>Modules</h2>
+    <p>The course follows the DMAIC sequence after three foundation modules. Process capability and statistical process control are the core and are taught in the most depth. Modules are published as they are finished and verified; a module whose quiz you have passed on this device is marked Completed.</p>
+    <ol class="module-list" data-module-list></ol>
+
+    <div hidden>
+      <span data-module-desc="00">Origin at Motorola, spread through GE, what a sigma level means, DMAIC at a glance, belts and roles, Lean and Six Sigma, what the published critiques say.</span>
+      <span data-module-desc="01">Types of data, mean, median, standard deviation, histograms, the normal distribution and its limits, other distributions engineers meet, the central limit theorem by simulation.</span>
+      <span data-module-desc="02">SIPOC, process maps, value stream basics, the eight wastes, common versus special cause variation in words before any chart.</span>
+      <span data-module-desc="03">Problem statements, charters, business case, scope, VOC to CTQ, Kano, stakeholders, what a good Green Belt project looks like.</span>
+      <span data-module-desc="04">Bias, linearity, stability, repeatability and reproducibility, crossed gauge R&amp;R by ANOVA with a full worked example, %R&amp;R, %Tolerance, ndc, attribute agreement.</span>
+      <span data-module-desc="05">Operational definitions, sampling plans, rational subgrouping and why it decides everything downstream, data collection sheets, data quality failures.</span>
+      <span data-module-desc="06">Defects versus defectives, opportunities, FTY versus RTY, DPMO to sigma level, the 1.5 sigma shift and its controversy presented fairly.</span>
+      <span data-module-desc="07">Cp, Cpk, Pp, Ppk, Cpm; within versus overall sigma; capability to PPM; the 1.33 and 1.67 conventions; confidence intervals on Cpk; a full worked study from raw data to report.</span>
+      <span data-module-desc="08">Stability first, non-normal data, one-sided specifications, transformations and alternative distributions, attribute capability, bounded characteristics, reading a supplier's report.</span>
+      <span data-module-desc="09">Pareto, box plots, scatter plots, stratification, multi-vari charts, time series plots; why you look before you test.</span>
+      <span data-module-desc="10">Cause and effect diagrams, 5 whys done properly, is/is not, fault trees, process FMEA per the AIAG-VDA handbook with a worked example.</span>
+      <span data-module-desc="11">The logic of a test, Type I and II error, p-values and confidence intervals explained correctly, t-tests, ANOVA, chi-square, variance tests, normality tests, power and sample size.</span>
+      <span data-module-desc="12">Correlation and its traps, simple linear regression, residual analysis, multiple regression introduction, what R² does and does not tell you.</span>
+      <span data-module-desc="13">Why one-factor-at-a-time fails, 2^k factorials, main effects and interactions, a fully worked 2³ example, fractional factorials, blocking, response surfaces, the Taguchi debate.</span>
+      <span data-module-desc="14">5S, standard work, poka-yoke, SMED, kaizen, Pugh matrix, piloting, and how to prove an improvement with data rather than a bar chart.</span>
+      <span data-module-desc="15">Tolerance stack-up from a capability angle, allocating tolerances with capability data, robust design, the Taguchi loss function, feeding capability back into DFM.</span>
+      <span data-module-desc="16">Shewhart's insight, control limits versus specification limits, X̄-R, X̄-S and I-MR charts built by hand from data, Western Electric and Nelson rules, false alarm rates.</span>
+      <span data-module-desc="17">p, np, c and u charts, chart selection, EWMA and CUSUM, short-run SPC, charts for non-normal data, reacting to a signal.</span>
+      <span data-module-desc="18">Control plans, reaction plans, standardisation, handoff to production, PPAP and IATF 16949 expectations, ongoing capability monitoring, project closure.</span>
+      <span data-module-desc="19">A brazed heat-exchanger leak-test problem taken through every DMAIC phase with all datasets provided and a full solution in collapsible blocks.</span>
+    </div>
+
+    <h2>How to use this course</h2>
+    <ol>
+      <li><strong>Work in order the first time.</strong> Modules 0 to 2 set up vocabulary. The Measure modules (4 to 8) carry the statistics that every later module leans on; Modules 7 and 8 on capability and 16 and 17 on control charts are the core of the course.</li>
+      <li><strong>Reproduce the numbers.</strong> Every worked example prints its full dataset. Copy it into Excel, Minitab, Python, or the calculator on the page, and check that you get the same mean, sigma, and index. If you do not, you have found either your mistake or ours, and both are worth finding.</li>
+      <li><strong>Use the calculators.</strong> Each module's calculator is pre-loaded with the module's example so you can see it agree with the text, then paste your own data. All calculators are collected on the <a href="calculators.html">Calculators</a> page for use after the course.</li>
+      <li><strong>Do the exercises before opening the solution.</strong> Each has data and a full solution in a collapsible block, verified the same way as the examples.</li>
+      <li><strong>Take the quiz.</strong> Eight to twelve questions per module. Score 70% or more and the module is marked complete on this device. Progress is stored only in your browser; nothing is sent anywhere.</li>
+      <li><strong>Print a module as a handout.</strong> The print stylesheet removes navigation and expands the collapsible blocks.</li>
+    </ol>
+
+    <h2>Conventions</h2>
+    <ul>
+      <li>All engineering quantities are metric: mm, µm, g, N, °C, MPa, s.</li>
+      <li>Every capability index is printed next to the sigma estimate that produced it (within-subgroup R̄/d₂ or S̄/c₄, or overall sample standard deviation). The course teaches the 2026 AIAG &amp; VDA and ISO 22514 convention as current and the older AIAG convention, which most software still prints, explicitly alongside it.</li>
+      <li>Capability is reported only after a control chart of the same data has been shown. Specification limits never appear on a control chart.</li>
+      <li>Inline citations like [3] link to the References at the end of each module. Sources marked "secondary" are credible but were not read in the original by the course author; everything else was.</li>
+      <li>Examples labelled "constructed" use invented but realistic data generated by a seeded script; they are not real production runs and name no real company. Real cases are named and cited.</li>
+      <li>"Your customer may require something different; ask" appears often. It is the honest answer more often than a single number.</li>
+    </ul>
+
+    <h2>How the numbers are verified</h2>
+    <p>Every dataset in the course is generated by a seeded script and stored as a CSV file in the course repository. Every statistic shown on a page is computed from that file by a Python script using numpy, scipy and statsmodels, then recomputed independently with the textbook closed-form formulas written out in plain Python, then checked for internal consistency (Cpk never exceeds Cp, the PPM matches the normal tail area of the same Z, the control chart constants match the subgroup size, the narrative matches the numbers). Finally the JavaScript calculators on the pages are run on the same data and must reproduce every value. A page is published only when all four checks pass. The scripts and their results are part of the course repository, so a sceptical reader can rerun them.</p>
+
+    <h2>Prerequisites</h2>
+    <p>Arithmetic with a calculator or spreadsheet, the idea of a mean and a standard deviation, and the ability to read an engineering drawing with a tolerance on it. Every other term is defined the first time it appears, and every standard is introduced with its full designation and current edition.</p>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="assets/js/course.js"></script>
+</body>
+</html>

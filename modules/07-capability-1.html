@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 7: Process capability I · Six Sigma Course</title>
+<meta name="description" content="Cp, Cpk, Pp, Ppk and Cpm from raw data: within versus overall sigma, stability before capability, capability to PPM, the 1.33 and 1.67 conventions, confidence intervals on Cpk, and a full worked study.">
+<meta name="examples" content="m07-bore, m07-bore-30, m07-fill, m07-cpm, m07-ex1-keyway, m07-ex2-wall, chk-nist-capability">
+<!-- allowed-numbers: conventions and hand-arithmetic intermediates that are not stored in verification/results/.
+     Each intermediate below was computed by script from the results values before it was typed here. -->
+<meta name="allowed-numbers" content="1.33 1.67 2.00 1.00 1.50 0.27 99.73 1.96 0.00135 0.940 1.128 3.267 0.025 0.050 0.001 0.030 0.060 0.15 0.30 2.50 2.35 2.65 6.000 6.030 6.015 250.0 25.000 25.030 12.000 12.025 0.0211 0.0289 0.01981 0.02029 0.0396 0.0406 0.98 0.0089 0.0039 3.12 0.000906 0.072 0.153 0.60 0.28 1.951 2.611 2.772 2.24 1.25 1.13 249.9 0.0124 0.02508 0.0176 0.01254 0.01312 0.0787 0.012 0.00663 0.0128 0.01326 0.0022 0.00376 1.10 0.0525 2.5045 2.5707 0.066 0.70 10.5 9.5 10.1 0.10 1.05 1.09 0.97 1.17 0.5 1.6">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="07">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 7 · Measure</p>
+    <h1>Process capability I</h1>
+    <p class="lead">A capability index compresses a process and a tolerance into one number. That is its value and its danger. This module builds the indices from raw data, one arithmetic step at a time, and insists on the two questions that have to be answered before the number means anything: is the process stable, and which sigma did you use?</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Compute</strong> Cp, Cpu, Cpl, Cpk, Pp, Ppk and Cpm from raw data with a calculator or spreadsheet, and reproduce every number in this module.</li>
+      <li><strong>Distinguish</strong> the within-subgroup sigma (R̄/d₂, S̄/c₄, MR̄/d₂) from the overall sigma (sample standard deviation) and state which one is behind any index you report.</li>
+      <li><strong>Explain</strong> why a control chart of the same data comes before any capability index, and what the index means when the chart is not stable.</li>
+      <li><strong>Convert</strong> an index into a predicted parts-per-million and say what the prediction assumes.</li>
+      <li><strong>Describe</strong> where the 1.33 and 1.67 conventions come from and treat them as customer agreements rather than laws.</li>
+      <li><strong>Attach</strong> a confidence interval to a Cpk and explain what a Cpk from 30 parts can and cannot tell you.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three quick questions on ground that Modules 1 and 5 covered. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="07">
+      <fieldset class="q" data-answer="b">
+        <legend>1. The sample standard deviation s divides the sum of squared deviations by</legend>
+        <label><input type="radio" name="p1" value="a"> n</label>
+        <label><input type="radio" name="p1" value="b"> n − 1</label>
+        <label><input type="radio" name="p1" value="c"> n + 1</label>
+        <label><input type="radio" name="p1" value="d"> 2n</label>
+        <p class="explain" hidden>n − 1 degrees of freedom, because the mean was estimated from the same data (Module 1).</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. About what fraction of a normal distribution lies within ±3 standard deviations of the mean?</legend>
+        <label><input type="radio" name="p2" value="a"> 68 %</label>
+        <label><input type="radio" name="p2" value="b"> 95 %</label>
+        <label><input type="radio" name="p2" value="c"> 99.7 %</label>
+        <label><input type="radio" name="p2" value="d"> 100 %</label>
+        <p class="explain" hidden>99.73 %, leaving 0.27 %, or 2,700 parts per million, in the two tails together.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. A rational subgroup is</legend>
+        <label><input type="radio" name="p3" value="a"> a small set of consecutive parts made under conditions as alike as possible, so that only common-cause variation is inside it</label>
+        <label><input type="radio" name="p3" value="b"> a random sample from a whole day's production</label>
+        <label><input type="radio" name="p3" value="c"> any five parts</label>
+        <label><input type="radio" name="p3" value="d"> a sample chosen to include both good and bad parts</label>
+        <p class="explain" hidden>Module 5. The within-subgroup sigma in this module rests entirely on this idea.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Capability indices came out of the automotive industry. Kane's 1986 paper in the <em>Journal of Quality Technology</em>, written at Ford, set out Cp, CPU, CPL, k and Cpk as a system, and described their use in Japanese industry and their adoption by the US automotive companies.<sup class="cite"><a href="#ref-3">[3]</a></sup> Four decades later a Cpk appears on almost every production part approval, every supplier quality report, and most drawings that carry a critical characteristic. Program managers who would not read a histogram will ask for "the Cpk". That is the situation you will be in: one number, a threshold, and a decision hanging on the comparison.</p>
+    <p>The problem is that the number hides everything that matters. <em>The following is an illustrative failure with invented details, not a real program.</em> A machining supplier reports Cpk = 1.31 for a bore against a customer requirement of 1.33 and asks for a deviation. The quality engineer reads the report and finds three things. The sample was 30 parts. The 30 parts were picked from a bin, so nobody knows the order they were made in and no control chart can be drawn. And the index was computed from the sample standard deviation, which the report calls Cpk but the supplier's software would have called Ppk if the subgroups had been entered. None of the three questions the engineer needs to answer, is the process stable, will the next lot look like this one, what fraction will be out of tolerance, can be answered from the report. The 1.31 is not wrong; it is empty.</p>
+    <p>Wheeler puts the underlying point plainly: for a process that is not operated predictably, capability indices describe the past and cannot predict the future.<sup class="cite"><a href="#ref-7">[7]</a></sup> The current AIAG &amp; VDA SPC manual makes it a rule: Cp and Cpk must only be used if the process is stable.<sup class="cite"><a href="#ref-1">[1]</a></sup> This module is organised around that requirement. Every example shows its control chart before its index, and the calculator will not let you skip the step.</p>
+
+    <h2 id="idea">What a capability index measures</h2>
+    <p>A tolerance is the voice of the customer: the interval from the lower specification limit (LSL) to the upper specification limit (USL) inside which a part is acceptable. A process has a voice too: the distribution of the characteristic it actually produces, summarised by a centre (the mean) and a spread (a standard deviation). Capability compares the two voices.</p>
+    <p>For a normal distribution, almost all output (99.73 %) falls within ±3 standard deviations of the mean, so the "natural" width of a process is taken as 6σ. Comparing 6σ with the tolerance width gives the first index. Comparing the distance from the mean to the nearest limit with 3σ gives the second, and the second is the one that matters, because a process can be narrow and still be in the wrong place.</p>
+
+    <figure>
+      <svg viewBox="0 0 660 250" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Same spread, different centring: Cp is equal, Cpk is not</title>
+        <desc id="fig1-d">Two panels. Each shows a lower and an upper specification limit as vertical dashed lines and a bell curve of the same width. In the left panel the curve is centred between the limits and the two one-sided distances are equal. In the right panel the curve is shifted toward the upper limit, so the distance from the mean to the upper limit is shorter and the upper tail crosses the limit.</desc>
+        <g class="chart-text">
+          <text x="150" y="18" text-anchor="middle" class="chart-title">Centred: Cpk = Cp</text>
+          <text x="480" y="18" text-anchor="middle" class="chart-title">Shifted: Cpk &lt; Cp</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M30 200 H270"/>
+          <path d="M360 200 H600"/>
+        </g>
+        <g class="chart-spec">
+          <path d="M60 40 V200"/><path d="M240 40 V200"/>
+          <path d="M390 40 V200"/><path d="M570 40 V200"/>
+        </g>
+        <g class="chart-text small bad">
+          <text x="60" y="215" text-anchor="middle">LSL</text><text x="240" y="215" text-anchor="middle">USL</text>
+          <text x="390" y="215" text-anchor="middle">LSL</text><text x="570" y="215" text-anchor="middle">USL</text>
+        </g>
+        <g class="chart-curve">
+          <path d="M70 199 C 110 195, 125 60, 150 60 S 190 195, 230 199"/>
+          <path d="M450 199 C 490 195, 505 60, 530 60 S 570 195, 610 199"/>
+        </g>
+        <g class="chart-center">
+          <path d="M150 55 V200"/>
+          <path d="M530 55 V200"/>
+        </g>
+        <g class="chart-text small">
+          <text x="150" y="235" text-anchor="middle">mean at mid-tolerance</text>
+          <text x="530" y="235" text-anchor="middle">mean near USL</text>
+          <text x="105" y="120" text-anchor="middle">x̄ − LSL</text>
+          <text x="195" y="120" text-anchor="middle">USL − x̄</text>
+          <text x="460" y="120" text-anchor="middle">x̄ − LSL</text>
+          <text x="552" y="105" text-anchor="middle">USL − x̄</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3">
+          <path d="M60 130 H150"/><path d="M150 130 H240"/>
+          <path d="M390 130 H530"/><path d="M530 115 H570"/>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Two processes with the same spread and the same tolerance. Cp compares the widths and is the same for both. Cpk uses the distance to the nearest limit and is lower on the right, where part of the upper tail is out of tolerance.</figcaption>
+    </figure>
+
+    <h2 id="sigma">The two sigma estimates, and why there are two</h2>
+    <p>Everything in this module turns on one decision: how σ is estimated. There are two families, and they answer different questions.</p>
+    <h3 id="within">Within-subgroup sigma</h3>
+    <p>When the data come in rational subgroups (Module 5), the spread <em>inside</em> a subgroup reflects only the variation that is present over a few consecutive parts: the common-cause noise of the process at that moment. The average range R̄ of the subgroups, or the average standard deviation S̄, estimates that noise after division by a constant that depends on the subgroup size n.<sup class="cite"><a href="#ref-13">[13]</a></sup></p>
+    <div class="formula">σ̂<sub>within</sub> = R̄ / d₂ &nbsp;&nbsp;or&nbsp;&nbsp; σ̂<sub>within</sub> = S̄ / c₄
+      <span class="where">R̄ is the mean of the subgroup ranges, S̄ the mean of the subgroup standard deviations; d₂ and c₄ are tabulated for the subgroup size n (for n = 5, d₂ = 2.326 and c₄ = 0.940). For individual values (n = 1) the moving range of successive values is used with d₂ = 1.128 for a span of two.</span>
+    </div>
+    <p>Why divide by d₂? The range of a sample of n normal values has an expected value of d₂σ, so R̄/d₂ is an unbiased estimate of σ. The same reasoning gives c₄ for the standard deviation. The constants are generated by script for this course and checked against the NIST handbook table.<sup class="cite"><a href="#ref-13">[13]</a></sup> They appear in the <a href="../calculators.html">Calculators</a> page and will be tabulated in full on the tables page.</p>
+    <h3 id="overall">Overall sigma</h3>
+    <p>The overall sigma ignores the subgroups and pools all the values into one sample standard deviation with n − 1 in the denominator (Module 1). It contains everything: the within-subgroup noise plus any drift, shift, or difference between subgroups that happened during the study.</p>
+    <div class="formula">σ̂<sub>overall</sub> = s = √[ Σ(x<sub>i</sub> − x̄)² / (n − 1) ]
+      <span class="where">n is the total number of values, x̄ their mean.</span>
+    </div>
+    <p>If the process is stable, the two estimates agree apart from sampling noise. If the process drifts between subgroups, the overall sigma is larger, and the gap between the two is itself a diagnostic: it measures how much variation is coming from between the subgroups rather than within them.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+
+    <figure>
+      <svg viewBox="0 0 660 230" role="img" aria-labelledby="fig2-t fig2-d">
+        <title id="fig2-t">Within-subgroup spread versus overall spread when the mean drifts</title>
+        <desc id="fig2-d">Ten tight clusters of five dots each, plotted against time. The clusters slowly rise and fall. A short bracket on one cluster marks the within-subgroup spread; a tall bracket at the right spans all the dots and marks the overall spread, which is clearly larger.</desc>
+        <g fill="none" stroke="currentColor" stroke-width="1"><path d="M40 200 H560"/><path d="M40 200 V30"/></g>
+        <text x="300" y="222" text-anchor="middle" class="chart-text muted">Time (subgroups of 5 consecutive parts)</text>
+        <text x="16" y="115" text-anchor="middle" transform="rotate(-90 16 115)" class="chart-text muted">Measured value</text>
+        <g class="chart-point">
+          <circle cx="70" cy="130" r="3"/><circle cx="76" cy="122" r="3"/><circle cx="82" cy="136" r="3"/><circle cx="88" cy="128" r="3"/><circle cx="94" cy="125" r="3"/>
+          <circle cx="120" cy="118" r="3"/><circle cx="126" cy="124" r="3"/><circle cx="132" cy="112" r="3"/><circle cx="138" cy="121" r="3"/><circle cx="144" cy="127" r="3"/>
+          <circle cx="170" cy="104" r="3"/><circle cx="176" cy="98" r="3"/><circle cx="182" cy="110" r="3"/><circle cx="188" cy="101" r="3"/><circle cx="194" cy="107" r="3"/>
+          <circle cx="220" cy="90" r="3"/><circle cx="226" cy="84" r="3"/><circle cx="232" cy="96" r="3"/><circle cx="238" cy="87" r="3"/><circle cx="244" cy="93" r="3"/>
+          <circle cx="270" cy="82" r="3"/><circle cx="276" cy="76" r="3"/><circle cx="282" cy="88" r="3"/><circle cx="288" cy="79" r="3"/><circle cx="294" cy="85" r="3"/>
+          <circle cx="320" cy="96" r="3"/><circle cx="326" cy="90" r="3"/><circle cx="332" cy="102" r="3"/><circle cx="338" cy="93" r="3"/><circle cx="344" cy="99" r="3"/>
+          <circle cx="370" cy="114" r="3"/><circle cx="376" cy="108" r="3"/><circle cx="382" cy="120" r="3"/><circle cx="388" cy="111" r="3"/><circle cx="394" cy="117" r="3"/>
+          <circle cx="420" cy="134" r="3"/><circle cx="426" cy="128" r="3"/><circle cx="432" cy="140" r="3"/><circle cx="438" cy="131" r="3"/><circle cx="444" cy="137" r="3"/>
+          <circle cx="470" cy="146" r="3"/><circle cx="476" cy="140" r="3"/><circle cx="482" cy="152" r="3"/><circle cx="488" cy="143" r="3"/><circle cx="494" cy="149" r="3"/>
+          <circle cx="520" cy="138" r="3"/><circle cx="526" cy="132" r="3"/><circle cx="532" cy="144" r="3"/><circle cx="538" cy="135" r="3"/><circle cx="544" cy="141" r="3"/>
+        </g>
+        <g class="chart-center"><path d="M64 118 H100 M64 140 H100 M64 118 V140"/></g>
+        <text x="104" y="160" class="chart-text accent small">within-subgroup spread (R̄/d₂)</text>
+        <g class="chart-spec"><path d="M580 72 H600 M580 156 H600 M590 72 V156"/></g>
+        <text x="596" y="62" text-anchor="end" class="chart-text bad small">overall spread (s)</text>
+      </svg>
+      <figcaption>Figure 2. When the mean wanders between subgroups, each subgroup is still tight, so R̄/d₂ is small, but the pooled standard deviation s sees the whole envelope. The ratio of the two is a measure of between-subgroup variation.</figcaption>
+    </figure>
+
+    <h2 id="indices">The indices</h2>
+    <p>Each index below is written with a generic σ̂. Which estimate you put in decides the name of the index, and the section after this one deals with the naming.</p>
+    <h3 id="cp">Cp: the potential</h3>
+    <div class="formula">Cp = (USL − LSL) / 6σ̂
+      <span class="where">Tolerance width divided by the natural process width. Cp = 1 means the ±3σ spread exactly fills the tolerance. Cp needs both limits.</span>
+    </div>
+    <p>Cp ignores where the process is centred. It answers "could this process meet the tolerance if it were perfectly centred?", which is why it is sometimes called the potential capability. A process with Cp = 2 and its mean sitting on the upper limit still ships half its output out of tolerance.</p>
+    <h3 id="cpk">Cpu, Cpl, and Cpk: the actual</h3>
+    <div class="formula">Cpu = (USL − x̄) / 3σ̂ &nbsp;&nbsp;&nbsp; Cpl = (x̄ − LSL) / 3σ̂ &nbsp;&nbsp;&nbsp; Cpk = min(Cpu, Cpl)
+      <span class="where">Each one-sided index is the distance from the mean to that limit in units of 3σ̂. Cpk is the worse of the two. With a single limit, Cpk is simply the one-sided index that exists.</span>
+    </div>
+    <p>Cpk is the index that predicts defects, because the nearer limit is where the tail crosses. It is always at or below Cp, and equals Cp only when the mean is exactly at mid-tolerance. Kane's original formulation used a centring ratio k, the distance of the mean from mid-tolerance as a fraction of the half-tolerance, so that Cpk = Cp(1 − k).<sup class="cite"><a href="#ref-3">[3]</a></sup> The two forms are algebraically identical; the calculator prints k so that you can see how much of the gap between Cp and Cpk is centring.</p>
+    <h3 id="cpm">Cpm: distance from the target</h3>
+    <div class="formula">Cpm = (USL − LSL) / 6·√[ σ̂² + (x̄ − T)² ]
+      <span class="where">T is the target value, usually mid-tolerance. The denominator adds the squared offset from target to the variance, so Cpm falls as the mean moves off target even while it is far from both limits.</span>
+    </div>
+    <p>Cpm was introduced by Chan, Cheng and Spiring in 1988 to reflect Taguchi's argument that loss grows with distance from the target, not only when a limit is crossed.<sup class="cite"><a href="#ref-4">[4]</a></sup> Cpk cannot see an off-target mean until it approaches a limit; Cpm can. Worked example 3 shows a process with Cpk = 1.40 and Cpm = 0.76. Cpm is rarely a contractual requirement, but it is the right index when the drawing has a target and the function depends on being near it, which is most fits and most assemblies (Module 15).</p>
+
+    <h2 id="naming">Which sigma, which name: two conventions in use</h2>
+    <p>Here the industry is in the middle of a change, and you will meet both conventions, often in the same week. The course teaches both explicitly so that you can read any report.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table A. The two naming conventions for capability indices.</caption>
+        <thead><tr><th>Convention</th><th>Cp, Cpk</th><th>Pp, Ppk</th><th>Within-subgroup index</th><th>Where you meet it</th></tr></thead>
+        <tbody>
+          <tr><td>AIAG &amp; VDA SPC Manual, 1st edition (2026); ISO 22514 series<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-10">[10]</a></sup></td><td>Computed from the <strong>overall</strong> variation; the C is used only when the process has been shown to be stable</td><td>The <strong>same formula</strong> on the same overall variation; the P records that stability was not proven (a performance study)</td><td>Named Cw, Cwk (R̄/d₂ or S̄/c₄); an analysis tool, not for reporting</td><td>New PPAP and IATF-related submissions, European automotive, anything citing ISO 22514</td></tr>
+          <tr><td>AIAG SPC Reference Manual, 2nd edition (2005), now superseded<sup class="cite"><a href="#ref-11">[11]</a></sup></td><td>Computed from the <strong>within-subgroup</strong> sigma (R̄/d₂ or S̄/c₄); called "short-term"</td><td>Computed from the <strong>overall</strong> sample s; called "long-term" or performance</td><td>That is Cpk itself</td><td>Minitab, JMP and most SPC software defaults; older supplier reports; most training material; Wheeler's writing uses the same split<sup class="cite"><a href="#ref-7">[7]</a></sup></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Under the older convention, Cpk and Ppk are different numbers computed from different sigmas, and their gap is the between-subgroup variation. Under the 2026 convention the letter no longer tells you which sigma was used, because both use the overall variation; the letter tells you whether a control chart was checked first. The manual's own footnote says that what its predecessor called Cpk is now called Cwk, and that Cwk should not be used for reporting.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <p>The practical rule this course applies everywhere: <strong>print the sigma estimate next to every index, every time.</strong> Then the name cannot mislead anyone. The calculator on this page does that, offers both conventions as a toggle, and defaults to the 2026 naming. When you receive a report, the first question to ask is not "what is the Cpk?" but "which sigma is this, and was the process in control?" Module 8 has a checklist for reading a supplier's report.</p>
+
+    <h2 id="stability">Stability first</h2>
+    <p>A capability index is a prediction: it says what fraction of future output will be out of tolerance, on the assumption that the future looks like the sample. That assumption is exactly what a control chart tests. If the chart shows a point beyond the limits or a run rule firing, the process changed during the study, and there is no single distribution to be capable. NIST states the assumption directly: process capability is defined for a process in statistical control.<sup class="cite"><a href="#ref-2">[2]</a></sup> ISO 22514-1 makes the same distinction between a capability study and a performance study.<sup class="cite"><a href="#ref-10">[10]</a></sup> The AIAG &amp; VDA manual requires n ≥ 125 values in at least 25 subgroups for a process capability study and states that tolerance limits are not drawn on control charts.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <p>That last point deserves its own sentence, because it is the most common error in industry. <strong>Control limits are computed from the data and describe the process. Specification limits come from the drawing and describe the customer. They never appear on the same chart.</strong> A point can be inside the specification and outside the control limits (the process changed, and you should find out why before it reaches the specification), or outside the specification and inside the control limits (the process is stable and simply not capable; adjusting it point by point will make it worse). Modules 16 and 17 return to this.</p>
+    <p>What if the chart is not stable? Then you still compute the numbers, because a customer will ask for them, but you name them Pp and Ppk under either convention, you say in the report that the process was not in statistical control, and you treat the index as a description of this sample rather than a prediction. Exercise 2 is exactly that case. The AIAG &amp; VDA manual and ISO 22514-2 also define time-dependent process models that allow a capability statement for processes with known, controlled drift; Module 8 introduces them.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+
+    <h2 id="example1">Worked example 1: a full capability study, raw data to report</h2>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. The setting is realistic: a reamed bore of Ø12.000 ± 0.025 mm in an aluminium housing, measured with a bore micrometer reading to 0.001 mm, five consecutive parts every 30 minutes over two shifts, 25 subgroups, 125 parts.</p>
+    <p>This is the size of study the AIAG &amp; VDA manual asks for, and the same data will return in Module 16 for the control chart theory. Here is all of it.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Bore diameter, mm, 25 subgroups of 5 consecutive parts (constructed data). Subgroup means and ranges computed from the values.</caption><thead><tr><th>Subgroup</th>
+<th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th><th>x<sub>4</sub></th><th>x<sub>5</sub></th>
+<th>Mean x̄</th><th>Range R</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>11.982</td><td>12.007</td><td>12.009</td><td>12.008</td><td>11.997</td><td>12.0006</td><td>0.027</td></tr>
+<tr><td>2</td><td>12.002</td><td>12.012</td><td>12.009</td><td>12.004</td><td>12.008</td><td>12.0070</td><td>0.010</td></tr>
+<tr><td>3</td><td>12.008</td><td>11.999</td><td>12.005</td><td>12.003</td><td>11.996</td><td>12.0022</td><td>0.012</td></tr>
+<tr><td>4</td><td>12.001</td><td>11.994</td><td>12.002</td><td>11.995</td><td>12.005</td><td>11.9994</td><td>0.011</td></tr>
+<tr><td>5</td><td>12.007</td><td>11.998</td><td>11.993</td><td>12.018</td><td>12.005</td><td>12.0042</td><td>0.025</td></tr>
+<tr><td>6</td><td>12.006</td><td>12.000</td><td>12.007</td><td>12.000</td><td>12.007</td><td>12.0040</td><td>0.007</td></tr>
+<tr><td>7</td><td>12.012</td><td>12.025</td><td>12.009</td><td>12.009</td><td>12.001</td><td>12.0112</td><td>0.024</td></tr>
+<tr><td>8</td><td>12.003</td><td>11.996</td><td>12.000</td><td>12.000</td><td>11.995</td><td>11.9988</td><td>0.008</td></tr>
+<tr><td>9</td><td>11.996</td><td>12.009</td><td>12.014</td><td>12.015</td><td>12.005</td><td>12.0078</td><td>0.019</td></tr>
+<tr><td>10</td><td>12.017</td><td>12.015</td><td>12.003</td><td>12.002</td><td>12.002</td><td>12.0078</td><td>0.015</td></tr>
+<tr><td>11</td><td>12.001</td><td>12.008</td><td>12.006</td><td>11.996</td><td>12.006</td><td>12.0034</td><td>0.012</td></tr>
+<tr><td>12</td><td>11.992</td><td>12.004</td><td>12.006</td><td>12.011</td><td>11.997</td><td>12.0020</td><td>0.019</td></tr>
+<tr><td>13</td><td>12.009</td><td>12.007</td><td>12.003</td><td>12.004</td><td>12.009</td><td>12.0064</td><td>0.006</td></tr>
+<tr><td>14</td><td>11.997</td><td>12.001</td><td>12.004</td><td>12.010</td><td>12.007</td><td>12.0038</td><td>0.013</td></tr>
+<tr><td>15</td><td>12.002</td><td>12.013</td><td>12.001</td><td>11.999</td><td>12.001</td><td>12.0032</td><td>0.014</td></tr>
+<tr><td>16</td><td>12.004</td><td>12.001</td><td>12.001</td><td>12.007</td><td>12.007</td><td>12.0040</td><td>0.006</td></tr>
+<tr><td>17</td><td>11.998</td><td>12.004</td><td>12.012</td><td>12.000</td><td>12.015</td><td>12.0058</td><td>0.017</td></tr>
+<tr><td>18</td><td>12.010</td><td>11.998</td><td>12.013</td><td>12.005</td><td>12.007</td><td>12.0066</td><td>0.015</td></tr>
+<tr><td>19</td><td>12.015</td><td>12.004</td><td>12.009</td><td>12.007</td><td>11.996</td><td>12.0062</td><td>0.019</td></tr>
+<tr><td>20</td><td>11.993</td><td>12.001</td><td>12.003</td><td>12.005</td><td>12.008</td><td>12.0020</td><td>0.015</td></tr>
+<tr><td>21</td><td>11.997</td><td>12.015</td><td>12.006</td><td>12.001</td><td>11.995</td><td>12.0028</td><td>0.020</td></tr>
+<tr><td>22</td><td>11.996</td><td>12.012</td><td>12.007</td><td>11.994</td><td>12.002</td><td>12.0022</td><td>0.018</td></tr>
+<tr><td>23</td><td>11.996</td><td>12.004</td><td>11.994</td><td>12.008</td><td>12.018</td><td>12.0040</td><td>0.024</td></tr>
+<tr><td>24</td><td>12.002</td><td>12.001</td><td>12.002</td><td>12.001</td><td>12.007</td><td>12.0026</td><td>0.006</td></tr>
+<tr><td>25</td><td>11.991</td><td>11.989</td><td>12.011</td><td>12.011</td><td>11.996</td><td>11.9996</td><td>0.022</td></tr>
+</tbody></table></div>
+    <h3>Step 1. Is the process stable? Build the X̄-R chart</h3>
+    <p>With n = 5 the constants are A₂ = 0.577, D₃ = 0, D₄ = 2.114, d₂ = 2.326.<sup class="cite"><a href="#ref-13">[13]</a></sup> The grand mean of the 25 subgroup means is x̄̄ = <span data-ex="m07-bore" data-key="chart.xbarbar" data-dp="4">12.0039</span> mm and the mean range is R̄ = <span data-ex="m07-bore" data-key="chart.rbar" data-dp="5">0.01536</span> mm.</p>
+    <div class="formula">UCL<sub>x̄</sub> = x̄̄ + A₂R̄ = 12.0039 + 0.577 × 0.01536 = <span data-ex="m07-bore" data-key="chart.ucl_x" data-dp="4">12.0128</span> mm<br>
+      LCL<sub>x̄</sub> = x̄̄ − A₂R̄ = <span data-ex="m07-bore" data-key="chart.lcl_x" data-dp="4">11.9950</span> mm<br>
+      UCL<sub>R</sub> = D₄R̄ = 2.114 × 0.01536 = <span data-ex="m07-bore" data-key="chart.ucl_r" data-dp="4">0.0325</span> mm; LCL<sub>R</sub> = D₃R̄ = 0
+    </div>
+    <p>The calculator below draws both charts from this table. No subgroup mean falls outside its limits, no range exceeds 0.0325 mm, and none of the Western Electric run rules fires. The process is stable over the study, so under the 2026 convention the indices may be called Cp and Cpk. Notice how narrow the X̄ limits are compared with the tolerance: ±0.0089 mm around the grand mean against ±0.025 mm. That is normal; the limits describe the spread of means of five, which is √5 times tighter than the spread of individual parts. It is one more reason never to draw specification limits on the chart.</p>
+    <h3>Step 2. Is the distribution close to normal?</h3>
+    <p>The Anderson-Darling statistic on the 125 values is A² = <span data-ex="m07-bore" data-key="descriptive.ad_A2" data-dp="3">0.361</span> with p = <span data-ex="m07-bore" data-key="descriptive.ad_p" data-dp="2">0.44</span>. There is no evidence against normality, and the histogram in the calculator looks the part: one mode, mild tails, no truncation at a limit. The normal-based PPM predictions below are therefore reasonable. Module 8 covers what to do when this step fails; Module 11 explains the test itself.</p>
+    <h3>Step 3. Both sigma estimates</h3>
+    <div class="formula">σ̂<sub>within</sub> = R̄ / d₂ = 0.01536 / 2.326 = <span data-ex="m07-bore" data-key="within.sigma" data-dp="6">0.006604</span> mm<br>
+      σ̂<sub>overall</sub> = s = <span data-ex="m07-bore" data-key="overall.s" data-dp="6">0.006763</span> mm (sample standard deviation of all 125 values)
+    </div>
+    <p>The ratio is 0.98: the two estimates agree within about 2 %, which is what a stable process should give. The small excess in the overall sigma is the slight subgroup-to-subgroup movement you can see in the X̄ chart, well inside the limits.</p>
+    <h3>Step 4. The indices, each with its sigma</h3>
+    <p>Tolerance width USL − LSL = 0.050 mm. Distances from the grand mean: USL − x̄̄ = 12.025 − 12.0039 = 0.0211 mm and x̄̄ − LSL = 0.0289 mm. The mean sits above nominal, so the upper side governs.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Capability of the bore, both conventions. Values computed from the full table; the arithmetic shown uses rounded intermediates and reproduces the index to two decimals.</caption>
+        <thead><tr><th>Index (2026 name)</th><th>Legacy 2005 name</th><th>Sigma used</th><th>Arithmetic</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Cp</td><td>Pp</td><td>overall s = 0.006763</td><td>0.050 / (6 × 0.006763) = 0.050 / 0.0406</td><td class="num"><span data-ex="m07-bore" data-key="overall.Pp" data-dp="2">1.23</span></td></tr>
+          <tr><td>Cpu</td><td>Ppu</td><td>overall s</td><td>0.0211 / (3 × 0.006763) = 0.0211 / 0.02029</td><td class="num"><span data-ex="m07-bore" data-key="overall.Ppu" data-dp="2">1.04</span></td></tr>
+          <tr><td>Cpl</td><td>Ppl</td><td>overall s</td><td>0.0289 / 0.02029</td><td class="num"><span data-ex="m07-bore" data-key="overall.Ppl" data-dp="2">1.42</span></td></tr>
+          <tr><td><strong>Cpk</strong></td><td><strong>Ppk</strong></td><td>overall s</td><td>min(1.04, 1.42)</td><td class="num"><strong><span data-ex="m07-bore" data-key="overall.Ppk" data-dp="2">1.04</span></strong></td></tr>
+          <tr><td>Cpm</td><td>Cpm</td><td>overall s and (x̄̄ − T)</td><td>0.050 / (6 × √(0.006763² + 0.0039²))</td><td class="num"><span data-ex="m07-bore" data-key="overall.Cpm" data-dp="2">1.07</span></td></tr>
+          <tr><td>Cw</td><td>Cp</td><td>within R̄/d₂ = 0.006604</td><td>0.050 / (6 × 0.006604) = 0.050 / 0.0396</td><td class="num"><span data-ex="m07-bore" data-key="within.Cw" data-dp="2">1.26</span></td></tr>
+          <tr><td>Cwu</td><td>Cpu</td><td>within R̄/d₂</td><td>0.0211 / (3 × 0.006604) = 0.0211 / 0.01981</td><td class="num"><span data-ex="m07-bore" data-key="within.Cwu" data-dp="2">1.06</span></td></tr>
+          <tr><td>Cwl</td><td>Cpl</td><td>within R̄/d₂</td><td>0.0289 / 0.01981</td><td class="num"><span data-ex="m07-bore" data-key="within.Cwl" data-dp="2">1.46</span></td></tr>
+          <tr><td><strong>Cwk</strong></td><td><strong>Cpk</strong></td><td>within R̄/d₂</td><td>min(1.06, 1.46)</td><td class="num"><strong><span data-ex="m07-bore" data-key="within.Cwk" data-dp="2">1.06</span></strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Read the two bold rows together. A supplier using older software would report Cpk = 1.06 and Ppk = 1.04. A report to the 2026 convention would say Cpk = 1.04 (stable process, overall variation), with Cwk = 1.06 available as an analysis figure. Either way, the process is centred <span data-ex="m07-bore" data-key="overall.k" data-dp="3">0.156</span> of the half-tolerance above nominal (that is k), and the potential index of 1.23 to 1.26 tells you that centring alone would lift the actual index to about 1.25. Not to 1.33: the spread is too large for that as well.</p>
+    <h3>Step 5. From index to parts per million</h3>
+    <p>For a normal distribution the fraction beyond a limit is the tail area beyond Z = 3 × (one-sided index). On the upper side Z = 3 × 1.04 = 3.12, and the normal tail beyond 3.12 is 0.000906, or <span data-ex="m07-bore" data-key="overall.ppm_upper" data-dp="0">906</span> PPM. The lower side adds <span data-ex="m07-bore" data-key="overall.ppm_lower" data-dp="1">9.6</span> PPM, for a total of <span data-ex="m07-bore" data-key="overall.ppm_total" data-dp="0">915</span> PPM predicted from the overall sigma. From the within sigma the prediction is <span data-ex="m07-bore" data-key="within.ppm_total" data-dp="0">706</span> PPM. The observed count in the sample is <span data-ex="m07-bore" data-key="observed.n_out" data-dp="0">0</span> out of 125, which is entirely consistent with either prediction: at 900 PPM you would expect to see one bad part in about 1,100. The largest value in the table, 12.025, sits exactly on the upper limit, which is a reminder that the tail is real even when no part has crossed.</p>
+    <p>Three things to say about the PPM figure. It is a prediction under the normal assumption, so it inherits Step 2. It is far more sensitive to the sigma estimate than the index is: a 2 % change in σ moved the prediction from 706 to 915 PPM, a 30 % change. And it is a long-run rate for a process that stays exactly like this one; it says nothing about next week's tool change.</p>
+    <h3>Step 6. Report</h3>
+    <p>A capability report for this bore should state: the characteristic and tolerance; the sample (125 parts, 25 subgroups of 5, consecutive, dates and shifts); the gauge and its resolution, with a reference to its gauge R&amp;R (Module 4); the control charts with their limits and the statement that no rule fired; the normality check; both sigma estimates; the indices with the sigma named for each; the predicted and observed PPM; and the confidence interval on the reported index (next section). "Cpk = 1.04" on its own is not a report.</p>
+
+    <h3 id="calc-bore">Calculator: process capability</h3>
+    <p>Pre-loaded with the bore data above so that you can see it reproduce Table 2. Paste your own data in the same layout, one subgroup per line. Every chart is drawn from the data with the constants for the subgroup size.</p>
+    <div class="calc" data-calc="capability" id="calc-cap-bore">
+      <h3>Process capability calculator</h3>
+      <p class="calc-intro">Stability chart, normality check, both sigma estimates, indices under either naming convention, predicted PPM and confidence intervals. Nothing is sent anywhere; the arithmetic runs in your browser.</p>
+      <script type="application/json" class="calc-data">{"x":[11.982,12.007,12.009,12.008,11.997,12.002,12.012,12.009,12.004,12.008,12.008,11.999,12.005,12.003,11.996,12.001,11.994,12.002,11.995,12.005,12.007,11.998,11.993,12.018,12.005,12.006,12.0,12.007,12.0,12.007,12.012,12.025,12.009,12.009,12.001,12.003,11.996,12.0,12.0,11.995,11.996,12.009,12.014,12.015,12.005,12.017,12.015,12.003,12.002,12.002,12.001,12.008,12.006,11.996,12.006,11.992,12.004,12.006,12.011,11.997,12.009,12.007,12.003,12.004,12.009,11.997,12.001,12.004,12.01,12.007,12.002,12.013,12.001,11.999,12.001,12.004,12.001,12.001,12.007,12.007,11.998,12.004,12.012,12.0,12.015,12.01,11.998,12.013,12.005,12.007,12.015,12.004,12.009,12.007,11.996,11.993,12.001,12.003,12.005,12.008,11.997,12.015,12.006,12.001,11.995,11.996,12.012,12.007,11.994,12.002,11.996,12.004,11.994,12.008,12.018,12.002,12.001,12.002,12.001,12.007,11.991,11.989,12.011,12.011,11.996],"usl":12.025,"lsl":11.975,"target":12.0,"subgroup_size":5,"chart":"xbar_r","units":"mm","label":"m07-bore"}</script>
+    </div>
+
+    <h2 id="thresholds">The 1.33 and 1.67 conventions</h2>
+    <p>Where do the thresholds come from? A Cpk of 1.00 puts a specification limit 3σ from the mean: about 1,350 PPM beyond it on that side if the process never moves. A Cpk of 1.33 puts the limit 4σ away, which leaves a margin of 1σ for the mean to wander before the 3σ tail reaches the limit; 1.67 puts it 5σ away. Those are the mechanics. The numbers themselves are customer conventions, and the two most cited sources for them are the AIAG PPAP manual and the AIAG &amp; VDA SPC manual.</p>
+    <ul>
+      <li>The AIAG PPAP manual (4th edition) sets acceptance bands for the initial process study submitted with a part approval: an index above 1.67 is acceptable, 1.33 to 1.67 may be acceptable with customer agreement, and below 1.33 is not, with an ongoing expectation of at least 1.33. The course author has confirmed the manual's existence and edition against the AIAG catalogue but has not read the manual; the bands are cited here through a secondary source and should be confirmed against your own copy or your customer's requirement.<sup class="cite"><a href="#ref-8">[8]</a><a href="#ref-9">[9]</a></sup></li>
+      <li>The AIAG &amp; VDA SPC manual gives example targets by class of characteristic: for a process capability or performance study, 1.67 for critical characteristics, 1.33 for major, 1.00 for minor; for a preliminary study on smaller samples the targets are higher (2.00 and 1.67 for critical, 1.67 and 1.33 for major at n ≥ 125), and the manual states that they are examples and that the requirement is a matter of customer agreement.<sup class="cite"><a href="#ref-1">[1]</a></sup></li>
+    </ul>
+    <p>So the honest form of the rule is: your customer may require 1.33 for ongoing production and 1.67 for safety or critical characteristics, and will say so on the drawing or in the supplier quality manual; ask. And the honest form of the argument with a program manager is not that 1.1 fails a threshold but that 1.1 means the limit is 3.3σ from the mean, that any shift of a third of a sigma will start producing rejects, and that the confidence interval on the estimate probably includes 1.0 anyway.</p>
+
+    <h2 id="ci">How sure are you? Confidence intervals on Cpk</h2>
+    <p>A Cpk computed from a sample is an estimate, and it has a sampling error like any other estimate. Bissell's 1990 paper, whose title asks "How reliable is your capability index?", gave the standard approximations; Kushler and Hurley compared several bounds in 1992.<sup class="cite"><a href="#ref-5">[5]</a><a href="#ref-6">[6]</a></sup> NIST gives the approximate 95 % interval in the form used here:<sup class="cite"><a href="#ref-2">[2]</a></sup></p>
+    <div class="formula">Ĉpk ± 1.96 × √[ 1/(9n) + Ĉpk² / (2(n − 1)) ]
+      <span class="where">n is the number of individual values behind the estimate. The interval is for an index computed from the overall s on normal data; the within-sigma version behaves similarly for the same n.</span>
+    </div>
+    <p><span class="example-label">Same constructed bore data.</span> For the full study, n = 125 and Ĉpk = 1.04: the square root term is 0.072, so the interval is <span data-ex="m07-bore" data-key="overall.Ppk_ci95.0" data-dp="2">0.90</span> to <span data-ex="m07-bore" data-key="overall.Ppk_ci95.1" data-dp="2">1.18</span>. Now take only the first six subgroups, 30 parts, which is a sample size that appears on a great many supplier reports. The estimate happens to come out at <span data-ex="m07-bore-30" data-key="overall.Ppk" data-dp="2">1.07</span>, a little higher than the full-study value, and the square root term is 0.153, so the interval is <span data-ex="m07-bore-30" data-key="overall.Ppk_ci95.0" data-dp="2">0.77</span> to <span data-ex="m07-bore-30" data-key="overall.Ppk_ci95.1" data-dp="2">1.37</span>.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table B. The same process, two sample sizes (constructed bore data).</caption>
+        <thead><tr><th>Sample</th><th>n</th><th>Ĉpk (overall s)</th><th>Approximate 95 % interval</th><th>Width</th></tr></thead>
+        <tbody>
+          <tr><td>First 6 subgroups</td><td class="num">30</td><td class="num"><span data-ex="m07-bore-30" data-key="overall.Ppk" data-dp="2">1.07</span></td><td class="num">0.77 to 1.37</td><td class="num">0.60</td></tr>
+          <tr><td>All 25 subgroups</td><td class="num">125</td><td class="num"><span data-ex="m07-bore" data-key="overall.Ppk" data-dp="2">1.04</span></td><td class="num">0.90 to 1.18</td><td class="num">0.28</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>With 30 parts, a reported Cpk of 1.07 is consistent with a true value anywhere from well below 1.0 to well above 1.33. It cannot demonstrate that a 1.33 requirement is met and it cannot demonstrate that it is missed. This is why the standards ask for 125 values, why NIST suggests at least 50 and prefers 100 or more for a capability study,<sup class="cite"><a href="#ref-2">[2]</a></sup> and why a report with n = 30 and no interval should be read as "we do not know yet". The interval shrinks roughly with √n, so halving the width of the 30-part interval takes about four times the data.</p>
+    <p>Cp has an exact interval based on the chi-square distribution, because it involves only σ: for the full bore study it runs from <span data-ex="m07-bore" data-key="overall.Pp_ci95.0" data-dp="2">1.08</span> to <span data-ex="m07-bore" data-key="overall.Pp_ci95.1" data-dp="2">1.39</span>. The calculator prints both intervals.</p>
+
+    <h2 id="example2">Worked example 2: one specification limit</h2>
+    <p class="example-label">Constructed data, not a real production run. Setting: a powder fill with a declared minimum content of 250.0 g. There is no upper limit on the drawing (overfill costs money but does not fail the part). One hundred consecutive containers from a checkweigher reading to 0.1 g.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Fill weight, g, 100 consecutive containers in time order, read left to right then down (constructed data).</caption><thead><tr><th>Values</th>
+<th>+0</th><th>+1</th><th>+2</th><th>+3</th><th>+4</th><th>+5</th><th>+6</th><th>+7</th><th>+8</th><th>+9</th>
+</tr></thead><tbody>
+<tr><td>1–10</td><td>251.7</td><td>251.4</td><td>252.1</td><td>251.0</td><td>253.1</td><td>252.4</td><td>252.7</td><td>251.7</td><td>253.9</td><td>251.6</td></tr>
+<tr><td>11–20</td><td>251.4</td><td>252.6</td><td>250.6</td><td>251.2</td><td>252.5</td><td>251.1</td><td>250.0</td><td>251.8</td><td>252.7</td><td>251.8</td></tr>
+<tr><td>21–30</td><td>252.8</td><td>251.4</td><td>250.5</td><td>251.4</td><td>251.9</td><td>251.6</td><td>251.7</td><td>252.0</td><td>252.6</td><td>251.1</td></tr>
+<tr><td>31–40</td><td>251.8</td><td>251.5</td><td>251.9</td><td>252.1</td><td>252.4</td><td>251.2</td><td>251.1</td><td>251.4</td><td>252.0</td><td>251.6</td></tr>
+<tr><td>41–50</td><td>251.5</td><td>253.4</td><td>250.7</td><td>253.0</td><td>251.9</td><td>251.7</td><td>252.0</td><td>253.8</td><td>250.7</td><td>251.7</td></tr>
+<tr><td>51–60</td><td>251.6</td><td>252.2</td><td>249.9</td><td>252.8</td><td>251.0</td><td>253.5</td><td>251.6</td><td>251.7</td><td>251.0</td><td>251.7</td></tr>
+<tr><td>61–70</td><td>253.0</td><td>252.4</td><td>251.9</td><td>251.0</td><td>250.4</td><td>252.7</td><td>254.1</td><td>252.3</td><td>253.2</td><td>251.7</td></tr>
+<tr><td>71–80</td><td>252.4</td><td>251.0</td><td>252.7</td><td>250.3</td><td>251.6</td><td>252.5</td><td>252.2</td><td>251.8</td><td>253.4</td><td>251.2</td></tr>
+<tr><td>81–90</td><td>252.5</td><td>252.7</td><td>253.1</td><td>254.1</td><td>252.7</td><td>252.0</td><td>251.6</td><td>251.6</td><td>252.6</td><td>251.6</td></tr>
+<tr><td>91–100</td><td>252.1</td><td>252.1</td><td>253.0</td><td>251.9</td><td>251.1</td><td>252.4</td><td>250.6</td><td>251.8</td><td>252.0</td><td>253.1</td></tr>
+</tbody></table></div>
+    <p>There are no subgroups here; the data are individual values in time order, so the stability check is an individuals and moving range chart and the within sigma comes from the moving range. Mean x̄ = <span data-ex="m07-fill" data-key="chart.xbar" data-dp="3">251.951</span> g; average moving range MR̄ = <span data-ex="m07-fill" data-key="chart.mrbar" data-dp="4">1.0424</span> g; σ̂<sub>within</sub> = MR̄/1.128 = <span data-ex="m07-fill" data-key="within.sigma" data-dp="4">0.9241</span> g; individuals limits x̄ ± 3σ̂<sub>within</sub> = <span data-ex="m07-fill" data-key="chart.lcl_x" data-dp="3">249.179</span> to <span data-ex="m07-fill" data-key="chart.ucl_x" data-dp="3">254.723</span> g; moving range upper limit 3.267 × MR̄ = <span data-ex="m07-fill" data-key="chart.ucl_mr" data-dp="3">3.406</span> g. No individual value and no moving range crosses its limit. Two of the Nelson rules do fire (a run of fifteen points within 1σ of the centre around containers 38 to 41, and an alternating pattern ending at 60); with 100 points and nine rules watched, an occasional rule hit is expected by chance, and the calculator lists them so that you can decide whether to look at the line. Here we note them and proceed. The Anderson-Darling p-value is <span data-ex="m07-fill" data-key="descriptive.ad_p" data-dp="2">0.26</span>.</p>
+    <p>The overall sigma is s = <span data-ex="m07-fill" data-key="overall.s" data-dp="4">0.8704</span> g, about 6 % below the moving-range estimate; for individual data with no drift the two should agree within sampling noise, and they do. With one limit there is no Cp and no Cpm, only the lower one-sided index:</p>
+    <div class="formula">Cpl = (x̄ − LSL) / 3s = (251.951 − 250.0) / (3 × 0.8704) = 1.951 / 2.611 = <span data-ex="m07-fill" data-key="overall.Ppl" data-dp="2">0.75</span> &nbsp;&nbsp; (overall s; the process is stable, so 2026 naming allows Cpl)<br>
+      Cwl = 1.951 / (3 × 0.9241) = 1.951 / 2.772 = <span data-ex="m07-fill" data-key="within.Cwl" data-dp="2">0.70</span> &nbsp;&nbsp; (within, MR̄/d₂)
+    </div>
+    <p>Z = 3 × 0.75 = 2.24 below the mean, and the lower tail of the normal beyond that is <span data-ex="m07-fill" data-key="overall.ppm_lower" data-dp="0">12501</span> PPM, about 1.25 % of containers under the declared minimum. The sample agrees: <span data-ex="m07-fill" data-key="observed.n_out" data-dp="0">1</span> of the 100 containers (249.9 g) is below 250.0. The 95 % interval on the index is <span data-ex="m07-fill" data-key="overall.Ppk_ci95.0" data-dp="2">0.62</span> to <span data-ex="m07-fill" data-key="overall.Ppk_ci95.1" data-dp="2">0.87</span>; the process is not capable by any threshold anyone uses, and the remedy is obvious and expensive: raise the mean, or reduce the spread. Raising the mean by 1 g would move the index to about 1.13 at the cost of 1 g of powder per container; reducing the spread needs an engineering change to the filler. That trade-off is Module 15's subject.</p>
+    <div class="calc" data-calc="capability" id="calc-cap-fill">
+      <h3>Example 2 in the calculator (inputs collapsed; expand to edit)</h3>
+      <script type="application/json" class="calc-data">{"x":[251.7,251.4,252.1,251.0,253.1,252.4,252.7,251.7,253.9,251.6,251.4,252.6,250.6,251.2,252.5,251.1,250.0,251.8,252.7,251.8,252.8,251.4,250.5,251.4,251.9,251.6,251.7,252.0,252.6,251.1,251.8,251.5,251.9,252.1,252.4,251.2,251.1,251.4,252.0,251.6,251.5,253.4,250.7,253.0,251.9,251.7,252.0,253.8,250.7,251.7,251.6,252.2,249.9,252.8,251.0,253.5,251.6,251.7,251.0,251.7,253.0,252.4,251.9,251.0,250.4,252.7,254.1,252.3,253.2,251.7,252.4,251.0,252.7,250.3,251.6,252.5,252.2,251.8,253.4,251.2,252.5,252.7,253.1,254.1,252.7,252.0,251.6,251.6,252.6,251.6,252.1,252.1,253.0,251.9,251.1,252.4,250.6,251.8,252.0,253.1],"usl":null,"lsl":250.0,"target":null,"subgroup_size":1,"chart":"imr","units":"g","collapsed":true}</script>
+    </div>
+
+    <h2 id="example3">Worked example 3: capable but off target, Cpk versus Cpm</h2>
+    <p class="example-label">Constructed data, not a real production run. Setting: a turned shoulder length of 25.000 ± 0.030 mm, measured on a CMM to 0.001 mm, 50 consecutive parts. The length sets an axial clearance in an assembly, so the target of 25.000 matters for function and not only the limits.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 4. Shoulder length, mm, 50 consecutive parts in time order (constructed data).</caption><thead><tr><th>Values</th>
+<th>+0</th><th>+1</th><th>+2</th><th>+3</th><th>+4</th><th>+5</th><th>+6</th><th>+7</th><th>+8</th><th>+9</th>
+</tr></thead><tbody>
+<tr><td>1–10</td><td>25.008</td><td>25.010</td><td>25.007</td><td>25.014</td><td>25.019</td><td>25.015</td><td>25.011</td><td>25.017</td><td>25.012</td><td>25.013</td></tr>
+<tr><td>11–20</td><td>25.009</td><td>25.020</td><td>25.007</td><td>25.020</td><td>25.012</td><td>25.008</td><td>25.014</td><td>25.011</td><td>25.015</td><td>25.013</td></tr>
+<tr><td>21–30</td><td>25.006</td><td>25.010</td><td>25.013</td><td>25.018</td><td>25.012</td><td>25.008</td><td>25.014</td><td>25.014</td><td>25.013</td><td>25.006</td></tr>
+<tr><td>31–40</td><td>25.015</td><td>25.016</td><td>25.005</td><td>25.017</td><td>25.005</td><td>25.009</td><td>25.015</td><td>25.015</td><td>25.013</td><td>25.021</td></tr>
+<tr><td>41–50</td><td>25.010</td><td>25.020</td><td>25.010</td><td>25.009</td><td>25.008</td><td>25.009</td><td>25.015</td><td>25.016</td><td>25.015</td><td>25.010</td></tr>
+</tbody></table></div>
+    <p>Individuals and moving range chart: x̄ = <span data-ex="m07-cpm" data-key="chart.xbar" data-dp="4">25.0124</span> mm, MR̄ = <span data-ex="m07-cpm" data-key="chart.mrbar" data-dp="5">0.00531</span> mm, limits <span data-ex="m07-cpm" data-key="chart.lcl_x" data-dp="4">24.9983</span> to <span data-ex="m07-cpm" data-key="chart.ucl_x" data-dp="4">25.0266</span> mm, nothing outside, no rule fires, Anderson-Darling p = <span data-ex="m07-cpm" data-key="descriptive.ad_p" data-dp="2">0.38</span>. Overall s = <span data-ex="m07-cpm" data-key="overall.s" data-dp="5">0.00418</span> mm, within σ̂ = MR̄/1.128 = <span data-ex="m07-cpm" data-key="within.sigma" data-dp="5">0.00470</span> mm.</p>
+    <p>The process is tight: Cp = 0.060 / (6 × 0.00418) = 0.060 / 0.02508 = <span data-ex="m07-cpm" data-key="overall.Pp" data-dp="2">2.39</span>. But the mean sits 0.0124 mm above target, 41 % of the way to the upper limit (k = <span data-ex="m07-cpm" data-key="overall.k" data-dp="3">0.415</span>), so Cpu = (25.030 − 25.0124) / (3 × 0.00418) = 0.0176 / 0.01254 = <span data-ex="m07-cpm" data-key="overall.Ppu" data-dp="2">1.40</span> and Cpk = <span data-ex="m07-cpm" data-key="overall.Ppk" data-dp="2">1.40</span>. Most customers would accept 1.40 without comment. Now the target-based index:</p>
+    <div class="formula">Cpm = 0.060 / (6 × √(0.00418² + 0.0124²)) = 0.060 / (6 × 0.01312) = 0.060 / 0.0787 = <span data-ex="m07-cpm" data-key="overall.Cpm" data-dp="2">0.76</span></div>
+    <p>The offset from target is three times the standard deviation, so the offset term dominates the denominator and Cpm is less than a third of Cp. Cpk sees a process comfortably inside its limits; Cpm sees a process that is consistently 0.012 mm long. Which is right depends on the part. If the drawing tolerance is the whole story, Cpk is the index. If the shoulder length feeds a clearance that was designed around 25.000, every part is carrying a 0.012 mm error into the stack, and Cpm is telling you what Cpk cannot. In this case the fix is a single offset in the tool setter, which is the cheapest capability improvement there is, and Cpk would never have prompted it.</p>
+    <div class="calc" data-calc="capability" id="calc-cap-cpm">
+      <h3>Example 3 in the calculator (inputs collapsed; expand to edit)</h3>
+      <script type="application/json" class="calc-data">{"x":[25.008,25.01,25.007,25.014,25.019,25.015,25.011,25.017,25.012,25.013,25.009,25.02,25.007,25.02,25.012,25.008,25.014,25.011,25.015,25.013,25.006,25.01,25.013,25.018,25.012,25.008,25.014,25.014,25.013,25.006,25.015,25.016,25.005,25.017,25.005,25.009,25.015,25.015,25.013,25.021,25.01,25.02,25.01,25.009,25.008,25.009,25.015,25.016,25.015,25.01],"usl":25.03,"lsl":24.97,"target":25.0,"subgroup_size":1,"chart":"imr","units":"mm","collapsed":true}</script>
+    </div>
+
+    <h2 id="check">A published check: the NIST handbook example</h2>
+    <p>The NIST/SEMATECH e-Handbook gives a small capability example with USL = 20, LSL = 8, mean 16 and standard deviation 2, and reports Cp = 1.00, Cpu = 0.667, Cpl = 1.333, Cpk = 0.667 and k = 0.333.<sup class="cite"><a href="#ref-2">[2]</a></sup> The course's verification scripts and the calculator on this page reproduce those values on a constructed sample of 100 values standardised to that mean and standard deviation: Cp = <span data-ex="chk-nist-capability" data-key="overall.Pp" data-dp="3">1.000</span>, Cpu = <span data-ex="chk-nist-capability" data-key="overall.Ppu" data-dp="3">0.667</span>, Cpl = <span data-ex="chk-nist-capability" data-key="overall.Ppl" data-dp="3">1.333</span>, k = <span data-ex="chk-nist-capability" data-key="overall.k" data-dp="3">0.333</span>. The NIST example is a textbook illustration and does not come with a control chart; the constructed sample used to reproduce it happens to fail the stability check, which is a good reminder that the arithmetic and the interpretation are separate steps.</p>
+
+    <h2 id="short-long">Short-term, long-term, and what "sigma level" has to do with it</h2>
+    <p>The older convention called the within-sigma index "short-term capability" and the overall-sigma index "long-term performance". The words are useful as long as you remember what they mean: short-term is what the process does over a few consecutive parts, long-term is what it did over the whole study, including whatever moved. Neither is the process's behaviour over the next year unless the study covered the sources of variation that will act over the next year (tool wear, material lots, operators, seasons). A 125-part study on one shift with one lot of material is a short-term study however you compute the sigma. Module 5's sampling plan is what makes a study representative, not the choice of formula.</p>
+    <p>Module 6 introduced the sigma level with its 1.5σ shift convention. The connection is direct: Cpk × 3 is a Z-value, so a Cpk of 1.33 is a 4σ process in the unshifted sense, and a "six sigma process" in Motorola's sense is one whose limit is 6σ from the short-term mean, Cp = 2.00, with a 1.5σ shift allowed for the long term, which is Cpk = 1.50 after the shift. The 3.4 PPM figure comes from that shifted one-sided tail. The controversy over whether a fixed 1.5σ shift is meaningful was covered in Module 6; in capability terms, the equivalent honest statement is simply to report both the within and the overall index and let the gap between them show how much the process actually moved.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Reporting a Cpk without a control chart.</strong> Consequence: the index describes a sample, not a process, and predicts nothing; a supplier can pass a study on a process that shifts every hour. Fix: chart first, every time, and say in the report which rules were checked.</li>
+      <li><strong>Not saying which sigma.</strong> Consequence: a Cpk of 1.06 and a Ppk of 1.04 from the same data get compared with each other, or with a threshold written for the other one. Fix: print the sigma estimate and the convention next to every index.</li>
+      <li><strong>Drawing specification limits on the control chart.</strong> Consequence: the chart stops detecting process changes and starts telling operators to adjust a stable process, which increases variation. Fix: control limits from the data on the chart; specification limits on the histogram and in the capability table only.</li>
+      <li><strong>Thirty parts and no interval.</strong> Consequence: a Cpk of 1.07 gets read as a fact when its interval runs from 0.77 to 1.37. Fix: report the interval, aim for 125 values in 25 subgroups, and treat small studies as preliminary.</li>
+      <li><strong>Assuming normality.</strong> Consequence: the PPM prediction can be wrong by an order of magnitude for a skewed or bounded characteristic, and Cpk on one-sided form tolerances (flatness, runout) is systematically misleading. Fix: test and look; use Module 8's methods when the shape is not normal.</li>
+      <li><strong>Picking parts from a bin.</strong> Consequence: no time order, no subgroups, no chart; the within sigma is meaningless and the overall sigma may be too. Fix: consecutive parts, recorded in order, in rational subgroups (Module 5).</li>
+      <li><strong>Reading Cp as capability.</strong> Consequence: a process with Cp = 2 and Cpk = 0.8 is called capable on the strength of the first number. Fix: Cpk predicts defects; Cp says what centring could achieve.</li>
+      <li><strong>Fixing the number instead of the process.</strong> Consequence: a wider tolerance, a smaller sample, a different sigma, or a transformation gets the index over the line and the customer still receives the same parts. Fix: the index is a measurement; if you do not like it, change the process, and prove the change with a new study.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a unilateral tolerance</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: a milled keyway width with a unilateral tolerance of 6.000 +0.030/0 mm (LSL 6.000, USL 6.030, mid-tolerance 6.015), measured with a gauge to 0.001 mm, 20 subgroups of 4 consecutive parts.</p>
+    <div class="table-wrap"><table class="data"><caption>Exercise 1 data. Keyway width, mm, 20 subgroups of 4 (constructed data).</caption><thead><tr><th>Subgroup</th>
+<th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th><th>x<sub>4</sub></th>
+</tr></thead><tbody>
+<tr><td>1</td><td>6.014</td><td>6.014</td><td>6.017</td><td>6.021</td></tr>
+<tr><td>2</td><td>6.017</td><td>6.019</td><td>6.018</td><td>6.018</td></tr>
+<tr><td>3</td><td>6.016</td><td>6.017</td><td>6.009</td><td>6.015</td></tr>
+<tr><td>4</td><td>6.019</td><td>6.023</td><td>6.021</td><td>6.016</td></tr>
+<tr><td>5</td><td>6.018</td><td>6.022</td><td>6.017</td><td>6.015</td></tr>
+<tr><td>6</td><td>6.012</td><td>6.012</td><td>6.015</td><td>6.022</td></tr>
+<tr><td>7</td><td>6.020</td><td>6.015</td><td>6.024</td><td>6.020</td></tr>
+<tr><td>8</td><td>6.010</td><td>6.014</td><td>6.020</td><td>6.025</td></tr>
+<tr><td>9</td><td>6.019</td><td>6.018</td><td>6.016</td><td>6.015</td></tr>
+<tr><td>10</td><td>6.015</td><td>6.017</td><td>6.016</td><td>6.018</td></tr>
+<tr><td>11</td><td>6.017</td><td>6.023</td><td>6.018</td><td>6.022</td></tr>
+<tr><td>12</td><td>6.017</td><td>6.015</td><td>6.015</td><td>6.012</td></tr>
+<tr><td>13</td><td>6.027</td><td>6.024</td><td>6.019</td><td>6.016</td></tr>
+<tr><td>14</td><td>6.018</td><td>6.020</td><td>6.023</td><td>6.013</td></tr>
+<tr><td>15</td><td>6.014</td><td>6.013</td><td>6.016</td><td>6.021</td></tr>
+<tr><td>16</td><td>6.008</td><td>6.017</td><td>6.005</td><td>6.014</td></tr>
+<tr><td>17</td><td>6.017</td><td>6.014</td><td>6.015</td><td>6.030</td></tr>
+<tr><td>18</td><td>6.022</td><td>6.023</td><td>6.012</td><td>6.014</td></tr>
+<tr><td>19</td><td>6.015</td><td>6.008</td><td>6.018</td><td>6.026</td></tr>
+<tr><td>20</td><td>6.015</td><td>6.019</td><td>6.009</td><td>6.022</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Compute x̄̄, R̄, the X̄ and R chart limits for n = 4 (A₂ = 0.729, D₃ = 0, D₄ = 2.282, d₂ = 2.059) and state whether the process is stable. (b) Compute σ̂<sub>within</sub> and the overall s. (c) Compute Cw, Cwu, Cwl, Cwk (or, in legacy names, Cp, Cpu, Cpl, Cpk) and Pp, Ppu, Ppl, Ppk. (d) Predict the PPM out of tolerance from each Cpk and compare with the count in the data. (e) The customer requires 1.33. Where is the process centred relative to mid-tolerance, and what would centring alone achieve?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x̄̄ = <span data-ex="m07-ex1-keyway" data-key="chart.xbarbar" data-dp="4">6.0172</span> mm, R̄ = <span data-ex="m07-ex1-keyway" data-key="chart.rbar" data-dp="4">0.0091</span> mm. UCL<sub>x̄</sub> = 6.0172 + 0.729 × 0.0091 = 6.0172 + 0.00663 = <span data-ex="m07-ex1-keyway" data-key="chart.ucl_x" data-dp="4">6.0238</span>; LCL<sub>x̄</sub> = <span data-ex="m07-ex1-keyway" data-key="chart.lcl_x" data-dp="4">6.0106</span>; UCL<sub>R</sub> = 2.282 × 0.0091 = <span data-ex="m07-ex1-keyway" data-key="chart.ucl_r" data-dp="4">0.0208</span>. All 20 means and ranges are inside their limits and no run rule fires: stable. (Anderson-Darling p = <span data-ex="m07-ex1-keyway" data-key="descriptive.ad_p" data-dp="2">0.16</span>, no evidence against normality.)</p>
+      <p><strong>(b)</strong> σ̂<sub>within</sub> = 0.0091 / 2.059 = <span data-ex="m07-ex1-keyway" data-key="within.sigma" data-dp="5">0.00442</span> mm; overall s = <span data-ex="m07-ex1-keyway" data-key="overall.s" data-dp="5">0.00453</span> mm. Ratio 0.98: consistent with a stable process.</p>
+      <p><strong>(c)</strong> Within: Cw = 0.030 / (6 × 0.00442) = <span data-ex="m07-ex1-keyway" data-key="within.Cw" data-dp="2">1.13</span>; Cwu = (6.030 − 6.0172) / (3 × 0.00442) = 0.0128 / 0.01326 = <span data-ex="m07-ex1-keyway" data-key="within.Cwu" data-dp="2">0.97</span>; Cwl = (6.0172 − 6.000) / 0.01326 = <span data-ex="m07-ex1-keyway" data-key="within.Cwl" data-dp="2">1.30</span>; Cwk = <span data-ex="m07-ex1-keyway" data-key="within.Cwk" data-dp="2">0.97</span>. Overall: Pp = <span data-ex="m07-ex1-keyway" data-key="overall.Pp" data-dp="2">1.10</span>, Ppu = <span data-ex="m07-ex1-keyway" data-key="overall.Ppu" data-dp="2">0.94</span>, Ppl = <span data-ex="m07-ex1-keyway" data-key="overall.Ppl" data-dp="2">1.27</span>, Ppk = <span data-ex="m07-ex1-keyway" data-key="overall.Ppk" data-dp="2">0.94</span>. Because the chart is stable, the 2026 convention names the overall-s index Cpk = 0.94.</p>
+      <p><strong>(d)</strong> From the within index: <span data-ex="m07-ex1-keyway" data-key="within.ppm_total" data-dp="0">1922</span> PPM; from the overall index: <span data-ex="m07-ex1-keyway" data-key="overall.ppm_total" data-dp="0">2394</span> PPM, almost all of it above the upper limit. Observed: <span data-ex="m07-ex1-keyway" data-key="observed.n_out" data-dp="0">0</span> of 80 out of tolerance (one value sits exactly on 6.030). Expected at 0.2 % in 80 parts: about 0.2, so seeing none is unremarkable. The 95 % interval on Cpk is <span data-ex="m07-ex1-keyway" data-key="overall.Ppk_ci95.0" data-dp="2">0.78</span> to <span data-ex="m07-ex1-keyway" data-key="overall.Ppk_ci95.1" data-dp="2">1.11</span>.</p>
+      <p><strong>(e)</strong> The mean is 0.0022 mm above mid-tolerance, k = <span data-ex="m07-ex1-keyway" data-key="overall.k" data-dp="3">0.146</span>; the cutter is running large. Centring would raise Cpk to Cp, about 1.10 to 1.13, still short of 1.33. To reach 1.33 with a centred process the within sigma would have to fall to 0.030/(6 × 1.33) = 0.00376 mm, about 15 % less than now. So the answer to the customer is: a tool offset will get to about 1.1 this week; 1.33 needs a variation-reduction project on the milling operation. Note that a unilateral tolerance changes nothing in the arithmetic; the target is still mid-tolerance unless the drawing says otherwise, and a machinist who "aims for nominal" at 6.000 would be aiming at the lower limit.</p>
+      <div class="calc" data-calc="capability" id="calc-cap-ex1">
+        <h3>Exercise 1 in the calculator</h3>
+        <script type="application/json" class="calc-data">{"x":[6.014,6.014,6.017,6.021,6.017,6.019,6.018,6.018,6.016,6.017,6.009,6.015,6.019,6.023,6.021,6.016,6.018,6.022,6.017,6.015,6.012,6.012,6.015,6.022,6.02,6.015,6.024,6.02,6.01,6.014,6.02,6.025,6.019,6.018,6.016,6.015,6.015,6.017,6.016,6.018,6.017,6.023,6.018,6.022,6.017,6.015,6.015,6.012,6.027,6.024,6.019,6.016,6.018,6.02,6.023,6.013,6.014,6.013,6.016,6.021,6.008,6.017,6.005,6.014,6.017,6.014,6.015,6.03,6.022,6.023,6.012,6.014,6.015,6.008,6.018,6.026,6.015,6.019,6.009,6.022],"usl":6.03,"lsl":6.0,"target":6.015,"subgroup_size":4,"chart":"xbar_r","units":"mm","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a process that moved during the study</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the wall thickness of a die-cast housing, 2.50 ± 0.15 mm, measured with an ultrasonic gauge to 0.01 mm, three parts from every shot, 30 consecutive shots.</p>
+    <div class="table-wrap"><table class="data"><caption>Exercise 2 data. Wall thickness, mm, 30 subgroups of 3 (constructed data).</caption><thead><tr><th>Subgroup</th>
+<th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th>
+</tr></thead><tbody>
+<tr><td>1</td><td>2.52</td><td>2.47</td><td>2.54</td></tr>
+<tr><td>2</td><td>2.51</td><td>2.48</td><td>2.56</td></tr>
+<tr><td>3</td><td>2.44</td><td>2.50</td><td>2.54</td></tr>
+<tr><td>4</td><td>2.52</td><td>2.49</td><td>2.49</td></tr>
+<tr><td>5</td><td>2.43</td><td>2.54</td><td>2.49</td></tr>
+<tr><td>6</td><td>2.48</td><td>2.47</td><td>2.50</td></tr>
+<tr><td>7</td><td>2.53</td><td>2.49</td><td>2.52</td></tr>
+<tr><td>8</td><td>2.54</td><td>2.47</td><td>2.43</td></tr>
+<tr><td>9</td><td>2.54</td><td>2.56</td><td>2.52</td></tr>
+<tr><td>10</td><td>2.52</td><td>2.55</td><td>2.51</td></tr>
+<tr><td>11</td><td>2.51</td><td>2.51</td><td>2.45</td></tr>
+<tr><td>12</td><td>2.46</td><td>2.51</td><td>2.51</td></tr>
+<tr><td>13</td><td>2.52</td><td>2.43</td><td>2.54</td></tr>
+<tr><td>14</td><td>2.54</td><td>2.52</td><td>2.51</td></tr>
+<tr><td>15</td><td>2.51</td><td>2.47</td><td>2.52</td></tr>
+<tr><td>16</td><td>2.56</td><td>2.50</td><td>2.48</td></tr>
+<tr><td>17</td><td>2.53</td><td>2.49</td><td>2.51</td></tr>
+<tr><td>18</td><td>2.50</td><td>2.50</td><td>2.50</td></tr>
+<tr><td>19</td><td>2.51</td><td>2.51</td><td>2.50</td></tr>
+<tr><td>20</td><td>2.52</td><td>2.53</td><td>2.47</td></tr>
+<tr><td>21</td><td>2.56</td><td>2.57</td><td>2.57</td></tr>
+<tr><td>22</td><td>2.64</td><td>2.58</td><td>2.59</td></tr>
+<tr><td>23</td><td>2.59</td><td>2.60</td><td>2.58</td></tr>
+<tr><td>24</td><td>2.59</td><td>2.56</td><td>2.55</td></tr>
+<tr><td>25</td><td>2.54</td><td>2.55</td><td>2.59</td></tr>
+<tr><td>26</td><td>2.59</td><td>2.56</td><td>2.60</td></tr>
+<tr><td>27</td><td>2.58</td><td>2.56</td><td>2.54</td></tr>
+<tr><td>28</td><td>2.53</td><td>2.55</td><td>2.55</td></tr>
+<tr><td>29</td><td>2.59</td><td>2.58</td><td>2.53</td></tr>
+<tr><td>30</td><td>2.56</td><td>2.54</td><td>2.60</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Build the X̄-R chart for n = 3 (A₂ = 1.023, D₃ = 0, D₄ = 2.575, d₂ = 1.693). Is the process stable? If not, where did it change? (b) Compute the within and overall sigma estimates and comment on their ratio. (c) Compute the within-sigma index and the overall-sigma index. Which name does each get under each convention, and which one would a customer be entitled to see? (d) Every one of the 90 values is inside the tolerance. Is the process capable?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x̄̄ = <span data-ex="m07-ex2-wall" data-key="chart.xbarbar" data-dp="4">2.5266</span> mm, R̄ = <span data-ex="m07-ex2-wall" data-key="chart.rbar" data-dp="4">0.0513</span> mm. UCL<sub>x̄</sub> = 2.5266 + 1.023 × 0.0513 = 2.5266 + 0.0525 = <span data-ex="m07-ex2-wall" data-key="chart.ucl_x" data-dp="4">2.5791</span>; LCL<sub>x̄</sub> = <span data-ex="m07-ex2-wall" data-key="chart.lcl_x" data-dp="4">2.4740</span>; UCL<sub>R</sub> = 2.575 × 0.0513 = <span data-ex="m07-ex2-wall" data-key="chart.ucl_r" data-dp="4">0.1322</span>. The R chart is quiet, but subgroups 22, 23 and 26 are above the upper X̄ limit and, from subgroup 21 on, every mean sits above the centre line (Western Electric rule 4 fires at 28, 29 and 30). The process mean shifted upward after shot 20: the first 20 subgroups average 2.5045 mm and the last 10 average 2.5707 mm, a step of about 0.066 mm, more than two within-subgroup sigmas. Not stable. In the story behind the data, the die temperature drifted up during the run.</p>
+      <p><strong>(b)</strong> σ̂<sub>within</sub> = 0.0513 / 1.693 = <span data-ex="m07-ex2-wall" data-key="within.sigma" data-dp="4">0.0303</span> mm; overall s = <span data-ex="m07-ex2-wall" data-key="overall.s" data-dp="4">0.0431</span> mm. The ratio is 0.70. The overall sigma is 42 % larger than the within sigma, and that excess is the shift: the subgroups are tight, the process moved between them. This ratio is the single fastest diagnostic on a capability report.</p>
+      <p><strong>(c)</strong> Within: Cw = 0.30 / (6 × 0.0303) = <span data-ex="m07-ex2-wall" data-key="within.Cw" data-dp="2">1.65</span>, Cwk = (2.65 − 2.5266) / (3 × 0.0303) = <span data-ex="m07-ex2-wall" data-key="within.Cwk" data-dp="2">1.36</span>. Overall: Pp = <span data-ex="m07-ex2-wall" data-key="overall.Pp" data-dp="2">1.16</span>, Ppk = <span data-ex="m07-ex2-wall" data-key="overall.Ppk" data-dp="2">0.95</span>. Under the 2005 convention these would be reported as Cpk = 1.36 and Ppk = 0.95, and a reader who only looked at the first would think the process passed 1.33. Under the 2026 convention the chart was not stable, so the reportable index is Ppk = 0.95 and Cwk = 1.36 is an internal analysis figure only. That is the better outcome for the customer: 0.95 is what was actually delivered. Cwk = 1.36 is what the process could do if it did not drift, which is useful to the engineer as an estimate of the prize for fixing the die temperature control, and to nobody else.</p>
+      <p><strong>(d)</strong> No. All 90 values inside the tolerance means the sample had no rejects; the overall index predicts <span data-ex="m07-ex2-wall" data-key="overall.ppm_total" data-dp="0">2106</span> PPM, and, more to the point, the process was moving during the study and nothing predicts where it goes next. The right report says: not in statistical control, Ppk = 0.95 descriptive only, special cause identified after shot 20, capability study to be repeated after the die temperature control is fixed. If you had drawn the specification limits on the X̄ chart instead of the control limits, you would have seen every mean comfortably inside ±0.15 mm and missed the shift entirely.</p>
+      <div class="calc" data-calc="capability" id="calc-cap-ex2">
+        <h3>Exercise 2 in the calculator</h3>
+        <script type="application/json" class="calc-data">{"x":[2.52,2.47,2.54,2.51,2.48,2.56,2.44,2.5,2.54,2.52,2.49,2.49,2.43,2.54,2.49,2.48,2.47,2.5,2.53,2.49,2.52,2.54,2.47,2.43,2.54,2.56,2.52,2.52,2.55,2.51,2.51,2.51,2.45,2.46,2.51,2.51,2.52,2.43,2.54,2.54,2.52,2.51,2.51,2.47,2.52,2.56,2.5,2.48,2.53,2.49,2.51,2.5,2.5,2.5,2.51,2.51,2.5,2.52,2.53,2.47,2.56,2.57,2.57,2.64,2.58,2.59,2.59,2.6,2.58,2.59,2.56,2.55,2.54,2.55,2.59,2.59,2.56,2.6,2.58,2.56,2.54,2.53,2.55,2.55,2.59,2.58,2.53,2.56,2.54,2.6],"usl":2.65,"lsl":2.35,"target":2.5,"subgroup_size":3,"chart":"xbar_r","units":"mm","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="07">
+      <fieldset class="q" data-answer="c">
+        <legend>1. Cp differs from Cpk in that Cp</legend>
+        <label><input type="radio" name="q1" value="a"> uses the within-subgroup sigma and Cpk the overall sigma</label>
+        <label><input type="radio" name="q1" value="b"> applies to one-sided specifications only</label>
+        <label><input type="radio" name="q1" value="c"> ignores where the process is centred</label>
+        <label><input type="radio" name="q1" value="d"> includes the distance from the target</label>
+        <p class="explain" hidden>Cp compares widths only; Cpk uses the distance from the mean to the nearer limit.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="1.33" data-tolerance="0.02">
+        <legend>2. USL = 10.5, LSL = 9.5, mean 10.1, σ̂ = 0.10. What is Cpk (to two decimals)?</legend>
+        <input type="number" name="q2" step="any">
+        <p class="explain" hidden>Cpu = (10.5 − 10.1)/(3 × 0.10) = 1.33; Cpl = (10.1 − 9.5)/0.30 = 2.00; Cpk = min = 1.33.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>3. Under the 2026 AIAG &amp; VDA convention, the difference between Cpk and Ppk is</legend>
+        <label><input type="radio" name="q3" value="a"> Cpk uses R̄/d₂ and Ppk uses the sample s</label>
+        <label><input type="radio" name="q3" value="b"> the same formula on the overall variation; the letter records whether stability was demonstrated</label>
+        <label><input type="radio" name="q3" value="c"> Ppk is always larger</label>
+        <label><input type="radio" name="q3" value="d"> Cpk is for attribute data</label>
+        <p class="explain" hidden>Same formula; C only for a process shown to be stable. The within-sigma index is Cwk.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. In the bore study, the within sigma was 0.006604 mm and the overall s was 0.006763 mm. This tells you that</legend>
+        <label><input type="radio" name="q4" value="a"> there was little variation between subgroups; the process was stable over the study</label>
+        <label><input type="radio" name="q4" value="b"> the gauge is not repeatable</label>
+        <label><input type="radio" name="q4" value="c"> the process shifted after a tool change</label>
+        <label><input type="radio" name="q4" value="d"> the data are not normal</label>
+        <p class="explain" hidden>A ratio near 1 means the subgroups do not move relative to each other. In Exercise 2 the ratio was 0.70 because of a shift.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>5. Specification limits belong on</legend>
+        <label><input type="radio" name="q5" value="a"> the X̄ chart</label>
+        <label><input type="radio" name="q5" value="b"> the R chart</label>
+        <label><input type="radio" name="q5" value="c"> both control charts</label>
+        <label><input type="radio" name="q5" value="d"> the histogram and the capability table, never on a control chart</label>
+        <p class="explain" hidden>Control limits describe the process; specification limits describe the customer. Mixing them turns the chart into an adjustment trigger.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. A supplier reports Cpk = 1.07 from 30 parts. The approximate 95 % interval is about</legend>
+        <label><input type="radio" name="q6" value="a"> 1.05 to 1.09</label>
+        <label><input type="radio" name="q6" value="b"> 0.97 to 1.17</label>
+        <label><input type="radio" name="q6" value="c"> 0.77 to 1.37</label>
+        <label><input type="radio" name="q6" value="d"> 0.5 to 1.6</label>
+        <p class="explain" hidden>From the NIST formula with n = 30: ±0.30. The report cannot show whether 1.33 is met or missed.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>7. A process has Cp = 2.4 and Cpk = 1.4 with the mean 3σ from the target. Which index will show the problem?</legend>
+        <label><input type="radio" name="q7" value="a"> Cp</label>
+        <label><input type="radio" name="q7" value="b"> Cpm</label>
+        <label><input type="radio" name="q7" value="c"> Cpu</label>
+        <label><input type="radio" name="q7" value="d"> none; the process is capable</label>
+        <p class="explain" hidden>Cpm adds the squared offset from target to the variance; in Example 3 it fell to 0.76 while Cpk stayed at 1.40.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="1350" data-tolerance="100">
+        <legend>8. A one-sided index of 1.00 corresponds to a limit 3σ from the mean. About how many PPM lie beyond that limit for a normal distribution?</legend>
+        <input type="number" name="q8" step="any">
+        <p class="explain" hidden>The upper tail beyond Z = 3 is 0.00135, or 1,350 PPM (half of the 2,700 PPM outside ±3σ).</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>9. The X̄ chart of a capability study shows three points above the upper control limit. The correct report says</legend>
+        <label><input type="radio" name="q9" value="a"> not in statistical control; Ppk given as descriptive only; special cause to be found and the study repeated</label>
+        <label><input type="radio" name="q9" value="b"> Cpk from R̄/d₂, since the ranges were in control</label>
+        <label><input type="radio" name="q9" value="c"> delete the three subgroups and recompute</label>
+        <label><input type="radio" name="q9" value="d"> widen the control limits to include them</label>
+        <p class="explain" hidden>Exercise 2. The within index describes what the process could do; it is not what was delivered. Outliers are marked with a documented cause, never deleted.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. The 1.33 requirement on a drawing is best described as</legend>
+        <label><input type="radio" name="q10" value="a"> a statistical law derived from the normal distribution</label>
+        <label><input type="radio" name="q10" value="b"> an ISO requirement for all characteristics</label>
+        <label><input type="radio" name="q10" value="c"> the value at which a process becomes six sigma</label>
+        <label><input type="radio" name="q10" value="d"> a customer convention, traceable to AIAG documents, that leaves 1σ of margin between the 3σ tail and the limit</label>
+        <p class="explain" hidden>PPAP bands and the AIAG &amp; VDA example targets are agreements; the manual itself says targets are set by customer agreement.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Cp ignores centring.</li>
+        <li>1.33.</li>
+        <li>b. Same formula; the letter records stability.</li>
+        <li>a. Ratio near 1: stable.</li>
+        <li>d. Never on a control chart.</li>
+        <li>c. 0.77 to 1.37.</li>
+        <li>b. Cpm.</li>
+        <li>About 1,350 PPM.</li>
+        <li>a. Descriptive Ppk, find the cause, repeat.</li>
+        <li>d. A customer convention.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Cp compares the tolerance width with 6σ; Cpk uses the distance from the mean to the nearer limit in units of 3σ and is the index that predicts defects. Cpm adds the distance from target.</li>
+      <li>There are two sigma estimates: within-subgroup (R̄/d₂, S̄/c₄, MR̄/d₂) and overall (sample s). Their ratio measures between-subgroup variation. Print the estimate next to every index.</li>
+      <li>Two naming conventions are in use. Under the 2026 AIAG &amp; VDA and ISO convention Cpk and Ppk share the overall-variation formula and the letter records stability; under the older AIAG convention, still printed by most software, Cpk uses the within sigma and Ppk the overall s.</li>
+      <li>Stability first. A capability index on an unstable process describes the sample and predicts nothing; report it as Ppk, say why, find the cause, and repeat the study.</li>
+      <li>Control limits come from the data and go on the chart; specification limits come from the drawing and go on the histogram. Never on the same chart.</li>
+      <li>PPM predictions assume normality and are far more sensitive to σ than the index is. Check the shape and report the observed count alongside.</li>
+      <li>A Cpk from 30 parts has a 95 % interval roughly ±0.3 wide. Aim for 125 values in 25 subgroups and always report the interval; 1.33 and 1.67 are customer conventions, so ask what your customer requires.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown. Standards are paraphrased, never quoted at length.</p>
+    <ol class="references">
+      <li id="ref-1">AIAG &amp; VDA. <em>Statistical Process Control (SPC) Manual: Process Management, Performance and Capability, Control Charts</em>, 1st ed. AIAG and VDA QMC, February 2026 (AIAG catalogue SPCAV-1). Sections 7.2, 7.4, 7.5, 7.8.2 and 9.4; Tables 7-4, 8-1 and 9-3. <a href="https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1">https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1</a> <span class="tag">(licensed copy read by the author)</span></li>
+      <li id="ref-2">NIST/SEMATECH. "6.1.6. What is Process Capability?" <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section1/pmc16.htm">https://www.itl.nist.gov/div898/handbook/pmc/section1/pmc16.htm</a></li>
+      <li id="ref-3">Kane, V. E. "Process Capability Indices." <em>Journal of Quality Technology</em> 18(1):41 to 52, 1986. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.1986.11978984">https://www.tandfonline.com/doi/abs/10.1080/00224065.1986.11978984</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-4">Chan, L. K., Cheng, S. W., and Spiring, F. A. "A New Measure of Process Capability: Cpm." <em>Journal of Quality Technology</em> 20(3):162 to 175, 1988. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.1988.11979102">https://www.tandfonline.com/doi/abs/10.1080/00224065.1988.11979102</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-5">Bissell, A. F. "How Reliable is Your Capability Index?" <em>Journal of the Royal Statistical Society, Series C (Applied Statistics)</em> 39(3):331 to 340, 1990. <a href="https://academic.oup.com/jrsssc/article-pdf/39/3/331/48622534/jrsssc_39_3_331.pdf">https://academic.oup.com/jrsssc/article-pdf/39/3/331/48622534/jrsssc_39_3_331.pdf</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-6">Kushler, R. H., and Hurley, P. "Confidence Bounds for Capability Indices." <em>Journal of Quality Technology</em> 24(4):188 to 195, 1992. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.1992.11979400">https://www.tandfonline.com/doi/abs/10.1080/00224065.1992.11979400</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-7">Wheeler, D. J. "The Keys to Quality Assurance: It Takes More Than a Good Capability Ratio." <em>Quality Digest</em>, 4 March 2019 (SPC Press manuscript 345). <a href="https://spcpress.com/pdf/DJW345.pdf">https://spcpress.com/pdf/DJW345.pdf</a></li>
+      <li id="ref-8">AIAG. <em>Production Part Approval Process (PPAP)</em>, 4th ed., 2006. AIAG catalogue listing. <a href="https://www.aiag.org/training-and-resources/manuals/details/PPAP-4">https://www.aiag.org/training-and-resources/manuals/details/PPAP-4</a> <span class="tag">(existence and edition confirmed from the catalogue; the acceptance bands are cited via [9])</span></li>
+      <li id="ref-9">Quality Engineer Stuff. "Initial Process Studies in PPAP." n.d. <a href="https://qualityengineerstuff.com/doc/initial-process-studies/">https://qualityengineerstuff.com/doc/initial-process-studies/</a> <span class="tag">(secondary: source for the PPAP 4th edition initial-study bands; confirm against the manual)</span></li>
+      <li id="ref-10">ISO 22514-1:2014. <em>Statistical methods in process management. Capability and performance. Part 1: General principles and concepts</em>. International Organization for Standardization. <a href="https://www.iso.org/standard/64135.html">https://www.iso.org/standard/64135.html</a> <span class="tag">(scope and structure read from the public preview)</span></li>
+      <li id="ref-11">AIAG. <em>Statistical Process Control (SPC) Reference Manual</em>, 2nd ed., 2005. Superseded by [1]. <span class="tag">(secondary: its within-sigma Cpk convention is described in footnote 11 of [1], which was read; the 2005 manual itself was not)</span></li>
+      <li id="ref-12">Bothe, D. R. <em>Measuring Process Capability: Techniques and Calculations for Quality and Manufacturing Engineers</em>. McGraw-Hill, 1997. <a href="https://search.worldcat.org/title/36135779">https://search.worldcat.org/title/36135779</a> <span class="tag">(catalogue record; recommended further reading, not cited for specific claims)</span></li>
+      <li id="ref-13">NIST/SEMATECH. "6.3.2.1. Shewhart X-bar and R and S Control Charts." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm</a> <span class="tag">(control chart constants; NIST prints D₄ for n = 5 as 2.115 where the exact value rounds to 2.114, which this course uses)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>Kotz, S., and Johnson, N. L. "Process Capability Indices: A Review, 1992 to 2000." <em>Journal of Quality Technology</em> 34(1):2 to 19, 2002. A survey of the many indices proposed beyond the five taught here, with discussion.</li>
+      <li>Bothe [12] for the most complete single reference on capability calculations, including non-normal and attribute cases that Module 8 introduces.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a capability review or a "close enough" conversation from your own experience, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+ "id": "m04-grr-bore",
+ "module": "04",
+ "kind": "grr",
+ "title": "Crossed gauge R&R on the bore gauge, 10 parts x 3 operators x 3 trials, %GRR about 24 %",
+ "source": "constructed",
+ "setting": "bore gauge for \u00d812.000 \u00b1 0.025 mm (tolerance 0.050 mm), 10 parts spanning the tolerance, 3 operators, 3 trials each, randomised order",
+ "params": {
+  "tolerance": 0.05,
+  "study_var_k": 6.0,
+  "alpha_remove": 0.05,
+  "units": "mm"
+ },
+ "columns": [
+  "part",
+  "operator",
+  "trial",
+  "y"
+ ],
+ "n_rows": 90
+}

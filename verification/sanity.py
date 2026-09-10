@@ -356,6 +356,7 @@ def check_pages():
         body = re.sub(r"<style.*?</style>", " ", body, flags=re.S)
         body = re.sub(r"<!--.*?-->", " ", body, flags=re.S)
         text = TAG_RE.sub(" ", body)
+        text = re.sub(r"https?://\S+", " ", text)  # DOIs and paths inside reference URLs are not statistics
         unknown = set()
         for nm in NUMBER_RE.finditer(text):
             tok = nm.group(0)

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculators · Six Sigma Course</title>
+<meta name="description" content="All the course calculators on one page: descriptive statistics, process capability, DPMO and sigma level, control chart builder, gauge R&amp;R, t-tests and ANOVA, sample size, 2^k factorial effects, and a central limit theorem and control chart simulator.">
+<meta name="examples" content="m07-bore, m07-fill, m04-grr-bore, m11-ttest2-pull, m11-anova-machines, chk-montgomery-etch">
+<meta name="allowed-numbers" content="1.33 1.67 1.50 0.27 99.73 12.000 0.025">
+<link rel="stylesheet" href="assets/css/course.css">
+</head>
+<body data-root="" data-page="calculators">
+
+<header class="site-header">
+  <a class="brand" href="index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Tools</p>
+    <h1>Calculators</h1>
+    <p class="lead">Every calculator from the course on one page, for use after you have finished it. Each one runs entirely in your browser with no libraries and sends nothing anywhere. The statistical engines behind them are tested against scipy and against the course's verification results on every dataset in the course; the tests and the code are in the course repository.</p>
+    <p>Each calculator is pre-loaded with a course dataset so you can see it agree with the module that teaches it. Paste your own data over it. Data may be separated by spaces, commas, tabs or new lines, and a comma decimal is accepted. Where a calculator belongs to a module that is not yet published, the dataset is the one that module will use.</p>
+    <ol>
+      <li><a href="#descriptive">Descriptive statistics and histogram</a></li>
+      <li><a href="#capability">Process capability</a> (Module 7)</li>
+      <li><a href="#dpmo">Sigma level, DPMO, DPU and rolled throughput yield</a> (Module 6)</li>
+      <li><a href="#control">Control chart builder</a> (Modules 16 and 17)</li>
+      <li><a href="#grr">Gauge R&amp;R, crossed, ANOVA method</a> (Module 4)</li>
+      <li><a href="#tests">Two-sample t-test, one-way ANOVA, paired and one-sample t</a> (Module 11)</li>
+      <li><a href="#samplesize">Sample size for a t-test</a> (Module 11)</li>
+      <li><a href="#factorial">2<sup>k</sup> factorial effects</a> (Module 13)</li>
+      <li><a href="#simulator">Central limit theorem and control chart simulator</a> (Modules 1 and 16)</li>
+    </ol>
+
+    <h2 id="descriptive">1. Descriptive statistics and histogram</h2>
+    <p>Mean, median, standard deviation, quartiles, skewness, kurtosis, the Anderson-Darling normality test, and a histogram with a fitted normal curve and optional specification limits. Pre-loaded with the 125 bore diameters of Module 7 (constructed data, Ø12.000 ± 0.025 mm).</p>
+    <div class="calc" data-calc="descriptive" id="c-desc">
+      <script type="application/json" class="calc-data">{"x":[11.982,12.007,12.009,12.008,11.997,12.002,12.012,12.009,12.004,12.008,12.008,11.999,12.005,12.003,11.996,12.001,11.994,12.002,11.995,12.005,12.007,11.998,11.993,12.018,12.005,12.006,12.0,12.007,12.0,12.007,12.012,12.025,12.009,12.009,12.001,12.003,11.996,12.0,12.0,11.995,11.996,12.009,12.014,12.015,12.005,12.017,12.015,12.003,12.002,12.002,12.001,12.008,12.006,11.996,12.006,11.992,12.004,12.006,12.011,11.997,12.009,12.007,12.003,12.004,12.009,11.997,12.001,12.004,12.01,12.007,12.002,12.013,12.001,11.999,12.001,12.004,12.001,12.001,12.007,12.007,11.998,12.004,12.012,12.0,12.015,12.01,11.998,12.013,12.005,12.007,12.015,12.004,12.009,12.007,11.996,11.993,12.001,12.003,12.005,12.008,11.997,12.015,12.006,12.001,11.995,11.996,12.012,12.007,11.994,12.002,11.996,12.004,11.994,12.008,12.018,12.002,12.001,12.002,12.001,12.007,11.991,11.989,12.011,12.011,11.996],"usl":12.025,"lsl":11.975,"units":"mm"}</script>
+    </div>
+
+    <h2 id="capability">2. Process capability</h2>
+    <p>Control chart first, then normality, then Cp, Cpk, Pp, Ppk, Cpm with the sigma estimate printed beside every index, predicted PPM within and overall, and confidence intervals. Both naming conventions (AIAG &amp; VDA 2026 / ISO 22514, and the older AIAG 2005 convention most software prints) are available. Pre-loaded with the Module 7 bore study.</p>
+    <div class="calc" data-calc="capability" id="c-cap">
+      <script type="application/json" class="calc-data">{"x":[11.982,12.007,12.009,12.008,11.997,12.002,12.012,12.009,12.004,12.008,12.008,11.999,12.005,12.003,11.996,12.001,11.994,12.002,11.995,12.005,12.007,11.998,11.993,12.018,12.005,12.006,12.0,12.007,12.0,12.007,12.012,12.025,12.009,12.009,12.001,12.003,11.996,12.0,12.0,11.995,11.996,12.009,12.014,12.015,12.005,12.017,12.015,12.003,12.002,12.002,12.001,12.008,12.006,11.996,12.006,11.992,12.004,12.006,12.011,11.997,12.009,12.007,12.003,12.004,12.009,11.997,12.001,12.004,12.01,12.007,12.002,12.013,12.001,11.999,12.001,12.004,12.001,12.001,12.007,12.007,11.998,12.004,12.012,12.0,12.015,12.01,11.998,12.013,12.005,12.007,12.015,12.004,12.009,12.007,11.996,11.993,12.001,12.003,12.005,12.008,11.997,12.015,12.006,12.001,11.995,11.996,12.012,12.007,11.994,12.002,11.996,12.004,11.994,12.008,12.018,12.002,12.001,12.002,12.001,12.007,11.991,11.989,12.011,12.011,11.996],"usl":12.025,"lsl":11.975,"target":12.0,"subgroup_size":5,"chart":"xbar_r","units":"mm"}</script>
+    </div>
+
+    <h2 id="dpmo">3. Sigma level, DPMO, DPU and rolled throughput yield</h2>
+    <p>Defects, units and opportunities to DPU, DPMO, first-time yield and sigma level, with and without the 1.5σ shift, both labelled; conversion in either direction; and rolled throughput yield for a chain of process steps. Module 6 explains the conventions and the controversy over the shift.</p>
+    <div class="calc" data-calc="dpmo" id="c-dpmo">
+      <script type="application/json" class="calc-data">{"defects":37,"units":2400,"opportunities":5,"dpmo":3.4,"yields":[0.98,0.95,0.99,0.97,0.985]}</script>
+    </div>
+
+    <h2 id="control">4. Control chart builder</h2>
+    <p>I-MR, X̄-R, X̄-S, p, np, c and u charts with limits computed from the data using the constants for the subgroup size; Western Electric and Nelson rules selectable; limits can be frozen from a baseline period and applied to later data. Pre-loaded with the Module 7 bore data as an X̄-R chart. Specification limits are never drawn on these charts; put them in the capability calculator.</p>
+    <div class="calc" data-calc="control" id="c-control">
+      <script type="application/json" class="calc-data">{"type":"xbar_r","x":[11.982,12.007,12.009,12.008,11.997,12.002,12.012,12.009,12.004,12.008,12.008,11.999,12.005,12.003,11.996,12.001,11.994,12.002,11.995,12.005,12.007,11.998,11.993,12.018,12.005,12.006,12.0,12.007,12.0,12.007,12.012,12.025,12.009,12.009,12.001,12.003,11.996,12.0,12.0,11.995,11.996,12.009,12.014,12.015,12.005,12.017,12.015,12.003,12.002,12.002,12.001,12.008,12.006,11.996,12.006,11.992,12.004,12.006,12.011,11.997,12.009,12.007,12.003,12.004,12.009,11.997,12.001,12.004,12.01,12.007,12.002,12.013,12.001,11.999,12.001,12.004,12.001,12.001,12.007,12.007,11.998,12.004,12.012,12.0,12.015,12.01,11.998,12.013,12.005,12.007,12.015,12.004,12.009,12.007,11.996,11.993,12.001,12.003,12.005,12.008,11.997,12.015,12.006,12.001,11.995,11.996,12.012,12.007,11.994,12.002,11.996,12.004,11.994,12.008,12.018,12.002,12.001,12.002,12.001,12.007,11.991,11.989,12.011,12.011,11.996],"subgroup_size":5,"units":"mm","rules":["we1","we2","we3","we4"]}</script>
+    </div>
+
+    <h2 id="grr">5. Gauge R&amp;R, crossed, ANOVA method</h2>
+    <p>Parts × operators × trials, two-way ANOVA with the interaction term dropped when it is not significant, variance components, %Contribution, %Study Variation, %Tolerance and the number of distinct categories, with the AIAG MSA guideline bands stated as guidelines. Pre-loaded with the Module 4 study of the bore gauge (constructed data: 10 parts, 3 operators, 3 trials, tolerance 0.050 mm).</p>
+    <div class="calc" data-calc="grr" id="c-grr">
+      <script type="application/json" class="calc-data">{"rows":[[1,"A",1,11.987],[1,"A",2,11.985],[1,"A",3,11.983],[1,"B",1,11.987],[1,"B",2,11.986],[1,"B",3,11.985],[1,"C",1,11.979],[1,"C",2,11.985],[1,"C",3,11.982],[2,"A",1,11.986],[2,"A",2,11.983],[2,"A",3,11.987],[2,"B",1,11.99],[2,"B",2,11.991],[2,"B",3,11.989],[2,"C",1,11.987],[2,"C",2,11.985],[2,"C",3,11.982],[3,"A",1,11.994],[3,"A",2,11.991],[3,"A",3,11.992],[3,"B",1,11.992],[3,"B",2,11.995],[3,"B",3,11.996],[3,"C",1,11.991],[3,"C",2,11.992],[3,"C",3,11.989],[4,"A",1,11.999],[4,"A",2,11.996],[4,"A",3,11.997],[4,"B",1,11.995],[4,"B",2,11.998],[4,"B",3,11.999],[4,"C",1,11.995],[4,"C",2,11.989],[4,"C",3,11.994],[5,"A",1,12.004],[5,"A",2,11.999],[5,"A",3,12.0],[5,"B",1,12.002],[5,"B",2,12.004],[5,"B",3,12.001],[5,"C",1,11.998],[5,"C",2,12.001],[5,"C",3,11.994],[6,"A",1,11.997],[6,"A",2,11.997],[6,"A",3,12.0],[6,"B",1,12.0],[6,"B",2,11.999],[6,"B",3,11.996],[6,"C",1,11.996],[6,"C",2,11.997],[6,"C",3,11.995],[7,"A",1,12.004],[7,"A",2,12.007],[7,"A",3,12.007],[7,"B",1,12.005],[7,"B",2,12.005],[7,"B",3,12.004],[7,"C",1,12.002],[7,"C",2,12.0],[7,"C",3,12.003],[8,"A",1,12.009],[8,"A",2,12.008],[8,"A",3,12.008],[8,"B",1,12.011],[8,"B",2,12.011],[8,"B",3,12.009],[8,"C",1,12.01],[8,"C",2,12.011],[8,"C",3,12.008],[9,"A",1,12.009],[9,"A",2,12.011],[9,"A",3,12.01],[9,"B",1,12.011],[9,"B",2,12.009],[9,"B",3,12.014],[9,"C",1,12.012],[9,"C",2,12.01],[9,"C",3,12.008],[10,"A",1,12.013],[10,"A",2,12.016],[10,"A",3,12.012],[10,"B",1,12.014],[10,"B",2,12.014],[10,"B",3,12.016],[10,"C",1,12.013],[10,"C",2,12.013],[10,"C",3,12.016]],"tolerance":0.05,"study_var_k":6,"alpha_remove":0.05}</script>
+    </div>
+
+    <h2 id="tests">6. Two-sample t-test, one-way ANOVA, paired and one-sample t</h2>
+    <p>Group summaries, pooled and Welch t-tests with confidence intervals and Cohen's d, one-way ANOVA with η², variance checks, and a plain-language reading of the p-value that says what it is (the probability of data at least this extreme if the null hypothesis were true) and what it is not. Pre-loaded with the Module 11 pull-strength comparison of two suppliers; the ANOVA example (three machines) is in the comment below the box.</p>
+    <div class="calc" data-calc="tests" id="c-tests">
+      <script type="application/json" class="calc-data">{"mode":"ttest2","alpha":0.05,"lines":["A 44.1 46.7 45.8 46.1 46.4 44.9 42.4 45.9 44.2 50.0 45.9 50.4","B 49.7 52.0 48.3 46.2 50.5 52.2 46.8 50.4 46.9 49.0 43.5 52.8"]}</script>
+    </div>
+    <details>
+      <summary>One-way ANOVA example: cycle time on three machines (Module 11, constructed data)</summary>
+      <p>Paste these three lines into the box above and choose "One-way ANOVA":</p>
+      <pre>M1 42.0 41.9 42.6 43.0 42.3 42.7 41.9 43.0 41.8 41.2
+M2 43.1 41.6 41.5 41.8 43.1 43.0 41.6 40.0 41.0 41.8
+M3 43.0 42.8 42.5 43.3 43.2 41.8 42.4 43.3 43.8 43.4</pre>
+    </details>
+
+    <h2 id="samplesize">7. Sample size for a t-test</h2>
+    <p>The number of observations needed to detect a difference δ with standard deviation σ at a given α and power, by the normal approximation and by iteration on the t distribution, for one-sample, paired or two-sample designs. Module 11 works an example.</p>
+    <div class="calc" data-calc="samplesize" id="c-ss">
+      <script type="application/json" class="calc-data">{"delta":1.5,"sigma":2.0,"alpha":0.05,"power":0.9,"sides":2,"design":"two-sample"}</script>
+    </div>
+
+    <h2 id="factorial">8. 2<sup>k</sup> factorial effects</h2>
+    <p>Main effects, interactions, coefficients, ANOVA when replicated, and a Pareto of effects for 2² and 2³ designs in standard order. Pre-loaded with Montgomery's plasma-etch 2³ example (8 runs, 2 replicates; etch rate in Å/min), a published textbook dataset that the course's verification scripts reproduce to the published effects; Module 13 builds its own worked example.</p>
+    <div class="calc" data-calc="factorial" id="c-fact">
+      <script type="application/json" class="calc-data">{"k":3,"replicates":2,"factors":["A","B","C"],"y":[[550.0,604.0],[669.0,650.0],[633.0,601.0],[642.0,635.0],[1037.0,1052.0],[749.0,868.0],[1075.0,1063.0],[729.0,860.0]]}</script>
+    </div>
+
+    <h2 id="simulator">9. Central limit theorem and control chart simulator</h2>
+    <p>Choose a parent distribution and a subgroup size, draw subgroups, and watch the distribution of the means become narrower and closer to normal than the parent. Then add a shift in the mean and see how many subgroups each rule set needs to detect it, and how often each one raises a false alarm. Seeded, so a run can be repeated exactly.</p>
+    <div class="calc" data-calc="simulator" id="c-sim">
+      <script type="application/json" class="calc-data">{"parent":"exponential","n":5,"k":40,"shift":1.0,"shiftAt":25,"seed":7,"repeats":200}</script>
+    </div>
+
+    <h2>Notes on the numerical methods</h2>
+    <p>The normal, t, F and chi-square distribution functions are implemented in <code>assets/js/stats.js</code> with the algorithm and its accuracy cited in the source: Hart's rational approximation for the normal CDF as given by West (2005), Acklam's inverse normal with one Halley refinement, and the incomplete beta and gamma functions of <em>Numerical Recipes</em> for the t, F and chi-square distributions. The test suite compares each function with scipy at 200 or more points; the observed errors are below 1 × 10⁻⁹ everywhere, against targets of 10⁻⁷ for the normal CDF, 10⁻⁶ for its inverse, and 10⁻⁵ for the t and F CDFs. Control chart constants are computed by numerical integration in <code>verification/tables.py</code> and checked against the NIST handbook tables.</p>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/course.js"></script>
+<script src="assets/js/calculators.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+ "id": "m07-ex1-keyway",
+ "module": "07",
+ "kind": "capability",
+ "title": "Exercise 1: keyway width, unilateral tolerance, 20 subgroups of 4",
+ "source": "constructed",
+ "setting": "milled keyway width 6.000 +0.030/0 mm (target at mid-tolerance 6.015), gauge to 0.001 mm",
+ "params": {
+  "usl": 6.03,
+  "lsl": 6.0,
+  "target": 6.015,
+  "subgroup_size": 4,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 80
+}

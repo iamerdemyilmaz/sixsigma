@@ -1,0 +1,18 @@
+{
+ "id": "m11-ttest2-pull",
+ "module": "11",
+ "kind": "ttest2",
+ "title": "Solder joint pull strength from two suppliers, two-sample t",
+ "source": "constructed",
+ "setting": "pull strength in N of a soldered terminal, 12 joints from supplier A and 12 from supplier B, tester to 0.1 N",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "N"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 24
+}

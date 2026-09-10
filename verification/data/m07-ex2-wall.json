@@ -1,0 +1,21 @@
+{
+ "id": "m07-ex2-wall",
+ "module": "07",
+ "kind": "capability",
+ "title": "Exercise 2: die-cast wall thickness with a shift at subgroup 21",
+ "source": "constructed",
+ "setting": "die-cast housing wall 2.50 \u00b1 0.15 mm, ultrasonic gauge to 0.01 mm, 3 parts per shot",
+ "params": {
+  "usl": 2.65,
+  "lsl": 2.35,
+  "target": 2.5,
+  "subgroup_size": 3,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 90
+}
