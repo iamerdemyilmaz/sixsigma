@@ -1013,6 +1013,69 @@ def r_power(meta):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 16: ARL by Monte Carlo with an independent generator (a 64-bit
+# xorshift* stream and the Box-Muller transform), simulating the chart with
+# the rules applied on every observation. Compared with the exact Markov
+# chain of compute.py at a tolerance of a few standard errors (see close()).
+# --------------------------------------------------------------------------
+class _XorShift:
+    def __init__(self, seed):
+        self.s = (seed * 0x9E3779B97F4A7C15 + 0x2545F4914F6CDD1D) & 0xFFFFFFFFFFFFFFFF or 1
+
+    def uniform(self):
+        x = self.s
+        x ^= (x >> 12); x ^= (x << 25) & 0xFFFFFFFFFFFFFFFF; x ^= (x >> 27)
+        self.s = x
+        return (((x * 0x2545F4914F6CDD1D) & 0xFFFFFFFFFFFFFFFF) >> 11) / 9007199254740992.0
+
+    def normal(self):
+        u1 = self.uniform()
+        while u1 <= 1e-300: u1 = self.uniform()
+        return math.sqrt(-2.0 * math.log(u1)) * math.cos(2 * math.pi * self.uniform())
+
+
+def _run_length(rng, rules, delta, cap=100000):
+    use2, use3, use4 = "we2" in rules, "we3" in rules, "we4" in rules
+    hist = []
+    t = 0
+    while t < cap:
+        t += 1
+        z = rng.normal() + delta
+        if abs(z) > 3: return t
+        s = 1 if z > 0 else -1
+        hist.append(z)
+        if use2 and s * z > 2 and len(hist) >= 2:
+            w = hist[-3:]
+            if sum(1 for v in w if s * v > 2) >= 2: return t
+        if use3 and s * z > 1 and len(hist) >= 4:
+            w = hist[-5:]
+            if sum(1 for v in w if s * v > 1) >= 4: return t
+        if use4 and len(hist) >= 8:
+            w = hist[-8:]
+            if all(v > 0 for v in w) or all(v < 0 for v in w): return t
+        if len(hist) > 8: hist = hist[-8:]
+    return cap
+
+
+def r_arl(meta):
+    p = meta["params"]
+    R = p.get("mc_runs", 20000)
+    out = {}
+    rng = _XorShift(20260910)
+    for rs in p["rule_sets"]:
+        key = "+".join(rs)
+        for j, d in enumerate(p["shifts"]):
+            runs = min(R, 4000) if d > 0 else R
+            tot = 0
+            for _ in range(runs): tot += _run_length(rng, rs, d)
+            out[f"arl.{key}.{j}"] = tot / runs
+    for j, d in enumerate(p["shifts"]):
+        pb = norm_cdf(-3 - d) + norm_sf(3 - d)
+        out[f"p_beyond_3sigma.{j}"] = pb; out[f"arl_rule1_closed_form.{j}"] = 1.0 / pb
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1029,6 +1092,12 @@ def close(a, b, path):
         return len(a) == len(b) and all(close(x, y, path) for x, y in zip(a, b))
     if a is None or b is None: return a is None and b is None
     tol = 1e-6 if (".p" in path or "_p" in path or path.endswith("p")) else 1e-9
+    if path.startswith("arl."):
+        # Monte Carlo (this file) against the exact Markov chain (compute.py):
+        # 20,000 in-control runs give a standard error of about 0.7 % of the
+        # ARL and 4,000 shifted runs about 1.6 %, so 5 % is several standard
+        # errors while still catching any real error in either route
+        tol = 0.05
     if path.endswith("lambda_mle"):
         # two different optimisers of a flat log-likelihood agree only to
         # the resolution of the likelihood; the value used downstream is
@@ -1078,6 +1147,7 @@ def recompute_one(ex_id):
     elif kind == "chisq": mine = r_chisq(meta, cols)
     elif kind == "mannwhitney": mine = r_mannwhitney(meta, cols)
     elif kind == "power": mine = r_power(meta)
+    elif kind == "arl": mine = r_arl(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

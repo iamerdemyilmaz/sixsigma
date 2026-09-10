@@ -124,8 +124,11 @@ const SKIP = { info_power_nct: true };
 // Module 11's chisq (contingency table), mannwhitney and power kinds have no
 // calculator either (the tests calculator covers t-tests and ANOVA, the
 // sample-size calculator the n-for-power direction).
+// Module 16's arl kind (exact Markov-chain average run lengths of the runs
+// rules) is a static table; the CLT/detection simulator is the interactive
+// counterpart and is checked separately by its seeded simulation.
 const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_nonnormal: true, attribute_capability: true,
-  chisq: true, mannwhitney: true, power: true };
+  chisq: true, mannwhitney: true, power: true, arl: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

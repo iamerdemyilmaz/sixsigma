@@ -1064,6 +1064,92 @@ def power(params):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 16: average run length of a Shewhart chart with Western Electric
+# runs rules, by the exact Markov-chain method of Champ and Woodall (1987),
+# for a normal plotted statistic shifted by delta standard deviations.
+#   arl   params rule_sets [["we1"], ["we1","we2"], ...], shifts [0, 0.5, ...]
+# State = the zone categories of the last four observations (side and zone:
+# within 1 sigma, 1 to 2, 2 to 3; "none" before the chart starts) plus a
+# count of same-side observations before those four (capped at 3), which is
+# what rule 4 (eight in a row) needs. Rules fire on the observation that
+# completes the pattern, as in run_rules(); the first-alarm time, and hence
+# the ARL, is the same as for the "any window" formulation.
+# --------------------------------------------------------------------------
+def arl_markov(rules, delta):
+    from scipy.sparse import lil_matrix
+    from scipy.sparse.linalg import spsolve
+    cuts = [-3, -2, -1, 0, 1, 2, 3]
+    cdf = [float(stats.norm.cdf(c - delta)) for c in cuts]
+    # categories: (side, zone) with side -1/+1, zone 0 (0-1), 1 (1-2), 2 (2-3); None = no observation yet
+    cats = [(-1, 2), (-1, 1), (-1, 0), (1, 0), (1, 1), (1, 2)]
+    probs = [cdf[1] - cdf[0], cdf[2] - cdf[1], cdf[3] - cdf[2], cdf[4] - cdf[3], cdf[5] - cdf[4], cdf[6] - cdf[5]]
+    p_beyond = cdf[0] + (1 - cdf[6])
+    use2, use3, use4 = "we2" in rules, "we3" in rules, "we4" in rules
+
+    def fires(stored, extra, new):
+        s, z = new
+        if use2 and z == 2:
+            if sum(1 for c in stored[2:] if c is not None and c[0] == s and c[1] == 2) >= 1:
+                return True
+        if use3 and z >= 1:
+            if sum(1 for c in stored if c is not None and c[0] == s and c[1] >= 1) >= 3:
+                return True
+        if use4:
+            if all(c is not None and c[0] == s for c in stored) and extra >= 3:
+                return True
+        return False
+
+    def step(stored, extra, new):
+        s = new[0]
+        c1 = stored[0]
+        if c1 is not None and c1[0] == s and all(c is not None and c[0] == s for c in stored[1:]):
+            extra2 = min(3, extra + 1)
+        else:
+            extra2 = 0
+        return (stored[1:] + (new,), extra2)
+
+    start = ((None, None, None, None), 0)
+    index = {start: 0}; order = [start]; trans = []
+    i = 0
+    while i < len(order):
+        st = order[i]
+        row = []
+        for cat, pr in zip(cats, probs):
+            if fires(st[0], st[1], cat):
+                continue
+            nxt = step(st[0], st[1], cat)
+            if nxt not in index:
+                index[nxt] = len(order); order.append(nxt)
+            row.append((index[nxt], pr))
+        trans.append(row)
+        i += 1
+    n = len(order)
+    M = lil_matrix((n, n))
+    for i in range(n):
+        M[i, i] = 1.0
+        for j, pr in trans[i]:
+            M[i, j] -= pr
+    x = spsolve(M.tocsr(), np.ones(n))
+    return float(x[0]), n, p_beyond
+
+
+def arl_table(params):
+    rule_sets = params["rule_sets"]; shifts = params["shifts"]
+    out = {"shifts": list(shifts), "rule_sets": ["+".join(r) for r in rule_sets], "arl": {}, "states": {},
+           "p_beyond_3sigma": [float(stats.norm.cdf(-3 - d) + stats.norm.sf(3 - d)) for d in shifts]}
+    for rs in rule_sets:
+        key = "+".join(rs)
+        vals = []
+        for d in shifts:
+            a, n, _ = arl_markov(rs, d)
+            vals.append(a)
+        out["arl"][key] = vals
+        out["states"][key] = n
+    out["arl_rule1_closed_form"] = [1.0 / p for p in out["p_beyond_3sigma"]]
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1144,6 +1230,8 @@ def compute_one(ex_id):
         res = mannwhitney(cols, params)
     elif kind == "power":
         res = power(params)
+    elif kind == "arl":
+        res = arl_table(params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

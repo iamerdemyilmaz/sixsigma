@@ -1,0 +1,16 @@
+{
+ "id": "m16-seal",
+ "module": "16",
+ "kind": "xbar_s",
+ "title": "Heat-seal width, 20 subgroups of 10, X-bar-S chart, stable",
+ "source": "constructed",
+ "setting": "heat-seal width of a pouch in mm measured with a calibrated loupe to 0.01 mm, 10 consecutive pouches every hour for 20 hours",
+ "params": {
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 200
+}

@@ -1,0 +1,16 @@
+{
+ "id": "m16-furnace-clean",
+ "module": "16",
+ "kind": "imr",
+ "title": "Furnace zone temperature, the 49 readings after removing the assigned special cause at reading 33",
+ "source": "constructed",
+ "setting": "m16-furnace without reading 33 (cause found and documented), for the recomputed limits",
+ "params": {
+  "units": "\u00b0C"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 49
+}

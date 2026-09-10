@@ -1,0 +1,16 @@
+{
+ "id": "m16-ex1-pin",
+ "module": "16",
+ "kind": "xbar_r",
+ "title": "Exercise 1: pin length, 20 subgroups of 4, X-bar-R chart",
+ "source": "constructed",
+ "setting": "length of a turned pin in mm on a height gauge to 0.001 mm, 4 consecutive pins every 15 minutes for 20 samples",
+ "params": {
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 80
+}

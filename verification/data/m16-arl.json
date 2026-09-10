@@ -1,0 +1,49 @@
+{
+ "id": "m16-arl",
+ "module": "16",
+ "kind": "arl",
+ "title": "ARL of the 3-sigma chart with the Western Electric rules, exact Markov chain",
+ "source": "method: Champ and Woodall 1987 (S-C11); values computed by the course's own chain and checked by Monte Carlo in recompute.py",
+ "setting": "parameters only; normal plotted statistic with a shift of delta sigma",
+ "params": {
+  "rule_sets": [
+   [
+    "we1"
+   ],
+   [
+    "we1",
+    "we2"
+   ],
+   [
+    "we1",
+    "we3"
+   ],
+   [
+    "we1",
+    "we4"
+   ],
+   [
+    "we1",
+    "we2",
+    "we3",
+    "we4"
+   ]
+  ],
+  "shifts": [
+   0.0,
+   0.5,
+   1.0,
+   1.5,
+   2.0,
+   3.0
+  ],
+  "mc_runs": 20000
+ },
+ "columns": null,
+ "expected": {
+  "arl.we1.0": [
+   370.398,
+   0.001
+  ]
+ }
+}

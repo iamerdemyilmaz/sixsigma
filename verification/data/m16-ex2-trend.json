@@ -1,0 +1,16 @@
+{
+ "id": "m16-ex2-trend",
+ "module": "16",
+ "kind": "imr",
+ "title": "Exercise 2: coolant concentration, 30 shifts, a steady downward trend on an I-MR chart",
+ "source": "constructed",
+ "setting": "coolant concentration in % by refractometer to 0.01 %, one reading per shift for 30 shifts, drifting down as water evaporates without top-up",
+ "params": {
+  "units": "%"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 30
+}

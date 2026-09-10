@@ -1,0 +1,16 @@
+{
+ "id": "m16-furnace",
+ "module": "16",
+ "kind": "imr",
+ "title": "Furnace zone temperature, 50 hourly readings, one special cause at reading 33",
+ "source": "constructed",
+ "setting": "braze furnace zone-3 temperature in \u00b0C, logged hourly by the controller's thermocouple to 0.1 \u00b0C, 50 consecutive hours",
+ "params": {
+  "units": "\u00b0C"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 50
+}

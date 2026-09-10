@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 16: Statistical process control I · Six Sigma Course</title>
+<meta name="description" content="Shewhart's insight, common and special causes, control limits versus specification limits, X̄-R, X̄-S and I-MR charts built by hand from data with the constants, the Western Electric and Nelson rules with their false-alarm rates computed exactly, and how often to sample.">
+<meta name="examples" content="m07-bore, m16-seal, m16-furnace, m16-furnace-clean, m16-shift, m16-arl, chk-nist-imr, m16-ex1-pin, m16-ex2-trend">
+<!-- allowed-numbers: conventions, constants named in the text and hand-arithmetic intermediates not stored in verification/results/.
+     Every intermediate was computed by the build script (m16_inter.py) from the results values before it was printed here. -->
+<meta name="allowed-numbers" content="0.27 0.0027 0.00135 99.73 0.05 0.01 1.128 3.267 2.660 0.577 2.114 2.326 0.975 0.284 1.716 0.9727 0.729 2.282 2.059 12.000 12.025 11.975 0.025 0.050 1.96 2.00 3.00 1.50 0.50 5.00 8.00 30.000 1924 1.10 1.15 51.15 0.00886 0.0325 0.00660 0.00295 2.8 0.05368 0.01564 0.09448 0.05661 0.05370 3.5009 615.7 4.6 1.9 5.4 3.8 0.70 4.9941 19.845 20.521 0.676 15 25 4.8 2.24 0.02475 0.01649 0.00824 0.328 2.2 0.83">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="16">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 16 · Control</p>
+    <h1>Statistical process control I</h1>
+    <p class="lead">A control chart is a running record of a process with two lines drawn on it that say how far the process wanders when nothing has changed. Everything about it, the constants, the rules, the false alarms, follows from that one idea. This module builds the three variables charts by hand from printed data, states the run rules exactly, computes what each rule costs in false alarms, and returns to the question of how often to sample.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Explain</strong> Shewhart's distinction between common and special causes and what a control chart does with it.</li>
+      <li><strong>State</strong> the difference between control limits and specification limits and why they never appear on the same chart.</li>
+      <li><strong>Build</strong> X̄-R, X̄-S and I-MR charts from raw data with the tabulated constants, and choose the right one for the data you have.</li>
+      <li><strong>Apply</strong> the Western Electric and Nelson rules exactly as written, and read a pattern (a shift, a trend, a special cause) from the chart.</li>
+      <li><strong>Quantify</strong> the false-alarm rate and average run length of a chart with and without runs rules, and choose rules deliberately.</li>
+      <li><strong>Decide</strong> how often to sample and how to form subgroups so that the chart answers the question you are asking.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three questions on Modules 2, 5 and 7. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="16">
+      <fieldset class="q" data-answer="c">
+        <legend>1. Common-cause variation is</legend>
+        <label><input type="radio" name="p1" value="a"> variation caused by operator error</label>
+        <label><input type="radio" name="p1" value="b"> variation that exceeds the specification</label>
+        <label><input type="radio" name="p1" value="c"> the routine, ever-present variation of the process as it is designed and run</label>
+        <label><input type="radio" name="p1" value="d"> variation between two machines</label>
+        <p class="explain" hidden>Module 2: the noise of the system; only the system's owners can reduce it.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. The standard deviation of the mean of n = 5 values is</legend>
+        <label><input type="radio" name="p2" value="a"> the same as for one value</label>
+        <label><input type="radio" name="p2" value="b"> the individual standard deviation divided by √5</label>
+        <label><input type="radio" name="p2" value="c"> five times smaller</label>
+        <label><input type="radio" name="p2" value="d"> five times larger</label>
+        <p class="explain" hidden>Module 1; it is why X̄ limits are much tighter than the spread of individual parts.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. R̄/d₂ estimates</legend>
+        <label><input type="radio" name="p3" value="a"> the within-subgroup standard deviation from the average subgroup range</label>
+        <label><input type="radio" name="p3" value="b"> the overall standard deviation</label>
+        <label><input type="radio" name="p3" value="c"> the tolerance</label>
+        <label><input type="radio" name="p3" value="d"> the mean range of the specification</label>
+        <p class="explain" hidden>Module 7; d₂ is tabulated by subgroup size.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>On 16 May 1924 Walter Shewhart, a physicist at Western Electric's Bell Telephone Laboratories group, sent his manager a one-page memo with a small diagram attached. The diagram was the first control chart. The memo's point was that some variation in a manufactured product is due to chance and is to be expected, and some is due to assignable causes that can be found and removed; the chart was a way to tell the two apart in the running record of a process.<sup class="cite"><a href="#ref-1">[1]</a></sup> Shewhart worked the idea out in his 1931 book, where the choice of three-sigma limits is justified on economic grounds, as a balance between looking for causes that are not there and missing causes that are, rather than by any probability distribution.<sup class="cite"><a href="#ref-2">[2]</a></sup> A century on, the chart is unchanged, and the argument about what it means is still going: Woodall's 2000 review of the controversies in SPC lists the hypothesis-testing view of a control chart against Shewhart's own, the role of statistical theory, and the gap between researchers and practitioners as live questions.<sup class="cite"><a href="#ref-9">[9]</a></sup> This module teaches the chart as Shewhart intended it, an operational rule for telling noise from signal, and gives the probability arithmetic where it helps, which is in choosing rules.</p>
+    <p><em>The following is an illustrative failure with invented details, not a real program.</em> A machining cell charts a bore diameter. Somebody helpful draws the drawing limits, ±0.025 mm, on the chart as red lines, "so the operator can see the spec". The operator, seeing a reading move toward a red line, adjusts the offset. The next reading moves back past nominal, so the operator adjusts again. Within a week the measured variation has roughly doubled and the cell is producing more scrap than before the chart existed. Module 2's funnel experiment showed the arithmetic: adjusting a stable process to every deviation inflates its variance. The chart did not fail. It was never a control chart; it was a specification chart, and a specification chart tells an operator to tamper.</p>
+
+    <h2 id="causes">Common causes, special causes, and what the chart does</h2>
+    <p>Module 2 introduced the vocabulary in words. Here it becomes operational. Shewhart's chance causes, Deming's common causes, are the many small influences that are always present: the play in a bearing, the grade of the material within its specification, the temperature of the shop, the operator's ordinary variability. Their sum is the process's routine variation, and it is the same from hour to hour as long as the system is the same. Assignable or special causes are events: a tool chips, a lot of material is different, a fixture works loose, a new operator misreads a setting. They are not part of the system and their effect is a change in the record.</p>
+    <p>A control chart makes the distinction with a rule. Take the process's routine variation, estimated from small samples taken close together in time (the rational subgroups of Module 5), and draw limits at three of those standard deviations either side of the centre. A point outside the limits, or a pattern inside them that routine variation would almost never produce, is the signal to look for a special cause. Everything else is noise, and reacting to noise is tampering. The two mistakes are not symmetric in cost, and Shewhart set the limits where he did because in his experience three sigma made both mistakes rare enough to live with.<sup class="cite"><a href="#ref-2">[2]</a></sup></p>
+
+    <h2 id="limits">Control limits are not specification limits</h2>
+    <p>This is the second of three places in the course where this point is made, because it is the most common error in industry (Module 7 made it first; Module 17 will make it again). The two kinds of limit come from different sources, describe different things, and have different consequences when crossed.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Control limits and specification limits.</caption>
+        <thead><tr><th></th><th>Control limits</th><th>Specification limits</th></tr></thead>
+        <tbody>
+          <tr><td>Come from</td><td>the process's own data: centre ± 3 estimated standard deviations of the plotted statistic</td><td>the drawing or the customer: what a part must be to function</td></tr>
+          <tr><td>Describe</td><td>what the process does when nothing has changed</td><td>what the customer needs</td></tr>
+          <tr><td>Apply to</td><td>the plotted statistic (a subgroup mean, a range, an individual value)</td><td>individual parts only</td></tr>
+          <tr><td>Crossing one means</td><td>something changed; find the cause</td><td>this part is nonconforming; sort, rework or scrap it</td></tr>
+          <tr><td>Belong on</td><td>the control chart</td><td>the histogram and the capability report (Module 7)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A subgroup mean of five parts can be inside the specification while a part in the subgroup is outside it, and the X̄ limits are tighter than the specification by roughly √n for a capable process, so putting the two on one chart misleads in both directions at once. The AIAG &amp; VDA manual is explicit that tolerance limits are not entered on a control chart, and it treats the process-related chart (limits from the data) and the tolerance-related chart (a different tool, for a different purpose) as separate concepts.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
+    <figure>
+      <svg viewBox="0 0 660 260" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Control limits on the chart, specification limits on the histogram</title>
+        <desc id="fig1-d">Left: a control chart of subgroup means with a centre line and upper and lower control limits close to it; the points wander inside the limits. Right: a histogram of the individual parts with a normal curve, and the specification limits drawn much further out than the control limits, with a small tail crossing the upper limit. An arrow notes that the chart limits are about the square root of the subgroup size tighter than the individual spread.</desc>
+        <g class="chart-axis"><path d="M40 200 H310"/><path d="M40 200 V30"/><path d="M370 200 H630"/><path d="M370 200 V30"/></g>
+        <g class="chart-title"><text x="175" y="20" text-anchor="middle">X̄ chart: control limits from the data</text><text x="500" y="20" text-anchor="middle">Histogram of parts: specification limits</text></g>
+        <g class="chart-limit"><path d="M50 80 H300"/><path d="M50 160 H300"/></g>
+        <g class="chart-center"><path d="M50 120 H300"/></g>
+        <g class="chart-text small accent"><text x="304" y="84">UCL</text><text x="304" y="164">LCL</text><text x="304" y="124">x̄̄</text></g>
+        <g class="chart-line"><path d="M60 118 L80 105 L100 130 L120 112 L140 138 L160 100 L180 125 L200 115 L220 145 L240 108 L260 128 L280 110"/></g>
+        <g class="chart-point"><circle cx="60" cy="118" r="3"/><circle cx="80" cy="105" r="3"/><circle cx="100" cy="130" r="3"/><circle cx="120" cy="112" r="3"/><circle cx="140" cy="138" r="3"/><circle cx="160" cy="100" r="3"/><circle cx="180" cy="125" r="3"/><circle cx="200" cy="115" r="3"/><circle cx="220" cy="145" r="3"/><circle cx="240" cy="108" r="3"/><circle cx="260" cy="128" r="3"/><circle cx="280" cy="110" r="3"/></g>
+        <text x="175" y="222" text-anchor="middle" class="chart-text muted small">subgroup number</text>
+        <g class="chart-bar">
+          <rect x="400" y="180" width="18" height="20"/><rect x="418" y="140" width="18" height="60"/><rect x="436" y="90" width="18" height="110"/><rect x="454" y="55" width="18" height="145"/><rect x="472" y="45" width="18" height="155"/><rect x="490" y="70" width="18" height="130"/><rect x="508" y="110" width="18" height="90"/><rect x="526" y="160" width="18" height="40"/><rect x="544" y="185" width="18" height="15"/><rect x="562" y="194" width="18" height="6"/>
+        </g>
+        <g class="chart-spec"><path d="M385 40 V200"/><path d="M590 40 V200"/></g>
+        <g class="chart-text small bad"><text x="385" y="215" text-anchor="middle">LSL</text><text x="590" y="215" text-anchor="middle">USL</text></g>
+        <g class="chart-limit"><path d="M455 190 V200"/><path d="M515 190 V200"/></g>
+        <text x="485" y="236" text-anchor="middle" class="chart-text small accent">the X̄ control limits would sit here, about √n tighter</text>
+        <text x="500" y="252" text-anchor="middle" class="chart-text muted small">individual part value</text>
+      </svg>
+      <figcaption>Figure 1. The chart on the left carries the process's own limits and no specification. The histogram on the right carries the specification and no control limits. The X̄ limits, transferred to the histogram's scale, fall well inside the specification for a capable process, which is exactly why the two must not share a chart.</figcaption>
+    </figure>
+
+    <h2 id="three">Why three sigma, and what 0.27 % means</h2>
+    <p>If the plotted statistic were exactly normal and the process exactly stable, the chance that one point falls outside ±3σ is 0.27 %, about one in 370. That number is worth knowing, and it is not the reason for the limits. Shewhart chose three sigma because it worked across the distributions he met, and Wheeler's later argument is that for any homogeneous data, of whatever shape, three-sigma limits bracket nearly all of the points, which is what makes the chart usable without a normality check (Module 8).<sup class="cite"><a href="#ref-11">[11]</a></sup> The 0.27 % is best read as an upper reference: the false-alarm rate of rule 1 alone on a well-behaved process is around one point in a few hundred. The section on average run length below turns that into a number for every rule set.</p>
+
+    <h2 id="build">Building the charts by hand</h2>
+    <p>Three charts cover most variables data. The X̄-R chart plots subgroup means and ranges for subgroup sizes of about 2 to 10; the X̄-S chart plots means and standard deviations and is preferred above about n = 10, where the range wastes information; the I-MR chart plots individual values and the moving range between successive values when subgroups are impossible or pointless (one batch a day, one temperature reading an hour, destructive tests).<sup class="cite"><a href="#ref-4">[4]</a><a href="#ref-5">[5]</a></sup> All three use the same logic: estimate the routine standard deviation from the within-subgroup spread, then set the limits at three of the plotted statistic's standard deviations. The constants absorb the arithmetic and are tabulated by subgroup size.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
+
+    <h3 id="xbar-r">X̄-R chart: the bore diameter again</h3>
+    <p class="example-label">Constructed data, not a real production run: the Module 7 bore study, Ø12.000 ± 0.025 mm, 25 subgroups of 5 consecutive parts every 30 minutes, bore micrometer to 0.001 mm. The full table is on the Module 7 page; the subgroup means and ranges are what the chart needs.</p>
+    <div class="formula">Centre lines: x̄̄ = mean of the subgroup means; R̄ = mean of the subgroup ranges<br>
+      X̄ chart: UCL = x̄̄ + A₂R̄, LCL = x̄̄ − A₂R̄ &nbsp;&nbsp; R chart: UCL = D₄R̄, LCL = D₃R̄<br>
+      σ̂ = R̄ / d₂ (the routine standard deviation of individual parts); &nbsp; A₂ = 3 / (d₂√n)
+      <span class="where">For n = 5: A₂ = 0.577, D₃ = 0, D₄ = 2.114, d₂ = 2.326.<sup class="cite"><a href="#ref-4">[4]</a></sup> A₂R̄ is three standard deviations of a subgroup mean, because R̄/d₂ is σ̂ and σ̂/√n is the standard deviation of the mean.</span>
+    </div>
+    <p>x̄̄ = <span data-ex="m07-bore" data-key="chart.xbarbar" data-dp="4">12.0039</span> mm and R̄ = <span data-ex="m07-bore" data-key="chart.rbar" data-dp="5">0.01536</span> mm. A₂R̄ = 0.577 × 0.01536 = 0.00886 mm, so the X̄ limits are <span data-ex="m07-bore" data-key="chart.lcl_x" data-dp="4">11.9950</span> and <span data-ex="m07-bore" data-key="chart.ucl_x" data-dp="4">12.0128</span> mm. D₄R̄ = 2.114 × 0.01536 = 0.0325 mm is the upper limit of the R chart, and its lower limit is zero because D₃ = 0 for n ≤ 6. The routine standard deviation is σ̂ = 0.01536 / 2.326 = 0.00660 mm, and the standard deviation of a subgroup mean is 0.00660/√5 = 0.00295 mm; three of those is 0.00886 mm, which is A₂R̄ again. Compare that with the half-tolerance of 0.025 mm: the X̄ limits are 2.8 times tighter than the specification. No mean and no range crosses its limit, and, checking the rules in the next section, nothing else fires: the process was stable over the study. The calculator below redraws both charts from the Module 7 table.</p>
+    <p>Read the R chart first, always. The X̄ limits are computed from R̄, so if the ranges are out of control the X̄ limits are wrong before you have looked at them. A range chart that signals says the within-subgroup spread changed, which usually points to something different from a shift in the mean: a loose fixture, a worn tool making the size wander within minutes, a mixed lot inside a subgroup.</p>
+
+    <h3 id="xbar-s">X̄-S chart: a larger subgroup</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the seal width of a heat-sealed pouch in mm, measured with a calibrated loupe to 0.01 mm, ten consecutive pouches every hour for 20 hours.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 2. Seal width, mm, 20 subgroups of 10 (constructed data), with the subgroup means and ranges; the chart uses the subgroup standard deviations, which the calculator computes.</caption><thead><tr><th>Subgroup</th><th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th><th>x<sub>4</sub></th><th>x<sub>5</sub></th><th>x<sub>6</sub></th><th>x<sub>7</sub></th><th>x<sub>8</sub></th><th>x<sub>9</sub></th><th>x<sub>10</sub></th><th>Mean x̄</th><th>Range R</th></tr></thead><tbody>
+<tr><td>1</td><td>5.02</td><td>5.05</td><td>5.02</td><td>4.92</td><td>5.05</td><td>5.03</td><td>4.97</td><td>5.03</td><td>5.02</td><td>5.02</td><td>5.013</td><td>0.13</td></tr>
+<tr><td>2</td><td>5.00</td><td>5.03</td><td>4.96</td><td>4.99</td><td>4.97</td><td>5.04</td><td>5.00</td><td>4.98</td><td>4.95</td><td>4.98</td><td>4.990</td><td>0.09</td></tr>
+<tr><td>3</td><td>5.00</td><td>4.98</td><td>5.08</td><td>5.06</td><td>4.84</td><td>4.89</td><td>4.99</td><td>4.97</td><td>5.01</td><td>5.01</td><td>4.983</td><td>0.24</td></tr>
+<tr><td>4</td><td>5.13</td><td>4.93</td><td>4.98</td><td>5.12</td><td>5.04</td><td>5.04</td><td>4.97</td><td>4.90</td><td>5.01</td><td>5.01</td><td>5.013</td><td>0.23</td></tr>
+<tr><td>5</td><td>4.93</td><td>4.96</td><td>5.00</td><td>4.94</td><td>4.99</td><td>5.01</td><td>5.00</td><td>4.97</td><td>5.04</td><td>5.05</td><td>4.989</td><td>0.12</td></tr>
+<tr><td>6</td><td>5.02</td><td>4.95</td><td>5.04</td><td>4.97</td><td>5.05</td><td>4.94</td><td>5.05</td><td>5.00</td><td>4.93</td><td>4.98</td><td>4.993</td><td>0.12</td></tr>
+<tr><td>7</td><td>5.00</td><td>5.02</td><td>4.94</td><td>4.93</td><td>5.01</td><td>4.97</td><td>5.01</td><td>5.05</td><td>4.90</td><td>5.02</td><td>4.985</td><td>0.15</td></tr>
+<tr><td>8</td><td>5.07</td><td>4.98</td><td>4.95</td><td>5.05</td><td>5.02</td><td>5.05</td><td>4.98</td><td>4.91</td><td>4.99</td><td>4.97</td><td>4.997</td><td>0.16</td></tr>
+<tr><td>9</td><td>5.05</td><td>5.01</td><td>4.90</td><td>4.93</td><td>5.05</td><td>5.04</td><td>4.96</td><td>5.00</td><td>5.03</td><td>5.03</td><td>5.000</td><td>0.15</td></tr>
+<tr><td>10</td><td>5.05</td><td>5.02</td><td>4.99</td><td>4.98</td><td>5.06</td><td>4.86</td><td>4.99</td><td>5.00</td><td>4.91</td><td>5.02</td><td>4.988</td><td>0.20</td></tr>
+<tr><td>11</td><td>4.96</td><td>5.05</td><td>4.99</td><td>5.04</td><td>5.07</td><td>5.02</td><td>4.95</td><td>4.91</td><td>5.11</td><td>4.99</td><td>5.009</td><td>0.20</td></tr>
+<tr><td>12</td><td>4.96</td><td>5.01</td><td>4.99</td><td>5.05</td><td>5.00</td><td>5.00</td><td>4.96</td><td>5.03</td><td>4.94</td><td>5.04</td><td>4.998</td><td>0.11</td></tr>
+<tr><td>13</td><td>5.09</td><td>4.91</td><td>4.85</td><td>5.04</td><td>5.15</td><td>4.94</td><td>4.92</td><td>5.04</td><td>4.95</td><td>4.97</td><td>4.986</td><td>0.30</td></tr>
+<tr><td>14</td><td>4.98</td><td>5.03</td><td>4.98</td><td>5.02</td><td>4.99</td><td>4.95</td><td>4.98</td><td>4.94</td><td>5.00</td><td>4.93</td><td>4.980</td><td>0.10</td></tr>
+<tr><td>15</td><td>4.93</td><td>5.09</td><td>5.00</td><td>5.00</td><td>5.03</td><td>4.97</td><td>4.99</td><td>5.03</td><td>5.02</td><td>4.93</td><td>4.999</td><td>0.16</td></tr>
+<tr><td>16</td><td>5.05</td><td>4.96</td><td>4.94</td><td>4.95</td><td>4.98</td><td>5.10</td><td>4.93</td><td>5.01</td><td>4.87</td><td>5.00</td><td>4.979</td><td>0.23</td></tr>
+<tr><td>17</td><td>5.05</td><td>4.99</td><td>4.96</td><td>5.01</td><td>5.04</td><td>5.04</td><td>5.12</td><td>5.01</td><td>4.96</td><td>4.99</td><td>5.017</td><td>0.16</td></tr>
+<tr><td>18</td><td>5.00</td><td>5.01</td><td>5.00</td><td>5.01</td><td>4.90</td><td>5.05</td><td>4.97</td><td>4.93</td><td>5.04</td><td>5.08</td><td>4.999</td><td>0.18</td></tr>
+<tr><td>19</td><td>5.03</td><td>5.01</td><td>4.94</td><td>5.17</td><td>5.05</td><td>4.93</td><td>4.95</td><td>5.01</td><td>4.91</td><td>5.01</td><td>5.001</td><td>0.26</td></tr>
+<tr><td>20</td><td>4.97</td><td>5.07</td><td>5.06</td><td>4.84</td><td>5.00</td><td>4.90</td><td>5.07</td><td>5.01</td><td>5.03</td><td>4.94</td><td>4.989</td><td>0.23</td></tr>
+</tbody></table></div>
+    <div class="formula">X̄ chart: UCL = x̄̄ + A₃S̄, LCL = x̄̄ − A₃S̄ &nbsp;&nbsp; S chart: UCL = B₄S̄, LCL = B₃S̄ &nbsp;&nbsp; σ̂ = S̄ / c₄
+      <span class="where">For n = 10: A₃ = 0.975, B₃ = 0.284, B₄ = 1.716, c₄ = 0.9727.<sup class="cite"><a href="#ref-4">[4]</a></sup> Above n = 5 or so the S chart has a non-zero lower limit, and a subgroup with too little spread is a signal too: it usually means the gauge stuck, the values were copied, or the parts were not consecutive.</span>
+    </div>
+    <p>x̄̄ = <span data-ex="m16-seal" data-key="xbarbar" data-dp="4">4.9954</span> mm, S̄ = <span data-ex="m16-seal" data-key="sbar" data-dp="5">0.05506</span> mm. A₃S̄ = 0.975 × 0.05506 = 0.05368, so the X̄ limits are <span data-ex="m16-seal" data-key="lcl_x" data-dp="4">4.9417</span> and <span data-ex="m16-seal" data-key="ucl_x" data-dp="4">5.0491</span> mm; the S chart runs from B₃S̄ = 0.01564 to B₄S̄ = 0.09448 mm. σ̂ = S̄/c₄ = 0.05661 mm, and three standard deviations of a mean of ten is 3 × 0.05661/√10 = 0.05370 mm, A₃S̄ again. No subgroup mean or standard deviation crosses a limit and no Western Electric rule fires. (Nelson's rule 7, fifteen points in a row within one sigma of the centre, does fire at subgroups 15 and 16 on the X̄ chart; with limits this well estimated and twenty subgroups that is a false alarm of the kind the next section prices, and a reason to use that rule only when stratification is a real suspicion.)</p>
+
+    <h3 id="imr">I-MR chart: one reading at a time</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the zone-3 temperature of a braze furnace in °C, logged hourly from the controller's thermocouple to 0.1 °C, 50 consecutive hours.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Furnace zone temperature, °C, 50 hourly readings in order (constructed data).</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>610.4</td><td>610.0</td><td>609.4</td><td>607.3</td><td>610.0</td><td>611.1</td><td>611.3</td><td>609.4</td><td>612.7</td><td>612.3</td></tr>
+<tr><td>11–20</td><td>609.7</td><td>609.8</td><td>611.2</td><td>609.7</td><td>610.3</td><td>611.5</td><td>611.4</td><td>609.4</td><td>609.5</td><td>609.3</td></tr>
+<tr><td>21–30</td><td>610.0</td><td>610.1</td><td>609.5</td><td>610.9</td><td>610.1</td><td>610.0</td><td>607.6</td><td>608.3</td><td>609.2</td><td>610.4</td></tr>
+<tr><td>31–40</td><td>609.0</td><td>611.9</td><td>615.7</td><td>610.3</td><td>610.1</td><td>610.6</td><td>611.1</td><td>609.3</td><td>611.9</td><td>609.1</td></tr>
+<tr><td>41–50</td><td>610.6</td><td>609.8</td><td>609.8</td><td>610.8</td><td>610.2</td><td>611.9</td><td>609.4</td><td>610.6</td><td>610.7</td><td>612.5</td></tr>
+</tbody></table></div>
+    <div class="formula">MR<sub>i</sub> = |x<sub>i</sub> − x<sub>i−1</sub>|; &nbsp; MR̄ = mean of the n − 1 moving ranges; &nbsp; σ̂ = MR̄ / 1.128<br>
+      I chart: UCL = x̄ + 3 MR̄/1.128, LCL = x̄ − 3 MR̄/1.128 &nbsp;&nbsp; MR chart: UCL = 3.267 MR̄, LCL = 0
+      <span class="where">1.128 is d₂ for a "subgroup" of two consecutive values and 3.267 is D₄ for n = 2.<sup class="cite"><a href="#ref-5">[5]</a></sup> Some texts write the I-chart half-width as E₂MR̄ with E₂ = 2.660, which is 3/1.128 rounded; this course uses 3/1.128 so that the NIST worked example is reproduced to four decimals.</span>
+    </div>
+    <p>x̄ = <span data-ex="m16-furnace" data-key="xbar" data-dp="3">610.342</span> °C, MR̄ = <span data-ex="m16-furnace" data-key="mrbar" data-dp="4">1.3163</span> °C. σ̂ = 1.3163/1.128 = <span data-ex="m16-furnace" data-key="sigma_within" data-dp="4">1.1670</span> °C; 3σ̂ = 3.5009, so the I chart limits are <span data-ex="m16-furnace" data-key="lcl_x" data-dp="2">606.84</span> and <span data-ex="m16-furnace" data-key="ucl_x" data-dp="2">613.84</span> °C, and the MR chart's upper limit is 3.267 × 1.3163 = <span data-ex="m16-furnace" data-key="ucl_mr" data-dp="3">4.300</span> °C. Reading 33, 615.7 °C, is 4.6 standard deviations above the mean, 1.9 °C above the upper limit, and the moving range from reading 33 back down to reading 34 (5.4 °C) is beyond the MR limit as well (the range into the spike, 3.8 °C, is just inside it). That is a special cause: one reading, not a shift. The log showed a door interlock fault that hour. The reading is real, the cause is known and fixed, and the right treatment is to record it, remove it from the limit calculation, and keep charting.</p>
+    <p><strong>Recomputing the limits without the assigned cause.</strong> On the other 49 readings, x̄ = <span data-ex="m16-furnace-clean" data-key="xbar" data-dp="3">610.233</span> °C, MR̄ = <span data-ex="m16-furnace-clean" data-key="mrbar" data-dp="4">1.1854</span> °C, σ̂ = <span data-ex="m16-furnace-clean" data-key="sigma_within" data-dp="4">1.0509</span> °C and the limits are <span data-ex="m16-furnace-clean" data-key="lcl_x" data-dp="2">607.08</span> to <span data-ex="m16-furnace-clean" data-key="ucl_x" data-dp="2">613.39</span> °C, 0.70 °C narrower in total. A single spike inflated the moving-range average and with it every limit on the chart, which is the general lesson: limits computed from data that contain a special cause are too wide, and a chart with limits that are too wide misses the next special cause. (The inflated limits also produced a spurious Nelson rule 7 signal, fifteen readings within one sigma, at readings 25 and 26; it disappears with the corrected limits.) The AIAG &amp; VDA manual's guidance on outliers is the same: an outlier with an identified cause is documented and excluded; one without a cause is data.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
+
+    <h3 id="nist">A published check: the NIST individuals chart</h3>
+    <p>The NIST handbook's I-MR example, ten batch readings, gives x̄ = <span data-ex="chk-nist-imr" data-key="xbar" data-dp="2">50.81</span>, MR̄ = <span data-ex="chk-nist-imr" data-key="mrbar" data-dp="4">1.8778</span>, and limits <span data-ex="chk-nist-imr" data-key="lcl_x" data-dp="4">45.8159</span> and <span data-ex="chk-nist-imr" data-key="ucl_x" data-dp="4">55.8041</span>; the course's three routes reproduce all four figures (3 × 1.8778/1.128 = 4.9941 either side of the mean).<sup class="cite"><a href="#ref-5">[5]</a></sup></p>
+
+    <h3 id="calc-chart">Calculator: control chart builder</h3>
+    <p>Pre-loaded with the Module 7 bore data as an X̄-R chart. Switch the type, paste your own data, select which rules to flag, or freeze the limits from the first k subgroups (a baseline) and watch later subgroups against them, which is how a chart is used in production once its limits are established.</p>
+    <div class="calc" data-calc="control" id="calc-ctrl-bore">
+      <h3>Control chart builder</h3>
+      <script type="application/json" class="calc-data">{"type":"xbar_r","x":[11.982,12.007,12.009,12.008,11.997,12.002,12.012,12.009,12.004,12.008,12.008,11.999,12.005,12.003,11.996,12.001,11.994,12.002,11.995,12.005,12.007,11.998,11.993,12.018,12.005,12.006,12.0,12.007,12.0,12.007,12.012,12.025,12.009,12.009,12.001,12.003,11.996,12.0,12.0,11.995,11.996,12.009,12.014,12.015,12.005,12.017,12.015,12.003,12.002,12.002,12.001,12.008,12.006,11.996,12.006,11.992,12.004,12.006,12.011,11.997,12.009,12.007,12.003,12.004,12.009,11.997,12.001,12.004,12.01,12.007,12.002,12.013,12.001,11.999,12.001,12.004,12.001,12.001,12.007,12.007,11.998,12.004,12.012,12.0,12.015,12.01,11.998,12.013,12.005,12.007,12.015,12.004,12.009,12.007,11.996,11.993,12.001,12.003,12.005,12.008,11.997,12.015,12.006,12.001,11.995,11.996,12.012,12.007,11.994,12.002,11.996,12.004,11.994,12.008,12.018,12.002,12.001,12.002,12.001,12.007,11.991,11.989,12.011,12.011,11.996],"subgroup_size":5,"units":"mm","rules":["we1","we2","we3","we4"]}</script>
+    </div>
+
+    <h2 id="rules">The runs rules</h2>
+    <p>A point beyond three sigma is rule 1. It catches a large change quickly and a small one slowly: a shift of one standard deviation of the plotted statistic takes, on average, 44 points to produce a point beyond the limit (next section). The runs rules look for patterns that a stable process would rarely make, so that smaller changes are caught sooner. The four rules from the Western Electric <em>Statistical Quality Control Handbook</em> of 1956 divide each side of the chart into zones one sigma wide (C nearest the centre, then B, then A) and read:<sup class="cite"><a href="#ref-6">[6]</a><a href="#ref-7">[7]</a></sup></p>
+    <ol>
+      <li>One point beyond zone A (beyond 3σ).</li>
+      <li>Two out of three consecutive points in zone A or beyond (beyond 2σ), on the same side.</li>
+      <li>Four out of five consecutive points in zone B or beyond (beyond 1σ), on the same side.</li>
+      <li>Eight consecutive points on the same side of the centre line.</li>
+    </ol>
+    <p>Nelson's 1984 note in the <em>Journal of Quality Technology</em> lists eight tests, which most software offers as a menu: (1) one point beyond zone A; (2) nine in a row on one side; (3) six in a row steadily increasing or decreasing; (4) fourteen in a row alternating up and down; (5) two of three beyond 2σ on one side; (6) four of five beyond 1σ on one side; (7) fifteen in a row within zone C; (8) eight in a row beyond zone C on both sides.<sup class="cite"><a href="#ref-8">[8]</a></sup> Tests 1, 5, 6 and 2 are the Western Electric rules with the run length raised from eight to nine; tests 3 and 4 look for trends and systematic alternation; tests 7 and 8 look for stratification and mixtures, which are signs that the subgroups are not rational. Nelson's own advice was that the tests are for use on charts whose limits are established and that not all of them should be applied at once. The AIAG &amp; VDA manual states its stability criteria in the same terms, violations of the limits, runs (usually seven or more on one side), trends (usually seven or more rising or falling), and an unexpected count in the middle third of the chart (for a 25-point chart, fewer than 11 or more than 23 at a 1 % error rate), and notes that the Western Electric and Nelson rule sets are ways of counting the same things.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
+
+    <h3 id="example-shift">Worked example: a small shift the 3σ rule does not see</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the mass of adhesive dispensed per shot in mg, one shot weighed every 10 minutes on a balance reading to 0.01 mg, 50 shots; a new lot of adhesive was loaded before shot 26. The data were constructed with a mean of 20.0 mg and standard deviation 0.5 mg for the first 25 shots and a mean of 20.5 mg for the rest.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 4. Dispensed adhesive mass, mg, 50 shots in order (constructed data).</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>19.79</td><td>18.86</td><td>20.01</td><td>19.99</td><td>20.39</td><td>19.61</td><td>20.29</td><td>20.17</td><td>20.31</td><td>19.48</td></tr>
+<tr><td>11–20</td><td>20.30</td><td>19.67</td><td>20.13</td><td>19.53</td><td>19.86</td><td>19.67</td><td>19.10</td><td>19.79</td><td>20.41</td><td>18.91</td></tr>
+<tr><td>21–30</td><td>19.93</td><td>20.52</td><td>19.53</td><td>20.39</td><td>19.48</td><td>19.85</td><td>20.59</td><td>20.02</td><td>20.12</td><td>20.89</td></tr>
+<tr><td>31–40</td><td>20.46</td><td>20.02</td><td>20.94</td><td>20.44</td><td>21.02</td><td>20.61</td><td>20.50</td><td>20.48</td><td>20.31</td><td>20.21</td></tr>
+<tr><td>41–50</td><td>19.40</td><td>20.46</td><td>20.59</td><td>20.55</td><td>20.59</td><td>21.01</td><td>20.98</td><td>21.28</td><td>20.44</td><td>21.26</td></tr>
+</tbody></table></div>
+    <p>The I chart on all 50 values has x̄ = <span data-ex="m16-shift" data-key="xbar" data-dp="3">20.183</span> mg, MR̄ = <span data-ex="m16-shift" data-key="mrbar" data-dp="4">0.5418</span> mg, σ̂ = <span data-ex="m16-shift" data-key="sigma_within" data-dp="4">0.4804</span> mg and limits <span data-ex="m16-shift" data-key="lcl_x" data-dp="3">18.742</span> to <span data-ex="m16-shift" data-key="ucl_x" data-dp="3">21.624</span> mg. (In production the limits would come from a baseline period; here the whole record is used, which pulls the centre line up toward the shifted values and makes the exercise slightly harder than real life.) The first 25 shots average 19.845 mg and the last 25 20.521 mg: a shift of 0.676 mg, about one routine standard deviation. What the rules see:</p>
+    <ul>
+      <li><strong>Rule 1</strong> never fires. No shot in 25 after the change reaches the upper limit; a one-sigma shift moves the mean to 2σ below the limit, and a point beyond it is still a one-in-40 event.</li>
+      <li><strong>Rule 4</strong> (eight on one side) fires first, at shot <span data-ex="m16-shift" data-key="rules_x.we4.0" data-dp="0">40</span>, 15 shots after the change, and again at 49 and 50. Nelson's test 3 (six rising) fires at 40 and 41 as the run builds.</li>
+      <li><strong>Rules 2 and 3</strong> fire at shot <span data-ex="m16-shift" data-key="rules_x.we2.0" data-dp="0">50</span>, 25 shots after the change, when two large values arrive together.</li>
+      <li><strong>Nelson's test 4</strong> (fourteen alternating) fires at shots 14 to 16, <em>before</em> the change. That is a false alarm: with all eight tests switched on, a stable process produces one every few dozen points, and this one costs an investigation of a lot that was fine.</li>
+    </ul>
+    <p>The MR chart is quiet throughout: the shot-to-shot spread did not change, only the level, which is how a chart distinguishes a shift in the mean from a change in the noise. The lesson runs both ways. Without the runs rules, a one-sigma shift in a dispensed mass would have run for a long time; with all eight Nelson tests, a stable period produced a false alarm in 25 points. The next section puts numbers on that trade.</p>
+    <div class="calc" data-calc="control" id="calc-ctrl-shift">
+      <h3>Table 4 as an I-MR chart with all rules selected (inputs collapsed; try freezing the limits from the first 25 shots)</h3>
+      <script type="application/json" class="calc-data">{"type":"imr","x":[19.79,18.86,20.01,19.99,20.39,19.61,20.29,20.17,20.31,19.48,20.3,19.67,20.13,19.53,19.86,19.67,19.1,19.79,20.41,18.91,19.93,20.52,19.53,20.39,19.48,19.85,20.59,20.02,20.12,20.89,20.46,20.02,20.94,20.44,21.02,20.61,20.5,20.48,20.31,20.21,19.4,20.46,20.59,20.55,20.59,21.01,20.98,21.28,20.44,21.26],"subgroup_size":1,"units":"mg","rules":["we1","we2","we3","we4","n2","n3","n4","n7","n8"],"collapsed":true}</script>
+    </div>
+
+    <h2 id="arl">False alarms and average run length</h2>
+    <p>Every rule you add catches real changes sooner and raises false alarms more often. The way to compare rule sets is the <strong>average run length</strong> (ARL): the mean number of points plotted until the chart signals. In control, you want the ARL long (few false alarms); after a shift you want it short. For rule 1 alone on a normal statistic the in-control ARL is 1/p where p is the probability beyond ±3σ: 1/0.0027 = 370.4. With runs rules the arithmetic needs a Markov chain, which Champ and Woodall set up in 1987 and used to show exactly how much each supplementary rule shortens the in-control run.<sup class="cite"><a href="#ref-10">[10]</a></sup> Table 5 was computed by the course's own implementation of that chain and checked by simulation; the values are not copied from the paper, and the rule-1 column is the closed form.</p>
+    <div class="table-wrap"><table><caption>Table 5. Average run length of a Shewhart chart, normal plotted statistic, by rule set and by the size of a sustained shift in the plotted statistic's standard deviation units. Exact Markov-chain values computed by script (method of Champ and Woodall 1987); the in-control column (shift 0) is the false-alarm interval.</caption><tbody>
+<tr><th>Shift, in σ of the plotted statistic</th><td class="num"><span data-ex="m16-arl" data-key="shifts.0" data-dp="1">0.0</span></td><td class="num"><span data-ex="m16-arl" data-key="shifts.1" data-dp="1">0.5</span></td><td class="num"><span data-ex="m16-arl" data-key="shifts.2" data-dp="1">1.0</span></td><td class="num"><span data-ex="m16-arl" data-key="shifts.3" data-dp="1">1.5</span></td><td class="num"><span data-ex="m16-arl" data-key="shifts.4" data-dp="1">2.0</span></td><td class="num"><span data-ex="m16-arl" data-key="shifts.5" data-dp="1">3.0</span></td></tr>
+<tr><th>Rule 1 only</th><td class="num"><span data-ex="m16-arl" data-key="arl.we1.0" data-dp="1">370.4</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1.1" data-dp="1">155.2</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1.2" data-dp="1">43.9</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1.3" data-dp="1">15.0</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1.4" data-dp="1">6.3</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1.5" data-dp="1">2.0</span></td></tr>
+<tr><th>Rules 1 + 2</th><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.0" data-dp="1">225.4</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.1" data-dp="1">77.7</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.2" data-dp="1">20.0</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.3" data-dp="1">7.3</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.4" data-dp="1">3.6</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2.5" data-dp="1">1.7</span></td></tr>
+<tr><th>Rules 1 + 3</th><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.0" data-dp="1">166.1</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.1" data-dp="1">46.2</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.2" data-dp="1">12.7</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.3" data-dp="1">5.9</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.4" data-dp="1">3.7</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we3.5" data-dp="1">1.9</span></td></tr>
+<tr><th>Rules 1 + 4</th><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.0" data-dp="1">152.7</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.1" data-dp="1">44.3</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.2" data-dp="1">14.6</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.3" data-dp="1">7.8</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.4" data-dp="1">4.9</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we4.5" data-dp="1">2.0</span></td></tr>
+<tr><th>Rules 1 to 4</th><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.0" data-dp="1">91.8</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.1" data-dp="1">27.3</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.2" data-dp="1">9.2</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.3" data-dp="1">4.9</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.4" data-dp="1">3.1</span></td><td class="num"><span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.5" data-dp="1">1.7</span></td></tr>
+</tbody></table></div>
+    <p>Read the first column. Rule 1 alone gives a false alarm every <span data-ex="m16-arl" data-key="arl.we1.0" data-dp="0">370</span> points on average; adding rule 2 brings that to <span data-ex="m16-arl" data-key="arl.we1+we2.0" data-dp="0">225</span>, rule 3 to <span data-ex="m16-arl" data-key="arl.we1+we3.0" data-dp="0">166</span>, rule 4 to <span data-ex="m16-arl" data-key="arl.we1+we4.0" data-dp="0">153</span>, and all four together to <span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.0" data-dp="0">92</span>: four times as many false alarms as the plain chart. Now read the one-sigma column. The plain chart takes <span data-ex="m16-arl" data-key="arl.we1.2" data-dp="1">43.9</span> points on average to see a shift of one standard deviation of the plotted statistic; all four rules together take <span data-ex="m16-arl" data-key="arl.we1+we2+we3+we4.2" data-dp="1">9.2</span>, 4.8 times fewer. For a shift of three sigma the plain chart needs <span data-ex="m16-arl" data-key="arl.we1.5" data-dp="1">2.0</span> points and the rules barely help. That is the trade in numbers: the runs rules buy sensitivity to small shifts at the price of four times the false alarms, and do nothing for large ones.</p>
+    <p>Two things to add. The shift in Table 5 is in units of the plotted statistic. On an X̄ chart with n = 5, a shift of one standard deviation of the <em>individual parts</em> is a shift of √5 = 2.24 standard deviations of the mean, so the plain X̄ chart of the bore would see it in between <span data-ex="m16-arl" data-key="arl.we1.4" data-dp="1">6.3</span> and <span data-ex="m16-arl" data-key="arl.we1.5" data-dp="1">2.0</span> subgroups, a couple of hours at one subgroup per half hour; subgrouping is how a Shewhart chart gets its sensitivity. And the in-control figures are exact only for a normal statistic on a perfectly stable process with limits known exactly; with limits estimated from 25 subgroups the true false-alarm rate is somewhat higher, which is one more reason not to switch on every rule.<sup class="cite"><a href="#ref-9">[9]</a></sup> The practical guidance this course follows, which is also Nelson's and Wheeler's, is to use rule 1 always, add rules 2 to 4 when small sustained shifts matter and you can afford the investigations, and keep the trend and alternation tests for diagnosis rather than routine monitoring.<sup class="cite"><a href="#ref-8">[8]</a><a href="#ref-11">[11]</a></sup></p>
+
+    <h3 id="calc-sim">Simulator: watch the rules catch a shift</h3>
+    <p>The simulator draws subgroups from a parent distribution, applies a shift at a chosen subgroup, and counts how many subgroups each chart and rule set needs to signal, over many repetitions. Pre-loaded with a one-sigma shift at subgroup 25 and subgroups of five; try n = 1 to see the I chart struggle, and a non-normal parent to see how little it matters at n = 5.</p>
+    <div class="calc" data-calc="simulator" id="calc-sim-shift">
+      <h3>Central limit theorem and detection simulator</h3>
+      <script type="application/json" class="calc-data">{"parent":"normal","n":5,"k":50,"shift":1.0,"shiftAt":25,"seed":16,"repeats":200}</script>
+    </div>
+
+    <h2 id="sampling">How often to sample, and rational subgroups again</h2>
+    <p>The chart answers the question the subgrouping asks. Wheeler's rule for a rational subgroup is that it should come from a small region of time, space or product, so that the variation inside it is routine variation only; the chart then asks whether the variation <em>between</em> subgroups is more than routine.<sup class="cite"><a href="#ref-12">[12]</a></sup> Five consecutive bores every 30 minutes asks "does the reaming process drift or jump between half-hour checks?" Five bores picked at random across a shift asks nothing useful, because a shift-to-shift change is now inside the subgroup and inflates R̄, and the limits widen until they miss everything. The AIAG &amp; VDA manual makes the same two points about frequency: sample at a rate matched to how fast the process can change, since samples taken too far apart miss signals, and not so close together that consecutive values are autocorrelated, which makes the moving-range estimate of σ too small and the limits too tight.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
+    <p>A working procedure: list the ways the process can change (tool wear over hours, a lot change at each material delivery, a warm-up drift each morning, an operator change each shift), decide which of them the chart must catch and how soon, and set the subgroup so that none of those changes falls <em>inside</em> it and the sampling interval so that the fastest one of interest produces several subgroups before it matters. Then choose the chart: subgroups of 2 to 10 give X̄-R, larger ones X̄-S, and if the process changes so slowly that consecutive parts are effectively identical, or so rarely that one measurement per event is all there is, the I-MR chart with a longer interval. The subgroup size trades sensitivity against cost, and Table 5 with the √n scaling tells you what you are buying.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Specification limits on the chart.</strong> Consequence: operators adjust a stable process toward nominal and its variation grows (the funnel experiment). Fix: control limits from the data on the chart; the specification on the histogram.</li>
+      <li><strong>Limits from the specification, or from a target.</strong> Consequence: the chart has nothing to do with the process. Fix: x̄̄ ± A₂R̄ from at least 20 to 25 subgroups of real data.</li>
+      <li><strong>Reading the X̄ chart before the R chart.</strong> Consequence: X̄ limits computed from an out-of-control range are wrong. Fix: range or S chart first, every time.</li>
+      <li><strong>Limits recomputed from data that include a known special cause.</strong> Consequence: limits too wide, the next cause missed. Fix: document the cause, exclude the point, recompute; keep undocumented points in.</li>
+      <li><strong>Recomputing limits every week.</strong> Consequence: a slowly drifting process keeps redrawing its limits around itself and never signals. Fix: establish limits from a baseline, freeze them, and change them only when a deliberate process change has been made and verified.</li>
+      <li><strong>All eight tests switched on.</strong> Consequence: a false alarm every few dozen points, investigations that find nothing, and operators who stop looking. Fix: rule 1 always, rules 2 to 4 by decision, the rest for diagnosis.</li>
+      <li><strong>Subgroups that span a change.</strong> Consequence: R̄ inflated, limits too wide, the chart blind. Fix: consecutive parts, one machine, one lot, one operator inside each subgroup.</li>
+      <li><strong>Charting a characteristic nobody acts on.</strong> Consequence: a wall of charts and no reaction plan. Fix: every chart has an owner and a written reaction to each signal (Module 18).</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: an X̄-R chart from scratch</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the length of a turned pin in mm on a height gauge reading to 0.001 mm, four consecutive pins every 15 minutes, 20 samples.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 6. Pin length, mm, 20 subgroups of 4 (constructed data), with the subgroup means and ranges.</caption><thead><tr><th>Subgroup</th><th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th><th>x<sub>4</sub></th><th>Mean x̄</th><th>Range R</th></tr></thead><tbody>
+<tr><td>1</td><td>30.007</td><td>30.016</td><td>30.007</td><td>29.974</td><td>30.0010</td><td>0.042</td></tr>
+<tr><td>2</td><td>30.018</td><td>30.009</td><td>29.989</td><td>30.012</td><td>30.0070</td><td>0.029</td></tr>
+<tr><td>3</td><td>30.007</td><td>30.006</td><td>30.001</td><td>30.011</td><td>30.0063</td><td>0.010</td></tr>
+<tr><td>4</td><td>29.985</td><td>29.997</td><td>29.990</td><td>30.012</td><td>29.9960</td><td>0.027</td></tr>
+<tr><td>5</td><td>30.001</td><td>29.994</td><td>29.984</td><td>29.995</td><td>29.9935</td><td>0.017</td></tr>
+<tr><td>6</td><td>30.000</td><td>29.994</td><td>30.026</td><td>30.020</td><td>30.0100</td><td>0.032</td></tr>
+<tr><td>7</td><td>29.946</td><td>29.962</td><td>29.997</td><td>29.992</td><td>29.9743</td><td>0.051</td></tr>
+<tr><td>8</td><td>30.004</td><td>30.004</td><td>30.042</td><td>29.978</td><td>30.0070</td><td>0.064</td></tr>
+<tr><td>9</td><td>29.992</td><td>30.041</td><td>30.013</td><td>30.013</td><td>30.0148</td><td>0.049</td></tr>
+<tr><td>10</td><td>29.990</td><td>29.967</td><td>30.003</td><td>30.002</td><td>29.9905</td><td>0.036</td></tr>
+<tr><td>11</td><td>29.975</td><td>29.986</td><td>29.999</td><td>29.981</td><td>29.9853</td><td>0.024</td></tr>
+<tr><td>12</td><td>29.998</td><td>30.002</td><td>30.001</td><td>29.990</td><td>29.9977</td><td>0.012</td></tr>
+<tr><td>13</td><td>30.012</td><td>30.018</td><td>30.006</td><td>29.984</td><td>30.0050</td><td>0.034</td></tr>
+<tr><td>14</td><td>30.015</td><td>29.990</td><td>30.018</td><td>29.979</td><td>30.0005</td><td>0.039</td></tr>
+<tr><td>15</td><td>30.018</td><td>30.000</td><td>29.975</td><td>29.994</td><td>29.9967</td><td>0.043</td></tr>
+<tr><td>16</td><td>30.001</td><td>30.005</td><td>29.980</td><td>29.978</td><td>29.9910</td><td>0.027</td></tr>
+<tr><td>17</td><td>30.004</td><td>29.991</td><td>30.005</td><td>30.015</td><td>30.0038</td><td>0.024</td></tr>
+<tr><td>18</td><td>29.967</td><td>30.005</td><td>30.024</td><td>29.994</td><td>29.9975</td><td>0.057</td></tr>
+<tr><td>19</td><td>29.984</td><td>30.015</td><td>30.005</td><td>30.018</td><td>30.0055</td><td>0.034</td></tr>
+<tr><td>20</td><td>29.993</td><td>29.970</td><td>29.998</td><td>29.991</td><td>29.9880</td><td>0.028</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Compute x̄̄ and R̄. (b) With A₂ = 0.729, D₃ = 0, D₄ = 2.282 and d₂ = 2.059 for n = 4, compute the limits of both charts. (c) Is the process stable? Check rule 1 and the Western Electric rules. (d) Estimate σ̂ and the standard deviation of a subgroup mean. (e) The next subgroup after the study has a mean of 30.020 mm and a range of 0.030 mm. What do you do?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x̄̄ = <span data-ex="m16-ex1-pin" data-key="xbarbar" data-dp="4">29.9986</span> mm, R̄ = <span data-ex="m16-ex1-pin" data-key="rbar" data-dp="5">0.03395</span> mm.</p>
+      <p><strong>(b)</strong> A₂R̄ = 0.729 × 0.03395 = 0.02475 mm; X̄ limits <span data-ex="m16-ex1-pin" data-key="lcl_x" data-dp="4">29.9738</span> and <span data-ex="m16-ex1-pin" data-key="ucl_x" data-dp="4">30.0233</span> mm. R chart: UCL = 2.282 × 0.03395 = <span data-ex="m16-ex1-pin" data-key="ucl_r" data-dp="4">0.0775</span> mm, LCL = 0.</p>
+      <p><strong>(c)</strong> No range exceeds 0.0775 mm and no mean is outside the X̄ limits; rules 2, 3 and 4 do not fire. Stable over the 20 samples.</p>
+      <p><strong>(d)</strong> σ̂ = R̄/d₂ = 0.03395/2.059 = 0.01649 mm; the standard deviation of a mean of four is 0.01649/2 = 0.00824 mm, and three of those is the A₂R̄ of part (b).</p>
+      <p><strong>(e)</strong> The range of 0.030 mm is inside its limit; the mean of 30.020 mm is inside the X̄ limits too (30.0233), so there is no signal and no action. Notice the temptation: 30.020 is 0.020 mm from nominal, which sounds like a lot, and a specification-minded operator would adjust. The chart says the process has not changed. If the next subgroup is also high, rule 2 or rule 4 will eventually speak; until then, leave it alone.</p>
+      <div class="calc" data-calc="control" id="calc-ctrl-ex1">
+        <h3>Exercise 1 in the calculator (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"type":"xbar_r","x":[30.007,30.016,30.007,29.974,30.018,30.009,29.989,30.012,30.007,30.006,30.001,30.011,29.985,29.997,29.99,30.012,30.001,29.994,29.984,29.995,30.0,29.994,30.026,30.02,29.946,29.962,29.997,29.992,30.004,30.004,30.042,29.978,29.992,30.041,30.013,30.013,29.99,29.967,30.003,30.002,29.975,29.986,29.999,29.981,29.998,30.002,30.001,29.99,30.012,30.018,30.006,29.984,30.015,29.99,30.018,29.979,30.018,30.0,29.975,29.994,30.001,30.005,29.98,29.978,30.004,29.991,30.005,30.015,29.967,30.005,30.024,29.994,29.984,30.015,30.005,30.018,29.993,29.97,29.998,29.991],"subgroup_size":4,"units":"mm","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: what a trend looks like</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the concentration of a machining coolant in % measured by refractometer to 0.01 %, one reading per shift for 30 shifts; the sump lost water by evaporation and was not topped up. The data were constructed with a steady downward drift.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 7. Coolant concentration, %, 30 shift readings in order (constructed data).</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>7.87</td><td>7.78</td><td>7.79</td><td>7.77</td><td>7.88</td><td>7.43</td><td>7.83</td><td>7.83</td><td>7.83</td><td>7.59</td></tr>
+<tr><td>11–20</td><td>7.75</td><td>7.58</td><td>7.66</td><td>7.57</td><td>7.49</td><td>7.67</td><td>7.51</td><td>7.61</td><td>7.64</td><td>7.61</td></tr>
+<tr><td>21–30</td><td>7.38</td><td>7.05</td><td>7.20</td><td>7.18</td><td>7.17</td><td>7.03</td><td>6.61</td><td>7.12</td><td>6.89</td><td>7.28</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Build the I-MR chart on all 30 readings. (b) Which rules fire, in what order, and which chart (I or MR) sees the problem? (c) Compare σ̂ from the moving range with the sample standard deviation of the 30 readings and explain the difference. (d) What is the right response, and what should the limits be based on afterwards?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x̄ = <span data-ex="m16-ex2-trend" data-key="xbar" data-dp="3">7.487</span> %, MR̄ = <span data-ex="m16-ex2-trend" data-key="mrbar" data-dp="4">0.1666</span> %, σ̂ = <span data-ex="m16-ex2-trend" data-key="sigma_within" data-dp="4">0.1477</span> %; I chart limits <span data-ex="m16-ex2-trend" data-key="lcl_x" data-dp="3">7.044</span> to <span data-ex="m16-ex2-trend" data-key="ucl_x" data-dp="3">7.930</span> %; MR chart upper limit <span data-ex="m16-ex2-trend" data-key="ucl_mr" data-dp="3">0.544</span> %.</p>
+      <p><strong>(b)</strong> The MR chart is quiet: no moving range crosses its limit, because consecutive readings differ by only the shift-to-shift noise. The I chart is anything but. Rules 2 and 3 fire in the first shifts (at <span data-ex="m16-ex2-trend" data-key="rules_x.we2.0" data-dp="0">3</span> and <span data-ex="m16-ex2-trend" data-key="rules_x.we3.0" data-dp="0">5</span>), because the early readings all sit well above a centre line that is the average of a drifting series; rule 4 fires at shift <span data-ex="m16-ex2-trend" data-key="rules_x.we4.0" data-dp="0">14</span>; rule 1 first fires at shift <span data-ex="m16-ex2-trend" data-key="rules_x.we1.0" data-dp="0">26</span> as the readings fall through the lower limit. The pattern, a staircase rather than a step, with signals at both ends and a quiet MR chart, is the signature of a trend.</p>
+      <p><strong>(c)</strong> σ̂ from the moving range is 0.148 %; the sample standard deviation of all 30 readings is 0.328 %, 2.2 times larger. The moving range measures shift-to-shift noise; the overall s includes the drift of 0.83 % from the first five shifts to the last five. When these two disagree by this much, the process is not stable, and the ratio itself is a diagnostic (Module 7 used the same idea for capability).</p>
+      <p><strong>(d)</strong> Find the cause (here, evaporation without make-up) and fix the system: a top-up rule or an automatic make-up, not an operator "correcting" the concentration by eye each shift. Then establish new limits from a baseline of at least 20 readings <em>after</em> the fix, and freeze them. Limits computed from these 30 readings describe a drifting process and are useless for the corrected one.</p>
+      <div class="calc" data-calc="control" id="calc-ctrl-ex2">
+        <h3>Exercise 2 in the calculator (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"type":"imr","x":[7.87,7.78,7.79,7.77,7.88,7.43,7.83,7.83,7.83,7.59,7.75,7.58,7.66,7.57,7.49,7.67,7.51,7.61,7.64,7.61,7.38,7.05,7.2,7.18,7.17,7.03,6.61,7.12,6.89,7.28],"subgroup_size":1,"units":"%","rules":["we1","we2","we3","we4","n3"],"collapsed":true}</script>
+      </div>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="16">
+      <fieldset class="q" data-answer="b">
+        <legend>1. Control limits are computed from</legend>
+        <label><input type="radio" name="q1" value="a"> the specification, at ±75 % of the tolerance</label>
+        <label><input type="radio" name="q1" value="b"> the process data: centre ± 3 standard deviations of the plotted statistic, estimated within subgroups</label>
+        <label><input type="radio" name="q1" value="c"> the target ± 3σ where σ is chosen by the engineer</label>
+        <label><input type="radio" name="q1" value="d"> the customer's capability requirement</label>
+        <p class="explain" hidden>They are the voice of the process, not the customer.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="51.15" data-tolerance="0.02">
+        <legend>2. x̄̄ = 50.00, R̄ = 2.00, n = 5 (A₂ = 0.577). What is the X̄ chart's upper control limit?</legend>
+        <input type="number" name="q2" step="any">
+        <p class="explain" hidden>50.00 + 0.577 × 2.00 = 51.15.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>3. A subgroup mean is inside the control limits but one part in the subgroup is outside the specification. The chart says</legend>
+        <label><input type="radio" name="q3" value="a"> the process has changed; find the cause</label>
+        <label><input type="radio" name="q3" value="b"> adjust the machine toward nominal</label>
+        <label><input type="radio" name="q3" value="c"> nothing has changed; the process is stable and simply not capable enough, which is a capability problem, not a control problem</label>
+        <label><input type="radio" name="q3" value="d"> the control limits must be tightened</label>
+        <p class="explain" hidden>Stable and not capable: reduce variation (Modules 13 and 15), do not tamper.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. Which chart is read first, and why?</legend>
+        <label><input type="radio" name="q4" value="a"> the R (or S) chart, because the X̄ limits are computed from R̄ and are meaningless if the spread is out of control</label>
+        <label><input type="radio" name="q4" value="b"> the X̄ chart, because the mean matters more</label>
+        <label><input type="radio" name="q4" value="c"> either; they are independent</label>
+        <label><input type="radio" name="q4" value="d"> the histogram</label>
+        <p class="explain" hidden>Spread first, then location.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>5. Western Electric rule 4 is</legend>
+        <label><input type="radio" name="q5" value="a"> one point beyond 3σ</label>
+        <label><input type="radio" name="q5" value="b"> two of three beyond 2σ on one side</label>
+        <label><input type="radio" name="q5" value="c"> four of five beyond 1σ on one side</label>
+        <label><input type="radio" name="q5" value="d"> eight consecutive points on one side of the centre line</label>
+        <p class="explain" hidden>Nelson's version uses nine.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="370" data-tolerance="2">
+        <legend>6. The in-control average run length of a 3σ chart with rule 1 only, for a normal statistic, is about</legend>
+        <input type="number" name="q6" step="any">
+        <p class="explain" hidden>1/0.0027 = 370.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>7. Adding Western Electric rules 2, 3 and 4 to rule 1</legend>
+        <label><input type="radio" name="q7" value="a"> has no effect on false alarms</label>
+        <label><input type="radio" name="q7" value="b"> cuts the in-control ARL from about 370 to about 92, and cuts the time to detect a one-sigma shift by a factor of nearly five</label>
+        <label><input type="radio" name="q7" value="c"> makes the chart detect three-sigma shifts much faster</label>
+        <label><input type="radio" name="q7" value="d"> is required by ISO 7870-2</label>
+        <p class="explain" hidden>Table 5; rules trade false alarms for sensitivity to small shifts.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>8. A single reading with a documented special cause was included in the limit calculation. The limits are</legend>
+        <label><input type="radio" name="q8" value="a"> unaffected</label>
+        <label><input type="radio" name="q8" value="b"> too narrow</label>
+        <label><input type="radio" name="q8" value="c"> too wide, because the moving-range average is inflated; recompute without it</label>
+        <label><input type="radio" name="q8" value="d"> to be replaced by the specification</label>
+        <p class="explain" hidden>The furnace example: the limits narrowed after the spike was excluded.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>9. A rational subgroup is one in which</legend>
+        <label><input type="radio" name="q9" value="a"> only routine variation is present, so that the chart tests the variation between subgroups</label>
+        <label><input type="radio" name="q9" value="b"> parts are selected at random across the shift</label>
+        <label><input type="radio" name="q9" value="c"> both good and bad parts are represented</label>
+        <label><input type="radio" name="q9" value="d"> the size is always five</label>
+        <p class="explain" hidden>Wheeler: a small region of time, space or product.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. σ̂ from the moving range is 0.15 and the sample standard deviation of the same 30 readings is 0.33. The most likely explanation is</legend>
+        <label><input type="radio" name="q10" value="a"> a calculation error</label>
+        <label><input type="radio" name="q10" value="b"> the gauge is too coarse</label>
+        <label><input type="radio" name="q10" value="c"> the data are normal</label>
+        <label><input type="radio" name="q10" value="d"> the process level drifted or shifted during the 30 readings, so the overall spread contains variation the moving range does not</label>
+        <p class="explain" hidden>Exercise 2; the ratio is itself a diagnostic.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. From the process data.</li>
+        <li>51.15.</li>
+        <li>c. Stable, not capable.</li>
+        <li>a. R chart first.</li>
+        <li>d. Eight in a row.</li>
+        <li>About 370.</li>
+        <li>b. 370 to 92; faster for small shifts.</li>
+        <li>c. Too wide.</li>
+        <li>a. Routine variation only.</li>
+        <li>d. Drift or shift.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A control chart separates routine variation from special causes with an operational rule: limits at three standard deviations of the plotted statistic, estimated from within rational subgroups.</li>
+      <li>Control limits come from the data and describe the process; specification limits come from the drawing and describe the customer. Never on the same chart, for the second of three times in this course.</li>
+      <li>X̄-R for subgroups of 2 to 10, X̄-S above that, I-MR for individual readings. The constants (A₂, D₃, D₄, d₂; A₃, B₃, B₄, c₄; 1.128, 3.267) turn R̄, S̄ or MR̄ into limits. Read the spread chart first.</li>
+      <li>The Western Electric rules (beyond 3σ; 2 of 3 beyond 2σ; 4 of 5 beyond 1σ; 8 on one side) and Nelson's eight tests catch small shifts sooner at the cost of more false alarms; the AIAG &amp; VDA stability criteria say the same things in a different counting.</li>
+      <li>The in-control ARL is about 370 for rule 1 alone and about 92 with all four Western Electric rules; a one-sigma shift takes about 44 points to detect with rule 1 and about 9 with all four. Choose rules deliberately.</li>
+      <li>A documented special cause is excluded from the limits; an undocumented outlier is data. Limits are established from a baseline, frozen, and changed only after a deliberate, verified process change.</li>
+      <li>The subgroup and the sampling interval decide what the chart can see. Put only routine variation inside a subgroup and sample fast enough for the changes you need to catch.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10. Sources marked "secondary" or "catalogue" were not read in full by the course author; the claim is taken from the part shown. Standards and books are paraphrased.</p>
+    <ol class="references">
+      <li id="ref-1">Best, M., and Neuhauser, D. "Walter A Shewhart, 1924, and the Hawthorne factory." <em>Quality and Safety in Health Care</em> 15(2):142 to 143, 2006. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2464836/">https://pmc.ncbi.nlm.nih.gov/articles/PMC2464836/</a></li>
+      <li id="ref-2">Shewhart, W. A. <em>Economic Control of Quality of Manufactured Product</em>. Van Nostrand, 1931 (reissued ASQ, 1980). <a href="https://archive.org/details/in.ernet.dli.2015.150272">https://archive.org/details/in.ernet.dli.2015.150272</a> <span class="tag">(catalogue; the economic justification of three-sigma limits)</span></li>
+      <li id="ref-3">AIAG &amp; VDA. <em>Statistical Process Control (SPC) Manual: Process Management, Performance and Capability, Control Charts</em>, 1st ed. AIAG and VDA QMC, February 2026 (AIAG catalogue SPCAV-1). Section 7.5 (pp. 41 to 42, stability criteria and the rule sets; operating characteristic and ARL), Section 7.6 (outliers), Section 10.1 (process- versus tolerance-related control), Section 10.2.2 (p. 80, stability criteria), Section 10.2.4.2 (p. 83, average run length), Section 10.4 (p. 128, rational sampling and subgrouping, sampling frequency). <a href="https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1">https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1</a> <span class="tag">(licensed copy read by the author)</span></li>
+      <li id="ref-4">NIST/SEMATECH. "6.3.2.1. Shewhart X-bar and R and S Control Charts." <em>e-Handbook of Statistical Methods</em>. Formulas and the A₂, D₃, D₄ (and A₃, B₃, B₄) constants; the range method up to about n = 10. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm</a></li>
+      <li id="ref-5">NIST/SEMATECH. "6.3.2.2. Individuals Control Charts." <em>e-Handbook of Statistical Methods</em>. The I-MR chart and the worked example reproduced by this course. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc322.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc322.htm</a></li>
+      <li id="ref-6">Western Electric Co. <em>Statistical Quality Control Handbook</em>, 1st ed. Indianapolis, 1956. <span class="tag">(secondary: out of print; the four zone rules are cited as reproduced in [7])</span></li>
+      <li id="ref-7">Wikipedia. "Western Electric rules." <a href="https://en.wikipedia.org/wiki/Western_Electric_rules">https://en.wikipedia.org/wiki/Western_Electric_rules</a> <span class="tag">(secondary for the 1956 handbook; the rule statements and zones)</span></li>
+      <li id="ref-8">Nelson, L. S. "The Shewhart Control Chart: Tests for Special Causes." <em>Journal of Quality Technology</em> 16(4):237 to 239, 1984. <a href="https://www.leansixsigmadefinition.com/wp-content/uploads/2023/07/The-Shewhart-Control-Chart-Tests-for-Special-Causes-Lloyd-Nelson-Journal-of-Quality-Technology.pdf">https://www.leansixsigmadefinition.com/.../The-Shewhart-Control-Chart-Tests-for-Special-Causes-Lloyd-Nelson-Journal-of-Quality-Technology.pdf</a> <span class="tag">(the eight tests and Nelson's guidance on their use; read in full from this reproduction)</span></li>
+      <li id="ref-9">Woodall, W. H. "Controversies and Contradictions in Statistical Process Control (with discussion)." <em>Journal of Quality Technology</em> 32(4):341 to 378, 2000. <a href="https://www.tandfonline.com/doi/abs/10.1080/00224065.2000.11980013">https://www.tandfonline.com/doi/abs/10.1080/00224065.2000.11980013</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-10">Champ, C. W., and Woodall, W. H. "Exact Results for Shewhart Control Charts with Supplementary Runs Rules." <em>Technometrics</em> 29(4):393 to 399, 1987. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1987.10488266">https://www.tandfonline.com/doi/abs/10.1080/00401706.1987.10488266</a> <span class="tag">(abstract read; the Markov-chain method. Table 5 was computed by the course's own implementation and checked by simulation, not copied)</span></li>
+      <li id="ref-11">Wheeler, D. J., and Chambers, D. S. <em>Understanding Statistical Process Control</em>, 3rd ed. SPC Press, 2010. <a href="https://www.spcpress.com/book_understanding_statistical_process_control.php">https://www.spcpress.com/book_understanding_statistical_process_control.php</a> <span class="tag">(catalogue; three-sigma limits without a normality requirement, and the use of few rules; see also Wheeler's 2011 columns cited in Module 8)</span></li>
+      <li id="ref-12">Wheeler, D. J. "Rational Subgrouping: The Conceptual Foundation of Process Behavior Charts." <em>Quality Digest</em>, 1 June 2015 (SPC Press manuscript 282); and "Rational Sampling," 1 July 2015 (manuscript 283). <a href="https://spcpress.com/pdf/DJW282.pdf">https://spcpress.com/pdf/DJW282.pdf</a></li>
+      <li id="ref-13">ISO 7870-2:2023. <em>Control charts. Part 2: Shewhart control charts</em>, 2nd ed. International Organization for Standardization, 2023. <a href="https://www.evs.ee/en/iso-7870-2-2023">https://www.evs.ee/en/iso-7870-2-2023</a> <span class="tag">(catalogue: current edition and scope, including warning limits and pattern tests)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>Montgomery, D. C. <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley, 2019. The standard textbook treatment of the charts of this module, with OC curves and ARL tables.</li>
+      <li>Module 17 for attribute charts, EWMA and CUSUM (which detect small shifts without runs rules), and what to do when a chart signals; Module 18 for control plans and reaction plans.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a specification chart you had to take down, or a special cause a chart caught early, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

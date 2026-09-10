@@ -1,0 +1,17 @@
+{
+ "id": "m16-shift",
+ "module": "16",
+ "kind": "imr",
+ "title": "Dispensed adhesive mass, 50 shots, a 1-sigma shift at shot 26 caught by the runs rules",
+ "source": "constructed",
+ "setting": "mass of adhesive dispensed per shot in mg, one shot weighed on a balance to 0.01 mg every 10 minutes; a new adhesive lot from shot 26",
+ "params": {
+  "units": "mg",
+  "shift_at": 26
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 50
+}

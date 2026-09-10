@@ -26,7 +26,7 @@
     { num: "13", slug: "13-design-of-experiments", title: "Design of experiments", built: true },
     { num: "14", slug: "14-lean-tools", title: "Lean improvement tools", built: false },
     { num: "15", slug: "15-variation-and-design", title: "Variation reduction and design", built: false },
-    { num: "16", slug: "16-spc-1", title: "Statistical process control I", built: false },
+    { num: "16", slug: "16-spc-1", title: "Statistical process control I", built: true },
     { num: "17", slug: "17-spc-2", title: "Statistical process control II", built: false },
     { num: "18", slug: "18-control-plans", title: "Control plans and sustaining gains", built: false },
     { num: "19", slug: "19-capstone", title: "Capstone: a DMAIC project end to end", built: false }

@@ -404,6 +404,24 @@ def check_power(ex_id, r):
     check(abs(r["power_z"] - r["info_power_nct"]) < 0.08, f"{tag}: z-approximation far from noncentral-t power")
 
 
+def check_arl(ex_id, r):
+    tag = ex_id
+    shifts = r["shifts"]
+    for key, vals in r["arl"].items():
+        check(all(vals[i] > vals[i + 1] for i in range(len(vals) - 1)) or len(vals) < 2, f"{tag}: ARL not decreasing with shift for {key}")
+        check(all(v >= 1 for v in vals), f"{tag}: ARL below 1 for {key}")
+    if "we1" in r["arl"]:
+        for i, d in enumerate(shifts):
+            check(near(r["arl"]["we1"][i], 1.0 / r["p_beyond_3sigma"][i], 1e-6), f"{tag}: rule-1 ARL is not 1/p at shift {d}")
+        if 0 in shifts:
+            check(abs(r["arl"]["we1"][shifts.index(0)] - 370.4) < 0.05, f"{tag}: in-control ARL of the 3-sigma chart should be 370.4")
+    # adding rules can only shorten the in-control run
+    base = r["arl"].get("we1")
+    for key, vals in r["arl"].items():
+        if base and key != "we1":
+            check(all(v <= b + 1e-9 for v, b in zip(vals, base)), f"{tag}: {key} has a longer ARL than rule 1 alone")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -436,6 +454,7 @@ def check_results():
         elif kind == "chisq": check_chisq(ex_id, r)
         elif kind == "mannwhitney": check_mw(ex_id, r)
         elif kind == "power": check_power(ex_id, r)
+        elif kind == "arl": check_arl(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

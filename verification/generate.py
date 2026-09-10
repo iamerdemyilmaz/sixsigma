@@ -864,6 +864,73 @@ register(id="m13-ex2-roughness", module="13", kind="factorial",
          columns=["run", "rep", "A", "B", "C", "y"], rows=_m13e)
 
 
+# ---------------------------------------------------------------------------
+# Module 16: Statistical process control I (prefix m16-; m07-bore is reused
+# for the X-bar-R chart and chk-nist-imr is the published individuals check)
+# ---------------------------------------------------------------------------
+# Braze furnace zone temperature, hourly, 50 readings, one special cause (a spike at reading 33).
+_rng = np.random.default_rng(25)
+_ft = np.round(_rng.normal(610.0, 1.2, 50), 1); _ft[32] = round(float(_ft[32] + 5.5), 1)
+register(id="m16-furnace", module="16", kind="imr",
+         title="Furnace zone temperature, 50 hourly readings, one special cause at reading 33",
+         source="constructed", setting="braze furnace zone-3 temperature in °C, logged hourly by the controller's thermocouple to 0.1 °C, 50 consecutive hours",
+         params={"units": "°C"}, columns=["i", "x"], rows=[[i + 1, float(v)] for i, v in enumerate(_ft)])
+# The same readings with the special cause (reading 33) removed after its cause was found: the recomputed limits.
+register(id="m16-furnace-clean", module="16", kind="imr",
+         title="Furnace zone temperature, the 49 readings after removing the assigned special cause at reading 33",
+         source="constructed", setting="m16-furnace without reading 33 (cause found and documented), for the recomputed limits",
+         params={"units": "°C"}, columns=["i", "x"], rows=[[i + 1, float(v)] for i, v in enumerate(_ft) if i != 32])
+
+# Heat-seal width, 20 subgroups of 10, stable: the X-bar-S case.
+_rng = np.random.default_rng(1)
+_sw = []
+for _g in range(1, 21):
+    for _ in range(10):
+        _sw.append([_g, round(float(_rng.normal(5.00, 0.06)), 2)])
+register(id="m16-seal", module="16", kind="xbar_s",
+         title="Heat-seal width, 20 subgroups of 10, X-bar-S chart, stable",
+         source="constructed", setting="heat-seal width of a pouch in mm measured with a calibrated loupe to 0.01 mm, 10 consecutive pouches every hour for 20 hours",
+         params={"units": "mm"}, columns=["subgroup", "x"], rows=_sw)
+
+# Dispensed adhesive mass, 50 shots, a one-sigma upward shift from shot 26: the runs rules catch what rule 1 misses.
+_rng = np.random.default_rng(585)
+_am = np.round(np.concatenate([_rng.normal(20.0, 0.5, 25), _rng.normal(20.5, 0.5, 25)]), 2)
+register(id="m16-shift", module="16", kind="imr",
+         title="Dispensed adhesive mass, 50 shots, a 1-sigma shift at shot 26 caught by the runs rules",
+         source="constructed", setting="mass of adhesive dispensed per shot in mg, one shot weighed on a balance to 0.01 mg every 10 minutes; a new adhesive lot from shot 26",
+         params={"units": "mg", "shift_at": 26}, columns=["i", "x"], rows=[[i + 1, float(v)] for i, v in enumerate(_am)])
+
+# Average run lengths of the Shewhart chart with the Western Electric rules (exact Markov chain,
+# Champ and Woodall 1987), for shifts in units of the plotted statistic's sigma.
+register(id="m16-arl", module="16", kind="arl",
+         title="ARL of the 3-sigma chart with the Western Electric rules, exact Markov chain",
+         source="method: Champ and Woodall 1987 (S-C11); values computed by the course's own chain and checked by Monte Carlo in recompute.py",
+         setting="parameters only; normal plotted statistic with a shift of delta sigma",
+         params={"rule_sets": [["we1"], ["we1", "we2"], ["we1", "we3"], ["we1", "we4"], ["we1", "we2", "we3", "we4"]],
+                 "shifts": [0.0, 0.5, 1.0, 1.5, 2.0, 3.0], "mc_runs": 20000},
+         columns=None, rows=None,
+         expected={"arl.we1.0": [370.398, 0.001]})  # 1 / (2 Phi(-3)), the textbook in-control ARL of the 3-sigma chart
+
+# Exercise 1: pin length, 20 subgroups of 4, stable.
+_rng = np.random.default_rng(1)
+_pl = []
+for _g in range(1, 21):
+    for _ in range(4):
+        _pl.append([_g, round(float(_rng.normal(30.000, 0.020)), 3)])
+register(id="m16-ex1-pin", module="16", kind="xbar_r",
+         title="Exercise 1: pin length, 20 subgroups of 4, X-bar-R chart",
+         source="constructed", setting="length of a turned pin in mm on a height gauge to 0.001 mm, 4 consecutive pins every 15 minutes for 20 samples",
+         params={"units": "mm"}, columns=["subgroup", "x"], rows=_pl)
+
+# Exercise 2: coolant concentration drifting down over 30 shifts (evaporation without top-up): what a trend looks like on an I-MR chart.
+_rng = np.random.default_rng(1270)
+_cc = np.round(8.0 - 0.035 * np.arange(30) + _rng.normal(0, 0.15, 30), 2)
+register(id="m16-ex2-trend", module="16", kind="imr",
+         title="Exercise 2: coolant concentration, 30 shifts, a steady downward trend on an I-MR chart",
+         source="constructed", setting="coolant concentration in % by refractometer to 0.01 %, one reading per shift for 30 shifts, drifting down as water evaporates without top-up",
+         params={"units": "%"}, columns=["i", "x"], rows=[[i + 1, float(v)] for i, v in enumerate(_cc)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}
