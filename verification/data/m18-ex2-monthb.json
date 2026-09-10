@@ -1,0 +1,19 @@
+{
+ "id": "m18-ex2-monthb",
+ "module": "18",
+ "kind": "capability",
+ "title": "Exercise 2, month B: injection-moulded wall thickness",
+ "source": "constructed",
+ "setting": "same wall thickness feature, second of three monthly checks",
+ "params": {
+  "usl": 2.65,
+  "lsl": 2.35,
+  "target": 2.5,
+  "chart": "imr",
+  "units": "mm"
+ },
+ "columns": [
+  "x"
+ ],
+ "n_rows": 25
+}

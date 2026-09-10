@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 18: Control plans and sustaining gains · Six Sigma Course</title>
+<meta name="description" content="Control plans, reaction plans, standardization, handoff to production, linking to PPAP and IATF 16949 clause 9.1.1.1, ongoing capability monitoring, and closing out a DMAIC project.">
+<meta name="examples" content="m18-month1, m18-month2, m18-month3, m18-month4, m18-month5, m18-ex2-montha, m18-ex2-monthb, m18-ex2-monthc, m07-bore, m04-grr-bore, m03-charter-leak">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="18">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 18 · Control</p>
+    <h1>Control plans and sustaining gains</h1>
+    <p class="lead">Every tool in Modules 13 through 17 exists to produce a change: a redesigned process, a new fixture, a control chart proving a fix worked. None of that survives contact with a production floor for long without two unglamorous documents: a control plan that says exactly what gets checked, how, how often, and by whom, and a reaction plan that says exactly what to do when a check signals a problem. This module covers both, how they hand a stabilized process off to production, and how to tell a real capability shift from ordinary month-to-month noise once that handoff is months in the past.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Build</strong> a control plan that documents what to control, how, how often, and what to do when a signal occurs.</li>
+      <li><strong>Write</strong> a reaction plan that specifies an investigation of an assignable cause, not a reflexive process adjustment.</li>
+      <li><strong>Explain</strong> the standardization and documentation a stabilized process needs before handoff to production.</li>
+      <li><strong>Connect</strong> a control plan's requirements to PPAP submission and IATF 16949 clause 9.1.1.1 expectations.</li>
+      <li><strong>Distinguish</strong> a real capability shift from ordinary sampling noise using overlapping and non-overlapping confidence intervals on Ppk.</li>
+      <li><strong>Close out</strong> a DMAIC project with the reporting a Control phase requires.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p class="example-label">No public, data-backed case of a specific control-plan failure was found for this course; the scenario below is a constructed illustration, not a real event.</p>
+    <p>A DMAIC team fixes a real problem, runs the improvement, proves the gain with a hypothesis test and a control chart (Module 14), and celebrates. Eight months later, someone asks whether the fix is still in effect, and the honest answer is nobody knows: the chart the team built during the project was never handed to production, the operators who ran the pilot have moved to other lines, and the people running the process today were never told why a particular fixture setting matters. The reject rate has quietly drifted back most of the way to where it started, one small undocumented "fix" of a "fix" at a time. Nothing in this story required negligence. It only required a project to end without leaving behind a document that survives staff turnover, shift changes, and time &mdash; which is exactly what a control plan and a reaction plan are for. AIAG's standalone <em>Control Plan</em> manual exists as its own document, separate from APQP, specifically because this handoff step is substantial enough to deserve one.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+
+    <h2 id="controlplans">Control plans</h2>
+    <p>A control plan is a structured table, one row per characteristic, documenting how a process keeps that characteristic in check on an ongoing basis: the characteristic itself, its specification, the measurement method and gauge, the sample size and frequency, the control method (a chart, a check, a poka-yoke), and the reaction plan if it signals. AIAG's <em>Control Plan</em> manual (1st edition, March 2024, now standalone rather than a chapter of APQP) documents the current structure, its linkage back to APQP's process flow and PFMEA, and a "Safe Launch" phase of heightened monitoring immediately after a new or changed process starts production, before settling into the ongoing control plan.<sup class="cite"><a href="#ref-1">[1]</a></sup><sup class="cite"><a href="#ref-2">[2]</a></sup> A control plan without a PFMEA behind it (Module 10) is just a list of measurements someone thought to write down; the PFMEA is what justifies which characteristics made the list and why.</p>
+
+    <h2 id="standardization">Standardization and documentation</h2>
+    <p>Module 14's standard work (takt time, work sequence, standard in-process stock) is what a control plan assumes is already in place: a control chart's control limits describe a process running one documented way, and if the work sequence itself varies operator to operator, the chart is measuring method variation as if it were process noise. Work instructions, visual standards, and the control plan itself all need to say the same thing, updated together whenever the process changes &mdash; a control plan that documents a setting the work instruction no longer specifies is worse than no documentation, because it looks authoritative while being wrong.</p>
+
+    <h2 id="handoff">Handoff to production</h2>
+    <p>A project team's job is not finished when the data prove the fix works; it is finished when someone outside the project team can run, monitor, and react to the process correctly without the team in the room. That means training the people who will actually own the process day to day, not just the shift that happened to be running during the pilot; a sign-off that names who now owns the control plan and who owns escalation when it signals; and a real handoff meeting, not just an emailed document, because the reaction plan's value depends entirely on whether the person watching the chart at 2 a.m. actually knows what it says.</p>
+
+    <h2 id="ppap">Linking to PPAP and IATF 16949</h2>
+    <p>A control plan is one of PPAP's required submission elements, expected to be consistent with the process flow diagram and PFMEA submitted alongside it.<sup class="cite"><a href="#ref-3">[3]</a></sup> IATF 16949 clause 9.1.1.1, on monitoring and measurement of manufacturing processes, requires process studies for new manufacturing processes (including new or changed characteristics affecting fit, function, durability, or regulatory requirements) to verify process capability, requires a reaction plan when a process is not statistically stable or not capable, and requires significant process events to be recorded in the control plan.<sup class="cite"><a href="#ref-4">[4]</a></sup><sup class="cite"><a href="#ref-5">[5]</a></sup> None of this is optional paperwork layered on top of good practice; it is the same practice, written down in a form an auditor (and, more usefully, the next engineer who inherits the process) can actually check.</p>
+
+    <h2 id="reactionplans">Reaction plans</h2>
+    <p>A reaction plan answers one specific question: what does the person watching the chart actually do when it signals? A good reaction plan names the trigger (a specific Western Electric or Nelson rule, Module 16), the immediate containment action, who investigates, and the escalation path if the cause is not found within a stated time. What a reaction plan must never say, however phrased, is "adjust the process toward nominal." Module 2's funnel experiment already demonstrated, in a fully controlled simulation, that adjusting a stable process in response to its own ordinary noise (Rules 2, 3, and 4) increases variation rather than reducing it. A control chart's entire purpose is to tell the difference between a point that is ordinary noise (within control limits, no rule triggered: do nothing) and a point that is a real signal (a rule triggered: investigate and find the assignable cause, then decide whether action is needed). An operator who "corrects" every reading that drifts slightly toward a spec limit, chart or no chart, is running the funnel experiment's Rule 2 on a real process, by hand, indefinitely.</p>
+
+    <h2 id="ongoing">Ongoing capability monitoring: control limits vs. specification limits, a third time</h2>
+    <p>This course has now made the point that control limits and specification limits are never the same thing, and never belong on the same chart, twice: once when capability indices were introduced (Module 7), once when control charts were built by hand (Module 16). The third angle, here, is what that distinction means <em>over months</em>, not within a single chart. A monthly (or quarterly) capability check produces one Ppk estimate per period, and that estimate has its own sampling uncertainty &mdash; the 95&nbsp;% confidence interval this course has carried on Ppk since Module 7. Two months' point estimates can differ noticeably while their confidence intervals overlap heavily, in which case the honest conclusion is that nothing has necessarily changed; reacting to that difference as if it were a real trend is the same overreaction the funnel experiment warns against, just measured monthly instead of point to point. A real shift is one where the new period's confidence interval no longer overlaps the established band at all. Worked example 3 below shows both patterns on real numbers.</p>
+
+    <h2 id="closure">Project closure and reporting</h2>
+    <p>A DMAIC project closes with a short, specific report, not a retrospective essay: the problem statement and charter (Module 3) restated against what was actually achieved; the verified before-and-after result with its hypothesis test (Module 14); the control plan and reaction plan, handed to the named process owner; and a stated date (typically 3 to 6 months out) for a follow-up capability check, using exactly the confidence-interval comparison this module teaches, to confirm the gain actually held rather than assuming it did because nobody complained.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: a control plan row for the bore diameter</h3>
+    <p class="example-label">The data below reuses Module 7's bore-diameter example and Module 4's gauge R&amp;R example directly, rather than inventing new numbers for this module's purpose.</p>
+    <p>The reamed bore Ø12.000&nbsp;&plusmn;&nbsp;0.025&nbsp;mm this course has followed since Module 7 (stable, Ppk&nbsp;=&nbsp;<span data-ex="m07-bore" data-key="overall.Ppk" data-dp="3">1.040</span> on that module's 125 readings, mean&nbsp;<span data-ex="m07-bore" data-key="descriptive.mean" data-dp="4">12.0039</span>&nbsp;mm) gives a complete, traceable example for a control plan row.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Control plan row, bore diameter (constructed control plan, reusing verified capability and MSA data).</caption>
+        <thead><tr><th>Field</th><th>Entry</th></tr></thead>
+        <tbody>
+          <tr><td>Characteristic</td><td>Bore diameter (reamed)</td></tr>
+          <tr><td>Specification</td><td>Ø12.000 &plusmn; 0.025&nbsp;mm</td></tr>
+          <tr><td>Measurement method</td><td>Bore micrometer, resolution 0.001&nbsp;mm</td></tr>
+          <tr><td>Measurement system status</td><td>%GRR (%Tolerance) = <span data-ex="m04-grr-bore" data-key="pct_tolerance.grr" data-dp="1">29.8</span>&nbsp;% (AIAG "conditional" band, 10&ndash;30&nbsp;%), ndc&nbsp;=&nbsp;<span data-ex="m04-grr-bore" data-key="ndc" data-dp="0">5</span> (meets the guideline minimum) &mdash; acceptable for now, flagged for gauge improvement before the next PPAP cycle</td></tr>
+          <tr><td>Sample size / frequency</td><td>5 consecutive parts every 30 minutes</td></tr>
+          <tr><td>Control method</td><td>X&#772;-R chart, limits from the data (Module 16), never the 0.025&nbsp;mm spec</td></tr>
+          <tr><td>Reaction plan</td><td>See Worked example 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Every number in this row is either a specification already fixed at design time or a measured result already computed and verified elsewhere in this course (Modules 4 and 7); a control plan does not introduce new statistics, it collects and documents ones that already exist.</p>
+
+    <h3 id="example2">Worked example 2: the reaction plan for that row, and the failure mode it prevents</h3>
+    <p class="example-label">Constructed example, illustrating the principle stated above.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Reaction plan, bore diameter X&#772;-R chart (constructed).</caption>
+        <thead><tr><th>Trigger</th><th>Immediate action</th><th>Investigate</th><th>Escalate if unresolved in</th></tr></thead>
+        <tbody>
+          <tr><td>Western Electric Rule 1 (point beyond 3&sigma;)</td><td>Hold the last 30 minutes of parts, do not adjust the process</td><td>Operator checks tooling wear, fixture seating, recent changeovers</td><td>2 hours, to shift lead</td></tr>
+          <tr><td>Nelson Rule 2 (9 in a row on one side of centre)</td><td>Continue running, increase sampling frequency to every 15 minutes</td><td>Process engineer checks for a shift (tool change, material lot, ambient temperature)</td><td>1 shift, to process engineer</td></tr>
+          <tr><td>Any point outside spec (11.975&ndash;12.025&nbsp;mm)</td><td>Hold the part, quarantine the subgroup</td><td>Full investigation regardless of chart status; a spec violation is a containment issue even if the chart has not yet signalled</td><td>Immediate, to quality</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The middle column of every row is an investigation, never an adjustment. Consider the operator who instead nudges the fixture half a turn every time a reading drifts toward 12.010&nbsp;mm, chart or no chart, reasoning that "it's getting close." If the process is actually stable at its current centring, this is Deming's funnel experiment's Rule 2, run by hand: treating ordinary noise as a signal and reacting to it adds variation that was not there before, and after enough shifts of this, the chart shows a process with real variation and nobody can say why, because the true cause was the well-intentioned nudging itself. A reaction plan that says "investigate the assignable cause" instead of "adjust toward nominal" is the entire defense against this failure mode.</p>
+
+    <h3 id="example3">Worked example 3: five months of ongoing capability, real shift vs. noise</h3>
+    <p class="example-label">The data below is a constructed example, not a real production history. Setting: the same bore feature as Worked example 1, 6 subgroups of 5 sampled once per month for five months.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Monthly Ppk with its 95&nbsp;% confidence interval, five months (constructed data).</caption>
+        <thead><tr><th>Month</th><th>Mean (mm)</th><th>s (mm)</th><th>Ppk</th><th>95&nbsp;% CI on Ppk</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><span data-ex="m18-month1" data-key="descriptive.mean" data-dp="4">12.0033</span></td><td><span data-ex="m18-month1" data-key="descriptive.s" data-dp="5">0.00703</span></td><td><span data-ex="m18-month1" data-key="overall.Ppk" data-dp="3">1.029</span></td><td>(<span data-ex="m18-month1" data-key="overall.Ppk_ci95.0" data-dp="3">0.739</span>, <span data-ex="m18-month1" data-key="overall.Ppk_ci95.1" data-dp="3">1.320</span>)</td></tr>
+          <tr><td>2</td><td><span data-ex="m18-month2" data-key="descriptive.mean" data-dp="4">12.0029</span></td><td><span data-ex="m18-month2" data-key="descriptive.s" data-dp="5">0.00710</span></td><td><span data-ex="m18-month2" data-key="overall.Ppk" data-dp="3">1.037</span></td><td>(<span data-ex="m18-month2" data-key="overall.Ppk_ci95.0" data-dp="3">0.745</span>, <span data-ex="m18-month2" data-key="overall.Ppk_ci95.1" data-dp="3">1.330</span>)</td></tr>
+          <tr><td>3</td><td><span data-ex="m18-month3" data-key="descriptive.mean" data-dp="4">12.0010</span></td><td><span data-ex="m18-month3" data-key="descriptive.s" data-dp="5">0.00743</span></td><td><span data-ex="m18-month3" data-key="overall.Ppk" data-dp="3">1.077</span></td><td>(<span data-ex="m18-month3" data-key="overall.Ppk_ci95.0" data-dp="3">0.775</span>, <span data-ex="m18-month3" data-key="overall.Ppk_ci95.1" data-dp="3">1.379</span>)</td></tr>
+          <tr><td>4</td><td><span data-ex="m18-month4" data-key="descriptive.mean" data-dp="4">12.0036</span></td><td><span data-ex="m18-month4" data-key="descriptive.s" data-dp="5">0.00576</span></td><td><span data-ex="m18-month4" data-key="overall.Ppk" data-dp="3">1.237</span></td><td>(<span data-ex="m18-month4" data-key="overall.Ppk_ci95.0" data-dp="3">0.897</span>, <span data-ex="m18-month4" data-key="overall.Ppk_ci95.1" data-dp="3">1.577</span>)</td></tr>
+          <tr><td><strong>5</strong></td><td><strong><span data-ex="m18-month5" data-key="descriptive.mean" data-dp="4">12.0124</span></strong></td><td><strong><span data-ex="m18-month5" data-key="descriptive.s" data-dp="5">0.00813</span></strong></td><td><strong><span data-ex="m18-month5" data-key="overall.Ppk" data-dp="3">0.517</span></strong></td><td><strong>(<span data-ex="m18-month5" data-key="overall.Ppk_ci95.0" data-dp="3">0.338</span>, <span data-ex="m18-month5" data-key="overall.Ppk_ci95.1" data-dp="3">0.695</span>)</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Months 1 through 4 wander from 1.029 to 1.237, and it would be easy to read that as a trend (steadily improving, even) if only the point estimates are looked at. Their confidence intervals tell a different story: every one of the four overlaps every other one heavily (month 4's interval alone spans 0.897 to 1.577, comfortably covering all three earlier point estimates). Nothing in months 1 through 4 is distinguishable from a single stable process sampled four times with ordinary noise, and the right reaction to that variation is exactly none. Month 5 is a different case entirely: Ppk drops to 0.517, and its interval, 0.338 to 0.695, does not overlap month 4's lower bound of 0.897 at all &mdash; nor, for that matter, any of the four earlier months' lower bounds, all of which sit at 0.739 or above. That is a real, statistically distinguishable shift (here, both the mean moved further from target and the spread widened, consistent with a tool-wear story), and it is precisely the pattern that should trigger the reaction plan in Worked example 2, not a quiet note in a monthly report.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul class="mistakes">
+      <li><strong>A control plan with no PFMEA behind it.</strong> Consequence: characteristics get listed because someone remembered them, not because a structured risk analysis identified them, and a genuinely high-risk characteristic can be missing entirely. Fix: build the control plan from the PFMEA's output (Module 10), not from memory.</li>
+      <li><strong>A reaction plan that says "adjust toward nominal."</strong> Consequence: Deming's funnel experiment on a real process, run by hand, indefinitely, adding variation that was not there before. Fix: every reaction plan entry investigates a specific assignable cause; adjustment happens only after a cause is found and understood, never as the default first response to a chart signal.</li>
+      <li><strong>Treating a control plan as a one-time PPAP deliverable rather than a living document.</strong> Consequence: the plan still describes a process setting that changed months ago, and an operator following it faithfully is now following the wrong instruction. Fix: update the control plan whenever the process changes, with the same discipline as the original release.</li>
+      <li><strong>Handing off to whichever shift happened to be running the pilot, not to the process's actual long-term owner.</strong> Consequence: the one team that understands why a setting matters rotates off within months, and the knowledge leaves with them. Fix: name a specific process owner and train every shift that will actually run the process, not just the pilot shift.</li>
+      <li><strong>Reacting to a month-to-month Ppk change without checking whether the confidence intervals actually separate.</strong> Consequence: chasing noise, exactly the point Worked example 3 demonstrates on real numbers &mdash; months 1 through 4's wandering point estimates would trigger unnecessary investigation if read without their intervals. Fix: compare confidence intervals, not point estimates alone, before concluding a real change occurred.</li>
+      <li><strong>Recording capability checks but never recording significant process events (a tool change, a material lot change, a setting change) alongside them.</strong> Consequence: a real shift like Worked example 3's month 5 has no candidate cause on record when someone goes looking for one, months later. Fix: log significant events in the control plan itself, at the time they happen, exactly as IATF 16949 clause 9.1.1.1 expects.</li>
+      <li><strong>Closing a DMAIC project without a scheduled follow-up capability check.</strong> Consequence: a gain that was real at project closure erodes gradually, and nobody notices until the reject rate is most of the way back to where it started. Fix: schedule the follow-up check as part of project closure, not as an afterthought if someone happens to ask.</li>
+    </ul>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a control plan row for the leak test</h3>
+    <p class="example-label">Constructed example, reusing Module 3's charter data.</p>
+    <p>The charter baseline (Module 3) is a 100&nbsp;% helium leak test at final inspection on brazed heat-exchanger cores, <span data-ex="m03-charter-leak" data-key="defects" data-dp="0">42</span> rejects per <span data-ex="m03-charter-leak" data-key="units" data-dp="0">1000</span> units tested (an attribute characteristic, not a measured dimension).</p>
+    <p><strong>Tasks.</strong> Using the same seven fields as Table 1, draft a control plan row for the leak test. In particular: (a) what control method fits an attribute (pass/fail) characteristic like this one, rather than the X&#772;-R chart Table 1 used? (b) What would the reaction plan's first trigger reasonably be?</p>
+    <details>
+      <summary>Show one reasonable answer</summary>
+      <p><strong>(a)</strong> A p chart (Module 17), not an X&#772;-R chart &mdash; the leak test result is pass/fail per core, not a measured continuous value, and a p chart tracks the proportion rejected per lot the same way Module 14's pilot p charts did.</p>
+      <p><strong>(b)</strong> A reasonable first trigger is a point beyond the p chart's own control limits (computed from the data, never from a target reject rate) &mdash; for example, a lot with a reject rate clearly above the established average, the same signal Module 14's Worked example 3 discussion of a floored lower limit shows is not always available in the other direction. A complete row would also specify: measurement method (100&nbsp;% helium leak test), sample size/frequency (every core, every lot), and a reaction plan entry for "any single confirmed leak escape past the test" as an immediate, chart-independent containment trigger, the same way Table 2's "any point outside spec" row worked for a chart-based characteristic.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: real shift or noise?</h3>
+    <p class="example-label">The data below is a constructed example, not a real production history. Setting: wall thickness (mm) of an injection-moulded housing, target 2.50&nbsp;&plusmn;&nbsp;0.15&nbsp;mm, 25 individual readings per month.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Monthly Ppk with its 95&nbsp;% confidence interval, three months (constructed data).</caption>
+        <thead><tr><th>Month</th><th>Mean (mm)</th><th>s (mm)</th><th>Ppk</th><th>95&nbsp;% CI on Ppk</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td><span data-ex="m18-ex2-montha" data-key="descriptive.mean" data-dp="4">2.5008</span></td><td><span data-ex="m18-ex2-montha" data-key="descriptive.s" data-dp="5">0.03927</span></td><td><span data-ex="m18-ex2-montha" data-key="overall.Ppk" data-dp="3">1.266</span></td><td>(<span data-ex="m18-ex2-montha" data-key="overall.Ppk_ci95.0" data-dp="3">0.885</span>, <span data-ex="m18-ex2-montha" data-key="overall.Ppk_ci95.1" data-dp="3">1.648</span>)</td></tr>
+          <tr><td>B</td><td><span data-ex="m18-ex2-monthb" data-key="descriptive.mean" data-dp="4">2.4918</span></td><td><span data-ex="m18-ex2-monthb" data-key="descriptive.s" data-dp="5">0.04568</span></td><td><span data-ex="m18-ex2-monthb" data-key="overall.Ppk" data-dp="3">1.034</span></td><td>(<span data-ex="m18-ex2-monthb" data-key="overall.Ppk_ci95.0" data-dp="3">0.714</span>, <span data-ex="m18-ex2-monthb" data-key="overall.Ppk_ci95.1" data-dp="3">1.355</span>)</td></tr>
+          <tr><td>C</td><td><span data-ex="m18-ex2-monthc" data-key="descriptive.mean" data-dp="4">2.5421</span></td><td><span data-ex="m18-ex2-monthc" data-key="descriptive.s" data-dp="5">0.07983</span></td><td><span data-ex="m18-ex2-monthc" data-key="overall.Ppk" data-dp="3">0.450</span></td><td>(<span data-ex="m18-ex2-monthc" data-key="overall.Ppk_ci95.0" data-dp="3">0.268</span>, <span data-ex="m18-ex2-monthc" data-key="overall.Ppk_ci95.1" data-dp="3">0.633</span>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Do months A and B's confidence intervals overlap? What does that mean for whether anything changed between them? (b) Does month C's interval overlap month B's? (c) Should month C trigger the reaction plan?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Yes: A's interval (0.885 to 1.648) and B's (0.714 to 1.355) overlap substantially. Nothing here is distinguishable from ordinary month-to-month sampling noise on a single stable process; A's higher point estimate (1.266 vs. 1.034) is not evidence of a real difference.</p>
+      <p><strong>(b)</strong> No: month C's interval (0.268 to 0.633) sits entirely below month B's lower bound of 0.714, with no overlap at all.</p>
+      <p><strong>(c)</strong> Yes. Both the mean (2.4918&nbsp;mm&nbsp;&rarr;&nbsp;2.5421&nbsp;mm) and the spread (s: 0.04568&nbsp;mm&nbsp;&rarr;&nbsp;0.07983&nbsp;mm) moved between B and C, and the non-overlapping confidence intervals confirm this is a real, statistically distinguishable shift, not noise &mdash; exactly the pattern that should trigger an investigation under the reaction plan, the same reasoning Worked example 3 applied to month 5.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="18">
+      <fieldset class="q" data-answer="b">
+        <legend>1. A control plan row is built primarily from</legend>
+        <label><input type="radio" name="q1" value="a"> the operator's memory of what usually matters</label>
+        <label><input type="radio" name="q1" value="b"> the PFMEA's identified risks, so the characteristics controlled are the ones a structured risk analysis flagged</label>
+        <label><input type="radio" name="q1" value="c"> whichever characteristics are cheapest to measure</label>
+        <label><input type="radio" name="q1" value="d"> a fixed template used identically for every process</label>
+        <p class="explain" hidden>A control plan with no PFMEA behind it can miss a genuinely high-risk characteristic entirely.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. A reaction plan's middle step (after the trigger and immediate action) should always be</legend>
+        <label><input type="radio" name="q2" value="a"> adjust the process toward nominal</label>
+        <label><input type="radio" name="q2" value="b"> widen the control limits</label>
+        <label><input type="radio" name="q2" value="c"> investigate for a specific assignable cause</label>
+        <label><input type="radio" name="q2" value="d"> stop measuring until the next scheduled check</label>
+        <p class="explain" hidden>Adjustment without a found cause risks the funnel experiment's Rule 2 failure mode.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. An operator who nudges a fixture setting every time a stable process's reading drifts slightly toward a spec limit is, in effect,</legend>
+        <label><input type="radio" name="q3" value="a"> correctly following a reaction plan</label>
+        <label><input type="radio" name="q3" value="b"> improving the process's true capability</label>
+        <label><input type="radio" name="q3" value="c"> performing a valid control chart update</label>
+        <label><input type="radio" name="q3" value="d"> running the funnel experiment's Rule 2 by hand, adding variation that was not there before</label>
+        <p class="explain" hidden>Reacting to ordinary noise as if it were a signal is exactly what the funnel experiment (Module 2) demonstrated increases variation.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. IATF 16949 clause 9.1.1.1 requires, among other things,</legend>
+        <label><input type="radio" name="q4" value="a"> a reaction plan when a process is not statistically stable or not capable, and recording significant process events</label>
+        <label><input type="radio" name="q4" value="b"> control limits set equal to the specification limits</label>
+        <label><input type="radio" name="q4" value="c"> monthly capability checks only for attribute characteristics</label>
+        <label><input type="radio" name="q4" value="d"> that PFMEA be skipped once a control plan exists</label>
+        <p class="explain" hidden>Process studies, capability verification, a reaction plan when unstable/not capable, and recording significant events.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>5. In Worked example 3, months 1 through 4's Ppk point estimates ranged from 1.029 to 1.237. The right conclusion, given their confidence intervals, is</legend>
+        <label><input type="radio" name="q5" value="a"> the process was steadily improving each month</label>
+        <label><input type="radio" name="q5" value="b"> nothing distinguishable from ordinary sampling noise occurred, since the four intervals overlap heavily</label>
+        <label><input type="radio" name="q5" value="c"> the process failed capability in month 1</label>
+        <label><input type="radio" name="q5" value="d"> a new gauge was needed</label>
+        <p class="explain" hidden>Heavily overlapping confidence intervals mean the point-estimate differences are not statistically distinguishable from noise.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. In Worked example 3, month 5's Ppk confidence interval (0.338 to 0.695) compared with month 4's (0.897 to 1.577) shows</legend>
+        <label><input type="radio" name="q6" value="a"> the two intervals overlap, so nothing changed</label>
+        <label><input type="radio" name="q6" value="b"> the sample size was too small to say anything</label>
+        <label><input type="radio" name="q6" value="c"> no overlap at all, a real, statistically distinguishable shift</label>
+        <label><input type="radio" name="q6" value="d"> the specification limits must have changed</label>
+        <p class="explain" hidden>Month 5's upper bound (0.695) sits below month 4's lower bound (0.897): a clean, non-overlapping separation.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>7. This module's treatment of "control limits are not specification limits" is described in this course as</legend>
+        <label><input type="radio" name="q7" value="a"> the third of three times this distinction is made, this time applied across months rather than within one chart</label>
+        <label><input type="radio" name="q7" value="b"> the first time this distinction is made</label>
+        <label><input type="radio" name="q7" value="c"> unrelated to Modules 7 and 16</label>
+        <label><input type="radio" name="q7" value="d"> only relevant to attribute charts</label>
+        <p class="explain" hidden>Modules 7 and 16 made the point within a single capability study and a single chart; this module extends it to monthly monitoring.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>8. A control plan is linked to PPAP because</legend>
+        <label><input type="radio" name="q8" value="a"> PPAP requires no ongoing documentation at all</label>
+        <label><input type="radio" name="q8" value="b"> the control plan replaces the PPAP submission entirely</label>
+        <label><input type="radio" name="q8" value="c"> PPAP only applies to attribute characteristics</label>
+        <label><input type="radio" name="q8" value="d"> the control plan is one of PPAP's required submission elements, expected to be consistent with the process flow and PFMEA</label>
+        <p class="explain" hidden>PPAP's submission elements are meant to tell a consistent story together, not stand alone.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>9. Closing a DMAIC project without scheduling a follow-up capability check mainly risks</legend>
+        <label><input type="radio" name="q9" value="a"> the control plan becoming too long</label>
+        <label><input type="radio" name="q9" value="b"> a real gain eroding gradually with nobody noticing until it is mostly gone</label>
+        <label><input type="radio" name="q9" value="c"> the PFMEA needing to be redone</label>
+        <label><input type="radio" name="q9" value="d"> the reaction plan becoming invalid immediately</label>
+        <p class="explain" hidden>The scheduled follow-up is what actually confirms a gain held, rather than assuming it did.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>10. In Exercise 2, months A and B's overlapping confidence intervals, followed by month C's non-overlapping one, illustrate that</legend>
+        <label><input type="radio" name="q10" value="a"> three months is never enough data to say anything</label>
+        <label><input type="radio" name="q10" value="b"> Ppk point estimates should never be reported</label>
+        <label><input type="radio" name="q10" value="c"> the same overlap/non-overlap logic from the five-month bore example applies regardless of the specific characteristic or spec</label>
+        <label><input type="radio" name="q10" value="d"> a p chart should have been used instead</label>
+        <p class="explain" hidden>The confidence-interval comparison is a general method, not specific to one characteristic.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. Built from the PFMEA's identified risks.</li>
+        <li>c. Investigate a specific assignable cause.</li>
+        <li>d. Running the funnel experiment's Rule 2 by hand.</li>
+        <li>a. A reaction plan when unstable/not capable, and recording significant events.</li>
+        <li>b. Heavily overlapping intervals mean no distinguishable change.</li>
+        <li>c. No overlap: a real, statistically distinguishable shift.</li>
+        <li>a. The third of three times, applied across months.</li>
+        <li>d. One of PPAP's required, consistent submission elements.</li>
+        <li>b. A real gain can erode unnoticed without a scheduled follow-up.</li>
+        <li>c. The same logic applies regardless of the specific characteristic.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A control plan documents, per characteristic, the specification, measurement method, sample size/frequency, control method, and reaction plan; it should be built from the PFMEA's identified risks, not from memory.</li>
+      <li>A reaction plan's core discipline is investigating a specific assignable cause, never adjusting the process toward nominal as a reflexive first response &mdash; the same lesson the funnel experiment (Module 2) already proved with a simulation.</li>
+      <li>Handoff to production means training the process's actual long-term owner, not just the pilot shift, with a named owner for the control plan and for escalation.</li>
+      <li>A control plan is one of PPAP's required submission elements; IATF 16949 clause 9.1.1.1 requires a reaction plan when a process is unstable or not capable, and requires significant events to be recorded.</li>
+      <li>Comparing month-to-month Ppk confidence intervals, not point estimates alone, is how to tell ordinary sampling noise from a real capability shift &mdash; the third and final time this course makes the control-limits-vs-specification-limits distinction, here applied across time rather than within one chart.</li>
+      <li>A DMAIC project closes with a specific report and a scheduled follow-up capability check, not an assumption that a proven gain will simply hold on its own.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10 (Phase A) unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">AIAG. <em>Control Plan</em>, 1st ed., March 2024. <a href="https://www.aiag.org/training-and-resources/manuals/details/CP-1">https://www.aiag.org/training-and-resources/manuals/details/CP-1</a> <span class="tag">(catalogue-level: existence and edition; the standalone structure, APQP linkage, and "Safe Launch" phase confirmed at this depth)</span></li>
+      <li id="ref-2">AIAG. <em>Advanced Product Quality Planning (APQP)</em>, 3rd ed., March 2024. <a href="https://www.aiag.org/training-and-resources/manuals">https://www.aiag.org/training-and-resources/manuals</a> <span class="tag">(catalogue-level: existence and edition; control plan now a separate manual)</span></li>
+      <li id="ref-3">AIAG. <em>Production Part Approval Process (PPAP)</em>, 4th ed., 2006 (Nov 2009 printing). <a href="https://www.aiag.org/training-and-resources/manuals/details/PPAP-4">https://www.aiag.org/training-and-resources/manuals/details/PPAP-4</a> <span class="tag">(catalogue-level: existence and edition; the control plan as a required submission element)</span></li>
+      <li id="ref-4">Biswas, P. "IATF 16949:2016 Clause 9.1.1.1 Monitoring and measurement of manufacturing processes." 6 Aug 2023. <a href="https://preteshbiswas.com/2023/08/06/iatf-169492016-clause-9-1-1-1-monitoring-and-measurement-of-manufacturing-processes/">https://preteshbiswas.com/2023/08/06/iatf-169492016-clause-9-1-1-1-monitoring-and-measurement-of-manufacturing-processes/</a> <span class="tag">(verified, full: commentary on clause 9.1.1.1's requirements, cited as a commentary with the standard itself as the primary reference, see [5])</span></li>
+      <li id="ref-5">IATF 16949:2016. <em>Quality management system requirements for automotive production and relevant service parts organizations</em>. IATF. Clause 9.1.1.1, summarized via [4]. <span class="tag">(secondary: standard not read directly, not available online; requirement for process studies, capability verification, reaction plans when unstable or not capable, recording significant process events)</span></li>
+      <li id="ref-6">DQS. "New AIAG &amp; VDA SPC Manual 1st Edition released." 2026. <a href="https://www.dqsglobal.com/en/explore/blog/release-of-aiag-vda-spc-manual-1st-edition">https://www.dqsglobal.com/en/explore/blog/release-of-aiag-vda-spc-manual-1st-edition</a> <span class="tag">(verified, full: Cp/Cpk only for statistically stable processes, Pp/Ppk otherwise, the convention this module's ongoing Ppk tracking follows)</span></li>
+      <li id="ref-7">AIAG. <em>Statistical Process Control (SPC) Reference Manual</em>, 2nd ed., 2005 (superseded by the AIAG &amp; VDA SPC Manual, 1st ed., 2026). <span class="tag">(secondary: the legacy convention many supplier reports and software still print; see [6] for the current standard)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

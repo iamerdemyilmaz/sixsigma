@@ -1742,6 +1742,74 @@ register(id="m15-ex2-loss", module="15", kind="taguchi_loss",
          columns=["x"], rows=[[float(v)] for v in np.round(_m15e2, 2)])
 
 
+# Module 18: Control plans and sustaining gains (prefix m18-)
+# No new kind: "ongoing Cpk trend" reuses the existing `capability` kind as
+# five separate monthly registrations (reading off overall.Ppk_ci95, which
+# the kind already computes), the same bore feature as m07-bore (Ø12.000
+# +/- 0.025 mm) for continuity. Months 1-4 are the same stable process with
+# ordinary month-to-month sampling noise (mu fixed per month, all close to
+# 12.003, sigma 0.0068 mm); month 5 is a deliberate, real shift (mu 12.013,
+# sigma 0.0080 mm -- both the mean and the spread move, a plausible tool-wear
+# story) chosen so its 95% CI on Ppk does not overlap any of months 1-4's.
+_P_M18 = {"usl": 12.025, "lsl": 11.975, "target": 12.000, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"}
+
+
+def _m18_month(seed, mu, sigma, n_sub=6, sub_size=5):
+    rng = np.random.default_rng(seed)
+    rows = []
+    for g in range(1, n_sub + 1):
+        for _ in range(sub_size):
+            rows.append([g, round(float(rng.normal(mu, sigma)), 3)])
+    return rows
+
+
+register(id="m18-month1", module="18", kind="capability",
+         title="Ongoing capability, month 1, bore diameter",
+         source="constructed", setting="same bore feature as m07-bore, Ø12.000 +/- 0.025 mm, 6 subgroups of 5, first of five monthly capability checks",
+         params=dict(_P_M18), columns=["subgroup", "x"], rows=_m18_month(101, 12.002695, 0.0068))
+register(id="m18-month2", module="18", kind="capability",
+         title="Ongoing capability, month 2, bore diameter",
+         source="constructed", setting="same bore feature as m07-bore, 6 subgroups of 5, second of five monthly capability checks",
+         params=dict(_P_M18), columns=["subgroup", "x"], rows=_m18_month(201, 12.003430, 0.0068))
+register(id="m18-month3", module="18", kind="capability",
+         title="Ongoing capability, month 3, bore diameter",
+         source="constructed", setting="same bore feature as m07-bore, 6 subgroups of 5, third of five monthly capability checks",
+         params=dict(_P_M18), columns=["subgroup", "x"], rows=_m18_month(301, 12.002756, 0.0068))
+register(id="m18-month4", module="18", kind="capability",
+         title="Ongoing capability, month 4, bore diameter",
+         source="constructed", setting="same bore feature as m07-bore, 6 subgroups of 5, fourth of five monthly capability checks",
+         params=dict(_P_M18), columns=["subgroup", "x"], rows=_m18_month(401, 12.002803, 0.0068))
+# Exercise 2: a second, shorter ongoing-trend example (3 months, not 5),
+# a different characteristic (injection-moulded wall thickness) for variety,
+# individuals/I-MR rather than subgrouped. Months A and B are stable with
+# ordinary sampling noise; month C is a real shift.
+_P_M18W = {"usl": 2.65, "lsl": 2.35, "target": 2.50, "chart": "imr", "units": "mm"}
+
+
+def _m18_indiv(seed, mu, sigma, n=25):
+    rng = np.random.default_rng(seed)
+    return [[round(float(v), 3)] for v in rng.normal(mu, sigma, n)]
+
+
+register(id="m18-ex2-montha", module="18", kind="capability",
+         title="Exercise 2, month A: injection-moulded wall thickness",
+         source="constructed", setting="wall thickness (mm) of an injection-moulded housing, target 2.50 +/- 0.15 mm, 25 individual readings, first of three monthly checks",
+         params=dict(_P_M18W), columns=["x"], rows=_m18_indiv(11, 2.502, 0.043))
+register(id="m18-ex2-monthb", module="18", kind="capability",
+         title="Exercise 2, month B: injection-moulded wall thickness",
+         source="constructed", setting="same wall thickness feature, second of three monthly checks",
+         params=dict(_P_M18W), columns=["x"], rows=_m18_indiv(500, 2.498, 0.044))
+register(id="m18-ex2-monthc", module="18", kind="capability",
+         title="Exercise 2, month C: injection-moulded wall thickness, a real shift",
+         source="constructed", setting="same wall thickness feature, third month: a genuine process shift, not sampling noise",
+         params=dict(_P_M18W), columns=["x"], rows=_m18_indiv(9001, 2.53, 0.062))
+
+register(id="m18-month5", module="18", kind="capability",
+         title="Ongoing capability, month 5, bore diameter: a real shift",
+         source="constructed", setting="same bore feature as m07-bore, 6 subgroups of 5, fifth month: a genuine process shift (tool wear), not sampling noise",
+         params=dict(_P_M18), columns=["subgroup", "x"], rows=_m18_month(2, 12.013, 0.0080))
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}
