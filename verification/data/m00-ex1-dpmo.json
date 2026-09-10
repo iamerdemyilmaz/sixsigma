@@ -1,0 +1,14 @@
+{
+ "id": "m00-ex1-dpmo",
+ "module": "00",
+ "kind": "dpmo",
+ "title": "Solder-joint defects, 4,800 boards of 120 joints",
+ "source": "constructed",
+ "setting": "4,800 boards inspected by AOI, 120 solder joints each, 331 joint defects logged",
+ "params": {
+  "defects": 331,
+  "units": 4800,
+  "opportunities": 120
+ },
+ "columns": null
+}

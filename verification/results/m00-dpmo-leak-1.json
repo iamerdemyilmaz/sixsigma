@@ -1,0 +1,24 @@
+{
+ "id": "m00-dpmo-leak-1",
+ "kind": "dpmo",
+ "params": {
+  "defects": 23,
+  "units": 1250,
+  "opportunities": 1
+ },
+ "source": "constructed",
+ "results": {
+  "defects": 23,
+  "units": 1250,
+  "opportunities": 1,
+  "dpmo": 18400.0,
+  "dpu": 0.0184,
+  "dpo": 0.0184,
+  "yield_fty": 0.9817682465077646,
+  "yield_from_dpmo": 0.9816,
+  "sigma_long_term": 2.08797599637805,
+  "sigma_level_shifted": 3.58797599637805
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

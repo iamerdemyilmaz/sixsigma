@@ -10,7 +10,7 @@
      `built` controls whether the module is linked in navigation.
      Only finished modules are linked (no placeholder pages). */
   var MODULES = [
-    { num: "00", slug: "00-introduction", title: "Introduction: what Six Sigma is and is not", built: false },
+    { num: "00", slug: "00-introduction", title: "Introduction: what Six Sigma is and is not", built: true },
     { num: "01", slug: "01-variation-statistics", title: "Variation and basic statistics", built: false },
     { num: "02", slug: "02-process-thinking", title: "Process thinking", built: false },
     { num: "03", slug: "03-defining-a-project", title: "Defining a project", built: false },

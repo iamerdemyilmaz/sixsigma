@@ -1,0 +1,14 @@
+{
+ "id": "m00-dpmo-leak-1",
+ "module": "00",
+ "kind": "dpmo",
+ "title": "Leak-test failures, 1 opportunity per assembly",
+ "source": "constructed",
+ "setting": "brazed heat-exchanger assemblies, 1,250 tested in a week, 23 failed the leak test",
+ "params": {
+  "defects": 23,
+  "units": 1250,
+  "opportunities": 1
+ },
+ "columns": null
+}

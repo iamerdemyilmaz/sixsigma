@@ -101,6 +101,8 @@ function run(meta, cols) {
     case "ttest1": return Stats.oneSample(cols.x, p.mu0, p.alpha);
     case "regression": return Stats.regression(cols, p);
     case "samplesize": return Stats.sampleSize(p);
+    case "dpmo": return Stats.dpmo(p.defects, p.units, p.opportunities);
+    case "sigma_table": return Stats.sigmaTable(p);
     default: throw new Error("unknown kind " + meta.kind);
   }
 }

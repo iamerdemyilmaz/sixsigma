@@ -215,6 +215,23 @@ def check_tests(ex_id, r, kind):
         check(near(r["t_slope"] ** 2, r["F"], 1e-9), f"{tag}: t^2 != F")
     elif kind == "samplesize":
         check(r["n_t"] >= r["n_z"] == math.ceil(r["n_z_exact"]), f"{tag}: sample sizes")
+    elif kind == "dpmo":
+        check(0 <= r["dpmo"] <= 1e6, f"{tag}: DPMO range")
+        check(near(r["dpo"] * 1e6, r["dpmo"]), f"{tag}: DPO vs DPMO")
+        check(near(r["dpu"], r["dpo"] * r["opportunities"]), f"{tag}: DPU vs DPO")
+        check(near(norm_sf(r["sigma_long_term"]) * 1e6, r["dpmo"], 1e-6), f"{tag}: Z vs DPMO tail")
+        check(near(r["sigma_level_shifted"] - r["sigma_long_term"], 1.5), f"{tag}: shift is 1.5")
+        check(0 <= r["yield_fty"] <= 1, f"{tag}: yield range")
+    elif kind == "sigma_table":
+        for i, k in enumerate(r["levels"]):
+            c2, s1, s2 = r["ppm_centered_two_sided"][i], r["ppm_shifted_one_sided"][i], r["ppm_shifted_two_sided"][i]
+            check(0 < c2 < 1e6 and 0 < s1 < 1e6 and s1 <= s2 < 1e6, f"{tag}: PPM ranges at k={k}")
+            check(near(c2, 2e6 * norm_sf(k), 1e-6) and near(s1, 1e6 * norm_sf(k - r["shift"]), 1e-6), f"{tag}: tails at k={k}")
+            if i: check(c2 < r["ppm_centered_two_sided"][i - 1] and s1 < r["ppm_shifted_one_sided"][i - 1], f"{tag}: PPM decreases with k")
+        if r["shift"] == 1.5 and 6.0 in r["levels"]:
+            check(abs(r["ppm_shifted_one_sided"][r["levels"].index(6.0)] - 3.4) < 0.01, f"{tag}: 3.4 PPM at 6 sigma shifted")
+        for i, t in enumerate(r.get("ppm_targets", [])):
+            check(near(norm_sf(r["z_of_targets"][i]) * 1e6, t, 1e-6), f"{tag}: Z of target {t}")
 
 
 def load_data(ex_id):

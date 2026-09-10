@@ -742,9 +742,30 @@
   // Sigma level, DPMO, DPU, RTY
   // ---------------------------------------------------------------------
   S.dpmo = function (defects, units, opportunities) {
-    const dpmo = defects / (units * opportunities) * 1e6, dpu = defects / units;
+    const dpo = defects / (units * opportunities), dpmo = dpo * 1e6, dpu = defects / units;
     const zlt = S.normPpf(1 - dpmo / 1e6);
-    return { dpmo: dpmo, dpu: dpu, yield_fty: Math.exp(-dpu), sigma_long_term: zlt, sigma_level_shifted: zlt + 1.5 };
+    return { defects: defects, units: units, opportunities: opportunities, dpmo: dpmo, dpu: dpu, dpo: dpo,
+      yield_fty: Math.exp(-dpu), yield_from_dpmo: 1 - dpmo / 1e6, sigma_long_term: zlt, sigma_level_shifted: zlt + 1.5 };
+  };
+  // Sigma level k to PPM: centred two-sided 2·P(Z>k); with the 1.5σ shift the
+  // one-sided tail P(Z>k−shift) (the convention behind "3.4 PPM at six sigma")
+  // and the two-sided version adding the far tail P(Z>k+shift).
+  S.sigmaTable = function (params) {
+    const shift = params.shift === undefined ? 1.5 : params.shift, levels = params.levels.map(Number);
+    const out = { shift: shift, levels: levels, ppm_centered_two_sided: [], ppm_shifted_one_sided: [], ppm_shifted_two_sided: [], yield_shifted_one_sided: [] };
+    for (const k of levels) {
+      const near = S.normSf(k - shift), far = S.normSf(k + shift);
+      out.ppm_centered_two_sided.push(2e6 * S.normSf(k));
+      out.ppm_shifted_one_sided.push(1e6 * near);
+      out.ppm_shifted_two_sided.push(1e6 * (near + far));
+      out.yield_shifted_one_sided.push(1 - near);
+    }
+    if (params.ppm_targets) {
+      out.ppm_targets = params.ppm_targets.map(Number);
+      out.z_of_targets = out.ppm_targets.map(function (p) { return S.normPpf(1 - p / 1e6); });
+      out.sigma_level_of_targets = out.z_of_targets.map(function (z) { return z + shift; });
+    }
+    return out;
   };
   S.sigmaFromDpmo = function (dpmo, shift) { return S.normPpf(1 - dpmo / 1e6) + (shift === undefined ? 1.5 : shift); };
   S.dpmoFromSigma = function (sigma, shift) { return S.normSf(sigma - (shift === undefined ? 1.5 : shift)) * 1e6; };

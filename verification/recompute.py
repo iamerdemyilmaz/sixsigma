@@ -632,6 +632,30 @@ def r_samplesize(meta):
     return {"z_alpha": za, "z_beta": zb, "n_z_exact": nz, "n_z": n, "n_t": nt}
 
 
+def r_dpmo(meta):
+    p = meta["params"]; D, U, O = p["defects"], p["units"], p["opportunities"]
+    dpo = D / (U * O); dpmo = dpo * 1e6; dpu = D / U
+    z = norm_ppf(1 - dpo)
+    return {"dpmo": dpmo, "dpu": dpu, "dpo": dpo, "yield_fty": math.exp(-dpu), "yield_from_dpmo": 1 - dpo,
+            "sigma_long_term": z, "sigma_level_shifted": z + 1.5}
+
+
+def r_sigma_table(meta):
+    p = meta["params"]; shift = p.get("shift", 1.5)
+    out = {}
+    for i, k in enumerate(p["levels"]):
+        near, far = norm_sf(k - shift), norm_sf(k + shift)
+        out[f"ppm_centered_two_sided.{i}"] = 2e6 * norm_sf(k)
+        out[f"ppm_shifted_one_sided.{i}"] = 1e6 * near
+        out[f"ppm_shifted_two_sided.{i}"] = 1e6 * (near + far)
+        out[f"yield_shifted_one_sided.{i}"] = 1 - near
+    for i, t in enumerate(p.get("ppm_targets", [])):
+        z = norm_ppf(1 - t / 1e6)
+        out[f"z_of_targets.{i}"] = z
+        out[f"sigma_level_of_targets.{i}"] = z + shift
+    return out
+
+
 # --------------------------------------------------------------------------
 # Comparison
 # --------------------------------------------------------------------------
@@ -682,6 +706,8 @@ def recompute_one(ex_id):
     elif kind == "ttest1": mine = r_one_sample(cols["x"], meta["params"]["mu0"], meta["params"].get("alpha", 0.05))
     elif kind == "regression": mine = r_regression(meta, cols)
     elif kind == "samplesize": mine = r_samplesize(meta)
+    elif kind == "dpmo": mine = r_dpmo(meta)
+    elif kind == "sigma_table": mine = r_sigma_table(meta)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

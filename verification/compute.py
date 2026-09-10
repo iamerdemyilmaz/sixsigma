@@ -642,11 +642,39 @@ def samplesize(params):
 
 
 def dpmo_block(defects, units, opportunities):
+    """Defect count to DPU, DPO, DPMO, Poisson first-time yield, and the two
+    Z conventions: the plain normal tail Z (no shift) and the Motorola sigma
+    level, which adds 1.5 to it."""
     dpmo = defects / (units * opportunities) * 1e6
     dpu = defects / units
     z_lt = stats.norm.ppf(1 - dpmo / 1e6)
-    return {"dpmo": dpmo, "dpu": dpu, "yield_fty": math.exp(-dpu), "sigma_long_term": float(z_lt),
-            "sigma_level_shifted": float(z_lt + 1.5)}
+    return {"defects": defects, "units": units, "opportunities": opportunities,
+            "dpmo": dpmo, "dpu": dpu, "dpo": defects / (units * opportunities),
+            "yield_fty": math.exp(-dpu), "yield_from_dpmo": 1 - dpmo / 1e6,
+            "sigma_long_term": float(z_lt), "sigma_level_shifted": float(z_lt + 1.5)}
+
+
+def sigma_table(params):
+    """Sigma level to PPM under both conventions, per level k:
+    centred two-sided PPM = 2 * P(Z > k) * 1e6; with the 1.5 sigma shift the
+    one-sided PPM = P(Z > k - shift) * 1e6 (the convention behind "3.4 PPM at
+    six sigma"); two-sided shifted adds the far tail P(Z > k + shift)."""
+    shift = params.get("shift", 1.5)
+    levels = [float(k) for k in params["levels"]]
+    out = {"shift": shift, "levels": levels, "ppm_centered_two_sided": [], "ppm_shifted_one_sided": [],
+           "ppm_shifted_two_sided": [], "yield_shifted_one_sided": []}
+    for k in levels:
+        near = float(stats.norm.sf(k - shift))
+        far = float(stats.norm.sf(k + shift))
+        out["ppm_centered_two_sided"].append(2e6 * float(stats.norm.sf(k)))
+        out["ppm_shifted_one_sided"].append(1e6 * near)
+        out["ppm_shifted_two_sided"].append(1e6 * (near + far))
+        out["yield_shifted_one_sided"].append(1 - near)
+    if "ppm_targets" in params:
+        out["ppm_targets"] = [float(p) for p in params["ppm_targets"]]
+        out["z_of_targets"] = [float(stats.norm.isf(p / 1e6)) for p in params["ppm_targets"]]
+        out["sigma_level_of_targets"] = [z + shift for z in out["z_of_targets"]]
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -706,6 +734,10 @@ def compute_one(ex_id):
         res = regression(cols, params)
     elif kind == "samplesize":
         res = samplesize(params)
+    elif kind == "dpmo":
+        res = dpmo_block(params["defects"], params["units"], params["opportunities"])
+    elif kind == "sigma_table":
+        res = sigma_table(params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

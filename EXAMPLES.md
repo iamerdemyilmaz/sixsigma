@@ -64,10 +64,15 @@ Totals on 2026-09-09: 25 examples; 63 published values matched; 686 quantities a
 
 ## Course examples
 
-Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 34 examples, 1,119 quantities agree between Check 1 and Check 2, 2,960 values agree between Check 1 and the JavaScript engines, 100 page checks).
+Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 40 examples, 1,285 quantities agree between Check 1 and Check 2, 3,386 values agree between Check 1 and the JavaScript engines, 159 page checks).
 
 | id | Module | Kind | Setting and the point it makes | Dataset | Check 1 | Check 2 | Check 3 | Check 4 | Pages |
 |---|---|---|---|---|---|---|---|---|---|
+| m00-sigma-table | 0 | sigma level to PPM (parameters only) | levels 1 to 6 with the 1.5σ shift: centred two-sided PPM and shifted one-sided PPM (3.4 at 6σ, checked as the published Motorola target); Z of 3.4, 100, 1,000, 10,000 and 100,000 PPM | none | pass (1 published value) | pass | pass | pass | 00 |
+| m00-bore-preview | 0 | capability, I-MR, 100 individuals | drilled hole Ø8.000 ± 0.050 mm, bore gauge to 0.001 mm; stable, normal, running large: 5 of 100 oversize, Z 1.75 to the USL, 41,074 PPM predicted; the "sigma level is a tail area" preview | `m00-bore-preview.csv` | pass | pass | pass | pass | 00 |
+| m00-dpmo-leak-1, m00-dpmo-leak-6 | 0 | DPMO (parameters only) | 23 leak-test failures in 1,250 brazed assemblies counted with 1 and with 6 opportunities per unit: DPMO 18,400 vs 3,067, "sigma level" 3.59 vs 4.24, same DPU 0.0184 | none | pass | pass | pass | pass | 00 |
+| m00-ex1-dpmo | 0 | DPMO (parameters only) | 331 solder-joint defects on 4,800 boards of 120 joints: DPU 0.069, DPMO 575, FTY 93.3 %, Z 3.25 / 4.75; exercise 1 | none | pass | pass | pass | pass | 00 |
+| m00-ex2-pull | 0 | capability, I-MR, one-sided, 60 individuals | wire-bond pull strength, minimum 8.0 N, tester to 0.01 N; stable, 1 of 60 below, Z 2.07, 19,078 PPM predicted; exercise 2 | `m00-ex2-pull.csv` | pass | pass | pass | pass | 00 |
 | m07-bore | 7 | capability, X̄-R, 25 × 5 | reamed bore Ø12.000 ± 0.025 mm, bore micrometer to 0.001 mm; stable, normal, Cwk 1.06 / Ppk 1.04 with 95 % CI 0.90–1.18: the "not close enough" case | `m07-bore.csv` | pass | pass | pass | pass | 07, calculators |
 | m07-bore-30 | 7 | capability, first 6 subgroups | the same process from 30 values: Ppk 1.07 with 95 % CI 0.77–1.37 | `m07-bore-30.csv` | pass | pass | pass | pass | 07 |
 | m07-fill | 7 | capability, I-MR, one-sided | powder fill, declared minimum 250.0 g, 100 individuals; Ppl 0.75, 12,500 PPM predicted, 1 of 100 observed | `m07-fill.csv` | pass | pass | pass | pass | 07 |

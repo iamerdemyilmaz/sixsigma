@@ -1,0 +1,21 @@
+{
+ "id": "m00-bore-preview",
+ "module": "00",
+ "kind": "capability",
+ "title": "Drilled hole, 100 individuals, about 5 % out of tolerance",
+ "source": "constructed",
+ "setting": "drilled hole \u00d88.000 \u00b1 0.050 mm in a steel bracket, bore gauge to 0.001 mm, 100 consecutive parts",
+ "params": {
+  "usl": 8.05,
+  "lsl": 7.95,
+  "target": 8.0,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 100
+}

@@ -412,6 +412,51 @@ register(id="m11-anova-machines", module="11", kind="anova1",
          params={"alpha": 0.05, "units": "s"}, columns=["group", "x"], rows=_am)
 
 
+# ---------------------------------------------------------------------------
+# Module 0: Introduction (constructed course examples, prefix m00-)
+# ---------------------------------------------------------------------------
+register(id="m00-sigma-table", module="00", kind="sigma_table",
+         title="Sigma level to PPM, centred and with the 1.5 sigma shift",
+         source="arithmetic on the normal distribution; the shift is the Motorola convention (S-E8, S-D28), critiqued in S-C9 and S-E28",
+         setting="parameters only",
+         params={"levels": [1, 2, 3, 4, 4.5, 5, 6], "shift": 1.5, "ppm_targets": [3.4, 100, 1000, 10000, 100000]},
+         columns=None, rows=None,
+         expected={"ppm_shifted_one_sided.6": [3.4, 0.01]})  # Motorola's stated target (S-E8)
+
+# A drilled hole in a bracket, Ø8.000 ± 0.050 mm, 100 consecutive parts,
+# bore gauge to 0.001 mm; running large with about 5 % out of tolerance, so
+# that the histogram against the specification shows a visible tail.
+_rng = np.random.default_rng(37)
+register(id="m00-bore-preview", module="00", kind="capability",
+         title="Drilled hole, 100 individuals, about 5 % out of tolerance",
+         source="constructed", setting="drilled hole Ø8.000 ± 0.050 mm in a steel bracket, bore gauge to 0.001 mm, 100 consecutive parts",
+         params={"usl": 8.050, "lsl": 7.950, "target": 8.000, "subgroup_size": 1, "chart": "imr", "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 3)] for i, v in enumerate(_rng.normal(8.016, 0.021, 100))])
+
+# Leak-test rejects on brazed assemblies: the same 23 failures counted with
+# one opportunity per assembly, then with the six braze joints as opportunities.
+for _opp in (1, 6):
+    register(id=f"m00-dpmo-leak-{_opp}", module="00", kind="dpmo",
+             title=f"Leak-test failures, {_opp} opportunit{'y' if _opp == 1 else 'ies'} per assembly",
+             source="constructed", setting="brazed heat-exchanger assemblies, 1,250 tested in a week, 23 failed the leak test",
+             params={"defects": 23, "units": 1250, "opportunities": _opp}, columns=None, rows=None)
+
+# Exercise 1: solder-joint defects on assembled boards.
+register(id="m00-ex1-dpmo", module="00", kind="dpmo",
+         title="Solder-joint defects, 4,800 boards of 120 joints",
+         source="constructed", setting="4,800 boards inspected by AOI, 120 solder joints each, 331 joint defects logged",
+         params={"defects": 331, "units": 4800, "opportunities": 120}, columns=None, rows=None)
+
+# Exercise 2: solder-joint pull strength with a minimum of 8.0 N, 60 joints,
+# pull tester to 0.01 N.
+_rng = np.random.default_rng(23)
+register(id="m00-ex2-pull", module="00", kind="capability",
+         title="Pull strength, minimum 8.0 N, 60 individuals",
+         source="constructed", setting="wire-bond pull strength, minimum 8.0 N, pull tester to 0.01 N, 60 consecutive joints",
+         params={"usl": None, "lsl": 8.0, "target": None, "subgroup_size": 1, "chart": "imr", "units": "N"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 2)] for i, v in enumerate(_rng.normal(9.25, 0.55, 60))])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

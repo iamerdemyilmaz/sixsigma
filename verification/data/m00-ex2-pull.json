@@ -1,0 +1,21 @@
+{
+ "id": "m00-ex2-pull",
+ "module": "00",
+ "kind": "capability",
+ "title": "Pull strength, minimum 8.0 N, 60 individuals",
+ "source": "constructed",
+ "setting": "wire-bond pull strength, minimum 8.0 N, pull tester to 0.01 N, 60 consecutive joints",
+ "params": {
+  "usl": null,
+  "lsl": 8.0,
+  "target": null,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "N"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 60
+}
