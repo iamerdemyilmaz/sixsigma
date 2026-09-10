@@ -9,7 +9,11 @@
  *    verification/constants.json.
  * 3. Runs every engine on every example in verification/data/ and compares
  *    every numeric and string leaf of results/<id>.json to the JS output at
- *    the same path.
+ *    the same path. Kinds with no interactive calculator (Module 2's vsm,
+ *    funnel and funnel_growth are static, computed page content, not one of
+ *    the nine required calculators) are outside Check 4's scope by
+ *    definition and are skipped here; they are still fully covered by
+ *    compute.py, recompute.py and sanity.py (Checks 1 to 3).
  *
  * Run: node verification/test_calculators.js   (exit code 1 on any failure)
  */
@@ -111,6 +115,8 @@ function run(meta, cols) {
 }
 
 const SKIP = { info_power_nct: true };
+// Kinds with no in-page calculator (see the file header): not run here.
+const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {
@@ -148,6 +154,7 @@ for (const f of fs.readdirSync(RESULTS).sort()) {
   if (!f.endsWith(".json") || f.startsWith("_")) continue;
   const doc = JSON.parse(fs.readFileSync(path.join(RESULTS, f), "utf8"));
   const meta = JSON.parse(fs.readFileSync(path.join(DATA, doc.id + ".json"), "utf8"));
+  if (SKIP_KIND[meta.kind]) continue;
   const csvPath = path.join(DATA, doc.id + ".csv");
   const cols = fs.existsSync(csvPath) ? readCsv(csvPath) : {};
   let got;

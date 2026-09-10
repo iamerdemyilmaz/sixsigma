@@ -1,0 +1,45 @@
+{
+ "id": "m02-ex1-vsm",
+ "module": "02",
+ "kind": "vsm",
+ "title": "Current-state value stream map, sub-assembly and test cell (exercise 1)",
+ "source": "constructed",
+ "setting": "a 3-step assembly cell (sub-assembly, final assembly, function test), one shift",
+ "params": {
+  "daily_demand_pieces": 600,
+  "operating_seconds_per_day": 25200,
+  "steps": [
+   {
+    "name": "Sub-assembly",
+    "ct_s": 25.0
+   },
+   {
+    "name": "Final assembly",
+    "ct_s": 35.0
+   },
+   {
+    "name": "Function test",
+    "ct_s": 18.0
+   }
+  ],
+  "inventory": [
+   {
+    "name": "Component kits",
+    "wip_pieces": 500.0
+   },
+   {
+    "name": "WIP: sub-assembly to final",
+    "wip_pieces": 120.0
+   },
+   {
+    "name": "WIP: final to test",
+    "wip_pieces": 80.0
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 250.0
+   }
+  ]
+ },
+ "columns": null
+}

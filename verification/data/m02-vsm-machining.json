@@ -1,0 +1,53 @@
+{
+ "id": "m02-vsm-machining",
+ "module": "02",
+ "kind": "vsm",
+ "title": "Current-state value stream map, machined bracket cell",
+ "source": "constructed",
+ "setting": "a 4-step machining cell (turn, mill, deburr, inspect and pack) making one bracket part number, one shift",
+ "params": {
+  "daily_demand_pieces": 400,
+  "operating_seconds_per_day": 27000,
+  "steps": [
+   {
+    "name": "Turn",
+    "ct_s": 45.0
+   },
+   {
+    "name": "Mill",
+    "ct_s": 60.0
+   },
+   {
+    "name": "Deburr",
+    "ct_s": 30.0
+   },
+   {
+    "name": "Inspect & pack",
+    "ct_s": 20.0
+   }
+  ],
+  "inventory": [
+   {
+    "name": "Raw material",
+    "wip_pieces": 800.0
+   },
+   {
+    "name": "WIP: turn to mill",
+    "wip_pieces": 150.0
+   },
+   {
+    "name": "WIP: mill to deburr",
+    "wip_pieces": 200.0
+   },
+   {
+    "name": "WIP: deburr to inspect",
+    "wip_pieces": 100.0
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 300.0
+   }
+  ]
+ },
+ "columns": null
+}

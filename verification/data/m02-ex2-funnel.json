@@ -1,0 +1,16 @@
+{
+ "id": "m02-ex2-funnel",
+ "module": "02",
+ "kind": "funnel",
+ "title": "Funnel experiment simulation, 30 drops, sigma = 4.0 mm (exercise 2)",
+ "source": "constructed simulation of the four rules described in S-D10 (p. 327) and S-E21",
+ "setting": "a marble dropped through a funnel onto a paper target, position recorded in mm from the target on one axis",
+ "params": {
+  "sigma": 4.0
+ },
+ "columns": [
+  "i",
+  "e"
+ ],
+ "n_rows": 30
+}

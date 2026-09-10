@@ -1,0 +1,16 @@
+{
+ "id": "m02-redbead-days",
+ "module": "02",
+ "kind": "descriptive",
+ "title": "Red bead exercise, 20 simulated paddle draws (5 workers x 4 rounds)",
+ "source": "constructed simulation of the exercise described in S-E4, Binomial(n=50, p=0.20)",
+ "setting": "a paddle of 50 holes dipped into a mix of 20 % red beads, one draw per worker per round",
+ "params": {
+  "units": "red beads per draw"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 20
+}

@@ -25,6 +25,16 @@ Kinds handled by compute.py / recompute.py / stats.js:
   dpmo, sigma_table, binomial_poisson   no CSV; params only
   descriptive  x; optional usl/lsl (count outside) and log (statistics of ln x)
   subgroup_means  x; params sizes (means of consecutive subgroups, CLT on data)
+  vsm          no CSV; params daily_demand_pieces, operating_seconds_per_day,
+               steps [{name, ct_s}], inventory [{name, wip_pieces}]
+  funnel       column e (noise); params sigma (the true sd used to generate e).
+               Rule 1 x=e; Rule 2 x[k]=e[k]-e[k-1]; Rule 3 x[k]=e[k]-x[k-1];
+               Rule 4 x[k]=x[k-1]+e[k] (cumulative sum). See Module 2.
+  funnel_growth  columns e0..e{R-1}, R independent noise replications of the
+               same length; params sigma, checkpoints (drop numbers). Rules
+               3 and 4 are random walks, so a single path's window variance
+               is too noisy to check against theory; replication gives a
+               proper Monte Carlo estimate of Var(x_k) at each checkpoint.
 """
 import csv
 import json
@@ -521,6 +531,93 @@ for _i, (_ax, _ay) in _ANS.items():
              setting="published data, no units", params={"alpha": 0.05},
              columns=["x", "y"], rows=[[a, b] for a, b in zip(_ax, _ay)],
              expected={"mean_x": [9.0, 1e-9], "mean_y": [7.50, 5e-3], "slope": [0.500, 5e-4], "intercept": [3.00, 5e-3], "r": [0.816, 1e-3], "r2": [0.67, 5e-3]})
+
+
+# ---------------------------------------------------------------------------
+# Module 2: Process thinking (prefix m02-)
+# ---------------------------------------------------------------------------
+# Red bead experiment (S-E4): the theoretical distribution for a paddle of
+# 50 holes drawn from a mix that is 20 % red. The Poisson side of the kind is
+# not used on the page; a placeholder lambda is supplied so the shared
+# binomial_poisson function runs.
+register(id="m02-redbead-theory", module="02", kind="binomial_poisson",
+         title="Red bead paddle: Binomial(n=50, p=0.20), k = 0 to 20",
+         source="arithmetic on the binomial distribution for the course's version of the red bead exercise (S-E4)",
+         setting="parameters only", params={"n": 50, "p": 0.20, "lambda": 10.0, "k": list(range(0, 21))},
+         columns=None, rows=None)
+
+# A simulated run: 5 willing workers, 4 rounds, one paddle draw (50 beads,
+# 20 % red) each. The exact box size and headcount in Deming's own sessions
+# are not documented on the verified source page (S-E4); these are the
+# course's constructed parameters for a common version of the exercise.
+_rng = np.random.default_rng(42)
+_redbead_days = [[i + 1, int(v)] for i, v in enumerate(_rng.binomial(50, 0.20, 20))]
+register(id="m02-redbead-days", module="02", kind="descriptive",
+         title="Red bead exercise, 20 simulated paddle draws (5 workers x 4 rounds)",
+         source="constructed simulation of the exercise described in S-E4, Binomial(n=50, p=0.20)",
+         setting="a paddle of 50 holes dipped into a mix of 20 % red beads, one draw per worker per round",
+         params={"units": "red beads per draw"}, columns=["i", "x"], rows=_redbead_days)
+
+# Value stream map, a small machining cell (constructed, no employer detail).
+register(id="m02-vsm-machining", module="02", kind="vsm",
+         title="Current-state value stream map, machined bracket cell",
+         source="constructed", setting="a 4-step machining cell (turn, mill, deburr, inspect and pack) making one bracket part number, one shift",
+         params={"daily_demand_pieces": 400, "operating_seconds_per_day": 27000,
+                 "steps": [{"name": "Turn", "ct_s": 45.0}, {"name": "Mill", "ct_s": 60.0},
+                           {"name": "Deburr", "ct_s": 30.0}, {"name": "Inspect & pack", "ct_s": 20.0}],
+                 "inventory": [{"name": "Raw material", "wip_pieces": 800.0},
+                               {"name": "WIP: turn to mill", "wip_pieces": 150.0},
+                               {"name": "WIP: mill to deburr", "wip_pieces": 200.0},
+                               {"name": "WIP: deburr to inspect", "wip_pieces": 100.0},
+                               {"name": "Finished goods", "wip_pieces": 300.0}]},
+         columns=None, rows=None)
+
+# Exercise 1: a second, smaller cell (assembly and test), different numbers.
+register(id="m02-ex1-vsm", module="02", kind="vsm",
+         title="Current-state value stream map, sub-assembly and test cell (exercise 1)",
+         source="constructed", setting="a 3-step assembly cell (sub-assembly, final assembly, function test), one shift",
+         params={"daily_demand_pieces": 600, "operating_seconds_per_day": 25200,
+                 "steps": [{"name": "Sub-assembly", "ct_s": 25.0}, {"name": "Final assembly", "ct_s": 35.0},
+                           {"name": "Function test", "ct_s": 18.0}],
+                 "inventory": [{"name": "Component kits", "wip_pieces": 500.0},
+                               {"name": "WIP: sub-assembly to final", "wip_pieces": 120.0},
+                               {"name": "WIP: final to test", "wip_pieces": 80.0},
+                               {"name": "Finished goods", "wip_pieces": 250.0}]},
+         columns=None, rows=None)
+
+# The funnel experiment (S-D10 p. 327 via S-E21): four rules simulated from
+# the same noise sequence, marble position in mm from the target.
+_rng = np.random.default_rng(7)
+_e100 = [round(float(v), 3) for v in _rng.normal(0.0, 5.0, 100)]
+register(id="m02-funnel", module="02", kind="funnel",
+         title="Funnel experiment simulation, 100 drops, sigma = 5.0 mm",
+         source="constructed simulation of the four rules described in S-D10 (p. 327) and S-E21",
+         setting="a marble dropped through a funnel onto a paper target, position recorded in mm from the target on one axis",
+         params={"sigma": 5.0}, columns=["i", "e"], rows=[[i + 1, v] for i, v in enumerate(_e100)])
+
+# The same experiment, backed by 150 independent replications of 40 drops,
+# to estimate Var(x_k) at drop 8 and drop 40 for each rule without the noise
+# of reading a growth rate off a single random-walk path (see funnel_growth
+# above). The first replication is reused as the illustrative single path.
+_R, _NFG = 150, 40
+_rng = np.random.default_rng(7)
+_grid = _rng.normal(0.0, 5.0, (_NFG, _R))
+register(id="m02-funnel-growth", module="02", kind="funnel_growth",
+         title=f"Funnel experiment, {_R} independent replications of {_NFG} drops, sigma = 5.0 mm",
+         source="constructed simulation of the four rules described in S-D10 (p. 327) and S-E21",
+         setting="150 independent repeats of the same funnel simulation, 40 drops each, to estimate the variance of each rule at a given drop number",
+         params={"sigma": 5.0, "checkpoints": [8, 40]},
+         columns=["drop"] + [f"e{r}" for r in range(_R)],
+         rows=[[i + 1] + [round(float(_grid[i, r]), 4) for r in range(_R)] for i in range(_NFG)])
+
+# Exercise 2: a shorter run, rules 1 and 2 only asked for.
+_rng = np.random.default_rng(19)
+_e30 = [round(float(v), 3) for v in _rng.normal(0.0, 4.0, 30)]
+register(id="m02-ex2-funnel", module="02", kind="funnel",
+         title="Funnel experiment simulation, 30 drops, sigma = 4.0 mm (exercise 2)",
+         source="constructed simulation of the four rules described in S-D10 (p. 327) and S-E21",
+         setting="a marble dropped through a funnel onto a paper target, position recorded in mm from the target on one axis",
+         params={"sigma": 4.0}, columns=["i", "e"], rows=[[i + 1, v] for i, v in enumerate(_e30)])
 
 
 def main():

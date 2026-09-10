@@ -1,0 +1,37 @@
+{
+ "id": "m02-redbead-theory",
+ "module": "02",
+ "kind": "binomial_poisson",
+ "title": "Red bead paddle: Binomial(n=50, p=0.20), k = 0 to 20",
+ "source": "arithmetic on the binomial distribution for the course's version of the red bead exercise (S-E4)",
+ "setting": "parameters only",
+ "params": {
+  "n": 50,
+  "p": 0.2,
+  "lambda": 10.0,
+  "k": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20
+  ]
+ },
+ "columns": null
+}

@@ -372,6 +372,78 @@ def r_binomial_poisson(meta):
     return out
 
 
+def r_vsm(meta):
+    p = meta["params"]; demand = p["daily_demand_pieces"]; opsec = p["operating_seconds_per_day"]
+    total_ct_s = sum(s["ct_s"] for s in p["steps"])
+    total_ct_days = total_ct_s / opsec
+    out = {"takt_s": opsec / demand, "total_ct_s": total_ct_s, "total_ct_days": total_ct_days}
+    total_inv_days = 0.0
+    for i, item in enumerate(p["inventory"]):
+        d = item["wip_pieces"] / demand
+        out[f"inventory.{i}.days"] = d
+        total_inv_days += d
+    total_lead = total_inv_days + total_ct_days
+    out["total_inventory_days"] = total_inv_days
+    out["total_lead_time_days"] = total_lead
+    out["pce_pct"] = 100.0 * total_ct_days / total_lead
+    out["lead_time_to_ct_ratio"] = total_lead / total_ct_days
+    return out
+
+
+def r_funnel(meta, cols):
+    e = cols["e"]; n = len(e); sigma = meta["params"]["sigma"]
+    x1 = list(e)
+    x2 = [e[0]] + [e[k] - e[k - 1] for k in range(1, n)]
+    x3 = [0.0] * n; x3[0] = e[0]
+    for k in range(1, n): x3[k] = e[k] - x3[k - 1]
+    x4 = [0.0] * n; x4[0] = e[0]
+    for k in range(1, n): x4[k] = x4[k - 1] + e[k]
+    w = min(25, n // 2)
+    def meansq(arr, a, b): return sum(v * v for v in arr[a - 1:b]) / (b - a + 1)
+    out = {}
+    for name, arr in (("rule1", x1), ("rule2", x2), ("rule3", x3), ("rule4", x4)):
+        out[f"rules.{name}.x"] = arr
+        out[f"rules.{name}.var_all"] = sd(arr) ** 2
+        out[f"rules.{name}.meansq_first_w"] = meansq(arr, 1, w)
+        out[f"rules.{name}.meansq_last_w"] = meansq(arr, n - w + 1, n)
+    out["rules.rule1.theory_var"] = sigma ** 2
+    out["rules.rule2.theory_var"] = 2 * sigma ** 2
+    for name in ("rule3", "rule4"):
+        out[f"rules.{name}.theory_meansq_first_w"] = sigma ** 2 * (1 + w) / 2.0
+        out[f"rules.{name}.theory_meansq_last_w"] = sigma ** 2 * ((n - w + 1) + n) / 2.0
+    return out
+
+
+def r_funnel_growth(meta, cols):
+    p = meta["params"]; sigma = p["sigma"]; checkpoints = [int(c) for c in p["checkpoints"]]
+    rep_cols = sorted((k for k in cols if k.startswith("e")), key=lambda k: int(k[1:]))
+    n = len(cols[rep_cols[0]]); R = len(rep_cols)
+
+    def rules_of(e):
+        x1 = list(e)
+        x2 = [e[0]] + [e[k] - e[k - 1] for k in range(1, n)]
+        x3 = [0.0] * n; x3[0] = e[0]
+        for k in range(1, n): x3[k] = e[k] - x3[k - 1]
+        x4 = [0.0] * n; x4[0] = e[0]
+        for k in range(1, n): x4[k] = x4[k - 1] + e[k]
+        return {"rule1": x1, "rule2": x2, "rule3": x3, "rule4": x4}
+
+    out = {}
+    for name, arr in rules_of(cols[rep_cols[0]]).items():
+        out[f"illustrative.{name}"] = arr
+    sums = {name: {cp: 0.0 for cp in checkpoints} for name in ("rule1", "rule2", "rule3", "rule4")}
+    for rc in rep_cols:
+        for name, arr in rules_of(cols[rc]).items():
+            for cp in checkpoints:
+                sums[name][cp] += arr[cp - 1] ** 2
+    for name in sums:
+        for cp in checkpoints:
+            out[f"growth.{name}.meansq_at_{cp}"] = sums[name][cp] / R
+            out[f"growth.{name}.theory_at_{cp}"] = (sigma ** 2 if name == "rule1" else
+                                                      2 * sigma ** 2 if name == "rule2" else cp * sigma ** 2)
+    return out
+
+
 def r_capability(meta, cols):
     p = meta["params"]; x = cols["x"]
     usl, lsl, tgt = p.get("usl"), p.get("lsl"), p.get("target")
@@ -760,6 +832,9 @@ def recompute_one(ex_id):
     elif kind == "descriptive": mine = r_descriptive_block(meta, cols)
     elif kind == "subgroup_means": mine = r_subgroup_means(meta, cols)
     elif kind == "binomial_poisson": mine = r_binomial_poisson(meta)
+    elif kind == "vsm": mine = r_vsm(meta)
+    elif kind == "funnel": mine = r_funnel(meta, cols)
+    elif kind == "funnel_growth": mine = r_funnel_growth(meta, cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

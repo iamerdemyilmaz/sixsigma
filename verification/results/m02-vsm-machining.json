@@ -1,0 +1,105 @@
+{
+ "id": "m02-vsm-machining",
+ "kind": "vsm",
+ "params": {
+  "daily_demand_pieces": 400,
+  "operating_seconds_per_day": 27000,
+  "steps": [
+   {
+    "name": "Turn",
+    "ct_s": 45.0
+   },
+   {
+    "name": "Mill",
+    "ct_s": 60.0
+   },
+   {
+    "name": "Deburr",
+    "ct_s": 30.0
+   },
+   {
+    "name": "Inspect & pack",
+    "ct_s": 20.0
+   }
+  ],
+  "inventory": [
+   {
+    "name": "Raw material",
+    "wip_pieces": 800.0
+   },
+   {
+    "name": "WIP: turn to mill",
+    "wip_pieces": 150.0
+   },
+   {
+    "name": "WIP: mill to deburr",
+    "wip_pieces": 200.0
+   },
+   {
+    "name": "WIP: deburr to inspect",
+    "wip_pieces": 100.0
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 300.0
+   }
+  ]
+ },
+ "source": "constructed",
+ "results": {
+  "takt_s": 67.5,
+  "steps": [
+   {
+    "name": "Turn",
+    "ct_s": 45.0
+   },
+   {
+    "name": "Mill",
+    "ct_s": 60.0
+   },
+   {
+    "name": "Deburr",
+    "ct_s": 30.0
+   },
+   {
+    "name": "Inspect & pack",
+    "ct_s": 20.0
+   }
+  ],
+  "total_ct_s": 155.0,
+  "total_ct_days": 0.005740740740740741,
+  "inventory": [
+   {
+    "name": "Raw material",
+    "wip_pieces": 800.0,
+    "days": 2.0
+   },
+   {
+    "name": "WIP: turn to mill",
+    "wip_pieces": 150.0,
+    "days": 0.375
+   },
+   {
+    "name": "WIP: mill to deburr",
+    "wip_pieces": 200.0,
+    "days": 0.5
+   },
+   {
+    "name": "WIP: deburr to inspect",
+    "wip_pieces": 100.0,
+    "days": 0.25
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 300.0,
+    "days": 0.75
+   }
+  ],
+  "total_inventory_days": 3.875,
+  "total_lead_time_days": 3.8807407407407406,
+  "pce_pct": 0.14792899408284024,
+  "lead_time_to_ct_ratio": 676.0
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

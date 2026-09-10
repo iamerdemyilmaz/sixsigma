@@ -1,0 +1,88 @@
+{
+ "id": "m02-ex1-vsm",
+ "kind": "vsm",
+ "params": {
+  "daily_demand_pieces": 600,
+  "operating_seconds_per_day": 25200,
+  "steps": [
+   {
+    "name": "Sub-assembly",
+    "ct_s": 25.0
+   },
+   {
+    "name": "Final assembly",
+    "ct_s": 35.0
+   },
+   {
+    "name": "Function test",
+    "ct_s": 18.0
+   }
+  ],
+  "inventory": [
+   {
+    "name": "Component kits",
+    "wip_pieces": 500.0
+   },
+   {
+    "name": "WIP: sub-assembly to final",
+    "wip_pieces": 120.0
+   },
+   {
+    "name": "WIP: final to test",
+    "wip_pieces": 80.0
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 250.0
+   }
+  ]
+ },
+ "source": "constructed",
+ "results": {
+  "takt_s": 42.0,
+  "steps": [
+   {
+    "name": "Sub-assembly",
+    "ct_s": 25.0
+   },
+   {
+    "name": "Final assembly",
+    "ct_s": 35.0
+   },
+   {
+    "name": "Function test",
+    "ct_s": 18.0
+   }
+  ],
+  "total_ct_s": 78.0,
+  "total_ct_days": 0.0030952380952380953,
+  "inventory": [
+   {
+    "name": "Component kits",
+    "wip_pieces": 500.0,
+    "days": 0.8333333333333334
+   },
+   {
+    "name": "WIP: sub-assembly to final",
+    "wip_pieces": 120.0,
+    "days": 0.2
+   },
+   {
+    "name": "WIP: final to test",
+    "wip_pieces": 80.0,
+    "days": 0.13333333333333333
+   },
+   {
+    "name": "Finished goods",
+    "wip_pieces": 250.0,
+    "days": 0.4166666666666667
+   }
+  ],
+  "total_inventory_days": 1.5833333333333335,
+  "total_lead_time_days": 1.5864285714285715,
+  "pce_pct": 0.19510730901996098,
+  "lead_time_to_ct_ratio": 512.5384615384615
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

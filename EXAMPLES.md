@@ -64,7 +64,9 @@ Totals on 2026-09-09: 25 examples; 63 published values matched; 686 quantities a
 
 ## Course examples
 
-Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 50 examples, 1,548 quantities agree between Check 1 and Check 2, 3,998 values agree between Check 1 and the JavaScript engines, 333 page checks).
+Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed data, not a real production run" where it appears. The ids replace the planning ids in SOURCES.md Part 2 (`ex07-bore-capability` → `m07-bore`, and so on). All checks passed on 2026-09-09 (`verify_all.sh`: 57 examples, 1,741 quantities agree between Check 1 and Check 2, 4,162 values agree between Check 1 and the JavaScript engines, 425 page checks).
+
+Module 2's `vsm`, `funnel` and `funnel_growth` kinds have no interactive calculator (none of the nine required calculators fits value-stream or funnel-experiment arithmetic, and Module 2 precedes the control-chart calculator by design), so Check 4 does not apply to them; `test_calculators.js` skips these kinds explicitly (see its header comment) and they are fully covered by Checks 1 to 3 instead.
 
 | id | Module | Kind | Setting and the point it makes | Dataset | Check 1 | Check 2 | Check 3 | Check 4 | Pages |
 |---|---|---|---|---|---|---|---|---|---|
@@ -89,5 +91,12 @@ Constructed course examples (prefix `m<NN>-`). Each is labelled "constructed dat
 | m04-grr-bore | 4 (registered in Phase C) | crossed gauge R&R 10 × 3 × 3 | bore gauge, tolerance 0.050 mm; %GRR 23.9 % of study variation, 29.8 % of tolerance, ndc 5, interaction pooled (p 0.23) | `m04-grr-bore.csv` | pass | pass | pass | pass | calculators |
 | m11-ttest2-pull | 11 (registered in Phase C) | two-sample t | solder pull strength N, suppliers A and B, 12 each; Welch p 0.010, d −1.16 | `m11-ttest2-pull.csv` | pass | pass | pass | pass | calculators |
 | m11-anova-machines | 11 (registered in Phase C) | one-way ANOVA | cycle time s on three machines, 10 each; F 5.60, p 0.009, η² 0.29 | `m11-anova-machines.csv` | pass | pass | pass | pass | calculators |
+| m02-redbead-theory | 2 | binomial and Poisson (parameters only) | red-bead paddle, n 50, p 0.20: mean 10.0, sd 2.83; P(=10) 0.1398, P(≤5) 0.0480, P(≤15) 0.9692 | none | pass | pass | pass | pass | 02 |
+| m02-redbead-days | 2 | descriptive, 20 individuals | simulated red-bead counts, 5 workers × 4 rounds, Binomial(50, 0.20); mean 10.6, s 2.66, range 6 to 16, all within ±3 SD of the theoretical mean | `m02-redbead-days.csv` | pass | pass | pass | pass | 02 |
+| m02-vsm-machining | 2 | value stream metrics (parameters only) | 4-step machining cell, demand 400/day, 27,000 s/day; takt 67.5 s, total lead time 3.8807 days, PCE 0.148 % | none | pass | pass | pass | n/a (no calculator) | 02 |
+| m02-ex1-vsm | 2 | value stream metrics (parameters only) | 3-step assembly/test cell, demand 600/day; takt 42.0 s, lead time 1.5864 days, PCE 0.195 %; exercise 1 | none | pass | pass | pass | n/a (no calculator) | 02 |
+| m02-funnel | 2 | funnel experiment, 4 rules, single 100-drop path | σ = 5.0 mm; Rule 1 var 19.35 mm², Rule 2 var 36.94 mm² (ratio 1.91 ≈ 2); Rules 3 and 4 shown for the trajectory figure only (a single path is too noisy to check their growth rate, see m02-funnel-growth) | `m02-funnel.csv` | pass | pass | pass | n/a (no calculator) | 02 |
+| m02-funnel-growth | 2 | funnel experiment, 4 rules, 150 × 40-drop replications | Monte Carlo check of the Var(x_k) = k·σ² claim: mean square at drop 8 and drop 40 for each rule, all four within a factor of 2 of theory, Rules 3 and 4 growing roughly fivefold as theory predicts | `m02-funnel-growth.csv` | pass | pass | pass | n/a (no calculator) | 02 |
+| m02-ex2-funnel | 2 | funnel experiment, rules 1 and 2, 30 drops | σ = 4.0 mm; Rule 1 var 12.70 mm², Rule 2 var 26.36 mm² (ratio 2.08 ≈ 2); exercise 2 | `m02-ex2-funnel.csv` | pass | pass | pass | n/a (no calculator) | 02 |
 
 The published check example `chk-nist-capability` (NIST 6.1.6) is also declared on the Module 7 page as the reproduced textbook check, and `chk-montgomery-etch` (Montgomery plasma etch 2³) is the preload of the factorial calculator on `calculators.html`.

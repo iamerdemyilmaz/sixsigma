@@ -13,6 +13,8 @@ Conventions (see PROGRESS.md decision 7 and SOURCES.md S-A2):
               the legacy 2005 AIAG convention and most software call them
               Cp/Cpk. Stored as Cw/Cwk.
   legacy.*    the same numbers under the 2005 labels, for supplier reports.
+  vsm, funnel  Module 2 (process thinking): value-stream lead time/PCE, and
+              the four funnel-experiment rules. See generate.py for the kind.
 Control-chart constants come from verification/constants.json (tables.py),
 rounded to the precision of published tables. The individuals chart uses
 3 * MRbar / 1.128 (NIST 6.3.2.2), not the 3-decimal E2.
@@ -126,6 +128,114 @@ def binomial_poisson(params):
     po = {"lambda": lam, "k": ks, "mean": lam, "sd": math.sqrt(lam),
           "pmf": [float(stats.poisson.pmf(k, lam)) for k in ks], "cdf": [float(stats.poisson.cdf(k, lam)) for k in ks]}
     return {"binomial": b, "poisson": po}
+
+
+def vsm_metrics(params):
+    """Value-stream lead time and process cycle efficiency (Module 2).
+    Inventory converted to days by the standard VSM shorthand: quantity
+    divided by the daily customer requirement. Total lead time is that
+    inventory time plus the value-add (cycle) time; PCE is the cycle time's
+    share of the lead time."""
+    demand = float(params["daily_demand_pieces"])
+    opsec = float(params["operating_seconds_per_day"])
+    steps = params["steps"]
+    total_ct_s = float(sum(s["ct_s"] for s in steps))
+    total_ct_days = total_ct_s / opsec
+    inv_out = []
+    total_inv_days = 0.0
+    for item in params["inventory"]:
+        d = float(item["wip_pieces"]) / demand
+        inv_out.append({"name": item["name"], "wip_pieces": item["wip_pieces"], "days": d})
+        total_inv_days += d
+    total_lead_days = total_inv_days + total_ct_days
+    return {"takt_s": opsec / demand, "steps": steps, "total_ct_s": total_ct_s, "total_ct_days": total_ct_days,
+            "inventory": inv_out, "total_inventory_days": total_inv_days,
+            "total_lead_time_days": total_lead_days, "pce_pct": 100.0 * total_ct_days / total_lead_days,
+            "lead_time_to_ct_ratio": total_lead_days / total_ct_days}
+
+
+def funnel_sim(e, params):
+    """The funnel experiment's four rules (Module 2), applied to the same
+    noise sequence e. Rule 1: fixed funnel, x = e. Rule 2: move the funnel
+    from its last position by -(last deviation), giving x[k] = e[k] - e[k-1].
+    Rule 3: move the funnel to -(last deviation) measured from the target,
+    giving x[k] = e[k] - x[k-1]. Rule 4: move the funnel to the last resting
+    spot, giving the cumulative sum x[k] = x[k-1] + e[k]. Every x[k] is a
+    fixed, mean-zero combination of the e's, so E[x_k] = 0 exactly and
+    Var(x_k) = E[x_k^2]: Rule 1 is sigma^2 for every k; Rule 2 is 2*sigma^2
+    for every k >= 2; Rules 3 and 4 grow as k*sigma^2 (a genuine random walk
+    for Rule 4, an alternating one for Rule 3). Because the true mean is
+    known to be zero, the mean of x_k^2 over a window (not the window's own
+    sample variance, which is the wrong statistic for a non-stationary
+    series) is the unbiased way to estimate the average Var(x_k) over that
+    window: sigma^2 * mean(k) for k in the window."""
+    e = np.asarray(e, float)
+    n = len(e)
+    sigma = float(params["sigma"])
+    x1 = e.copy()
+    x2 = np.empty(n); x2[0] = e[0]
+    x2[1:] = e[1:] - e[:-1]
+    x3 = np.empty(n); x3[0] = e[0]
+    for k in range(1, n):
+        x3[k] = e[k] - x3[k - 1]
+    x4 = np.cumsum(e)
+
+    def meansq(arr, a, b):  # 1-indexed inclusive window, mean of x_k^2 (deviation from the known-zero target)
+        return float(np.mean(arr[a - 1:b] ** 2))
+
+    w = min(25, n // 2)
+    rules = {}
+    for name, arr in (("rule1", x1), ("rule2", x2), ("rule3", x3), ("rule4", x4)):
+        rules[name] = {"x": [float(v) for v in arr], "var_all": float(np.var(arr, ddof=1)),
+                        "meansq_first_w": meansq(arr, 1, w), "meansq_last_w": meansq(arr, n - w + 1, n)}
+    rules["rule1"]["theory_var"] = sigma ** 2
+    rules["rule2"]["theory_var"] = 2 * sigma ** 2
+    for name in ("rule3", "rule4"):
+        rules[name]["theory_meansq_first_w"] = sigma ** 2 * (1 + w) / 2.0
+        rules[name]["theory_meansq_last_w"] = sigma ** 2 * ((n - w + 1) + n) / 2.0
+    return {"n": n, "sigma": sigma, "w": w, "rules": rules}
+
+
+def funnel_growth(cols, params):
+    """Monte Carlo backing for the funnel experiment's variance-growth claim
+    (Module 2). cols holds R independent noise replications (columns e0, e1,
+    ...), each of length n. For each replication the four rules are applied
+    (as in funnel_sim) and the value at each checkpoint drop is squared;
+    averaging that square over the R independent replications is a proper,
+    low-noise Monte Carlo estimate of Var(x_k) at that drop (since E[x_k]=0
+    exactly for all four rules). The first replication is also returned in
+    full, as the illustrative single path drawn in the trajectory figure."""
+    sigma = float(params["sigma"])
+    checkpoints = [int(c) for c in params["checkpoints"]]
+    rep_cols = sorted((k for k in cols if k.startswith("e")), key=lambda k: int(k[1:]))
+    n = len(cols[rep_cols[0]])
+    R = len(rep_cols)
+
+    def rules_of(e):
+        e = np.asarray(e, float)
+        x1 = e.copy()
+        x2 = np.empty(n); x2[0] = e[0]; x2[1:] = e[1:] - e[:-1]
+        x3 = np.empty(n); x3[0] = e[0]
+        for k in range(1, n):
+            x3[k] = e[k] - x3[k - 1]
+        x4 = np.cumsum(e)
+        return {"rule1": x1, "rule2": x2, "rule3": x3, "rule4": x4}
+
+    illustrative = {name: [float(v) for v in arr] for name, arr in rules_of(cols[rep_cols[0]]).items()}
+    sums = {name: {cp: 0.0 for cp in checkpoints} for name in ("rule1", "rule2", "rule3", "rule4")}
+    for rc in rep_cols:
+        for name, arr in rules_of(cols[rc]).items():
+            for cp in checkpoints:
+                sums[name][cp] += float(arr[cp - 1]) ** 2
+    theory = {"rule1": lambda cp: sigma ** 2, "rule2": lambda cp: 2 * sigma ** 2,
+              "rule3": lambda cp: cp * sigma ** 2, "rule4": lambda cp: cp * sigma ** 2}
+    growth = {}
+    for name in sums:
+        growth[name] = {}
+        for cp in checkpoints:
+            growth[name][f"meansq_at_{cp}"] = sums[name][cp] / R
+            growth[name][f"theory_at_{cp}"] = theory[name](cp)
+    return {"n": n, "R": R, "sigma": sigma, "checkpoints": checkpoints, "illustrative": illustrative, "growth": growth}
 
 
 def histogram(x, k=None):
@@ -792,6 +902,12 @@ def compute_one(ex_id):
         res = subgroup_means(cols["x"], params)
     elif kind == "binomial_poisson":
         res = binomial_poisson(params)
+    elif kind == "vsm":
+        res = vsm_metrics(params)
+    elif kind == "funnel":
+        res = funnel_sim(cols["e"], params)
+    elif kind == "funnel_growth":
+        res = funnel_growth(cols, params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

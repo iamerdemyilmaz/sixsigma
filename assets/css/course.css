@@ -360,6 +360,8 @@ td.flag { color: var(--bad); font-weight: 600; }
 .chart-bar { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
 .chart-bar.dim { fill: var(--code-bg); stroke: var(--muted); }
 .chart-curve { stroke: var(--accent); stroke-width: 2; fill: none; }
+.chart-curve.bad { stroke: var(--bad); }
+.chart-box { stroke: currentColor; stroke-width: 1.2; fill: none; }
 .chart-text { font-family: inherit; font-size: 11px; fill: var(--fg); }
 .chart-text.muted { fill: var(--muted); }
 .chart-text.small { font-size: 10px; }

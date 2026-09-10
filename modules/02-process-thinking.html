@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 2: Process thinking · Six Sigma Course</title>
+<meta name="description" content="SIPOC and process maps, value stream mapping and process cycle efficiency, Ohno's eight wastes, and common versus special cause in words, with the red bead and funnel experiments, before any control chart.">
+<meta name="examples" content="m02-redbead-theory, m02-redbead-days, m02-vsm-machining, m02-ex1-vsm, m02-funnel, m02-funnel-growth, m02-ex2-funnel">
+<!-- allowed-numbers: conventions and hand-arithmetic intermediates that are not stored in verification/results/.
+     Each intermediate below was computed by script from the results values before it was typed here. -->
+<meta name="allowed-numbers" content="99.85">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="02">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 2 · Foundations</p>
+    <h1>Process thinking</h1>
+    <p class="lead">Every tool later in this course is a way of looking at a process. Before you compute a Cpk or draw a control chart you need to know where the process starts and ends, what actually moves through it, and whether what you are looking at is the process behaving the way it always does or something new. This module builds that vocabulary: SIPOC and process maps to draw the boundary, a value stream map to see time and inventory instead of just steps, the eight wastes to name what is not adding value, and the difference between common and special cause variation, in words, before Module 16 turns it into a chart.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Draw</strong> a SIPOC diagram for a process and use it to set the boundary of a project before mapping any detail.</li>
+      <li><strong>Build</strong> a simple current-state value stream map and compute lead time, takt time and process cycle efficiency from it.</li>
+      <li><strong>Name</strong> Ohno's seven wastes and Liker's eighth, and give a manufacturing example of each.</li>
+      <li><strong>Explain</strong>, in words and without a control chart, the difference between common cause and special cause variation.</li>
+      <li><strong>Use</strong> the red bead experiment to explain why ranking people on a stable system's output is a mistake.</li>
+      <li><strong>Predict</strong>, from the funnel experiment's four rules, which kinds of "correction" make a stable process worse.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>On 16 May 1924, Walter Shewhart, working in the inspection engineering department at Western Electric, the group that became Bell Telephone Laboratories the following year, wrote a one-page memo to his manager. It contained the first control chart and the distinction this entire module is built on: some of the variation in a process is <em>assignable</em> to a specific, findable cause, and the rest is <em>chance</em> variation, the routine scatter of a system that has not changed.<sup class="cite"><a href="#ref-1">[1]</a></sup> That is a hundred-year-old idea. It is also, according to a 2006 history of the memo and what followed it, an idea that spread slowly even inside Western Electric's own Hawthorne manufacturing plant, the company that had just invented it.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <p>The tools in this course were never the bottleneck. A SIPOC diagram takes twenty minutes to draw. The arithmetic behind a value stream map is division. What is hard, and what separates a project that fixes the right thing from one that produces a good-looking report, is thinking about the process before reaching for a chart or a formula: what are its boundaries, where does time actually go, and is the variation you are looking at built into the system or a sign that something changed. This module has no control chart and no capability index. Modules 4 through 18 hand you the arithmetic; Define and the early part of Measure are about seeing clearly enough that the arithmetic has something real to work on.</p>
+
+    <h2 id="sipoc">SIPOC and process maps</h2>
+    <p>Before you can improve a process you have to agree on what it is. A SIPOC diagram does that in one pass, in five columns: <strong>S</strong>uppliers, <strong>I</strong>nputs, <strong>P</strong>rocess, <strong>O</strong>utputs, <strong>C</strong>ustomers. The process column holds only four to eight high-level steps, deliberately coarse; a SIPOC is not a flowchart. Suppliers and inputs sit to the left of the process, outputs and customers to the right, and the boundary of the project is wherever you decide the first and last process steps are.</p>
+    <p>Two ways to fill it in. If the process already exists, start in the middle: list the main steps, then work outward to what each step consumes and produces. If you are scoping a new project and do not yet know the process well, start from the ends: who is the customer and what do they need, then work backward to the suppliers and inputs that make it possible, and let the process column fill in last. Either way, a SIPOC is a scoping tool. When you need step-by-step detail, a swim-lane process map is the next level down; when time and inventory matter as much as sequence, a value stream map (next section) is the level below that.</p>
+    <p class="example-label">The example below is a constructed process, drawn for teaching. It is not a real production line.</p>
+    <h3 id="example1">Worked example 1: SIPOC for a brazed heat-exchanger line</h3>
+    <p>This is the process the capstone project (Module 19) returns to: an aluminium heat-exchanger core, brazed in a furnace, that later fails its leak test at an inconvenient rate. Scoping that project starts here.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. SIPOC, brazed aluminium heat-exchanger core (constructed example).</caption>
+        <thead><tr><th>Suppliers</th><th>Inputs</th><th>Process</th><th>Outputs</th><th>Customers</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Tube and fin stock mill<br>Braze alloy and flux supplier<br>Fixture and tooling shop<br>Furnace atmosphere (nitrogen) supplier</td>
+            <td>Cut-to-length aluminium tube and fin stock<br>Braze filler ring and flux<br>Braze fixture<br>Process specification and drawing</td>
+            <td>1. Cut and form tube and fin<br>2. Stack and clamp in braze fixture<br>3. Apply flux<br>4. Furnace braze<br>5. Cool and unload<br>6. Leak test<br>7. Pack</td>
+            <td>Brazed, leak-tested heat-exchanger core<br>Leak-test record<br>Scrap and rework units<br>Furnace exhaust (waste)</td>
+            <td>Final HVAC-unit assembly (next internal step)<br>OEM customer<br>Quality file / PPAP record</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notice what the SIPOC does not tell you: how long each step takes, how many cores sit waiting between steps, or which of the seven process steps is where the leak-test failures come from. That is not a flaw. A SIPOC's job is to fix the boundary (cut-to-length stock in, a packed core out to final assembly) and confirm everyone agrees what is inside the project and what is a supplier's or customer's problem. Everything downstream, including the capstone's root-cause work, builds on this boundary being right.</p>
+
+    <h2 id="wastes">The eight wastes</h2>
+    <p>Taiichi Ohno, developing the Toyota Production System, named seven categories of activity that consume resources without adding anything the customer would pay for.<sup class="cite"><a href="#ref-3">[3]</a></sup> The Lean Enterprise Institute's standard list, with overproduction named as the worst of the seven because it hides and causes the other six, is reproduced in Table 2.<sup class="cite"><a href="#ref-2">[2]</a></sup> Jeffrey Liker later added an eighth, the waste of unused employee skill and creativity, in <em>The Toyota Way</em>; that addition is Liker's, not Ohno's, and this course labels it as such.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. The eight wastes, with a machining-shop example of each.</caption>
+        <thead><tr><th>Waste</th><th>Source</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Overproduction</td><td>Ohno</td><td>Running a full lot of 500 brackets because the machine is set up, when the next station needs 80.</td></tr>
+          <tr><td>Waiting</td><td>Ohno</td><td>A part sitting at the deburr station because the operator is running another job.</td></tr>
+          <tr><td>Conveyance (transportation)</td><td>Ohno</td><td>Moving parts between two buildings for a heat-treat step that could sit next to machining.</td></tr>
+          <tr><td>Processing (over-processing)</td><td>Ohno</td><td>Polishing a surface to a finish finer than the drawing calls for.</td></tr>
+          <tr><td>Inventory</td><td>Ohno</td><td>Six weeks of raw bar stock sitting in front of a machine that turns it over in two days.</td></tr>
+          <tr><td>Motion</td><td>Ohno</td><td>An operator walking to a tool crib for a gauge that could sit at the machine.</td></tr>
+          <tr><td>Correction (defects and rework)</td><td>Ohno</td><td>Reworking a batch of brazed cores because the fixture let two joints gap.</td></tr>
+          <tr><td>Unused skill</td><td>Liker</td><td>An operator who has spotted the fixture problem three times, never asked how to fix it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The list is worth memorising, but naming a waste is only useful if it points at a specific fix: "inventory" tells you to look at batch sizes and changeover time, "motion" tells you to look at the layout of a workstation, "unused skill" tells you to look at whether the person doing the job gets asked. Lumping several of these together as "inefficiency" loses that pointer.</p>
+
+    <h2 id="vsm">Value stream mapping</h2>
+    <p>The term "value stream" comes from Womack and Jones's <em>Lean Thinking</em>: everything, value-adding and non-value-adding, that it takes to bring a specific product from raw material to a customer.<sup class="cite"><a href="#ref-5">[5]</a></sup> A value stream map draws that on one page for one product family, including the flow of information (orders, schedules) alongside the flow of material; Rother and Shook's <em>Learning to See</em> is the method almost everyone uses to draw one.<sup class="cite"><a href="#ref-6">[6]</a><a href="#ref-7">[7]</a></sup> The difference from a plain process map is that a VSM attaches two numbers to every step: how long the step takes to do the work (cycle time), and how much sits waiting before it (work in process, WIP). Those two numbers convert into the quantity that a process map cannot show at all: how long a unit actually spends in the system.</p>
+    <h3 id="vsm-formulas">Lead time, takt time, and process cycle efficiency</h3>
+    <p>Three formulas, in the order you use them.</p>
+    <div class="formula">Takt time = operating time available per day / customer demand per day
+      <span class="where">The rate the customer is pulling product at, expressed as time per piece. It is a target for the line, not a measurement of any one step.</span>
+    </div>
+    <div class="formula">Inventory time (days) = pieces waiting at a point / customer demand per day
+      <span class="where">The standard shorthand for turning a pile of parts into a time: how many days of customer demand that pile represents, assuming it is consumed in the order it arrived.</span>
+    </div>
+    <div class="formula">Total lead time = sum of inventory time at every point + sum of cycle time at every step
+      <br>Process cycle efficiency (PCE) = (sum of cycle time) / (total lead time) × 100 %
+      <span class="where">Lead time is what a unit experiences: mostly waiting, plus the small amount of time actually being worked on. PCE is the value-adding share of that.</span>
+    </div>
+    <p class="example-label">The data below is a constructed example, not a real production line.</p>
+    <h3 id="example2">Worked example 2: current-state map of a machining cell</h3>
+    <p>A cell makes one bracket part number on one shift: turn, mill, deburr, inspect and pack. Demand is 400 pieces a day; the shift provides 27,000 seconds of operating time after breaks.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Current-state data, machined bracket cell (constructed data).</caption>
+        <thead><tr><th>Process step</th><th>Cycle time (s)</th></tr></thead>
+        <tbody>
+          <tr><td>Turn</td><td class="num">45</td></tr>
+          <tr><td>Mill</td><td class="num">60</td></tr>
+          <tr><td>Deburr</td><td class="num">30</td></tr>
+          <tr><td>Inspect &amp; pack</td><td class="num">20</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>Table 4. Inventory at each point (constructed data).</caption>
+        <thead><tr><th>Inventory point</th><th>Pieces</th></tr></thead>
+        <tbody>
+          <tr><td>Raw material</td><td class="num">800</td></tr>
+          <tr><td>WIP: turn to mill</td><td class="num">150</td></tr>
+          <tr><td>WIP: mill to deburr</td><td class="num">200</td></tr>
+          <tr><td>WIP: deburr to inspect</td><td class="num">100</td></tr>
+          <tr><td>Finished goods</td><td class="num">300</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 900 340" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Current-state value stream map, machined bracket cell</title>
+        <desc id="fig1-d">Four process boxes, turn, mill, deburr, inspect and pack, connected left to right by arrows, with an inventory triangle before and after each pair of processes: raw material, then a triangle between each step, then finished goods. Below, a stepped timeline alternates high segments for the inventory days at each triangle and low segments for the cycle time in seconds at each process, ending in the total lead time in days above the line and the total cycle time in seconds below it.</desc>
+        <g class="chart-text"><text x="450" y="18" text-anchor="middle" class="chart-title">Machined bracket cell, current state</text></g>
+        <g class="chart-box">
+          <rect x="110" y="55" width="90" height="50" rx="3"/>
+          <rect x="290" y="55" width="90" height="50" rx="3"/>
+          <rect x="470" y="55" width="90" height="50" rx="3"/>
+          <rect x="650" y="55" width="120" height="50" rx="3"/>
+        </g>
+        <g class="chart-text" text-anchor="middle" font-size="12">
+          <text x="155" y="76">Turn</text><text x="155" y="92" class="chart-text small">45 s</text>
+          <text x="335" y="76">Mill</text><text x="335" y="92" class="chart-text small">60 s</text>
+          <text x="515" y="76">Deburr</text><text x="515" y="92" class="chart-text small">30 s</text>
+          <text x="710" y="72">Inspect</text><text x="710" y="86">&amp; pack</text><text x="710" y="100" class="chart-text small">20 s</text>
+        </g>
+        <g class="chart-spec" font-size="11">
+          <path d="M40 80 L70 60 L70 100 Z"/><text x="55" y="120" text-anchor="middle" class="chart-text small">Raw material</text><text x="55" y="133" text-anchor="middle" class="chart-text small"><span data-ex="m02-vsm-machining" data-key="inventory.0.wip_pieces" data-dp="0">800</span> pcs</text>
+          <path d="M225 80 L255 60 L255 100 Z"/><text x="240" y="120" text-anchor="middle" class="chart-text small">WIP</text><text x="240" y="133" text-anchor="middle" class="chart-text small"><span data-ex="m02-vsm-machining" data-key="inventory.1.wip_pieces" data-dp="0">150</span> pcs</text>
+          <path d="M405 80 L435 60 L435 100 Z"/><text x="420" y="120" text-anchor="middle" class="chart-text small">WIP</text><text x="420" y="133" text-anchor="middle" class="chart-text small"><span data-ex="m02-vsm-machining" data-key="inventory.2.wip_pieces" data-dp="0">200</span> pcs</text>
+          <path d="M585 80 L615 60 L615 100 Z"/><text x="600" y="120" text-anchor="middle" class="chart-text small">WIP</text><text x="600" y="133" text-anchor="middle" class="chart-text small"><span data-ex="m02-vsm-machining" data-key="inventory.3.wip_pieces" data-dp="0">100</span> pcs</text>
+          <path d="M800 80 L830 60 L830 100 Z"/><text x="815" y="120" text-anchor="middle" class="chart-text small">FG</text><text x="815" y="133" text-anchor="middle" class="chart-text small"><span data-ex="m02-vsm-machining" data-key="inventory.4.wip_pieces" data-dp="0">300</span> pcs</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#m2arrow)">
+          <path d="M76 80 H104"/><path d="M206 80 H224"/><path d="M261 80 H284"/><path d="M386 80 H404"/><path d="M441 80 H464"/><path d="M566 80 H584"/><path d="M621 80 H644"/><path d="M786 80 H799"/>
+        </g>
+        <defs><marker id="m2arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M40 220 H860" stroke-width="1.5"/>
+          <path d="M55 220 V187 H240 V220 M240 220 V187 H420 V220 M420 220 V187 H600 V220 M600 220 V187 H815 V220" stroke-dasharray="0"/>
+          <path d="M55 220 V253 H155 V220 M240 220 V253 H335 V220 M420 220 V253 H515 V220 M600 220 V253 H710 V220" />
+        </g>
+        <g class="chart-text small" text-anchor="middle">
+          <text x="147" y="182">2.000 d</text><text x="330" y="182">0.375 d</text><text x="510" y="182">0.500 d</text><text x="707" y="182">0.250 d</text><text x="857" y="182" text-anchor="end">0.750 d</text>
+          <text x="105" y="248">45 s</text><text x="287" y="248">60 s</text><text x="467" y="248">30 s</text><text x="655" y="248">20 s</text>
+        </g>
+        <g class="chart-text" text-anchor="middle">
+          <text x="450" y="278">Total lead time = <tspan class="chart-text accent">3.8807 days</tspan> &#160;&#160;&#160;&#160; Total cycle time = <tspan class="chart-text accent">155 s</tspan> (0.0057 days)</text>
+          <text x="450" y="300" class="chart-text small muted">Process cycle efficiency = 155 s / 3.8807 days = <tspan class="chart-text accent">0.148 %</tspan></text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Current-state value stream map of the machining cell in Table 3 and Table 4. The zigzag timeline is the standard VSM device: a high segment for every inventory point's days of supply, a low segment for every process step's cycle time.</figcaption>
+    </figure>
+
+    <p>Takt time first, because it is the yardstick everything else is compared to: takt = 27,000 s / 400 pieces = <span data-ex="m02-vsm-machining" data-key="takt_s" data-dp="1">67.5</span> s per piece. Every step in Table 3 (45, 60, 30, 20 s) is comfortably under 67.5 s, so no single step is the pace-setting constraint; the delay is somewhere else.</p>
+    <p>Inventory time at each point, quantity divided by daily demand:</p>
+    <div class="formula">Raw material: 800 / 400 = <span data-ex="m02-vsm-machining" data-key="inventory.0.days" data-dp="3">2.000</span> days &nbsp;&nbsp; Turn→Mill WIP: 150 / 400 = <span data-ex="m02-vsm-machining" data-key="inventory.1.days" data-dp="3">0.375</span> days<br>
+      Mill→Deburr WIP: 200 / 400 = <span data-ex="m02-vsm-machining" data-key="inventory.2.days" data-dp="3">0.500</span> days &nbsp;&nbsp; Deburr→Inspect WIP: 100 / 400 = <span data-ex="m02-vsm-machining" data-key="inventory.3.days" data-dp="3">0.250</span> days<br>
+      Finished goods: 300 / 400 = <span data-ex="m02-vsm-machining" data-key="inventory.4.days" data-dp="3">0.750</span> days
+    </div>
+    <p>Sum of inventory time = <span data-ex="m02-vsm-machining" data-key="total_inventory_days" data-dp="3">3.875</span> days. Sum of cycle time = 45 + 60 + 30 + 20 = <span data-ex="m02-vsm-machining" data-key="total_ct_s" data-dp="0">155</span> s, which converted to days (dividing by the 27,000 s available in a day) is <span data-ex="m02-vsm-machining" data-key="total_ct_days" data-dp="6">0.005741</span> days. Total lead time is the sum of both: <span data-ex="m02-vsm-machining" data-key="total_lead_time_days" data-dp="4">3.8807</span> days.</p>
+    <div class="formula">PCE = 0.005741 / 3.8807 × 100 % = <span data-ex="m02-vsm-machining" data-key="pce_pct" data-dp="3">0.148</span> %</div>
+    <p>Every part passes every inspection in this constructed example; nothing here is a defect. And a part still spends, on average, about <span data-ex="m02-vsm-machining" data-key="lead_time_to_ct_ratio" data-dp="0">676</span> seconds sitting for every one second actually being cut, milled, deburred or inspected. A capability study or a control chart, applied to any one of these four steps, would never reveal that number, because 99.85&#8201;% of the part's time in the building is spent in one of the five triangles in Figure 1, not on a machine. This is the case for value stream mapping before any statistical tool: some of the biggest improvements in a factory are in the triangles, not in the boxes.</p>
+
+    <h2 id="common-special">Common cause and special cause, in words</h2>
+    <p>Every process varies. The question that decides what to do about it is whether the variation is <strong>common cause</strong> or <strong>special cause</strong>, and you can answer that question, most of the time, without a control chart.</p>
+    <p><strong>Common cause</strong> variation is built into the way the process currently works: the small differences between one part and the next that come from the machine, the material, the gauge, the method and the environment, all acting together, none of them dominant, none of them new. It is present in every unit, all the time, and no single person working inside the process can find "the cause" and remove it, because there isn't one cause; there are hundreds of small ones, and they are the system. Reducing common cause variation is a job for whoever can change the system: redesign the fixture, tighten the incoming material spec, retrain everyone, buy a better machine. Deming's language for this: an <em>analytic</em> problem, aimed at action on the process to change what happens in the future, as distinct from an <em>enumerative</em> one, which just counts or describes what is already there.<sup class="cite"><a href="#ref-8">[8]</a></sup> A capability index or a control limit is always an analytic claim: it says something about parts you have not made yet.</p>
+    <p><strong>Special cause</strong> variation means something changed: a tool broke, an operator substituted a different material, a setting drifted, a batch of gauge blocks was miscalibrated. It does not show up in every unit; it shows up in this shift, this operator, this lot, this hour. Because it is local and identifiable, the person closest to the process — the operator, the setup technician — is usually the right person to find it and fix it, and management does not need to redesign anything.</p>
+    <p>The two questions that tell them apart, before any chart: does this show up everywhere, all the time, for reasons built into how the process runs? Or did something specific change? Modules 16 and 17 build the control chart that answers this with arithmetic and a fixed false-alarm rate instead of a guess. The rest of this module is two demonstrations, one for each kind of mistake: mistaking common cause for a person's performance, and mistaking common cause for a special cause worth correcting.</p>
+
+    <h3 id="example3">Worked example 3: the red bead experiment</h3>
+    <p>W. Edwards Deming used a bead-drawing exercise in his seminars from the early 1980s, a gift to him from Bill Boller of Hewlett-Packard, to make a single point: a "willing worker's" output is limited by the system they work in, not by how hard they try, and ranking or rewarding people on a stable system's output is a fallacy.<sup class="cite"><a href="#ref-9">[9]</a></sup> A worker dips a paddle with a fixed number of holes into a box of beads, mostly white with some red, and the count of red ("defective") beads they draw is reported as the day's output.</p>
+    <p class="example-label">The published descriptions of the exercise available to this course do not state the exact box size, colour split or paddle size Deming himself used in a given session; the numbers below are the course's own constructed version of a common form of the exercise (a paddle of 50 holes, a mix that is 20&#8201;% red), not a transcription of Deming's data.</p>
+    <p>With a fixed 20&#8201;% red mix and a paddle that always draws 50 beads, the count of red beads on any one draw follows a binomial distribution: 50 independent draws, each with a 0.20 chance of being red.</p>
+    <div class="formula">Mean = n·p = 50 × 0.20 = <span data-ex="m02-redbead-theory" data-key="binomial.mean" data-dp="1">10.0</span> beads &nbsp;&nbsp; SD = &radic;[n·p·(1&#8722;p)] = &radic;(50×0.20×0.80) = <span data-ex="m02-redbead-theory" data-key="binomial.sd" data-dp="2">2.83</span> beads</div>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 5. Binomial(n = 50, p = 0.20) probabilities for the paddle's red-bead count.</caption>
+        <thead><tr><th>Red beads drawn</th><th>P(exactly this many)</th><th>P(this many or fewer)</th></tr></thead>
+        <tbody>
+          <tr><td class="num">3</td><td class="num"></td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.cdf.3" data-dp="4">0.0057</span></td></tr>
+          <tr><td class="num">5</td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.pmf.5" data-dp="4">0.0295</span></td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.cdf.5" data-dp="4">0.0480</span></td></tr>
+          <tr><td class="num">10</td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.pmf.10" data-dp="4">0.1398</span></td><td class="num"></td></tr>
+          <tr><td class="num">14</td><td class="num"></td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.cdf.14" data-dp="4">0.9393</span></td></tr>
+          <tr><td class="num">15</td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.pmf.15" data-dp="4">0.0299</span></td><td class="num"><span data-ex="m02-redbead-theory" data-key="binomial.cdf.15" data-dp="4">0.9692</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Now simulate five workers, four rounds each, one paddle draw per worker per round: twenty draws from that same distribution, nothing about the system changing between them.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Table 6. Red beads drawn, 5 simulated workers &times; 4 rounds (constructed simulation of Binomial(50, 0.20)).</caption>
+        <thead><tr><th>Worker</th><th>Round 1</th><th>Round 2</th><th>Round 3</th><th>Round 4</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td class="num">12</td><td class="num">9</td><td class="num">13</td><td class="num">11</td></tr>
+          <tr><td>B</td><td class="num">6</td><td class="num">16</td><td class="num">12</td><td class="num">12</td></tr>
+          <tr><td>C</td><td class="num">7</td><td class="num">10</td><td class="num">9</td><td class="num">14</td></tr>
+          <tr><td>D</td><td class="num">11</td><td class="num">13</td><td class="num">9</td><td class="num">8</td></tr>
+          <tr><td>E</td><td class="num">10</td><td class="num">6</td><td class="num">13</td><td class="num">11</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Mean = <span data-ex="m02-redbead-days" data-key="descriptive.mean" data-dp="1">10.6</span> beads, median <span data-ex="m02-redbead-days" data-key="descriptive.median" data-dp="1">11.0</span>, s = <span data-ex="m02-redbead-days" data-key="descriptive.s" data-dp="2">2.66</span>, from <span data-ex="m02-redbead-days" data-key="descriptive.min" data-dp="0">6</span> to <span data-ex="m02-redbead-days" data-key="descriptive.max" data-dp="0">16</span> beads: close to the theoretical mean of 10.0 and SD of 2.83, and every value comfortably inside a &plusmn;3 SD band (about 1.5 to 18.5 beads). Nothing here is a signal. If a supervisor singled out Worker B's round 2 (16 red beads, the worst single result in the table) for a warning and Worker E's round 2 (6 red beads, the best) for a bonus, the supervisor would be wrong on both counts: every worker used the identical paddle on the identical mix, and a spread from 6 to 16 is exactly what a stable Binomial(50, 0.20) system produces by chance. The paddle, not the worker, decides the count. Improving it — a better mix, a different paddle, a visual inspection step — is management's job, because it is the system.</p>
+    <h4>Calculator: descriptive statistics on the red bead results</h4>
+    <div class="calc" data-calc="descriptive" id="calc-desc-redbead">
+      <h3>Descriptive statistics and histogram</h3>
+      <p class="calc-intro">Pre-loaded with the 20 simulated paddle draws from Table 6. Paste any list of counts to see its own mean, spread and histogram.</p>
+      <script type="application/json" class="calc-data">{"x":[12,9,13,11,6,16,12,12,7,10,9,14,11,13,9,8,10,6,13,11],"units":"red beads per draw","label":"m02-redbead-days"}</script>
+    </div>
+
+    <h3 id="example4">Worked example 4: the funnel experiment and tampering</h3>
+    <p>Deming's funnel experiment demonstrates the opposite mistake: reacting to common cause variation as though it were special cause. A marble is dropped through a funnel aimed at a target on a flat surface; the funnel is then moved according to one of four rules, and the experiment is repeated for at least 50 drops under each rule.<sup class="cite"><a href="#ref-10">[10]</a><a href="#ref-11">[11]</a></sup></p>
+    <ul>
+      <li><strong>Rule 1.</strong> Leave the funnel exactly where it is, aimed at the target. Never move it.</li>
+      <li><strong>Rule 2.</strong> After each drop, move the funnel, from wherever it currently sits, the same distance and in the opposite direction as the marble's miss.</li>
+      <li><strong>Rule 3.</strong> After each drop, move the funnel to the position that mirrors the miss, measured from the <em>target</em> rather than from the funnel's last position — the funnel effectively starts over from the target every time.</li>
+      <li><strong>Rule 4.</strong> After each drop, move the funnel to sit directly over wherever the marble just landed.</li>
+    </ul>
+    <p>Rule 1 is "leave a stable process alone." Rules 2 through 4 are all versions of "the last part was off, so I adjusted the setup," the most common overreaction on a shop floor, and each one makes things worse in a different way. This is tampering: adjusting a process in response to noise it would have produced anyway.</p>
+    <p class="example-label">The data below is a constructed simulation of the four rules described above, not a transcription of one specific historical demonstration; the point does not depend on the particular random numbers used.</p>
+    <p>Let e<sub>k</sub> be the marble's own scatter on drop k if the funnel were not moved at all (independent, mean zero, the same spread every time). Rule 1 does nothing to the funnel, so its result is just x<sub>k</sub> = e<sub>k</sub>. Working through what each rule does to the funnel's position gives a one-line recursion for the others:</p>
+    <div class="formula">Rule 1: x<sub>k</sub> = e<sub>k</sub> &nbsp;&nbsp; Rule 2: x<sub>k</sub> = e<sub>k</sub> &minus; e<sub>k&minus;1</sub> &nbsp;&nbsp; Rule 3: x<sub>k</sub> = e<sub>k</sub> &minus; x<sub>k&minus;1</sub> &nbsp;&nbsp; Rule 4: x<sub>k</sub> = x<sub>k&minus;1</sub> + e<sub>k</sub>
+      <span class="where">Rule 2's funnel position after drop k&minus;1 is &minus;e<sub>k&minus;1</sub> (it moved the full miss in the opposite direction), so the next drop lands at e<sub>k</sub> plus that offset. Rule 3 resets from the target every time, so the position is always the mirror of the previous drop. Rule 4's position is just the previous landing spot, so x is a running total of every e so far: a random walk.</span>
+    </div>
+    <p>Applying that to the first five simulated drops (&sigma; = 5.0 mm) shows the four rules already pulling apart:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 7. First five simulated drops under each rule, mm from target (constructed simulation, &sigma; = 5.0 mm).</caption>
+        <thead><tr><th>Drop</th><th>Rule 1 (= e)</th><th>Rule 2</th><th>Rule 3</th><th>Rule 4</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule1.x.0" data-dp="3">0.006</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule2.x.0" data-dp="3">0.006</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule3.x.0" data-dp="3">0.006</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule4.x.0" data-dp="3">0.006</span></td></tr>
+          <tr><td>2</td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule1.x.1" data-dp="3">1.494</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule2.x.1" data-dp="3">1.488</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule3.x.1" data-dp="3">1.488</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule4.x.1" data-dp="3">1.500</span></td></tr>
+          <tr><td>3</td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule1.x.2" data-dp="3">-1.371</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule2.x.2" data-dp="3">-2.865</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule3.x.2" data-dp="3">-2.859</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule4.x.2" data-dp="3">0.129</span></td></tr>
+          <tr><td>4</td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule1.x.3" data-dp="3">-4.453</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule2.x.3" data-dp="3">-3.082</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule3.x.3" data-dp="3">-1.594</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule4.x.3" data-dp="3">-4.324</span></td></tr>
+          <tr><td>5</td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule1.x.4" data-dp="3">-2.273</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule2.x.4" data-dp="3">2.180</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule3.x.4" data-dp="3">-0.679</span></td><td class="num"><span data-ex="m02-funnel" data-key="rules.rule4.x.4" data-dp="3">-6.597</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Because e<sub>k</sub> and e<sub>k&minus;1</sub> are independent, Rule 2's variance is Var(e<sub>k</sub>) + Var(e<sub>k&minus;1</sub>) = 2&sigma;&sup2;, exactly double Rule 1's &sigma;&sup2;, for every drop from the second on. Rules 3 and 4 do not have a fixed variance at all: working through the recursion, Var(x<sub>k</sub>) = k&sigma;&sup2;, growing without bound as more drops accumulate. That is not a property of any particular random numbers; it follows from the recursion whatever the noise turns out to be.</p>
+
+    <figure>
+      <svg viewBox="0 0 900 460" role="img" aria-labelledby="fig2-t fig2-d">
+        <title id="fig2-t">One hundred simulated drops under each of the four funnel rules</title>
+        <desc id="fig2-d">Four line charts on the same vertical scale, minus 100 to plus 100 millimetres from the target, plotted against drop number 1 to 100. Rule 1 stays a tight, flat band close to zero. Rule 2 is a slightly wider flat band, still close to zero. Rule 3 oscillates back and forth with visibly increasing amplitude as the drops proceed. Rule 4 wanders steadily downward, away from the target, and does not return.</desc>
+        <g class="chart-text"><text x="450" y="16" text-anchor="middle" class="chart-title">Position, mm from target (same scale, all four panels)</text></g>
+        <g font-size="12">
+          <g class="chart-text"><text x="190" y="42" text-anchor="middle">Rule 1: fixed funnel</text><text x="530" y="42" text-anchor="middle">Rule 2: adjust from last position</text><text x="190" y="282" text-anchor="middle">Rule 3: adjust from target</text><text x="530" y="282" text-anchor="middle">Rule 4: chase the last drop</text></g>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1" opacity="0.6">
+          <rect x="40" y="30" width="300" height="170"/><rect x="380" y="30" width="300" height="170"/><rect x="40" y="270" width="300" height="170"/><rect x="380" y="270" width="300" height="170"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1" stroke-dasharray="3 3">
+          <path d="M40 115 H340"/><path d="M380 115 H680"/><path d="M40 355 H340"/><path d="M380 355 H680"/>
+        </g>
+        <g class="chart-text small muted">
+          <text x="36" y="118" text-anchor="end">0</text><text x="376" y="118" text-anchor="end">0</text><text x="36" y="358" text-anchor="end">0</text><text x="376" y="358" text-anchor="end">0</text>
+        </g>
+        <g fill="none" class="chart-curve" stroke-width="1.3">
+          <polyline points="40.0,115.0 43.0,113.7 46.1,116.2 49.1,118.8 52.1,116.9 55.2,119.2 58.2,114.7 61.2,109.3 64.2,117.1 67.3,117.6 70.3,112.9 73.3,113.5 76.4,114.6 79.4,119.0 82.4,115.1 85.5,112.0 88.5,120.7 91.5,116.9 94.5,123.1 97.6,120.5 100.6,122.8 103.6,116.0 106.7,120.4 109.7,113.8 112.7,114.3 115.8,115.8 118.8,125.7 121.8,117.3 124.8,115.2 127.9,114.5 130.9,121.5 133.9,117.0 137.0,119.2 140.0,118.4 143.0,110.5 146.1,118.4 149.1,115.1 152.1,111.2 155.2,117.5 158.2,115.5 161.2,114.5 164.2,114.7 167.3,120.2 170.3,114.7 173.3,109.2 176.4,121.6 179.4,111.3 182.4,114.5 185.5,117.7 188.5,106.5 191.5,111.8 194.5,120.1 197.6,114.7 200.6,112.5 203.6,115.8 206.7,112.1 209.7,115.3 212.7,112.2 215.8,108.9 218.8,117.9 221.8,114.1 224.8,117.0 227.9,114.5 230.9,120.0 233.9,117.5 237.0,115.8 240.0,111.2 243.0,110.1 246.1,120.6 249.1,118.4 252.1,112.3 255.2,123.5 258.2,117.0 261.2,115.4 264.2,109.7 267.3,112.1 270.3,116.4 273.3,116.6 276.4,116.1 279.4,108.5 282.4,116.8 285.5,116.3 288.5,113.5 291.5,115.5 294.5,115.8 297.6,119.7 300.6,115.0 303.6,116.9 306.7,110.0 309.7,112.2 312.7,115.1 315.8,112.2 318.8,116.4 321.8,110.5 324.8,115.0 327.9,112.5 330.9,120.5 333.9,113.5 337.0,122.2 340.0,123.7"/>
+          <polyline points="380.0,115.0 383.0,113.7 386.1,117.4 389.1,117.6 392.1,113.1 395.2,117.3 398.2,110.5 401.2,109.6 404.2,122.8 407.3,115.5 410.3,110.3 413.3,115.6 416.4,116.1 419.4,119.4 422.4,111.2 425.5,111.9 428.5,123.7 431.5,111.2 434.5,121.1 437.6,112.4 440.6,117.3 443.6,108.2 446.7,119.4 449.7,108.5 452.7,115.5 455.8,116.5 458.8,124.9 461.8,106.6 464.8,112.9 467.9,114.3 470.9,122.0 473.9,110.5 477.0,117.1 480.0,114.3 483.0,107.1 486.1,122.9 489.1,111.7 492.1,111.1 495.2,121.2 498.2,113.0 501.2,114.1 504.2,115.2 507.3,120.5 510.3,109.5 513.3,109.5 516.4,127.4 519.4,104.8 522.4,118.1 525.5,118.2 528.5,103.8 531.5,120.3 534.5,123.3 537.6,109.6 540.6,112.9 543.6,118.3 546.7,111.3 549.7,118.2 552.7,111.9 555.8,111.7 558.8,124.0 561.8,111.3 564.8,117.8 567.9,112.5 570.9,120.6 573.9,112.4 577.0,113.4 580.0,110.3 583.0,114.0 586.1,125.5 589.1,112.8 592.1,108.9 595.2,126.2 598.2,108.5 601.2,113.4 604.2,109.2 607.3,117.4 610.3,119.3 613.3,115.2 616.4,114.5 619.4,107.5 622.4,123.3 625.5,114.5 628.5,112.2 631.5,117.0 634.5,115.3 637.6,118.9 640.6,110.3 643.6,116.8 646.7,108.2 649.7,117.2 652.7,117.9 655.8,112.1 658.8,119.3 661.8,109.1 664.8,119.5 667.9,112.5 670.9,123.0 673.9,108.0 677.0,123.6 680.0,116.5"/>
+        </g>
+        <g fill="none" class="chart-curve bad" stroke-width="1.3">
+          <polyline points="40.0,355.0 43.0,353.7 46.1,357.4 49.1,356.4 52.1,355.6 55.2,358.6 58.2,351.1 61.2,353.2 64.2,358.9 67.3,353.7 70.3,354.2 73.3,354.3 76.4,355.2 79.4,358.7 82.4,351.4 85.5,355.6 88.5,360.1 91.5,351.9 94.5,366.2 97.6,349.3 100.6,368.6 103.6,342.4 106.7,373.0 109.7,335.9 112.7,373.4 115.8,337.4 118.8,383.3 121.8,328.9 124.8,381.3 127.9,328.3 130.9,388.2 133.9,323.8 137.0,390.4 140.0,323.1 143.0,382.4 146.1,331.0 149.1,379.1 152.1,327.1 155.2,385.4 158.2,325.1 161.2,384.4 164.2,325.3 167.3,389.9 170.3,319.8 173.3,384.5 176.4,332.1 179.4,374.2 182.4,335.3 185.5,377.5 188.5,324.0 191.5,382.7 194.5,332.4 197.6,377.3 200.6,330.2 203.6,380.6 206.7,326.5 209.7,383.7 212.7,323.4 215.8,380.5 218.8,332.4 221.8,376.7 224.8,335.2 227.9,374.2 230.9,340.8 233.9,371.6 237.0,339.2 240.0,367.0 243.0,338.1 246.1,377.5 249.1,335.9 252.1,371.4 255.2,347.1 258.2,364.9 261.2,345.6 264.2,359.1 267.3,348.0 270.3,363.4 273.3,348.1 276.4,362.9 279.4,340.6 282.4,371.2 285.5,340.1 288.5,368.4 291.5,342.1 294.5,368.7 297.6,346.0 300.6,364.1 303.6,347.8 306.7,357.2 309.7,350.0 312.7,360.1 315.8,347.1 318.8,364.4 321.8,341.1 324.8,368.9 327.9,338.6 330.9,376.8 333.9,331.7 337.0,385.5 340.0,333.2"/>
+          <polyline points="380.0,355.0 383.0,353.7 386.1,354.9 389.1,358.7 392.1,360.6 395.2,364.8 398.2,364.6 401.2,358.9 404.2,361.0 407.3,363.6 410.3,361.5 413.3,360.0 416.4,359.6 419.4,363.5 422.4,363.6 425.5,360.7 428.5,366.4 431.5,368.3 434.5,376.4 437.6,381.9 440.6,389.7 443.6,390.7 446.7,396.1 449.7,395.0 452.7,394.3 455.8,395.1 458.8,405.8 461.8,408.1 464.8,408.3 467.9,407.8 470.9,414.3 473.9,416.3 477.0,420.5 480.0,423.9 483.0,419.4 486.1,422.8 489.1,423.0 492.1,419.2 495.2,421.7 498.2,422.2 501.2,421.7 504.2,421.4 507.3,426.6 510.3,426.3 513.3,420.5 516.4,427.1 519.4,423.5 522.4,423.0 525.5,425.7 528.5,417.2 531.5,414.0 534.5,419.0 537.6,418.7 540.6,416.3 543.6,417.1 546.7,414.2 549.7,414.5 552.7,411.6 555.8,405.5 558.8,408.4 561.8,407.5 564.8,409.5 567.9,408.9 570.9,414.0 573.9,416.5 577.0,417.3 580.0,413.5 583.0,408.6 586.1,414.2 589.1,417.6 592.1,414.9 595.2,423.3 598.2,425.3 601.2,425.7 604.2,420.4 607.3,417.4 610.3,418.8 613.3,420.4 616.4,421.5 619.4,415.0 622.4,416.8 625.5,418.1 628.5,416.6 631.5,417.1 634.5,417.9 637.6,422.7 640.6,422.7 643.6,424.6 646.7,419.7 649.7,416.9 652.7,417.0 655.8,414.1 658.8,415.6 661.8,411.1 664.8,411.1 667.9,408.7 670.9,414.1 673.9,412.7 677.0,419.8 680.0,428.5"/>
+        </g>
+        <g class="chart-text small muted"><text x="190" y="450" text-anchor="middle">Drop 1 &#8594; 100</text><text x="530" y="450" text-anchor="middle">Drop 1 &#8594; 100</text></g>
+      </svg>
+      <figcaption>Figure 2. One simulated 100-drop run under each rule (&sigma; = 5.0 mm), all four panels on the same &minus;100 to +100 mm scale. Rule 1 and Rule 2 stay in a tight band near the target. Rule 3 swings back and forth with growing amplitude. Rule 4 drifts away and never returns, ending this run about 86 mm from the target.</figcaption>
+    </figure>
+
+    <p>Over this single run, Rule 1's variance was <span data-ex="m02-funnel" data-key="rules.rule1.var_all" data-dp="2">19.35</span> mm&sup2; and Rule 2's was <span data-ex="m02-funnel" data-key="rules.rule2.var_all" data-dp="2">36.94</span> mm&sup2;, a ratio of about 1.9, close to the exact theoretical value of 2 (both rules are stable, so a single 100-drop run estimates their variance reasonably well). Rules 3 and 4 are a different matter: because their variance keeps growing, no single number describes "the" variance of a random walk, and one 100-drop path is too noisy to read a growth rate off directly &mdash; by chance, this particular run ended with Rule 3 at <span data-ex="m02-funnel" data-key="rules.rule3.x.99" data-dp="2">25.69</span> mm and Rule 4 at <span data-ex="m02-funnel" data-key="rules.rule4.x.99" data-dp="2">-86.46</span> mm, but a different run could easily end somewhere else entirely. To check the k&sigma;&sup2; growth claim properly, the course ran 150 independent repeats of a shorter, 40-drop experiment and averaged the squared position at two drop numbers across all 150 repeats, which is a proper estimate of the variance at that drop, unlike a single path's own spread.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 8. Mean square distance from target (mm&sup2;), averaged over 150 independent simulated repeats, &sigma; = 5.0 mm.</caption>
+        <thead><tr><th>Rule</th><th>At drop 8 (observed)</th><th>At drop 8 (theory)</th><th>At drop 40 (observed)</th><th>At drop 40 (theory)</th></tr></thead>
+        <tbody>
+          <tr><td>1: fixed</td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule1.meansq_at_8" data-dp="2">25.64</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule1.theory_at_8" data-dp="2">25.00</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule1.meansq_at_40" data-dp="2">24.85</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule1.theory_at_40" data-dp="2">25.00</span></td></tr>
+          <tr><td>2: adjust from last position</td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule2.meansq_at_8" data-dp="2">45.03</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule2.theory_at_8" data-dp="2">50.00</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule2.meansq_at_40" data-dp="2">50.35</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule2.theory_at_40" data-dp="2">50.00</span></td></tr>
+          <tr><td>3: adjust from target</td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule3.meansq_at_8" data-dp="1">168.9</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule3.theory_at_8" data-dp="1">200.0</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule3.meansq_at_40" data-dp="1">775.5</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule3.theory_at_40" data-dp="1">1000.0</span></td></tr>
+          <tr><td>4: chase the last drop</td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule4.meansq_at_8" data-dp="1">221.9</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule4.theory_at_8" data-dp="1">200.0</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule4.meansq_at_40" data-dp="1">1122.7</span></td><td class="num"><span data-ex="m02-funnel-growth" data-key="growth.rule4.theory_at_40" data-dp="1">1000.0</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Rules 1 and 2 barely move between drop 8 and drop 40, as a stable, constant variance predicts. Rules 3 and 4 both grow by roughly the fivefold factor the theory predicts (drop 40 is five times drop 8), confirming that this is not an artefact of one unlucky run but the behaviour the recursion guarantees. The practical reading: a stable process left alone (Rule 1) does about as well as physically possible. Compensating from the machine's current position (Rule 2) doubles the variance but at least stays bounded, which is why habitually "nudging" a machine after every part is merely twice as bad, not catastrophic. Resetting the correction from a fixed reference every time (Rule 3) or chasing the last result (Rule 4) both make a process actively unstable, with no ceiling on how far it can wander. Every one of Rules 2 through 4 starts from a supervisor or operator who saw one data point off target and corrected for it. The process was never broken; the correction broke it.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Drawing a SIPOC or a process map from memory, at a desk.</strong> Consequence: the map shows how the process is supposed to work, and the project scopes around a version of the process that does not exist. Fix: walk the floor, watch the actual steps, and confirm the map with the people doing the work.</li>
+      <li><strong>Treating a process map and a value stream map as the same tool.</strong> Consequence: a process map with more boxes on it gets mistaken for a VSM, and the project never finds out where the time actually goes. Fix: a VSM is not "more detail," it is time and inventory attached to the boxes; without those two numbers it is still just a process map.</li>
+      <li><strong>Measuring cycle time only, and skipping inventory.</strong> Consequence: a step that takes 20 seconds looks fast, while 100 pieces sit in front of it for two days; the project "improves" the 20 seconds and lead time barely moves. Fix: count the piles, not just the stopwatch.</li>
+      <li><strong>Reacting to every part that misses the target.</strong> Consequence: Rules 2 through 4 of the funnel experiment, applied on the shop floor: variance goes up, sometimes without bound. Fix: ask whether this one part is common cause (leave the setting alone) or special cause (find out what changed) before touching the machine; Modules 16 and 17 build the chart that answers this reliably.</li>
+      <li><strong>Ranking, rewarding or disciplining people by a stable system's output.</strong> Consequence: the red bead lesson, applied to real people: the "best" and "worst" performer this month are often just the top and bottom of the same distribution, and rewarding or punishing them teaches nothing and wastes goodwill. Fix: look at whether performance varies more than the system's own common-cause spread before treating an individual result as meaningful.</li>
+      <li><strong>Calling every kind of waste "inefficiency."</strong> Consequence: the fix stays vague ("be more efficient") instead of pointing at inventory, motion, over-processing or one of the other named wastes, each of which has a specific, different fix. Fix: name the waste from Table 2 before proposing a solution.</li>
+      <li><strong>Assuming a process with zero defects has no waste.</strong> Consequence: a line that never ships a bad part can still have a process cycle efficiency under 1&#8201;%, as in Worked example 2, and nobody notices because the defect count looks fine. Fix: compute PCE; it measures something a pass/fail inspection cannot see.</li>
+      <li><strong>Skipping straight to a capability study or a control chart before the process is even mapped.</strong> Consequence: a statistically correct Cpk on a step that is not the constraint, computed on data pulled from a database instead of walked and understood. Fix: SIPOC, then a map with time and inventory, then decide which step is worth the statistical tools in Modules 4 onward.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: a second value stream map</h3>
+    <p class="example-label">Constructed data, not a real production line. Setting: a 3-step assembly and test cell (sub-assembly, final assembly, function test), one shift, demand 600 pieces a day, 25,200 seconds of operating time available.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Exercise 1 data. Cycle times and inventory, assembly and test cell (constructed data).</caption>
+        <thead><tr><th>Process step</th><th>Cycle time (s)</th></tr></thead>
+        <tbody>
+          <tr><td>Sub-assembly</td><td class="num">25</td></tr>
+          <tr><td>Final assembly</td><td class="num">35</td></tr>
+          <tr><td>Function test</td><td class="num">18</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Inventory point</th><th>Pieces</th></tr></thead>
+        <tbody>
+          <tr><td>Component kits</td><td class="num">500</td></tr>
+          <tr><td>WIP: sub-assembly to final</td><td class="num">120</td></tr>
+          <tr><td>WIP: final to test</td><td class="num">80</td></tr>
+          <tr><td>Finished goods</td><td class="num">250</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute the takt time. (b) Compute the inventory time at each of the four points, in days. (c) Compute the total lead time and the total cycle time. (d) Compute the process cycle efficiency. (e) Is any process step's cycle time above takt? What would that mean if it were?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Takt = 25,200 / 600 = <span data-ex="m02-ex1-vsm" data-key="takt_s" data-dp="1">42.0</span> s per piece.</p>
+      <p><strong>(b)</strong> Component kits: 500 / 600 = <span data-ex="m02-ex1-vsm" data-key="inventory.0.days" data-dp="4">0.8333</span> days. Sub-assembly&rarr;final WIP: 120 / 600 = <span data-ex="m02-ex1-vsm" data-key="inventory.1.days" data-dp="3">0.200</span> days. Final&rarr;test WIP: 80 / 600 = <span data-ex="m02-ex1-vsm" data-key="inventory.2.days" data-dp="4">0.1333</span> days. Finished goods: 250 / 600 = <span data-ex="m02-ex1-vsm" data-key="inventory.3.days" data-dp="4">0.4167</span> days.</p>
+      <p><strong>(c)</strong> Total inventory time = <span data-ex="m02-ex1-vsm" data-key="total_inventory_days" data-dp="4">1.5833</span> days. Total cycle time = 25 + 35 + 18 = <span data-ex="m02-ex1-vsm" data-key="total_ct_s" data-dp="0">78</span> s = <span data-ex="m02-ex1-vsm" data-key="total_ct_days" data-dp="6">0.003095</span> days. Total lead time = <span data-ex="m02-ex1-vsm" data-key="total_lead_time_days" data-dp="4">1.5864</span> days.</p>
+      <p><strong>(d)</strong> PCE = 0.003095 / 1.5864 &times; 100&#8201;% = <span data-ex="m02-ex1-vsm" data-key="pce_pct" data-dp="3">0.195</span> %.</p>
+      <p><strong>(e)</strong> No: 25, 35 and 18 s are all below the 42.0 s takt. If a step's cycle time were above takt, that step could not keep up with customer demand even running continuously, and it would be the line's constraint; the fix would start there, not at whichever step happens to look busiest.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a funnel run under Rules 1 and 2</h3>
+    <p class="example-label">Constructed simulation, &sigma; = 4.0 mm, not a transcription of a real demonstration.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>Exercise 2 data. First 8 simulated drops, marble scatter e (mm from target) if the funnel were never moved.</caption>
+        <thead><tr><th>Drop</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+        <tbody><tr><td>e (mm)</td><td>&minus;1.480</td><td>3.976</td><td>1.663</td><td>&minus;2.473</td><td>2.689</td><td>&minus;5.800</td><td>2.374</td><td>&minus;2.247</td></tr></tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Under Rule 1, x<sub>k</sub> = e<sub>k</sub>. Write down x<sub>1</sub> through x<sub>4</sub>. (b) Under Rule 2, x<sub>k</sub> = e<sub>k</sub> &minus; e<sub>k&minus;1</sub> for k &ge; 2, and x<sub>1</sub> = e<sub>1</sub>. Compute x<sub>1</sub> through x<sub>4</sub>. (c) Over the full 30-drop run (not just these 8 points), the sample variance came out to <span data-ex="m02-ex2-funnel" data-key="rules.rule1.var_all" data-dp="2">12.70</span> mm&sup2; for Rule 1. What would you predict for Rule 2's variance, and why?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x<sub>1</sub> = <span data-ex="m02-ex2-funnel" data-key="rules.rule1.x.0" data-dp="3">-1.480</span>, x<sub>2</sub> = <span data-ex="m02-ex2-funnel" data-key="rules.rule1.x.1" data-dp="3">3.976</span>, x<sub>3</sub> = <span data-ex="m02-ex2-funnel" data-key="rules.rule1.x.2" data-dp="3">1.663</span>, x<sub>4</sub> = <span data-ex="m02-ex2-funnel" data-key="rules.rule1.x.3" data-dp="3">-2.473</span> (Rule 1 just reproduces e).</p>
+      <p><strong>(b)</strong> x<sub>1</sub> = e<sub>1</sub> = <span data-ex="m02-ex2-funnel" data-key="rules.rule2.x.0" data-dp="3">-1.480</span>. x<sub>2</sub> = e<sub>2</sub> &minus; e<sub>1</sub> = 3.976 &minus; (&minus;1.480) = <span data-ex="m02-ex2-funnel" data-key="rules.rule2.x.1" data-dp="3">5.456</span>. x<sub>3</sub> = e<sub>3</sub> &minus; e<sub>2</sub> = 1.663 &minus; 3.976 = <span data-ex="m02-ex2-funnel" data-key="rules.rule2.x.2" data-dp="3">-2.313</span>. x<sub>4</sub> = e<sub>4</sub> &minus; e<sub>3</sub> = &minus;2.473 &minus; 1.663 = <span data-ex="m02-ex2-funnel" data-key="rules.rule2.x.3" data-dp="3">-4.136</span>.</p>
+      <p><strong>(c)</strong> Because Rule 2's variance is exactly double Rule 1's (each x<sub>k</sub> is the difference of two independent noise terms, each contributing its own variance), the prediction is about 2 &times; 12.70 &asymp; 25.4 mm&sup2;. The value actually computed for the full 30-drop run was <span data-ex="m02-ex2-funnel" data-key="rules.rule2.var_all" data-dp="2">26.36</span> mm&sup2;, a ratio of about 2.1 &mdash; close to the theoretical 2, with the small difference being ordinary sampling noise from using only 30 drops.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="02">
+      <fieldset class="q" data-answer="c">
+        <legend>1. A SIPOC diagram is best used to</legend>
+        <label><input type="radio" name="q1" value="a"> replace a detailed process map</label>
+        <label><input type="radio" name="q1" value="b"> compute a capability index</label>
+        <label><input type="radio" name="q1" value="c"> set the boundary and high-level scope of a process before mapping detail</label>
+        <label><input type="radio" name="q1" value="d"> record control chart limits</label>
+        <p class="explain" hidden>SIPOC is deliberately coarse: four to eight steps, used for scoping, not detailed process documentation.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. In a value stream map, the days of inventory at a point are computed as</legend>
+        <label><input type="radio" name="q2" value="a"> pieces waiting &times; cycle time in seconds</label>
+        <label><input type="radio" name="q2" value="b"> pieces waiting / customer demand per day</label>
+        <label><input type="radio" name="q2" value="c"> cycle time / takt time</label>
+        <label><input type="radio" name="q2" value="d"> customer demand per day / pieces waiting</label>
+        <p class="explain" hidden>Inventory time is the pile of parts expressed as days of customer demand it represents.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="0.148" data-tolerance="0.01">
+        <legend>3. A cell's total cycle time is 0.0057 days and its total lead time is 3.8807 days. What is the process cycle efficiency, in percent (to three decimals)?</legend>
+        <input type="number" name="q3" step="any">
+        <p class="explain" hidden>PCE = 0.0057 / 3.8807 &times; 100 % &asymp; 0.148 %, as in Worked example 2.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. Ohno's seven wastes plus Liker's eighth waste (unused employee skill) are, together,</legend>
+        <label><input type="radio" name="q4" value="a"> all attributed to Ohno</label>
+        <label><input type="radio" name="q4" value="b"> a list found only in the AIAG PPAP manual</label>
+        <label><input type="radio" name="q4" value="c"> the same list as the seven basic quality tools</label>
+        <label><input type="radio" name="q4" value="d"> seven from Ohno's Toyota Production System, plus one added later by Liker</label>
+        <p class="explain" hidden>The eighth waste is Liker's addition in The Toyota Way, not part of Ohno's original list.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>5. Common cause variation is best described as</legend>
+        <label><input type="radio" name="q5" value="a"> the routine scatter built into how the process currently runs, present in every unit</label>
+        <label><input type="radio" name="q5" value="b"> a defect caused by one operator's mistake</label>
+        <label><input type="radio" name="q5" value="c"> variation that only appears after a tool change</label>
+        <label><input type="radio" name="q5" value="d"> variation too small to matter</label>
+        <p class="explain" hidden>Common cause is the system's routine behaviour; special cause is a specific, findable, local change.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. In the red bead experiment, the spread in red-bead counts from one worker's draw to another is mainly explained by</legend>
+        <label><input type="radio" name="q6" value="a"> differences in worker skill</label>
+        <label><input type="radio" name="q6" value="b"> differences in effort between rounds</label>
+        <label><input type="radio" name="q6" value="c"> ordinary sampling variation from a fixed mix and paddle, the same for every worker</label>
+        <label><input type="radio" name="q6" value="d"> a special cause that appears every fourth round</label>
+        <p class="explain" hidden>Every worker draws from the identical system; the spread from 6 to 16 beads is what Binomial(50, 0.20) produces by chance.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>7. In the funnel experiment, Rule 2 (move the funnel from its last position, opposite to the last miss) produces, compared with Rule 1 (never move the funnel),</legend>
+        <label><input type="radio" name="q7" value="a"> the same variance</label>
+        <label><input type="radio" name="q7" value="b"> exactly double the variance, but still a stable, bounded process</label>
+        <label><input type="radio" name="q7" value="c"> a variance that grows without bound</label>
+        <label><input type="radio" name="q7" value="d"> less variance, because it corrects errors</label>
+        <p class="explain" hidden>x_k = e_k - e_(k-1) for Rule 2: the sum of two independent noise variances, exactly 2 sigma-squared, but still constant over time (not growing).</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>8. The funnel experiment's Rule 4 (move the funnel to sit over the last drop) produces a process whose</legend>
+        <label><input type="radio" name="q8" value="a"> variance is zero</label>
+        <label><input type="radio" name="q8" value="b"> variance is constant and equal to Rule 1's</label>
+        <label><input type="radio" name="q8" value="c"> position oscillates with growing amplitude around the target</label>
+        <label><input type="radio" name="q8" value="d"> position is a random walk that drifts away from the target without returning</label>
+        <p class="explain" hidden>Rule 4's x is a running sum of the noise terms, a genuine random walk, with variance growing in proportion to the number of drops.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>9. A machine operator sees one part measure slightly outside nominal and immediately adjusts the machine's offset before making the next part. Absent other evidence, this is closest to</legend>
+        <label><input type="radio" name="q9" value="a"> tampering: reacting to what may be ordinary common cause variation, which typically increases variation</label>
+        <label><input type="radio" name="q9" value="b"> correct practice, since the part was outside nominal</label>
+        <label><input type="radio" name="q9" value="c"> irrelevant, since only specification limits matter</label>
+        <label><input type="radio" name="q9" value="d"> evidence of a special cause requiring a root-cause investigation</label>
+        <p class="explain" hidden>One point off nominal, by itself, does not distinguish common from special cause; adjusting on every such point is exactly Rules 2 to 4 of the funnel experiment.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>10. A process ships zero defective parts but has a process cycle efficiency of 0.15&#8201;%. The correct conclusion is</legend>
+        <label><input type="radio" name="q10" value="a"> the process needs no improvement, since nothing fails inspection</label>
+        <label><input type="radio" name="q10" value="b"> the PCE figure must be a calculation error</label>
+        <label><input type="radio" name="q10" value="c"> parts spend almost all their time waiting rather than being worked on, a form of waste a defect count cannot show</label>
+        <label><input type="radio" name="q10" value="d"> the takt time is too short</label>
+        <p class="explain" hidden>Worked example 2: a zero-defect process can still have almost all of its lead time made up of inventory (waiting), which PCE reveals and a pass/fail inspection does not.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. Scope and boundary, before detailed mapping.</li>
+        <li>b. Pieces waiting divided by daily demand.</li>
+        <li>About 0.148 %.</li>
+        <li>d. Seven from Ohno, one added later by Liker.</li>
+        <li>a. Routine, system-wide scatter.</li>
+        <li>c. Ordinary sampling variation from an identical system.</li>
+        <li>b. Exactly double, still bounded.</li>
+        <li>d. A random walk that drifts away.</li>
+        <li>a. Tampering.</li>
+        <li>c. Almost all time is waiting, not value-add.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>A SIPOC diagram (Suppliers, Inputs, Process, Outputs, Customers) sets a project's boundary in four to eight process steps; it is a scoping tool, not a process map.</li>
+      <li>A value stream map attaches cycle time and inventory to each step, and converts them into lead time and process cycle efficiency; a zero-defect process can still spend well under 1&#8201;% of its lead time adding value.</li>
+      <li>Ohno named seven wastes (overproduction, waiting, conveyance, processing, inventory, motion, correction); Liker later added an eighth, unused employee skill. Naming the specific waste points at the specific fix.</li>
+      <li>Common cause variation is built into the system and present in every unit; only changing the system reduces it. Special cause variation is a specific, findable, local change, usually fixable by the person closest to the process.</li>
+      <li>The red bead experiment: when every worker draws from the identical system, the spread in their results is ordinary sampling variation, not a difference in skill or effort. Ranking people on it is a mistake.</li>
+      <li>The funnel experiment: reacting to a single data point (tampering) never helps. Adjusting from the machine's current position roughly doubles variance but stays stable; resetting from a fixed reference or chasing the last result both make the process actively unstable, with variance that grows without bound.</li>
+      <li>None of this needed a control chart. Modules 16 and 17 give you the chart that tells common cause from special cause with arithmetic; this module is the judgment that comes before it.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown.</p>
+    <ol class="references">
+      <li id="ref-1">Best, M., &amp; Neuhauser, D. (2006). Walter A Shewhart, 1924, and the Hawthorne factory. <em>Quality and Safety in Health Care</em>, 15(2), 142&ndash;143. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2464836/">https://pmc.ncbi.nlm.nih.gov/articles/PMC2464836/</a></li>
+      <li id="ref-2">Lean Enterprise Institute. Lexicon: "Seven wastes." <a href="https://www.lean.org/lexicon-terms/seven-wastes/">https://www.lean.org/lexicon-terms/seven-wastes/</a></li>
+      <li id="ref-3">Ohno, T. (1988). <em>Toyota Production System: Beyond Large-Scale Production</em>. Productivity Press. <a href="https://books.google.com/books/about/Toyota_Production_System.html?id=QebEDwAAQBAJ">https://books.google.com/books/about/Toyota_Production_System.html?id=QebEDwAAQBAJ</a></li>
+      <li id="ref-4">Liker, J. K. (2004). <em>The Toyota Way</em>. McGraw-Hill. <a href="https://books.google.com/books/about/The_Toyota_Way.html?id=eZutzPww02EC">https://books.google.com/books/about/The_Toyota_Way.html?id=eZutzPww02EC</a> <span class="tag">(secondary: catalogue-level; the eighth-waste attribution is cited from the book's description, not a full reading)</span></li>
+      <li id="ref-5">Womack, J. P., &amp; Jones, D. T. (1996). <em>Lean Thinking</em>. Simon &amp; Schuster. <a href="https://www.lean.org/the-lean-post/articles/lean-thinking-a-look-back-and-a-look-forward/">https://www.lean.org/the-lean-post/articles/lean-thinking-a-look-back-and-a-look-forward/</a> <span class="tag">(secondary: catalogue-level; cited for the term "value stream")</span></li>
+      <li id="ref-6">Lean Enterprise Institute. Lexicon: "Value-stream mapping." <a href="https://www.lean.org/lexicon-terms/value-stream-mapping/">https://www.lean.org/lexicon-terms/value-stream-mapping/</a></li>
+      <li id="ref-7">Rother, M., &amp; Shook, J. (1999). <em>Learning to See</em>. Lean Enterprise Institute. <a href="https://www.lean.org/lexicon-terms/value-stream-mapping/">https://www.lean.org/lexicon-terms/value-stream-mapping/</a> <span class="tag">(secondary: catalogue-level; the method is described via [6], which confirms this book introduced it)</span></li>
+      <li id="ref-8">Deming, W. E. (1975). On probability as a basis for action. <em>The American Statistician</em>, 29(4), 146&ndash;152. <a href="https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf">https://deming.org/wp-content/uploads/2020/06/On-Probability-As-a-Basis-For-Action-1975.pdf</a></li>
+      <li id="ref-9">The W. Edwards Deming Institute. "Red Bead Experiment"; "The Red Bead Experiment with Dr. W. Edwards Deming." <a href="https://deming.org/explore/red-bead-experiment/">https://deming.org/explore/red-bead-experiment/</a> ; <a href="https://deming.org/deming-red-bead-experiment/">https://deming.org/deming-red-bead-experiment/</a> <span class="tag">(the exact box size, colour split, paddle size and headcount are not stated on these pages; Module 2's numbers are the course's own constructed choice, not Deming's documented figures)</span></li>
+      <li id="ref-10">Deming, W. E. (1986). <em>Out of the Crisis</em>. MIT Center for Advanced Engineering Study, p. 327. <a href="https://archive.org/details/outofcrisisquali00demi">https://archive.org/details/outofcrisisquali00demi</a> <span class="tag">(catalogue-level; the page reference is via [11])</span></li>
+      <li id="ref-11">SPC for Excel. "Over-controlling a process: the funnel experiment." <a href="https://www.spcforexcel.com/knowledge/variation/overcontrolling-process-funnel-experiment/">https://www.spcforexcel.com/knowledge/variation/overcontrolling-process-funnel-experiment/</a> <span class="tag">(secondary: a paraphrase of Deming's experiment, not the original)</span></li>
+    </ol>
+    <!-- AUTHOR: optional personal note here (a project scoped on the wrong process boundary, or a "just nudge it back" conversation from your own experience, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

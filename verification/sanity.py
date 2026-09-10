@@ -259,6 +259,50 @@ def check_tests(ex_id, r, kind):
             check(abs(r["ppm_shifted_one_sided"][r["levels"].index(6.0)] - 3.4) < 0.01, f"{tag}: 3.4 PPM at 6 sigma shifted")
         for i, t in enumerate(r.get("ppm_targets", [])):
             check(near(norm_sf(r["z_of_targets"][i]) * 1e6, t, 1e-6), f"{tag}: Z of target {t}")
+    elif kind == "vsm":
+        check(near(r["takt_s"], r["params"]["operating_seconds_per_day"] / r["params"]["daily_demand_pieces"]), f"{tag}: takt formula")
+        check(near(r["total_lead_time_days"], r["total_inventory_days"] + r["total_ct_days"]), f"{tag}: lead time = inventory days + cycle time")
+        check(r["total_lead_time_days"] >= r["total_ct_days"], f"{tag}: lead time below cycle time")
+        check(0 < r["pce_pct"] <= 100, f"{tag}: PCE out of (0, 100] range")
+        check(near(r["pce_pct"], 100 * r["total_ct_days"] / r["total_lead_time_days"]), f"{tag}: PCE formula")
+        check(near(r["lead_time_to_ct_ratio"], 100.0 / r["pce_pct"], 1e-6), f"{tag}: lead time / cycle time ratio vs PCE")
+        check(all(item["days"] >= 0 for item in r["inventory"]), f"{tag}: inventory days non-negative")
+        check(all(s["ct_s"] < r["takt_s"] for s in r["steps"]), f"{tag}: a step's cycle time is not below takt time")
+    elif kind == "funnel":
+        # A single simulated path (used for the trajectory figure). Rules 1
+        # and 2 are stationary, so their variance over the whole path is a
+        # low-noise estimate and is checked against theory tightly. Rules 3
+        # and 4 are random walks: the variance of a *single path's* window is
+        # a high-noise estimate of a quantity that is itself growing, so only
+        # the direction (later more variable than earlier) is checked here;
+        # the magnitude is checked properly, by replication, under
+        # kind "funnel_growth".
+        r1, r2 = r["rules"]["rule1"], r["rules"]["rule2"]
+        for name in ("rule1", "rule2", "rule3", "rule4"):
+            check(r["rules"][name]["var_all"] > 0, f"{tag}: {name} var_all positive")
+        check(0.4 * r1["theory_var"] < r1["meansq_first_w"] < 2.5 * r1["theory_var"], f"{tag}: rule1 first-window mean square far from sigma^2")
+        check(0.4 * r1["theory_var"] < r1["meansq_last_w"] < 2.5 * r1["theory_var"], f"{tag}: rule1 last-window mean square far from sigma^2")
+        ratio = r2["var_all"] / r1["var_all"]
+        check(1.2 < ratio < 3.2, f"{tag}: rule2/rule1 variance ratio {ratio:.2f} far from the theoretical 2")
+        for name in ("rule3", "rule4"):
+            b = r["rules"][name]
+            check(b["meansq_last_w"] > b["meansq_first_w"], f"{tag}: {name} mean square did not grow from the first to the last window")
+            check(b["meansq_last_w"] > r1["meansq_last_w"], f"{tag}: {name} not more variable than rule1 by the end")
+    elif kind == "funnel_growth":
+        # R independent replications, so the mean square at a fixed drop
+        # number k is a proper (low-noise) Monte Carlo estimate of Var(x_k),
+        # comparable to the theoretical k*sigma^2 within a generous factor.
+        g, cps = r["growth"], r["checkpoints"]
+        for name in ("rule1", "rule2", "rule3", "rule4"):
+            for cp in cps:
+                obs, th = g[name][f"meansq_at_{cp}"], g[name][f"theory_at_{cp}"]
+                check(0.5 * th < obs < 2.0 * th, f"{tag}: {name} at drop {cp}: observed {obs:.3f} vs theory {th:.3f}")
+        lo, hi = min(cps), max(cps)
+        for name in ("rule3", "rule4"):
+            check(g[name][f"meansq_at_{hi}"] > g[name][f"meansq_at_{lo}"], f"{tag}: {name} did not grow from drop {lo} to drop {hi}")
+        for name in ("rule1", "rule2"):
+            ratio = g[name][f"meansq_at_{hi}"] / g[name][f"meansq_at_{lo}"]
+            check(0.4 < ratio < 2.5, f"{tag}: {name} should stay roughly flat between checkpoints, ratio {ratio:.2f}")
 
 
 def load_data(ex_id):
