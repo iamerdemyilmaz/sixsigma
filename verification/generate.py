@@ -1539,6 +1539,27 @@ register(id="m10-ex2-fault-tree", module="10", kind="fault_tree",
          params={"tree": _m10_ex2_tree}, columns=None, rows=None)
 
 
+# Worked example 3: verifying a candidate root cause by turning it off and on.
+# The 5 Whys chain ends at a worn fixture locating pin; 20 assemblies are built
+# on the worn fixture and 20 on a re-pinned one, and the braze joint gap is
+# measured on each. Reuses the existing ttest2 kind.
+def _m10_fixture(seed=41, n=20):
+    rng = np.random.default_rng(seed)
+    worn = np.round(rng.normal(0.121, 0.0135, n), 3)
+    repinned = np.round(rng.normal(0.104, 0.0125, n), 3)
+    return worn, repinned
+
+
+_m10worn, _m10new = _m10_fixture()
+register(id="m10-verify-fixture", module="10", kind="ttest2",
+         title="Worked example 3: braze joint gap on the worn and the re-pinned fixture",
+         source="constructed",
+         setting="braze joint gap (mm) on 20 assemblies built on the worn locating pin and 20 built after the pin was replaced, measured on a shadowgraph to 0.001 mm",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "mm"},
+         columns=["group", "x"],
+         rows=[["worn", float(v)] for v in _m10worn] + [["repinned", float(v)] for v in _m10new])
+
+
 # ---------------------------------------------------------------------------
 # Module 12: Correlation and regression (prefix m12-)
 # New kind this module: mregression (multiple linear regression). Simple
@@ -1589,6 +1610,73 @@ register(id="m12-ex1-mreg", module="12", kind="mregression",
          source="constructed", setting="wire-bond pull strength (N) vs bond force (g) and bond time (ms), 20 bonds",
          params={"predictors": ["force", "time"], "alpha": 0.05, "units_y": "N"},
          columns=["force", "time", "y"], rows=[[float(a), float(b), float(c)] for a, b, c in zip(_m12force, _m12time, _m12py)])
+
+
+# Worked example 3: a correlation destroyed by stratification. Two spray
+# nozzles are run at different line speeds and lay down different coating
+# thicknesses. Pooled, thickness rises with line speed; within either nozzle
+# it falls, which is the physically correct direction (less material per unit
+# length at higher speed). A true sign reversal, i.e. Simpson's paradox on
+# continuous data, using the existing `regression` kind three times.
+def _m12_coat(seed=5, slope=-0.6, sd=1.0, n=20):
+    rng = np.random.default_rng(seed)
+    sp_a = rng.uniform(18, 26, n)
+    sp_b = rng.uniform(30, 38, n)
+    t_a = 42.0 + slope * (sp_a - 22) + rng.normal(0, sd, n)
+    t_b = 58.0 + slope * (sp_b - 34) + rng.normal(0, sd, n)
+    return (np.round(sp_a, 1), np.round(t_a, 1), np.round(sp_b, 1), np.round(t_b, 1))
+
+
+_m12spA, _m12tA, _m12spB, _m12tB = _m12_coat()
+register(id="m12-coat-nozzle-a", module="12", kind="regression",
+         title="Worked example 3: coating thickness vs line speed, nozzle A alone",
+         source="constructed",
+         setting="powder coating thickness (um) vs line speed (m/min), 20 panels sprayed through nozzle A",
+         params={"alpha": 0.05, "units_x": "m/min", "units_y": "um"},
+         columns=["x", "y"], rows=[[float(a), float(b)] for a, b in zip(_m12spA, _m12tA)])
+register(id="m12-coat-nozzle-b", module="12", kind="regression",
+         title="Worked example 3: coating thickness vs line speed, nozzle B alone",
+         source="constructed",
+         setting="powder coating thickness (um) vs line speed (m/min), 20 panels sprayed through nozzle B",
+         params={"alpha": 0.05, "units_x": "m/min", "units_y": "um"},
+         columns=["x", "y"], rows=[[float(a), float(b)] for a, b in zip(_m12spB, _m12tB)])
+register(id="m12-coat-pooled", module="12", kind="regression",
+         title="Worked example 3: coating thickness vs line speed, both nozzles pooled",
+         source="constructed",
+         setting="the same 40 panels as m12-coat-nozzle-a and -b, pooled with the nozzle identity discarded",
+         params={"alpha": 0.05, "units_x": "m/min", "units_y": "um"},
+         columns=["x", "y"],
+         rows=[[float(a), float(b)] for a, b in zip(np.concatenate([_m12spA, _m12spB]),
+                                                    np.concatenate([_m12tA, _m12tB]))])
+
+
+# Exercise 2: an r of almost exactly zero over a strong relationship. Adhesive
+# shear strength against cure temperature has an optimum near 150 degC, so the
+# straight line through it is flat and R2 is nearly nothing, while the residual
+# plot is an unmistakable inverted parabola. The quadratic is registered as an
+# mregression on temp and temp^2 so the solution's numbers are computed, not
+# asserted.
+def _m12_cure(seed=10, n=18, peak=150.0, top=24.0, curv=-0.0035, sd=0.55):
+    rng = np.random.default_rng(seed)
+    t = np.sort(rng.uniform(120, 180, n))
+    y = top + curv * (t - peak) ** 2 + rng.normal(0, sd, n)
+    return np.round(t, 0), np.round(y, 2)
+
+
+_m12cT, _m12cY = _m12_cure()
+register(id="m12-ex2-cure", module="12", kind="regression",
+         title="Exercise 2: adhesive shear strength vs cure temperature, straight line fit",
+         source="constructed",
+         setting="lap-shear strength (MPa) of an adhesive joint vs cure temperature (deg C), 18 joints across 120 to 180 deg C",
+         params={"alpha": 0.05, "units_x": "degC", "units_y": "MPa"},
+         columns=["x", "y"], rows=[[float(a), float(b)] for a, b in zip(_m12cT, _m12cY)])
+register(id="m12-ex2-cure-quad", module="12", kind="mregression",
+         title="Exercise 2: the same 18 joints fitted with a quadratic in cure temperature",
+         source="constructed",
+         setting="the same 18 joints as m12-ex2-cure, with cure temperature and its square as the two predictors",
+         params={"predictors": ["temp", "temp_sq"], "alpha": 0.05, "units_y": "MPa"},
+         columns=["temp", "temp_sq", "y"],
+         rows=[[float(a), float(a) ** 2, float(b)] for a, b in zip(_m12cT, _m12cY)])
 
 
 # Module 14: Lean improvement tools (prefix m14-)

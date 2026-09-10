@@ -36,11 +36,11 @@
   var PAGES = [
     { href: "index.html", title: "Course home", key: "index", built: true },
     { href: "calculators.html", title: "Calculators", key: "calculators", built: true },
-    { href: "tables.html", title: "Statistical tables", key: "tables", built: false },
-    { href: "formulas.html", title: "Formula sheet", key: "formulas", built: false },
-    { href: "glossary.html", title: "Glossary", key: "glossary", built: false },
-    { href: "references.html", title: "All references", key: "references", built: false },
-    { href: "about.html", title: "About and licence", key: "about", built: false },
+    { href: "tables.html", title: "Statistical tables", key: "tables", built: true },
+    { href: "formulas.html", title: "Formula sheet", key: "formulas", built: true },
+    { href: "glossary.html", title: "Glossary", key: "glossary", built: true },
+    { href: "references.html", title: "All references", key: "references", built: true },
+    { href: "about.html", title: "About and licence", key: "about", built: true },
     { href: "https://erdemyilmaz.me/", title: "Back to erdemyilmaz.me", key: "home", built: true, external: true }
   ];
 

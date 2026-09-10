@@ -1,0 +1,18 @@
+{
+ "id": "m10-verify-fixture",
+ "module": "10",
+ "kind": "ttest2",
+ "title": "Worked example 3: braze joint gap on the worn and the re-pinned fixture",
+ "source": "constructed",
+ "setting": "braze joint gap (mm) on 20 assemblies built on the worn locating pin and 20 built after the pin was replaced, measured on a shadowgraph to 0.001 mm",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "mm"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 40
+}

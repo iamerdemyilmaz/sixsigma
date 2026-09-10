@@ -218,3 +218,37 @@ Totals on 2026-09-10 (after Module 15, both sessions combined): 158 examples; 4,
 Module 18 needed no new harness kind: "ongoing Cpk trend" reuses the existing `capability` kind as 8 separate monthly registrations, reading off `overall.Ppk_ci95`, which the kind already computes. Module 18's Worked examples 1 and 2 (a control plan row and its reaction plan) redeclare `m07-bore`, `m04-grr-bore`, and `m03-charter-leak` in the page's `<meta name="examples">` list to cite already-verified numbers (Ppk, %GRR, ndc, the charter baseline) rather than computing anything new — a control plan documents existing statistics, it does not generate new ones. This is also explicitly the third of three times this course makes the "control limits are not specification limits" point (Modules 7 and 16 made it first and second), here extended across months via confidence-interval overlap rather than within one chart.
 
 Totals on 2026-09-10 (after Module 18, both sessions combined — the author's full requested list for this session, Modules 3/4/5/6/9/10/12/14/15/18, is now complete): 166 examples; 4,678 quantities agree between Check 1 and Check 2; 9,351 values agree between Check 1 and the JavaScript engines (126 examples with a calculator engine); 1,498 page checks.
+
+## Phase E (2026-09-10): examples added during the verification pass
+
+The Phase E reread found three places where the brief's own structural requirements were not met,
+each of which needed new, verified data rather than only editing. All six new examples were built by
+the same protocol as everything above.
+
+| m12-coat-nozzle-a / -b | 12 | simple regression (existing kind `regression`, three registrations) | powder coating thickness (µm) vs line speed (m/min), 20 panels per spray nozzle: nozzle A slope −0.5202 (r −0.763, p 9.3e-05), nozzle B slope −0.6339 (r −0.895, p 1.0e-07) — both negative, both significant, matching the physics (faster line, less powder per panel) | `m12-coat-nozzle-a.csv`, `m12-coat-nozzle-b.csv` | pass | pass | pass | pass (`Stats.regression`) | 12 |
+| m12-coat-pooled | 12 | simple regression | the same 40 panels with the nozzle identity discarded: slope **+1.0762** (r +0.835, R² 0.697, p 2.1e-11) — a true sign reversal, Simpson's paradox on continuous data, driven entirely by nozzle B running both faster (mean 33.79 vs 22.01 m/min) and thicker (58.09 vs 42.00 µm). Worked example 3, the module's third, which the brief requires and Phase D had left at two | `m12-coat-pooled.csv` | pass | pass | pass | pass | 12 |
+| m12-ex2-cure | 12 | simple regression | adhesive lap-shear strength (MPa) vs cure temperature (°C), 18 joints across 120–180 °C: slope −0.0070, **r = −0.146, R² = 0.0213, p = 0.563** — an r of nearly zero over a strong relationship, because the true response has an interior optimum. Exercise 2, the module's second, which the brief requires and Phase D had left at one | `m12-ex2-cure.csv` | pass | pass | pass | pass | 12 |
+| m12-ex2-cure-quad | 12 | multiple regression (`mregression`, predictors temp and temp²) | the same 18 joints fitted with a quadratic: R² 0.691, adj 0.650, F(2, 15) = 16.79, p 0.000149, s falls from 0.875 to 0.5074 MPa, both terms p ≈ 4e-05; maximum at −b₁/2b₂ = 151.1 °C | `m12-ex2-cure-quad.csv` | pass | pass | pass | pass (`Stats.mregression`) | 12 |
+| m10-verify-fixture | 10 | two-sample t (existing kind `ttest2`) | braze joint gap (mm), 20 assemblies on a worn locating pin vs 20 after replacing it: 0.11915 vs 0.10535 mm, difference 0.0138 mm, t = 3.498 on 38 df, p = 0.0012, 95 % CI 0.00581 to 0.02179 mm, Cohen's d = 1.106, Levene p = 0.411. Worked example 3, the module's third; it also supplies the module's missing discipline, verifying a candidate cause by turning it off and on | `m10-verify-fixture.csv` | pass | pass | pass | pass (`Stats.ttest2`) | 10 |
+
+**Datasets printed that were not printed before.** The brief requires every dataset to be embedded on
+its page so a learner can reproduce the numbers in a spreadsheet. A page-by-page scan found fourteen
+that were computed from but never shown, and they were added as collapsible data tables (the print
+stylesheet expands them, so they survive printing as a handout): `m04-grr-scale` (90 readings),
+`m05-rounding-fine` (80), `m05-ex1-naive`/`-rational` (40), `m09-boxplot-shift1/2/3` (90),
+`m09-ex2-multivari` (27), `m12-mreg-fillet` (24 rows × 4 columns), `m12-ex1-mreg` (20 × 3),
+`m18-month1` to `m18-month5` (150) and `m18-ex2-montha/b/c` (74). Datasets that are printed in the
+module that introduces them and reused later by reference (`m07-bore` in Modules 15 and 18,
+`m01-flatness` in 8 and 17, `m01-anscombe-*` in 9 and 12, `m11-ttest1-torque` from Module 1) were left
+as they are, as were the published NIST and Montgomery check datasets, which are cited to the source
+that holds them, and the Monte Carlo simulations, whose seed and parameters are embedded instead.
+
+**One wrong answer found.** Module 13's quiz question 2 (a 2² design with cell means 12, 14, 13, 20)
+gave the main effect of A as 4.75 with a tolerance of ±0.02. The correct value is
+((14 + 20) − (12 + 13))/2 = 4.5, so a learner who worked it out correctly was marked wrong. Answer,
+explanation and answer key corrected. All 218 quiz questions across the 26 quizzes were then graded in
+the browser with their declared answers and every one scored 100 %.
+
+Totals on 2026-09-10 (after the Phase E pass): 172 examples; 4,829 quantities agree between Check 1
+and Check 2; 9,655 values agree between Check 1 and the JavaScript engines (131 examples with a
+calculator engine); 1,573 page checks.

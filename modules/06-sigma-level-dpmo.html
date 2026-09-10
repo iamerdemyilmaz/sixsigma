@@ -65,12 +65,39 @@
     <p>A "sigma level" is a Z-value: how many standard deviations the nearest specification limit sits from the process mean, under a normal model, read backward from an observed defect rate rather than forward from a measured mean and sigma the way Module 7 computes Cpk. Two numbers are commonly reported, and this course always labels which one is in use.</p>
     <div class="formula">Z (long-term, no shift) = &Phi;<sup>&minus;1</sup>(1 &minus; DPMO / 1,000,000)
       <br>Sigma level (Motorola convention) = Z + 1.5
-      <span class="where">&Phi;<sup>&minus;1</sup> is the inverse standard normal CDF (Module 1). The plain Z is a direct reading of the observed defect rate as a normal tail probability, nothing more. Adding 1.5 is the shift convention explained below; skipping the label on which one a report is quoting is how "we're at four sigma" ends up meaning two different defect rates depending on who is asked.</span>
+      <span class="where">&Phi;<sup>&minus;1</sup> is the inverse standard normal CDF (Module 1). The plain Z is a direct reading of the observed defect rate as a normal tail probability, nothing more.<sup class="cite"><a href="#ref-5">[5]</a></sup> Adding 1.5 is the shift convention explained below; skipping the label on which one a report is quoting is how "we're at four sigma" ends up meaning two different defect rates depending on who is asked.</span>
     </div>
 
     <h2 id="shift">The 1.5 sigma shift: history and controversy</h2>
-    <p>Motorola's own articulation of Six Sigma treats a process as capable of drifting up to 1.5&sigma; off-centre over the long run without being considered out of control, and reports the sigma level for the resulting <em>worst-case, one-sided</em> tail rather than for a perfectly centred process.<sup class="cite"><a href="#ref-6">[6]</a></sup> Arithmetically: a process truly centred 6&sigma; from both specification limits has a predicted defect rate of about 0.002&nbsp;PPM (Table 1 below computes this exactly); a process whose mean has drifted 1.5&sigma; toward one limit, leaving only 4.5&sigma; of margin on the near side, has a predicted one-sided defect rate of about 3.4&nbsp;PPM &mdash; Motorola's published target. The two numbers describe different things: the first is "how good is this process if it never moves," the second is "how bad could this process get if it drifts as far as we're willing to tolerate before calling it a problem."</p>
+    <p>Motorola's own articulation of Six Sigma treats a process as capable of drifting up to 1.5&sigma; off-centre over the long run without being considered out of control, and reports the sigma level for the resulting <em>worst-case, one-sided</em> tail rather than for a perfectly centred process.<sup class="cite"><a href="#ref-6">[6]</a>, <a href="#ref-7">[7]</a>, <a href="#ref-8">[8]</a></sup> Arithmetically: a process truly centred 6&sigma; from both specification limits has a predicted defect rate of about 0.002&nbsp;PPM (Table 1 below computes this exactly); a process whose mean has drifted 1.5&sigma; toward one limit, leaving only 4.5&sigma; of margin on the near side, has a predicted one-sided defect rate of about 3.4&nbsp;PPM &mdash; Motorola's published target. The two numbers describe different things: the first is "how good is this process if it never moves," the second is "how bad could this process get if it drifts as far as we're willing to tolerate before calling it a problem."</p>
     <p>Tadikamalla's 1994 critique is that the shift is a definitional convention baked into the standard sigma-to-PPM lookup table, not a property measured on any particular process, and that presenting "6&sigma; = 3.4 PPM" without the shift explained lets readers assume a Z of 6 when the honest claim is closer to a Z of 4.5.<sup class="cite"><a href="#ref-2">[2]</a></sup> Bothe's 2002 paper supplies the strongest statistical argument <em>for</em> allowing the margin: with the small subgroup sizes (commonly n&nbsp;=&nbsp;4 or 5) typical of an X&#772;-R chart, a mean shift smaller than roughly 1.5&sigma; has a real chance of going undetected for some time by the chart's own limits, so a process that has drifted that far without tripping an alarm is not a hypothetical, it is a realistic blind spot of the monitoring method itself.<sup class="cite"><a href="#ref-3">[3]</a></sup> Burns' 2018 practitioner column takes the opposite position: if a process really does drift 1.5&sigma; routinely and this is built into the standard conversion table as normal, expected behaviour, that process is, by Shewhart's own definition, not in a state of statistical control at all, and the shift convention quietly normalises an out-of-control condition instead of flagging it as one.<sup class="cite"><a href="#ref-4">[4]</a></sup> This course takes no side: every sigma-level figure it reports states, in words and in the calculator output, whether the 1.5&sigma; shift is included, so the reader is never left to guess which claim is being made.</p>
+
+    <h2 id="which-metric">Which metric to report, and to whom</h2>
+    <p>Four numbers have now been defined for the same process, and a Green Belt is regularly asked for all of them by
+    different people in the same week. They are not interchangeable, and the honest answer to "what is our sigma level?" often
+    begins by asking what the number is for.</p>
+    <p><strong>DPU is the number to track over time on one process.</strong> It has no opportunity count in it, so nobody can
+    move it by redefining anything, and it is the only one of the four whose trend line means exactly what it appears to mean.
+    If a project baseline and its after-improvement result are reported in one metric, this is the one that will survive a
+    sceptical review.</p>
+    <p><strong>RTY is the number to report for a line.</strong> It answers the question a plant manager is actually asking,
+    which is what fraction of what we start comes out the far end without being touched again. Its value is that it exposes
+    rework: a line whose final yield is 99&nbsp;% and whose RTY is 78&nbsp;% is running a second factory inside the first one,
+    and the gap between the two numbers is roughly the size of it.</p>
+    <p><strong>DPMO and the sigma level are the numbers for talking to someone outside the process.</strong> They compress a
+    defect rate onto a scale that a customer or a corporate scorecard already understands, and that compression is exactly
+    what makes them easy to abuse. Two rules keep them defensible. First, write down the opportunity definition next to the
+    number, in words, once, and do not change it during the project; if it has to change, report both. Second, state whether
+    the 1.5 sigma shift is included. A sigma level quoted without either of those is not a measurement, it is a claim.</p>
+    <p>What none of the four will tell you is whether the process is stable, which is the question that decides whether any of
+    them predicts anything about next week. A defect rate computed over a period that contained a tooling change and a
+    material lot change is an average of two processes, and the sigma level derived from it describes neither. That is why a
+    p chart (Module 17) belongs beside a DPMO figure, and why the capability indices of Module 7, which come from measured
+    values rather than counts, carry more information per part measured than any count-based metric can.</p>
+    <p>One practical consequence for project work: prefer a measured characteristic to a count wherever the process gives you
+    a choice. Fifty leak-test results tell you the reject rate and nothing else; fifty measured joint gaps tell you the reject
+    rate, the margin you have, which direction you are drifting, and how much variation reduction would be needed to close the
+    gap. Counting is what you do when the characteristic genuinely is an attribute, not a first resort.</p>
 
     <h2 id="examples">Worked examples</h2>
 

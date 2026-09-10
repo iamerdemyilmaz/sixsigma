@@ -1,0 +1,22 @@
+{
+ "id": "m12-ex2-cure-quad",
+ "module": "12",
+ "kind": "mregression",
+ "title": "Exercise 2: the same 18 joints fitted with a quadratic in cure temperature",
+ "source": "constructed",
+ "setting": "the same 18 joints as m12-ex2-cure, with cure temperature and its square as the two predictors",
+ "params": {
+  "predictors": [
+   "temp",
+   "temp_sq"
+  ],
+  "alpha": 0.05,
+  "units_y": "MPa"
+ },
+ "columns": [
+  "temp",
+  "temp_sq",
+  "y"
+ ],
+ "n_rows": 18
+}

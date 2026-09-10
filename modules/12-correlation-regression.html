@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Module 12: Correlation and regression · Six Sigma Course</title>
 <meta name="description" content="Correlation and its traps, simple linear regression by hand and by script, residual analysis, an introduction to multiple regression, and what R² does and does not tell you.">
-<meta name="examples" content="m12-temp-fillet, m12-mreg-fillet, m12-ex1-mreg, m12-ex1-force-only, m01-anscombe-1, m01-anscombe-2, m01-anscombe-3, m01-anscombe-4">
+<meta name="examples" content="m12-temp-fillet, m12-mreg-fillet, m12-ex1-mreg, m12-ex1-force-only, m12-coat-nozzle-a, m12-coat-nozzle-b, m12-coat-pooled, m12-ex2-cure, m12-ex2-cure-quad, m01-anscombe-1, m01-anscombe-2, m01-anscombe-3, m01-anscombe-4">
+<!-- allowed-numbers: intermediates computed by script from the results values above, not typed by hand.
+     151.1 = -b1/(2*b2) from m12-ex2-cure-quad, the temperature at the quadratic's maximum. -->
+<meta name="allowed-numbers" content="151.1">
 <link rel="stylesheet" href="../assets/css/course.css">
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cfd39382023243b08cf5932468455c77"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
@@ -47,7 +50,7 @@
       <br>b&#8321; = S<sub>xy</sub> / S<sub>xx</sub> = &Sigma;(x&#8722;x&#772;)(y&#8722;y&#772;) / &Sigma;(x&#8722;x&#772;)&sup2; &nbsp;&nbsp; b&#8320; = y&#772; &minus; b&#8321;x&#772;
       <span class="where">Least squares: the line that minimizes the sum of squared vertical distances from each point to the line. b&#8321; is the predicted change in y per unit change in x; b&#8320; is where the line crosses x = 0, which may or may not be a meaningful point depending on whether x = 0 falls inside the range of the data.</span>
     </div>
-    <p>The slope's own standard error, t-statistic and p-value (Module 11's logic applied to one coefficient) test whether the slope is distinguishable from zero &mdash; whether there is a linear relationship at all, not whether the model is a good one.</p>
+    <p>The slope's own standard error, t-statistic and p-value (Module 11's logic applied to one coefficient) test whether the slope is distinguishable from zero &mdash; whether there is a linear relationship at all, not whether the model is a good one.<sup class="cite"><a href="#ref-3">[3]</a></sup></p>
 
     <h2 id="residuals">Residual analysis</h2>
     <p>A residual is the difference between an observed y and the model's fitted value at that x: e = y &minus; &#375;. NIST's e-Handbook treats a plot of residuals against fitted values (or against x) as the primary check of a regression model, ahead of any summary statistic: it should show no pattern &mdash; no curve (a sign the true relationship is not linear), no funnel shape (a sign the variance is not constant), no trend over the order the data was collected (a sign of a missed time-based effect), and residuals that look reasonably close to a normal distribution.<sup class="cite"><a href="#ref-1">[1]</a></sup> Any of these patterns means the model's own assumptions do not hold, and the p-values and confidence intervals it reports are not trustworthy even if R&sup2; looks respectable.</p>
@@ -102,7 +105,7 @@
     <div class="formula">&#375; = <span data-ex="m12-temp-fillet" data-key="intercept" data-dp="3">-2.806</span> + <span data-ex="m12-temp-fillet" data-key="slope" data-dp="5">0.00670</span> &times; temperature
       <span class="where">r = <span data-ex="m12-temp-fillet" data-key="r" data-dp="3">0.690</span>, R&sup2; = <span data-ex="m12-temp-fillet" data-key="r2" data-dp="3">0.477</span>, slope p-value <span data-ex="m12-temp-fillet" data-key="p_slope" data-dp="4">0.0002</span> (significant), residual s = <span data-ex="m12-temp-fillet" data-key="s" data-dp="4">0.0390</span> mm.</span>
     </div>
-    <p>Temperature alone explains <span data-ex="m12-temp-fillet" data-key="r2" data-dp="1">0.5</span> &times; 100, i.e. about 48&nbsp;%, of the variation in fillet width. Adding flux mass and joint gap:</p>
+    <p>Temperature alone explains R&sup2; = <span data-ex="m12-temp-fillet" data-key="r2" data-dp="3">0.477</span> of the variation in fillet width, about 48&nbsp;%. Adding flux mass and joint gap:</p>
     <div class="table-wrap">
       <table>
         <caption>Table 1. Multiple regression, fillet width vs temperature, flux mass, and joint gap (constructed data, n = 24).</caption>
@@ -116,7 +119,117 @@
       </table>
     </div>
     <div class="formula">R&sup2; = <span data-ex="m12-mreg-fillet" data-key="r2" data-dp="3">0.773</span> &nbsp;&nbsp; R&sup2;<sub>adj</sub> = <span data-ex="m12-mreg-fillet" data-key="r2_adj" data-dp="3">0.739</span> &nbsp;&nbsp; F(<span data-ex="m12-mreg-fillet" data-key="k" data-dp="0">3</span>, <span data-ex="m12-mreg-fillet" data-key="df_resid" data-dp="0">20</span>) = <span data-ex="m12-mreg-fillet" data-key="f" data-dp="2">22.69</span>, p <span data-ex="m12-mreg-fillet" data-key="p_f" data-dp="6">0.000001</span> &nbsp;&nbsp; s = <span data-ex="m12-mreg-fillet" data-key="s" data-dp="4">0.0269</span> mm</div>
-    <p>Adding two predictors nearly doubles the explained variation, from about 48&nbsp;% to <span data-ex="m12-mreg-fillet" data-key="r2" data-dp="1">0.8</span> &times; 100 (77.3&nbsp;%). Both temperature and gap are highly significant, and gap's coefficient is negative &mdash; a wider gap means a narrower fillet, which matches the physical picture of a fixed amount of filler metal bridging a larger opening. Flux mass, though, has a p-value of <span data-ex="m12-mreg-fillet" data-key="coefficients.flux.p" data-dp="3">0.129</span>: not statistically significant at the conventional 5&nbsp;% level, and its 95&nbsp;% confidence interval comfortably includes zero. A team that measured only flux mass and fillet width, and computed just their simple correlation, could easily have seen a moderate relationship and assumed flux mass mattered; in the full model, controlling for temperature and gap, that apparent effect mostly evaporates. This is precisely what "holding the other predictors constant" buys: a fairer read of whether each variable earns its place, not just how each one looks in isolation.</p>
+    <p>Adding two predictors nearly doubles the explained variation, from about 48&nbsp;% to 77&nbsp;% (R&sup2; = <span data-ex="m12-mreg-fillet" data-key="r2" data-dp="3">0.773</span>). Both temperature and gap are highly significant, and gap's coefficient is negative &mdash; a wider gap means a narrower fillet, which matches the physical picture of a fixed amount of filler metal bridging a larger opening. Flux mass, though, has a p-value of <span data-ex="m12-mreg-fillet" data-key="coefficients.flux.p" data-dp="3">0.129</span>: not statistically significant at the conventional 5&nbsp;% level, and its 95&nbsp;% confidence interval comfortably includes zero. A team that measured only flux mass and fillet width, and computed just their simple correlation, could easily have seen a moderate relationship and assumed flux mass mattered; in the full model, controlling for temperature and gap, that apparent effect mostly evaporates. This is precisely what "holding the other predictors constant" buys: a fairer read of whether each variable earns its place, not just how each one looks in isolation.</p>
+
+    <details>
+      <summary>Show the 24 braze joints (temperature, flux mass, gap, fillet width)</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A1. Braze fillet width (mm) with furnace temperature (&deg;C), flux mass (mg) and joint gap (mm), 24 joints (constructed data). Worked example 2's simple regression uses the temperature and width columns only.</caption>
+          <thead><tr><th>temp</th><th>flux</th><th>gap</th><th>width</th><th>temp</th><th>flux</th><th>gap</th><th>width</th></tr></thead>
+          <tbody>
+            <tr><td class="num">598.4</td><td class="num">12.66</td><td class="num">0.056</td><td class="num">1.2469</td><td class="num">598.2</td><td class="num">10.72</td><td class="num">0.055</td><td class="num">1.1928</td></tr>
+            <tr><td class="num">608.5</td><td class="num">11.24</td><td class="num">0.133</td><td class="num">1.2768</td><td class="num">602.3</td><td class="num">13.1</td><td class="num">0.11</td><td class="num">1.2373</td></tr>
+            <tr><td class="num">595.5</td><td class="num">10.77</td><td class="num">0.064</td><td class="num">1.232</td><td class="num">604.3</td><td class="num">13.11</td><td class="num">0.145</td><td class="num">1.1518</td></tr>
+            <tr><td class="num">591.2</td><td class="num">13.73</td><td class="num">0.122</td><td class="num">1.1548</td><td class="num">602.4</td><td class="num">10.58</td><td class="num">0.104</td><td class="num">1.2116</td></tr>
+            <tr><td class="num">596.2</td><td class="num">10.21</td><td class="num">0.094</td><td class="num">1.1649</td><td class="num">598.7</td><td class="num">8.77</td><td class="num">0.052</td><td class="num">1.241</td></tr>
+            <tr><td class="num">604.4</td><td class="num">11.88</td><td class="num">0.1</td><td class="num">1.2173</td><td class="num">598.8</td><td class="num">12.99</td><td class="num">0.108</td><td class="num">1.2256</td></tr>
+            <tr><td class="num">605.6</td><td class="num">11.26</td><td class="num">0.101</td><td class="num">1.2633</td><td class="num">602.9</td><td class="num">10.99</td><td class="num">0.098</td><td class="num">1.2803</td></tr>
+            <tr><td class="num">600.8</td><td class="num">8.67</td><td class="num">0.067</td><td class="num">1.2537</td><td class="num">608.4</td><td class="num">11.34</td><td class="num">0.119</td><td class="num">1.2618</td></tr>
+            <tr><td class="num">596.2</td><td class="num">9.01</td><td class="num">0.056</td><td class="num">1.2166</td><td class="num">591.0</td><td class="num">11.05</td><td class="num">0.062</td><td class="num">1.1544</td></tr>
+            <tr><td class="num">608.3</td><td class="num">12.9</td><td class="num">0.114</td><td class="num">1.2513</td><td class="num">591.8</td><td class="num">8.22</td><td class="num">0.117</td><td class="num">1.0924</td></tr>
+            <tr><td class="num">608.6</td><td class="num">11.14</td><td class="num">0.06</td><td class="num">1.3406</td><td class="num">605.2</td><td class="num">11.08</td><td class="num">0.143</td><td class="num">1.2045</td></tr>
+            <tr><td class="num">598.7</td><td class="num">12.07</td><td class="num">0.057</td><td class="num">1.2416</td><td class="num">599.2</td><td class="num">8.58</td><td class="num">0.072</td><td class="num">1.1866</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <h3 id="example3">Worked example 3: a correlation that stratification reverses</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>Setting: a powder coating line. Panels are sprayed through one of two spray nozzles, a standard nozzle (A) and a high-flow nozzle (B), and coating thickness is measured on each panel in micrometres. The high-flow nozzle lays down more material, so the line is run faster when it is fitted. Someone pulls 40 panels' records out of the system, pairs thickness against line speed, and fits a regression, without recording which nozzle sprayed which panel.</p>
+    <div class="table-wrap">
+        <table>
+          <caption>Table 2. Nozzle A: line speed (m/min) and coating thickness (&#181;m), 20 panels (constructed data).</caption>
+          <thead><tr><th>speed</th><th>thickness</th><th>speed</th><th>thickness</th></tr></thead>
+          <tbody>
+            <tr><td class="num">24.4</td><td class="num">41.7</td><td class="num">23.2</td><td class="num">42.2</td></tr>
+            <tr><td class="num">24.5</td><td class="num">41.2</td><td class="num">19.9</td><td class="num">42.1</td></tr>
+            <tr><td class="num">22.1</td><td class="num">39.9</td><td class="num">21.5</td><td class="num">43.1</td></tr>
+            <tr><td class="num">20.3</td><td class="num">43.3</td><td class="num">25.8</td><td class="num">38.6</td></tr>
+            <tr><td class="num">18.4</td><td class="num">43</td><td class="num">25.2</td><td class="num">39.8</td></tr>
+            <tr><td class="num">21.1</td><td class="num">42.6</td><td class="num">24.8</td><td class="num">39.5</td></tr>
+            <tr><td class="num">21.3</td><td class="num">42.5</td><td class="num">21.1</td><td class="num">44</td></tr>
+            <tr><td class="num">18.4</td><td class="num">42.2</td><td class="num">21.9</td><td class="num">42.6</td></tr>
+            <tr><td class="num">18.4</td><td class="num">43.9</td><td class="num">23.4</td><td class="num">43.6</td></tr>
+            <tr><td class="num">26</td><td class="num">39.3</td><td class="num">18.5</td><td class="num">44.8</td></tr>
+          </tbody>
+        </table>
+      </div>
+    <div class="table-wrap">
+        <table>
+          <caption>Table 3. Nozzle B: line speed (m/min) and coating thickness (&#181;m), 20 panels (constructed data).</caption>
+          <thead><tr><th>speed</th><th>thickness</th><th>speed</th><th>thickness</th></tr></thead>
+          <tbody>
+            <tr><td class="num">34.4</td><td class="num">58.6</td><td class="num">35.7</td><td class="num">56.9</td></tr>
+            <tr><td class="num">32.2</td><td class="num">59.9</td><td class="num">30</td><td class="num">60.6</td></tr>
+            <tr><td class="num">37</td><td class="num">55.6</td><td class="num">34</td><td class="num">58.1</td></tr>
+            <tr><td class="num">30.5</td><td class="num">60</td><td class="num">33.5</td><td class="num">57.4</td></tr>
+            <tr><td class="num">35.4</td><td class="num">58.5</td><td class="num">31.6</td><td class="num">60.3</td></tr>
+            <tr><td class="num">37</td><td class="num">55.8</td><td class="num">32.6</td><td class="num">57.5</td></tr>
+            <tr><td class="num">31.8</td><td class="num">59.5</td><td class="num">36.4</td><td class="num">55.3</td></tr>
+            <tr><td class="num">37.2</td><td class="num">56.1</td><td class="num">32.5</td><td class="num">57.6</td></tr>
+            <tr><td class="num">37</td><td class="num">56.8</td><td class="num">31.2</td><td class="num">60.7</td></tr>
+            <tr><td class="num">30.1</td><td class="num">59.9</td><td class="num">35.6</td><td class="num">56.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    <p>Pooling all 40 panels and fitting one line gives a strong, highly significant positive relationship:</p>
+    <div class="formula">Pooled (n = <span data-ex="m12-coat-pooled" data-key="n" data-dp="0">40</span>): &nbsp; &#375; = <span data-ex="m12-coat-pooled" data-key="intercept" data-dp="3">20.020</span> + <span data-ex="m12-coat-pooled" data-key="slope" data-dp="4">1.0762</span> &times; speed
+      <br>r = <span data-ex="m12-coat-pooled" data-key="r" data-dp="3">0.835</span>, &nbsp; R&sup2; = <span data-ex="m12-coat-pooled" data-key="r2" data-dp="3">0.697</span>, &nbsp; slope p-value <span data-ex="m12-coat-pooled" data-key="p_slope" data-dp="9">0.000000000</span>, &nbsp; residual s = <span data-ex="m12-coat-pooled" data-key="s" data-dp="3">4.645</span> &#181;m
+      <span class="where">Read literally: every extra metre per minute of line speed buys about <span data-ex="m12-coat-pooled" data-key="slope" data-dp="2">1.08</span>&nbsp;&#181;m of coating. An engineer who wanted a thicker coat and believed this number would speed the line up.</span>
+    </div>
+    <p>Now fit the same relationship separately within each nozzle:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. The same 40 panels, pooled and stratified by nozzle (constructed data).</caption>
+        <thead><tr><th>Fit</th><th>n</th><th>Slope (&#181;m per m/min)</th><th>r</th><th>R&sup2;</th><th>Slope p-value</th><th>Mean speed</th><th>Mean thickness</th></tr></thead>
+        <tbody>
+          <tr><td>Pooled, nozzle ignored</td><td class="num"><span data-ex="m12-coat-pooled" data-key="n" data-dp="0">40</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="slope" data-dp="4">1.0762</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="r" data-dp="3">0.835</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="r2" data-dp="3">0.697</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="p_slope" data-dp="9">0.000000000</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="mean_x" data-dp="2">27.90</span></td><td class="num"><span data-ex="m12-coat-pooled" data-key="mean_y" data-dp="2">50.04</span></td></tr>
+          <tr><td>Nozzle A only</td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="n" data-dp="0">20</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="slope" data-dp="4">-0.5202</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="r" data-dp="3">-0.763</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="r2" data-dp="3">0.581</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="p_slope" data-dp="6">0.000093</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="mean_x" data-dp="2">22.01</span></td><td class="num"><span data-ex="m12-coat-nozzle-a" data-key="mean_y" data-dp="2">42.00</span></td></tr>
+          <tr><td>Nozzle B only</td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="n" data-dp="0">20</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="slope" data-dp="4">-0.6339</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="r" data-dp="3">-0.895</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="r2" data-dp="3">0.800</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="p_slope" data-dp="9">0.000000103</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="mean_x" data-dp="2">33.79</span></td><td class="num"><span data-ex="m12-coat-nozzle-b" data-key="mean_y" data-dp="2">58.09</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <svg viewBox="0 0 740 300" role="img" aria-labelledby="fig3-t fig3-d">
+        <title id="fig3-t">The same 40 panels, pooled and stratified by nozzle</title>
+        <desc id="fig3-d">Two scatter plots of coating thickness in micrometres (vertical axis) against line speed in metres per minute (horizontal axis), same scales in both. Left: all forty panels with the nozzle identity discarded, and one fitted line rising steeply from lower left to upper right. The points form two separated clouds, one at low speed and low thickness and one at high speed and high thickness, and the fitted line runs through the gap between them. Right: the same points with nozzle A drawn as circles and nozzle B as squares, each with its own fitted line; both of those lines slope gently downward, in the opposite direction to the pooled line.</desc>
+        <g class="chart-text"><text x="48" y="24" class="chart-title">Pooled: thickness rises with speed</text></g>
+        <g class="chart-text"><text x="400" y="24" class="chart-title">Stratified by nozzle: it falls</text></g>
+        <g class="chart-box"><rect x="48" y="44" width="300" height="190"/><rect x="400" y="44" width="300" height="190"/></g>
+        <g class="chart-axis"><line x1="98.0" y1="234" x2="98.0" y2="238"/><line x1="450.0" y1="234" x2="450.0" y2="238"/><line x1="160.5" y1="234" x2="160.5" y2="238"/><line x1="512.5" y1="234" x2="512.5" y2="238"/><line x1="223.0" y1="234" x2="223.0" y2="238"/><line x1="575.0" y1="234" x2="575.0" y2="238"/><line x1="285.5" y1="234" x2="285.5" y2="238"/><line x1="637.5" y1="234" x2="637.5" y2="238"/><line x1="348.0" y1="234" x2="348.0" y2="238"/><line x1="700.0" y1="234" x2="700.0" y2="238"/><line x1="48" y1="198.4" x2="44" y2="198.4"/><line x1="48" y1="139.0" x2="44" y2="139.0"/><line x1="48" y1="79.6" x2="44" y2="79.6"/><line x1="400" y1="198.4" x2="396" y2="198.4"/><line x1="400" y1="139.0" x2="396" y2="139.0"/><line x1="400" y1="79.6" x2="396" y2="79.6"/></g>
+        <g class="chart-text"><text x="98.0" y="250" text-anchor="middle" class="chart-text small">20</text><text x="160.5" y="250" text-anchor="middle" class="chart-text small">25</text><text x="223.0" y="250" text-anchor="middle" class="chart-text small">30</text><text x="285.5" y="250" text-anchor="middle" class="chart-text small">35</text><text x="348.0" y="250" text-anchor="middle" class="chart-text small">40</text><text x="450.0" y="250" text-anchor="middle" class="chart-text small">20</text><text x="512.5" y="250" text-anchor="middle" class="chart-text small">25</text><text x="575.0" y="250" text-anchor="middle" class="chart-text small">30</text><text x="637.5" y="250" text-anchor="middle" class="chart-text small">35</text><text x="700.0" y="250" text-anchor="middle" class="chart-text small">40</text><text x="40" y="202.4" text-anchor="end" class="chart-text small">40</text><text x="40" y="143.0" text-anchor="end" class="chart-text small">50</text><text x="40" y="83.6" text-anchor="end" class="chart-text small">60</text><text x="392" y="202.4" text-anchor="end" class="chart-text small">40</text><text x="392" y="143.0" text-anchor="end" class="chart-text small">50</text><text x="392" y="83.6" text-anchor="end" class="chart-text small">60</text></g>
+        <g fill="currentColor"><circle cx="153.0" cy="188.3" r="3"/><circle cx="154.2" cy="191.2" r="3"/><circle cx="124.3" cy="199.0" r="3"/><circle cx="101.8" cy="178.8" r="3"/><circle cx="78.0" cy="180.6" r="3"/><circle cx="111.8" cy="182.9" r="3"/><circle cx="114.2" cy="183.5" r="3"/><circle cx="78.0" cy="185.3" r="3"/><circle cx="78.0" cy="175.2" r="3"/><circle cx="173.0" cy="202.5" r="3"/><circle cx="138.0" cy="185.3" r="3"/><circle cx="96.7" cy="185.9" r="3"/><circle cx="116.8" cy="180.0" r="3"/><circle cx="170.5" cy="206.7" r="3"/><circle cx="163.0" cy="199.6" r="3"/><circle cx="158.0" cy="201.3" r="3"/><circle cx="111.8" cy="174.6" r="3"/><circle cx="121.7" cy="182.9" r="3"/><circle cx="140.5" cy="177.0" r="3"/><circle cx="79.2" cy="169.9" r="3"/><circle cx="278.0" cy="87.9" r="3"/><circle cx="250.5" cy="80.2" r="3"/><circle cx="310.5" cy="105.8" r="3"/><circle cx="229.2" cy="79.6" r="3"/><circle cx="290.5" cy="88.5" r="3"/><circle cx="310.5" cy="104.6" r="3"/><circle cx="245.5" cy="82.6" r="3"/><circle cx="313.0" cy="102.8" r="3"/><circle cx="310.5" cy="98.6" r="3"/><circle cx="224.2" cy="80.2" r="3"/><circle cx="294.2" cy="98.0" r="3"/><circle cx="223.0" cy="76.1" r="3"/><circle cx="273.0" cy="90.9" r="3"/><circle cx="266.8" cy="95.1" r="3"/><circle cx="243.0" cy="77.8" r="3"/><circle cx="255.5" cy="94.5" r="3"/><circle cx="303.0" cy="107.5" r="3"/><circle cx="254.2" cy="93.9" r="3"/><circle cx="238.0" cy="75.5" r="3"/><circle cx="293.0" cy="99.2" r="3"/></g>
+        <g class="chart-curve"><line class="chart-curve" x1="73.0" y1="202.0" x2="323.0" y2="74.2"/></g>
+        <g fill="currentColor"><circle cx="505.0" cy="188.3" r="3"/><circle cx="506.2" cy="191.2" r="3"/><circle cx="476.2" cy="199.0" r="3"/><circle cx="453.8" cy="178.8" r="3"/><circle cx="430.0" cy="180.6" r="3"/><circle cx="463.8" cy="182.9" r="3"/><circle cx="466.2" cy="183.5" r="3"/><circle cx="430.0" cy="185.3" r="3"/><circle cx="430.0" cy="175.2" r="3"/><circle cx="525.0" cy="202.5" r="3"/><circle cx="490.0" cy="185.3" r="3"/><circle cx="448.8" cy="185.9" r="3"/><circle cx="468.8" cy="180.0" r="3"/><circle cx="522.5" cy="206.7" r="3"/><circle cx="515.0" cy="199.6" r="3"/><circle cx="510.0" cy="201.3" r="3"/><circle cx="463.8" cy="174.6" r="3"/><circle cx="473.8" cy="182.9" r="3"/><circle cx="492.5" cy="177.0" r="3"/><circle cx="431.2" cy="169.9" r="3"/></g>
+        <g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="627.4" y="85.3" width="5.2" height="5.2"/><rect x="599.9" y="77.6" width="5.2" height="5.2"/><rect x="659.9" y="103.2" width="5.2" height="5.2"/><rect x="578.6" y="77.0" width="5.2" height="5.2"/><rect x="639.9" y="85.9" width="5.2" height="5.2"/><rect x="659.9" y="102.0" width="5.2" height="5.2"/><rect x="594.9" y="80.0" width="5.2" height="5.2"/><rect x="662.4" y="100.2" width="5.2" height="5.2"/><rect x="659.9" y="96.0" width="5.2" height="5.2"/><rect x="573.6" y="77.6" width="5.2" height="5.2"/><rect x="643.6" y="95.4" width="5.2" height="5.2"/><rect x="572.4" y="73.5" width="5.2" height="5.2"/><rect x="622.4" y="88.3" width="5.2" height="5.2"/><rect x="616.1" y="92.5" width="5.2" height="5.2"/><rect x="592.4" y="75.2" width="5.2" height="5.2"/><rect x="604.9" y="91.9" width="5.2" height="5.2"/><rect x="652.4" y="104.9" width="5.2" height="5.2"/><rect x="603.6" y="91.3" width="5.2" height="5.2"/><rect x="587.4" y="72.9" width="5.2" height="5.2"/><rect x="642.4" y="96.6" width="5.2" height="5.2"/></g>
+        <g><line class="chart-curve bad" x1="425.0" y1="174.1" x2="525.0" y2="198.9"/><line class="chart-curve bad" x1="575.0" y1="76.7" x2="675.0" y2="106.8"/></g>
+        <g class="chart-text small">
+          <text x="406" y="206">nozzle A (circles)</text>
+          <text x="570" y="66">nozzle B (squares)</text>
+        </g>
+        <g class="chart-text muted">
+          <text x="198.0" y="268" text-anchor="middle">line speed (m/min)</text>
+          <text x="550.0" y="268" text-anchor="middle">line speed (m/min)</text>
+          <text x="14" y="139.0" transform="rotate(-90 14 139.0)" text-anchor="middle">coating thickness (&#181;m)</text>
+        </g>
+      </svg>
+      <figcaption>Figure 3. Powder coating thickness against line speed for the same 40 panels, pooled (left) and stratified by spray nozzle (right). The pooled line and the two within-nozzle lines have opposite signs. Constructed data.</figcaption>
+    </figure>
+    <p>Both within-nozzle slopes are negative, both are statistically significant, and both agree with the physics: at a higher line speed a panel spends less time in front of the gun, so it receives less powder. The pooled slope has the opposite sign, and it is the more significant of the three. Nothing is wrong with the arithmetic in any of the three fits. What is wrong is the question the pooled fit answers.</p>
+    <p>The mechanism is visible in the last two columns of Table 4. Nozzle A runs at a mean speed of <span data-ex="m12-coat-nozzle-a" data-key="mean_x" data-dp="2">22.01</span>&nbsp;m/min and lays <span data-ex="m12-coat-nozzle-a" data-key="mean_y" data-dp="2">42.00</span>&nbsp;&#181;m; nozzle B runs at <span data-ex="m12-coat-nozzle-b" data-key="mean_x" data-dp="2">33.79</span>&nbsp;m/min and lays <span data-ex="m12-coat-nozzle-b" data-key="mean_y" data-dp="2">58.09</span>&nbsp;&#181;m. The pooled line is not measuring what line speed does to thickness at all. It is drawing a line between two nozzles that differ in both variables at once, and the nozzle is doing all the work. This is the continuous-data form of Simpson's paradox: a relationship within every subgroup that reverses when the subgroups are combined.</p>
+    <p>The defence is not statistical, it is procedural, and Module 9 already named it: stratify before you fit. Any variable that could plausibly shift both x and y &mdash; nozzle, machine, shift, batch of raw material, operator, gauge, season &mdash; is recorded with the data and used to split it. If the split changes the answer, the split was the answer. A lurking variable that was never recorded cannot be stratified on afterwards, which is why the operational definitions and data collection sheet of Module 5 matter more to a regression than any of the arithmetic in this module. The multiple regression of Worked example 2 is the other tool for the same problem: had the nozzle been recorded as an indicator variable and put in the model alongside speed, the fit would have reported the within-nozzle slope and the nozzle offset separately, which is the honest decomposition of Figure 3's right panel.</p>
 
     <h2 id="mistakes">Common mistakes</h2>
     <ol>
@@ -137,8 +250,58 @@
       <summary>Show the worked solution</summary>
       <p><strong>(a)</strong> R&sup2; must rise by at least a small amount regardless, because adding any predictor to a least-squares fit can never decrease R&sup2;. The real question is whether it rises by enough to matter, and whether adjusted R&sup2; agrees.</p>
       <p><strong>(b)</strong> Force: coefficient <span data-ex="m12-ex1-mreg" data-key="coefficients.force.coef" data-dp="4">0.0949</span>, p <span data-ex="m12-ex1-mreg" data-key="coefficients.force.p" data-dp="9">0.000000000</span>. Time: coefficient <span data-ex="m12-ex1-mreg" data-key="coefficients.time.coef" data-dp="4">0.0313</span>, p <span data-ex="m12-ex1-mreg" data-key="coefficients.time.p" data-dp="3">0.003</span>. R&sup2; = <span data-ex="m12-ex1-mreg" data-key="r2" data-dp="3">0.928</span>, R&sup2;<sub>adj</sub> = <span data-ex="m12-ex1-mreg" data-key="r2_adj" data-dp="3">0.919</span>.</p>
-      <p><strong>(c)</strong> Yes: bond time's p-value (0.003) is well under 0.05, and adjusted R&sup2; rose along with plain R&sup2; (from a one-predictor model's adjusted R&sup2; of <span data-ex="m12-ex1-force-only" data-key="r2" data-dp="3">0.876</span>&times;<sup>*</sup> to 0.919), not just plain R&sup2; alone. This is the opposite outcome from Worked example 2's flux mass: there, a second predictor's simple relationship with y turned out not to hold up once the other predictors were in the model; here, bond time's effect is real and statistically supported even after controlling for bond force. The two examples together are the point: adding a predictor always raises R&sup2; a little, but only checking its own coefficient and adjusted R&sup2; tells you whether that rise means anything.</p>
-      <p class="small">* The one-predictor model's own adjusted R&sup2; is not separately reported here; comparing plain R&sup2; (0.876 &rarr; 0.928) alongside the fact that adjusted R&sup2; also rose substantially (to 0.919) is what supports keeping bond time, not the plain-R&sup2; increase by itself.</p>
+      <p><strong>(c)</strong> Yes: bond time's p-value (0.003) is well under 0.05, and adjusted R&sup2; rose along with plain R&sup2; (from the one-predictor model's adjusted R&sup2; of <span data-ex="m12-ex1-force-only" data-key="r2_adj" data-dp="3">0.869</span> to <span data-ex="m12-ex1-mreg" data-key="r2_adj" data-dp="3">0.919</span>), not just plain R&sup2; alone. This is the opposite outcome from Worked example 2's flux mass: there, a second predictor's simple relationship with y turned out not to hold up once the other predictors were in the model; here, bond time's effect is real and statistically supported even after controlling for bond force. The two examples together are the point: adding a predictor always raises R&sup2; a little, but only checking its own coefficient and adjusted R&sup2; tells you whether that rise means anything.</p>
+    </details>
+
+    <details>
+      <summary>Show the 20 wire bonds (force, time, pull strength)</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A2. Wire-bond pull strength (N) with bond force (g) and bond time (ms), 20 bonds (constructed data). Exercise 1's simple regression uses the force and strength columns only.</caption>
+          <thead><tr><th>force</th><th>time</th><th>strength</th><th>force</th><th>time</th><th>strength</th></tr></thead>
+          <tbody>
+            <tr><td class="num">45.4</td><td class="num">30.0</td><td class="num">8.15</td><td class="num">52.6</td><td class="num">25.3</td><td class="num">9.0</td></tr>
+            <tr><td class="num">58.5</td><td class="num">20.6</td><td class="num">8.72</td><td class="num">46.1</td><td class="num">17.3</td><td class="num">8.1</td></tr>
+            <tr><td class="num">34.3</td><td class="num">24.7</td><td class="num">6.8</td><td class="num">39.9</td><td class="num">27.5</td><td class="num">7.29</td></tr>
+            <tr><td class="num">58.5</td><td class="num">34.6</td><td class="num">9.33</td><td class="num">53.7</td><td class="num">30.5</td><td class="num">9.12</td></tr>
+            <tr><td class="num">39.4</td><td class="num">34.2</td><td class="num">7.3</td><td class="num">39.1</td><td class="num">27.3</td><td class="num">7.33</td></tr>
+            <tr><td class="num">42.7</td><td class="num">29.5</td><td class="num">7.83</td><td class="num">43.6</td><td class="num">33.3</td><td class="num">8.31</td></tr>
+            <tr><td class="num">54.8</td><td class="num">25.8</td><td class="num">8.93</td><td class="num">34.0</td><td class="num">15.8</td><td class="num">6.5</td></tr>
+            <tr><td class="num">42.3</td><td class="num">20.5</td><td class="num">7.7</td><td class="num">42.1</td><td class="num">25.6</td><td class="num">8.07</td></tr>
+            <tr><td class="num">46.5</td><td class="num">18.2</td><td class="num">7.85</td><td class="num">36.1</td><td class="num">24.2</td><td class="num">7.18</td></tr>
+            <tr><td class="num">30.8</td><td class="num">34.4</td><td class="num">7.07</td><td class="num">37.9</td><td class="num">16.2</td><td class="num">6.79</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a correlation of almost zero over a strong relationship</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>Setting: lap-shear strength (MPa) of a structural adhesive joint against cure temperature (&deg;C), 18 joints cured at temperatures spread across the supplier's stated 120 to 180&nbsp;&deg;C window, one joint per temperature, pulled to failure on a load frame reading to 0.01&nbsp;MPa.</p>
+    <div class="table-wrap">
+        <table>
+          <caption>Table 5. Cure temperature (&deg;C) and lap-shear strength (MPa), 18 joints (constructed data).</caption>
+          <thead><tr><th>temp</th><th>strength</th><th>temp</th><th>strength</th></tr></thead>
+          <tbody>
+            <tr><td class="num">128</td><td class="num">22.23</td><td class="num">165</td><td class="num">23.8</td></tr>
+            <tr><td class="num">129</td><td class="num">22.65</td><td class="num">165</td><td class="num">23.73</td></tr>
+            <tr><td class="num">129</td><td class="num">21.91</td><td class="num">170</td><td class="num">23.01</td></tr>
+            <tr><td class="num">132</td><td class="num">22.31</td><td class="num">170</td><td class="num">22.52</td></tr>
+            <tr><td class="num">140</td><td class="num">23.25</td><td class="num">170</td><td class="num">21.63</td></tr>
+            <tr><td class="num">146</td><td class="num">24.29</td><td class="num">171</td><td class="num">22.62</td></tr>
+            <tr><td class="num">151</td><td class="num">23.93</td><td class="num">176</td><td class="num">21.54</td></tr>
+            <tr><td class="num">155</td><td class="num">22.9</td><td class="num">177</td><td class="num">21.42</td></tr>
+            <tr><td class="num">161</td><td class="num">23.32</td><td class="num">177</td><td class="num">22.22</td></tr>
+          </tbody>
+        </table>
+      </div>
+    <p><strong>Tasks.</strong> (a) Fit a simple linear regression of strength on temperature and report the slope, r, R&sup2; and the slope's p-value. (b) On that evidence alone, what would you conclude about whether cure temperature affects strength? (c) Plot the residuals against temperature and say what the plot shows. (d) State what an r of nearly zero does and does not license you to say, and what you would do next.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Slope <span data-ex="m12-ex2-cure" data-key="slope" data-dp="4">-0.0070</span>&nbsp;MPa per &deg;C, r = <span data-ex="m12-ex2-cure" data-key="r" data-dp="3">-0.146</span>, R&sup2; = <span data-ex="m12-ex2-cure" data-key="r2" data-dp="4">0.0213</span>, slope p-value <span data-ex="m12-ex2-cure" data-key="p_slope" data-dp="3">0.563</span>, residual s = <span data-ex="m12-ex2-cure" data-key="s" data-dp="3">0.875</span>&nbsp;MPa. The line is flat and the fit explains about 2&nbsp;% of the variation.</p>
+      <p><strong>(b)</strong> On the linear fit alone the temptation is to conclude "cure temperature does not affect strength, so we can cure anywhere in the window." That conclusion is wrong, and the exercise exists to make the error concrete. A p-value of <span data-ex="m12-ex2-cure" data-key="p_slope" data-dp="3">0.563</span> is not evidence of no effect; it is a failure to find a <em>linear</em> effect, and the null hypothesis being tested is about the slope of a straight line, nothing more (Module 11: never read a large p-value as proof of no difference).</p>
+      <p><strong>(c)</strong> The residuals form a clean inverted parabola: negative at both ends of the temperature range and positive in the middle. That is the signature of a relationship with an optimum, and a straight line is the wrong model for it. Fitting temperature and its square as two predictors (Module 12's multiple regression, with temperature&sup2; simply computed as a second column) gives R&sup2; = <span data-ex="m12-ex2-cure-quad" data-key="r2" data-dp="3">0.691</span>, adjusted R&sup2; = <span data-ex="m12-ex2-cure-quad" data-key="r2_adj" data-dp="3">0.650</span>, F(<span data-ex="m12-ex2-cure-quad" data-key="k" data-dp="0">2</span>, <span data-ex="m12-ex2-cure-quad" data-key="df_resid" data-dp="0">15</span>) = <span data-ex="m12-ex2-cure-quad" data-key="f" data-dp="2">16.79</span> with p = <span data-ex="m12-ex2-cure-quad" data-key="p_f" data-dp="6">0.000149</span>, residual s = <span data-ex="m12-ex2-cure-quad" data-key="s" data-dp="4">0.5074</span>&nbsp;MPa, and both terms significant (temperature p = <span data-ex="m12-ex2-cure-quad" data-key="coefficients.temp.p" data-dp="6">0.000045</span>, temperature&sup2; p = <span data-ex="m12-ex2-cure-quad" data-key="coefficients.temp_sq.p" data-dp="6">0.000042</span>). The quadratic's maximum sits at &minus;b&#8321;&nbsp;/&nbsp;2b&#8322; = 151.1&nbsp;&deg;C, near the middle of the window, and the residual standard deviation falls from <span data-ex="m12-ex2-cure" data-key="s" data-dp="3">0.875</span> to <span data-ex="m12-ex2-cure-quad" data-key="s" data-dp="4">0.5074</span>&nbsp;MPa.</p>
+      <p><strong>(d)</strong> An r of nearly zero licenses one statement: over this range, there is no useful <em>straight-line</em> relationship between these two variables. It does not license "there is no relationship", "temperature does not matter", or "cure anywhere in the window." What to do next: plot the raw scatter (Module 9's rule, which would have shown the curve before any arithmetic), then treat the cure temperature as a factor with an interior optimum, which is a response surface question rather than a regression one &mdash; Module 13's introduction to response surface methods is exactly the tool, and the practical answer for the process is to set the cure at the top of the curve and specify a window around it, not to leave the supplier's full range open.</p>
     </details>
 
     <h2 id="quiz">Quiz</h2>
@@ -261,8 +424,8 @@
       <li id="ref-1">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 4.4.4 "How can I tell if a model fits my data?". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm">https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm</a></li>
       <li id="ref-2">Anscombe, F. J. (1973). Graphs in statistical analysis. <em>The American Statistician</em>, 27(1), 17&ndash;21. Values as reproduced in Wikipedia and the R <code>datasets</code> package documentation (Module 1, S-E35, S-E36). <a href="https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf">https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf</a></li>
       <li id="ref-3">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>. NIST, 2012 (updated). <a href="https://www.itl.nist.gov/div898/handbook/">https://www.itl.nist.gov/div898/handbook/</a></li>
-      <li id="ref-4">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(catalogue-level; general regression reference)</span></li>
-      <li id="ref-5">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+      <li id="ref-4">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(catalogue-level; general regression reference, further reading)</span></li>
+      <li id="ref-5">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a> <span class="tag">(the Green Belt scope this module is written against; no single claim rests on it)</span></li>
     </ol>
 
     <nav class="pager" aria-label="Module navigation" data-pager></nav>

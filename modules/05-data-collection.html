@@ -41,13 +41,13 @@
     <p>No fully documented public case study for this specific module was found in the sources searched for this course, so the illustration below is a labelled constructed scenario rather than a real one. A machining cell samples five consecutive parts every hour for its X&#772;-R chart. Two nominally identical lathes feed the same conveyor, and the sampler just grabs "the next five parts." Because the two machines run continuously and interleave on the conveyor, roughly half of every subgroup comes from each lathe. The chart has run stable for months. What it cannot show, by construction, is that lathe 2 has quietly drifted 0.018&nbsp;mm high of lathe 1: that difference is real, it is happening on every single part, and it is completely invisible on this chart, because it is baked into "normal" subgroup-to-subgroup noise rather than appearing as a between-subgroup signal. The chart is not lying. It is answering a question &mdash; "does the combined two-machine stream drift over time?" &mdash; that nobody meant to ask, instead of the question that mattered: "are these two machines producing the same thing?"</p>
 
     <h2 id="op-def">Operational definitions</h2>
-    <p>An operational definition states, in terms specific enough to leave no room for judgement, exactly how a characteristic is measured and how the result is classified. "Reject if the fillet looks thin" is not an operational definition; "reject if the fillet width at the marked reference point measures below 1.2&nbsp;mm on the gauge described in WI-114" is. Deming argued that most disputes over data are really disputes over definitions that were never made operational, and that a numerical specification is meaningless without one, because two people can apply the same nominal rule to the same part and reach opposite conclusions if the rule leaves any of the measurement method, the reference point, the environment, or the classification boundary unstated.<sup class="cite"><a href="#ref-1">[1]</a></sup> Module 4's attribute agreement study is a direct, quantitative test of whether an operational definition is doing its job: a low kappa is usually evidence that the definition, not the inspectors, needs work.</p>
+    <p>An operational definition states, in terms specific enough to leave no room for judgement, exactly how a characteristic is measured and how the result is classified. "Reject if the fillet looks thin" is not an operational definition; "reject if the fillet width at the marked reference point measures below 1.2&nbsp;mm on the gauge described in WI-114" is. Deming argued that most disputes over data are really disputes over definitions that were never made operational, and that a numerical specification is meaningless without one, because two people can apply the same nominal rule to the same part and reach opposite conclusions if the rule leaves any of the measurement method, the reference point, the environment, or the classification boundary unstated.<sup class="cite"><a href="#ref-1">[1]</a>, <a href="#ref-7">[7]</a></sup> Module 4's attribute agreement study is a direct, quantitative test of whether an operational definition is doing its job: a low kappa is usually evidence that the definition, not the inspectors, needs work.</p>
 
     <h2 id="sampling">Sampling plans</h2>
     <p>A sampling plan states what will be measured, how often, by whom, and from where in the process, decided before data collection starts rather than improvised by whoever happens to be free. Convenience sampling &mdash; measuring whatever is easiest to reach, whenever there is a spare moment &mdash; is the most common failure, because it silently trades representativeness for ease: parts from the end of a shift, parts near the inspection station, parts a particular operator happens to run. A sampling plan should say explicitly which population the sample is meant to represent (every part? every cavity? every shift?) and confirm the sampling method actually reaches all of it. The ASQ Green Belt Body of Knowledge places sampling plans and data collection squarely inside Measure, alongside rational subgrouping, as the foundation the rest of the phase depends on.<sup class="cite"><a href="#ref-4">[4]</a></sup></p>
 
     <h2 id="subgrouping">Rational subgrouping and why it decides everything downstream</h2>
-    <p>The formal rule, in Wheeler's phrasing: choose subgroups so that the variation <em>within</em> a subgroup is only the routine variation you want the chart's limits to represent, and let any variation you want the chart to be able to <em>detect</em> show up <em>between</em> subgroups.<sup class="cite"><a href="#ref-2">[2]</a></sup> This is a design decision, not an afterthought, and it has to be made before data collection starts, because it cannot be fixed by more sophisticated analysis afterward &mdash; the information that a naive subgrouping throws away by blending two sources together is simply gone.</p>
+    <p>The formal rule, in Wheeler's phrasing: choose subgroups so that the variation <em>within</em> a subgroup is only the routine variation you want the chart's limits to represent, and let any variation you want the chart to be able to <em>detect</em> show up <em>between</em> subgroups.<sup class="cite"><a href="#ref-2">[2]</a>, <a href="#ref-5">[5]</a></sup> This is a design decision, not an afterthought, and it has to be made before data collection starts, because it cannot be fixed by more sophisticated analysis afterward &mdash; the information that a naive subgrouping throws away by blending two sources together is simply gone.</p>
     <div class="formula">Within-subgroup variation should be routine, common-cause variation only.
       <br>Between-subgroup variation is what the X&#772; chart is built to detect.
       <span class="where">Consecutive-in-time subgroups (the default choice) are rational when the process runs as one stream. When a process has more than one stream &mdash; cavities, spindles, operators, machines &mdash; consecutive-in-time subgroups are usually <em>not</em> rational, because they mix the streams inside every subgroup.</span>
@@ -56,6 +56,26 @@
 
     <h2 id="sheets">Data collection sheets</h2>
     <p>A data collection sheet exists to capture the context a later analysis will need, not just the measurement itself. At minimum: the value, the time it was taken, who took it, which machine/cavity/spindle/operator produced the part, and the gauge used. Skipping the context columns is the single most common reason a promising-looking dataset turns out to be unusable three weeks later, when someone asks "was this before or after the tool change?" and nobody recorded it.</p>
+
+    <details>
+      <summary>Show the 80 micrometer readings (0.001&nbsp;mm resolution)</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A1. Shaft diameter (mm), 80 parts, read on a digital micrometer to 0.001&nbsp;mm (constructed data). The coarse column of Table 3 is these same 80 values rounded to 0.01&nbsp;mm.</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">6.503</td><td class="num">6.507</td><td class="num">6.503</td><td class="num">6.49</td><td class="num">6.507</td><td class="num">6.504</td><td class="num">6.496</td><td class="num">6.505</td><td class="num">6.503</td><td class="num">6.502</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">6.5</td><td class="num">6.504</td><td class="num">6.494</td><td class="num">6.499</td><td class="num">6.496</td><td class="num">6.505</td><td class="num">6.5</td><td class="num">6.498</td><td class="num">6.494</td><td class="num">6.498</td></tr>
+            <tr><td>21&ndash;30</td><td class="num">6.5</td><td class="num">6.498</td><td class="num">6.51</td><td class="num">6.508</td><td class="num">6.478</td><td class="num">6.485</td><td class="num">6.499</td><td class="num">6.497</td><td class="num">6.502</td><td class="num">6.502</td></tr>
+            <tr><td>31&ndash;40</td><td class="num">6.517</td><td class="num">6.491</td><td class="num">6.497</td><td class="num">6.516</td><td class="num">6.505</td><td class="num">6.505</td><td class="num">6.496</td><td class="num">6.487</td><td class="num">6.501</td><td class="num">6.501</td></tr>
+            <tr><td>41&ndash;50</td><td class="num">6.49</td><td class="num">6.495</td><td class="num">6.499</td><td class="num">6.492</td><td class="num">6.499</td><td class="num">6.501</td><td class="num">6.5</td><td class="num">6.496</td><td class="num">6.505</td><td class="num">6.507</td></tr>
+            <tr><td>51&ndash;60</td><td class="num">6.503</td><td class="num">6.493</td><td class="num">6.506</td><td class="num">6.496</td><td class="num">6.507</td><td class="num">6.491</td><td class="num">6.507</td><td class="num">6.5</td><td class="num">6.49</td><td class="num">6.497</td></tr>
+            <tr><td>61&ndash;70</td><td class="num">6.5</td><td class="num">6.502</td><td class="num">6.492</td><td class="num">6.491</td><td class="num">6.502</td><td class="num">6.496</td><td class="num">6.502</td><td class="num">6.506</td><td class="num">6.487</td><td class="num">6.502</td></tr>
+            <tr><td>71&ndash;80</td><td class="num">6.51</td><td class="num">6.498</td><td class="num">6.494</td><td class="num">6.506</td><td class="num">6.502</td><td class="num">6.507</td><td class="num">6.497</td><td class="num">6.488</td><td class="num">6.499</td><td class="num">6.496</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
 
     <h2 id="failures">Common data quality failures</h2>
     <p>Three failures recur often enough to name individually, all of them things a data collection sheet and a sampling plan should have prevented, and none of them fixable by better statistics after the fact.</p>
@@ -209,6 +229,26 @@
       <p><strong>(c)</strong> The rational grouping's chart is the one worth trusting: it is <strong>not stable</strong>, while the naive grouping reports a falsely reassuring "stable, no signal." The rational grouping correctly flags that something worth investigating (the two lathes running at different levels) is present. An unstable chart from a rationally subgrouped study is not a failure of the study; it is the study doing its job.</p>
     </details>
 
+    <details>
+      <summary>Show the 40 bore diameters, in production order</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A2. Bore diameter (mm), 40 parts in production order, grouped as the naive plan groups them: eight consecutive subgroups of five (constructed data). The rational grouping uses these same 40 values, regrouped so that subgroups 1 to 4 are lathe 1 (parts 1, 3, 5, &hellip;) and 5 to 8 are lathe 2 (parts 2, 4, 6, &hellip;).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">24.992</td><td class="num">25.005</td><td class="num">24.998</td><td class="num">25.022</td><td class="num">25.011</td></tr>
+            <tr><td>2</td><td class="num">25.019</td><td class="num">24.994</td><td class="num">25.01</td><td class="num">25.007</td><td class="num">25.034</td></tr>
+            <tr><td>3</td><td class="num">25.003</td><td class="num">25.006</td><td class="num">24.99</td><td class="num">25.034</td><td class="num">25.002</td></tr>
+            <tr><td>4</td><td class="num">25.001</td><td class="num">24.999</td><td class="num">25.006</td><td class="num">24.994</td><td class="num">25.013</td></tr>
+            <tr><td>5</td><td class="num">24.993</td><td class="num">25.024</td><td class="num">24.999</td><td class="num">25.012</td><td class="num">25.004</td></tr>
+            <tr><td>6</td><td class="num">25.026</td><td class="num">24.984</td><td class="num">25.015</td><td class="num">24.99</td><td class="num">25.016</td></tr>
+            <tr><td>7</td><td class="num">24.987</td><td class="num">25.018</td><td class="num">25.0</td><td class="num">25.015</td><td class="num">24.99</td></tr>
+            <tr><td>8</td><td class="num">25.014</td><td class="num">24.989</td><td class="num">25.004</td><td class="num">25.002</td><td class="num">25.007</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
     <h3 id="ex2">Exercise 2: spot the data collection problems</h3>
     <p class="example-label">Constructed scenario, not a real project.</p>
     <p>A new hire is asked to collect 100 readings of a fill weight for a capability study. Their plan: "I'll grab whatever containers are sitting on the finished-goods pallet when I have a free ten minutes each day, sort them by how full they look so the light ones are easy to spot, and write down the weight to the nearest gram since that's what the customer spec is in." <strong>Task.</strong> Identify every data quality failure in this plan and say what it will do to the resulting study.</p>
@@ -345,7 +385,7 @@
       <li id="ref-3">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 6.3.2.1 "Shewhart X-bar and R and S control charts". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc321.htm</a></li>
       <li id="ref-4">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
       <li id="ref-5">Wheeler, D. J., &amp; Chambers, D. S. (2010). <em>Understanding Statistical Process Control</em>, 3rd ed. SPC Press. <a href="https://www.spcpress.com/book_understanding_statistical_process_control.php">https://www.spcpress.com/book_understanding_statistical_process_control.php</a> <span class="tag">(catalogue-level; general reference for rational subgrouping's role in SPC)</span></li>
-      <li id="ref-6">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(secondary: catalogue-level)</span></li>
+      <li id="ref-6">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(secondary: catalogue-level; further reading, no claim on this page rests on it)</span></li>
       <li id="ref-7">Deming, W. E. (1986). <em>Out of the Crisis</em>. MIT Center for Advanced Engineering Study. <a href="https://archive.org/details/outofcrisisquali00demi">https://archive.org/details/outofcrisisquali00demi</a> <span class="tag">(secondary: catalogue-level; operational definitions are discussed at length in this book, not independently verified by page this session)</span></li>
     </ol>
 

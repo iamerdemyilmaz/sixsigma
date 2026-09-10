@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formula sheet &middot; Six Sigma Course</title>
+<meta name="description" content="Every formula in the course on one page: descriptive statistics, capability, DPMO and yield, gauge R&amp;R, control chart limits, hypothesis tests, regression, factorial effects, tolerance stacks and the Taguchi loss function.">
+<!-- allowed-numbers: 1.41 is the AIAG MSA ndc multiplier (the rounded value of the square root of 2 used in the published formula); it is a constant of the formula, not a computed result. -->
+<meta name="allowed-numbers" content="1.41">
+<link rel="stylesheet" href="assets/css/course.css">
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cfd39382023243b08cf5932468455c77"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body data-root="" data-page="formulas">
+
+<header class="site-header">
+  <a class="brand" href="index.html">Six Sigma Course <span>&middot; Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Reference</p>
+    <h1>Formula sheet</h1>
+    <p class="lead">Every formula the course uses, with the module that explains it and the assumption that decides whether it applies.</p>
+    <p>Every formula the course uses, in one place, with the module that explains it. Nothing here is a substitute for
+    that explanation: a formula applied without its assumptions is how a Cpk of 1.4 gets reported on a process that is not
+    stable, not normal, and measured with a gauge that eats a third of the tolerance. Where a formula needs a constant, it is
+    in the <a href="tables.html">tables</a>.</p>
+
+    <h2 id="descriptive">Descriptive statistics</h2>
+    <div class="formula">Mean: &nbsp; x&#772; = (&Sigma; x<sub>i</sub>) / n
+      <br>Sample standard deviation: &nbsp; s = &radic;[ &Sigma;(x<sub>i</sub> &minus; x&#772;)&sup2; / (n &minus; 1) ]
+      <br>Population standard deviation: &nbsp; &sigma; = &radic;[ &Sigma;(x<sub>i</sub> &minus; &mu;)&sup2; / N ]
+      <br>Range: &nbsp; R = x<sub>max</sub> &minus; x<sub>min</sub>
+      <br>Standard error of the mean: &nbsp; SE = s / &radic;n
+      <span class="where">The n &minus; 1 is what makes s an unbiased estimator of the variance from a sample; use it unless
+      you genuinely have the whole population. Module 1.</span>
+    </div>
+
+    <h2 id="normal">The normal distribution and Z</h2>
+    <div class="formula">Z = (x &minus; &mu;) / &sigma; &nbsp; (or (x &minus; x&#772;) / s from a sample)
+      <br>Fraction beyond an upper limit: &nbsp; 1 &minus; &Phi;(Z<sub>USL</sub>), &nbsp; Z<sub>USL</sub> = (USL &minus; x&#772;) / s
+      <br>Fraction below a lower limit: &nbsp; &Phi;(&minus;Z<sub>LSL</sub>), &nbsp; Z<sub>LSL</sub> = (x&#772; &minus; LSL) / s
+      <span class="where">The predicted fraction is only as good as the normal assumption behind it. Check the shape first.
+      Modules 1, 7 and 8.</span>
+    </div>
+
+    <h2 id="capability">Process capability</h2>
+    <div class="formula">Within-subgroup sigma: &nbsp; &sigma;&#770;<sub>within</sub> = R&#772; / d&#8322; &nbsp; or &nbsp;
+      S&#772; / c&#8324; &nbsp; or, on individuals, &nbsp; MR&#772; / 1.128
+      <br>Overall sigma: &nbsp; &sigma;&#770;<sub>overall</sub> = s, the sample standard deviation of all the data
+      <br>C<sub>p</sub> = (USL &minus; LSL) / (6&sigma;&#770;) &nbsp;&nbsp; C<sub>pu</sub> = (USL &minus; x&#772;) / (3&sigma;&#770;)
+      &nbsp;&nbsp; C<sub>pl</sub> = (x&#772; &minus; LSL) / (3&sigma;&#770;) &nbsp;&nbsp; C<sub>pk</sub> = min(C<sub>pu</sub>, C<sub>pl</sub>)
+      <br>C<sub>pm</sub> = (USL &minus; LSL) / (6&radic;[ &sigma;&#770;&sup2; + (x&#772; &minus; T)&sup2; ]) &nbsp; with target T
+      <br>Predicted PPM (normal): &nbsp; 10<sup>6</sup> &times; [ 1 &minus; &Phi;(3C<sub>pu</sub>) + &Phi;(&minus;3C<sub>pl</sub>) ]
+      <br>Approximate 95&nbsp;% interval on C<sub>pk</sub>: &nbsp; C&#770;<sub>pk</sub> [ 1 &plusmn; 1.96 &radic;( 1/(9nC&#770;<sub>pk</sub>&sup2;) + 1/(2(n&minus;1)) ) ]
+      <span class="where">Which sigma you used decides which letter you may print. Under the current AIAG &amp; VDA and ISO
+      22514 convention the C letters require a process shown to be stable and the P letters do not, and both use the overall
+      sigma; under the legacy 2005 convention C came from the within-subgroup sigma and P from the overall one. State the
+      convention and the sigma next to every index. Modules 7 and 8.</span>
+    </div>
+
+    <h2 id="defects">Defects, yield and sigma level</h2>
+    <div class="formula">DPMO = (defects / (units &times; opportunities per unit)) &times; 10<sup>6</sup>
+      <br>DPU = defects / units &nbsp;&nbsp; First-time yield of a step: &nbsp; Y = e<sup>&minus;DPU</sup> (Poisson) or
+      good/total
+      <br>Rolled throughput yield: &nbsp; RTY = Y&#8321; &times; Y&#8322; &times; &hellip; &times; Y<sub>k</sub>
+      &nbsp;&nbsp; Normalised yield = RTY<sup>1/k</sup> &nbsp;&nbsp; Total DPU = &minus;ln(RTY)
+      <br>Z (long term, no shift) = &Phi;<sup>&minus;1</sup>(1 &minus; DPMO / 10<sup>6</sup>) &nbsp;&nbsp;
+      Sigma level (Motorola convention) = Z + 1.5
+      <span class="where">The 1.5 is a convention, not a measurement. Say which of the two numbers you are quoting. Module 6.</span>
+    </div>
+
+    <h2 id="msa">Measurement systems analysis</h2>
+    <div class="formula">&sigma;&sup2;<sub>total</sub> = &sigma;&sup2;<sub>part</sub> + &sigma;&sup2;<sub>repeatability</sub> + &sigma;&sup2;<sub>reproducibility</sub>
+      <br>&sigma;<sub>GRR</sub> = &radic;( &sigma;&sup2;<sub>repeatability</sub> + &sigma;&sup2;<sub>reproducibility</sub> )
+      <br>%Contribution = 100 &times; &sigma;&sup2;<sub>GRR</sub> / &sigma;&sup2;<sub>total</sub> &nbsp;&nbsp;
+      %Study Variation = 100 &times; &sigma;<sub>GRR</sub> / &sigma;<sub>total</sub>
+      <br>%Tolerance = 100 &times; 6&sigma;<sub>GRR</sub> / (USL &minus; LSL) &nbsp;&nbsp;
+      ndc = 1.41 &times; &sigma;<sub>part</sub> / &sigma;<sub>GRR</sub>
+      <span class="where">Variances add; standard deviations do not. %Contribution and %Study Variation therefore tell
+      different-looking stories about the same gauge, and both are correct. Module 4.</span>
+    </div>
+
+    <h2 id="charts">Control charts</h2>
+    <div class="formula">X&#772;-R: &nbsp; X&#772;&#772; &plusmn; A&#8322;R&#772; &nbsp;|&nbsp; R chart: D&#8323;R&#772; to D&#8324;R&#772;
+      <br>X&#772;-S: &nbsp; X&#772;&#772; &plusmn; A&#8323;S&#772; &nbsp;|&nbsp; S chart: B&#8323;S&#772; to B&#8324;S&#772;
+      <br>I-MR: &nbsp; x&#772; &plusmn; 3 MR&#772; / 1.128 &nbsp;|&nbsp; MR chart: 0 to 3.267 MR&#772;
+      <br>p chart: &nbsp; p&#772; &plusmn; 3 &radic;[ p&#772;(1 &minus; p&#772;) / n<sub>i</sub> ] &nbsp;&nbsp;
+      np chart: &nbsp; np&#772; &plusmn; 3 &radic;[ np&#772;(1 &minus; p&#772;) ]
+      <br>c chart: &nbsp; c&#772; &plusmn; 3&radic;c&#772; &nbsp;&nbsp;
+      u chart: &nbsp; u&#772; &plusmn; 3 &radic;( u&#772; / n<sub>i</sub> )
+      <br>EWMA: &nbsp; z<sub>i</sub> = &lambda;x<sub>i</sub> + (1 &minus; &lambda;)z<sub>i&minus;1</sub>, &nbsp;
+      limits target &plusmn; L&sigma;&#770;&radic;[&lambda;/(2 &minus; &lambda;)] in the steady state
+      <br>Tabular CUSUM: &nbsp; C&#8314;<sub>i</sub> = max(0, C&#8314;<sub>i&minus;1</sub> + (x<sub>i</sub> &minus; target)/&sigma;&#770; &minus; k), signal when C&#8314; or C&#8315; exceeds h
+      <span class="where">Every limit is the centre line plus or minus three standard deviations of the statistic being
+      plotted. Specification limits are never drawn on any of these charts. Modules 16 and 17.</span>
+    </div>
+
+    <h2 id="tests">Hypothesis tests and intervals</h2>
+    <div class="formula">One sample: &nbsp; t = (x&#772; &minus; &mu;&#8320;) / (s/&radic;n), &nbsp; df = n &minus; 1
+      <br>Two samples, pooled: &nbsp; t = (x&#772;&#8321; &minus; x&#772;&#8322;) / (s<sub>p</sub>&radic;(1/n&#8321; + 1/n&#8322;)),
+      &nbsp; s<sub>p</sub>&sup2; = [(n&#8321;&minus;1)s&#8321;&sup2; + (n&#8322;&minus;1)s&#8322;&sup2;] / (n&#8321; + n&#8322; &minus; 2)
+      <br>Welch: &nbsp; t = (x&#772;&#8321; &minus; x&#772;&#8322;) / &radic;(s&#8321;&sup2;/n&#8321; + s&#8322;&sup2;/n&#8322;), with the Welch&ndash;Satterthwaite df
+      <br>Paired: &nbsp; t = d&#772; / (s<sub>d</sub>/&radic;n) on the n differences, df = n &minus; 1
+      <br>Confidence interval on a mean: &nbsp; x&#772; &plusmn; t<sub>&alpha;/2, n&minus;1</sub> s/&radic;n
+      <br>Two-sample sample size: &nbsp; n per group = 2(z<sub>&alpha;/2</sub> + z<sub>&beta;</sub>)&sup2; &sigma;&sup2; / &delta;&sup2;, then iterate with t
+      <br>Effect size: &nbsp; Cohen's d = (x&#772;&#8321; &minus; x&#772;&#8322;) / s<sub>p</sub>
+      <br>Chi-square on a contingency table: &nbsp; &chi;&sup2; = &Sigma; (O &minus; E)&sup2; / E, &nbsp; df = (r &minus; 1)(c &minus; 1)
+      <span class="where">A p-value is the probability of data at least this extreme <em>if the null hypothesis were true</em>.
+      It is not the probability that the hypothesis is true, and a large p-value is not evidence of no difference. Always
+      report the effect size and its interval beside it. Module 11.</span>
+    </div>
+
+    <h2 id="regression">Correlation and regression</h2>
+    <div class="formula">r = &Sigma;(x &minus; x&#772;)(y &minus; y&#772;) / &radic;[ &Sigma;(x &minus; x&#772;)&sup2; &Sigma;(y &minus; y&#772;)&sup2; ]
+      <br>Slope: &nbsp; b&#8321; = &Sigma;(x &minus; x&#772;)(y &minus; y&#772;) / &Sigma;(x &minus; x&#772;)&sup2; &nbsp;&nbsp;
+      Intercept: &nbsp; b&#8320; = y&#772; &minus; b&#8321;x&#772;
+      <br>R&sup2; = SS<sub>regression</sub> / SS<sub>total</sub> = 1 &minus; SS<sub>residual</sub> / SS<sub>total</sub>
+      <br>Adjusted R&sup2; = 1 &minus; (1 &minus; R&sup2;)(n &minus; 1)/(n &minus; k &minus; 1)
+      <br>Residual standard deviation: &nbsp; s = &radic;( SS<sub>residual</sub> / (n &minus; k &minus; 1) )
+      <span class="where">R&sup2; measures how much variation the model accounts for in the data you have, not whether the
+      model is right. The residual plot decides that. Module 12.</span>
+    </div>
+
+    <h2 id="doe">Design of experiments</h2>
+    <div class="formula">Main effect of A in a 2<sup>k</sup>: &nbsp; effect = y&#772;<sub>A high</sub> &minus; y&#772;<sub>A low</sub>
+      <br>Coefficient in the coded model: &nbsp; b<sub>A</sub> = effect / 2
+      <br>Interaction AB: &nbsp; effect = &frac12;[ (effect of A at B high) &minus; (effect of A at B low) ]
+      <br>Contrast form: &nbsp; effect = (&Sigma; &plusmn;y) / (n2<sup>k&minus;1</sup>) using the sign column of the design
+      <br>Resolution of a fractional design: the length of the shortest word in the defining relation
+      <span class="where">A fractional design buys runs with confounding, and you choose which confounding you can live with
+      before you run it, not after. Module 13.</span>
+    </div>
+
+    <h2 id="tolerance">Tolerances and loss</h2>
+    <div class="formula">Worst case stack: &nbsp; T<sub>assembly</sub> = &Sigma; T<sub>i</sub>
+      <br>Root sum of squares: &nbsp; T<sub>assembly</sub> = &radic;( &Sigma; T<sub>i</sub>&sup2; )
+      <br>Taguchi loss: &nbsp; L(x) = k(x &minus; T)&sup2;, &nbsp; k = A&#8320; / &delta;&#8320;&sup2;
+      <br>Average loss over a process: &nbsp; L&#772; = k[ s&sup2; + (x&#772; &minus; T)&sup2; ]
+      <span class="where">RSS predicts the spread of a stack correctly and says nothing about where it is centred; a small
+      mean shift in each part is what turns a comfortable predicted capability into a marginal real one. Module 15.</span>
+    </div>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>&copy; <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/course.js"></script>
+</body>
+</html>

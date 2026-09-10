@@ -1,0 +1,18 @@
+{
+ "id": "m12-ex2-cure",
+ "module": "12",
+ "kind": "regression",
+ "title": "Exercise 2: adhesive shear strength vs cure temperature, straight line fit",
+ "source": "constructed",
+ "setting": "lap-shear strength (MPa) of an adhesive joint vs cure temperature (deg C), 18 joints across 120 to 180 deg C",
+ "params": {
+  "alpha": 0.05,
+  "units_x": "degC",
+  "units_y": "MPa"
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 18
+}

@@ -1,0 +1,18 @@
+{
+ "id": "m12-coat-nozzle-b",
+ "module": "12",
+ "kind": "regression",
+ "title": "Worked example 3: coating thickness vs line speed, nozzle B alone",
+ "source": "constructed",
+ "setting": "powder coating thickness (um) vs line speed (m/min), 20 panels sprayed through nozzle B",
+ "params": {
+  "alpha": 0.05,
+  "units_x": "m/min",
+  "units_y": "um"
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 20
+}

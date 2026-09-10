@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Module 10: Root cause analysis · Six Sigma Course</title>
 <meta name="description" content="Cause-and-effect diagrams, 5 Whys done properly with evidence, Is/Is-not, fault tree introduction, process FMEA per the AIAG-VDA handbook with a worked example, and prioritization.">
-<meta name="examples" content="m10-pfmea-braze, m10-fault-tree-leak, m10-ex1-pfmea, m10-ex2-fault-tree">
+<meta name="examples" content="m10-pfmea-braze, m10-fault-tree-leak, m10-verify-fixture, m10-ex1-pfmea, m10-ex2-fault-tree">
 <link rel="stylesheet" href="../assets/css/course.css">
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cfd39382023243b08cf5932468455c77"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
@@ -139,6 +139,63 @@
       <br>P(top event) = 1 &minus; (1&minus;0.00212)(1&minus;0.002) = 0.00412
     </div>
     <p>About 4 in 1,000 assemblies are predicted to reach the customer with an undetected leak &mdash; noticeably smaller than the 4.2&nbsp;% reject rate the test catches, which is exactly the point of a 100&nbsp;% leak test: most leaks are caught. The tree also shows where the residual risk concentrates: the "test fails to detect" branch (5&nbsp;% miss rate) contributes roughly as much to the undetected-escape probability as all three physical leak causes combined, which argues for a Module 4 MSA study on the leak-test method itself as much as for any change to the braze process.</p>
+
+    <h3 id="example3">Worked example 3: verifying a candidate cause by turning it off and on</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>This is the step the 5 Whys section calls the whole value of the technique, done with numbers. The chain on the brazed
+    header ended at a candidate cause: the assembly fixture's locating pin has worn, so the two parts sit further apart than
+    the drawing intends and the braze gap opens. That is a plausible story consistent with everything seen so far, which is
+    precisely the point at which teams stop and implement. The verification is to turn the suspected cause off and measure:
+    twenty assemblies are built on the worn fixture, the pin is replaced, and twenty more are built on the repaired one. The
+    joint gap is measured on a shadowgraph to 0.001&nbsp;mm.</p>
+    <details>
+      <summary>Show the 40 gap measurements</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A1. Braze joint gap (mm), 20 assemblies on the worn locating pin and 20 after it was replaced, in build order (constructed data).</caption>
+          <thead><tr><th>Fixture</th><th>Assemblies</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>Worn pin</td><td>1&ndash;10</td><td class="num">0.104</td><td class="num">0.125</td><td class="num">0.121</td><td class="num">0.128</td><td class="num">0.103</td><td class="num">0.136</td><td class="num">0.122</td><td class="num">0.105</td><td class="num">0.103</td><td class="num">0.103</td></tr>
+            <tr><td></td><td>11&ndash;20</td><td class="num">0.111</td><td class="num">0.137</td><td class="num">0.133</td><td class="num">0.114</td><td class="num">0.114</td><td class="num">0.147</td><td class="num">0.133</td><td class="num">0.11</td><td class="num">0.119</td><td class="num">0.115</td></tr>
+            <tr><td>Pin replaced</td><td>1&ndash;10</td><td class="num">0.106</td><td class="num">0.115</td><td class="num">0.101</td><td class="num">0.109</td><td class="num">0.111</td><td class="num">0.114</td><td class="num">0.096</td><td class="num">0.101</td><td class="num">0.129</td><td class="num">0.102</td></tr>
+            <tr><td></td><td>11&ndash;20</td><td class="num">0.104</td><td class="num">0.11</td><td class="num">0.097</td><td class="num">0.099</td><td class="num">0.125</td><td class="num">0.12</td><td class="num">0.09</td><td class="num">0.105</td><td class="num">0.088</td><td class="num">0.085</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Braze joint gap (mm) with the worn locating pin and after replacing it, 20 assemblies each
+        (constructed data).</caption>
+        <thead><tr><th>Fixture</th><th>n</th><th>Mean gap (mm)</th><th>s (mm)</th></tr></thead>
+        <tbody>
+          <tr><td>Worn pin</td><td class="num"><span data-ex="m10-verify-fixture" data-key="n.0" data-dp="0">20</span></td><td class="num"><span data-ex="m10-verify-fixture" data-key="means.0" data-dp="5">0.11915</span></td><td class="num"><span data-ex="m10-verify-fixture" data-key="sds.0" data-dp="5">0.01322</span></td></tr>
+          <tr><td>Pin replaced</td><td class="num"><span data-ex="m10-verify-fixture" data-key="n.1" data-dp="0">20</span></td><td class="num"><span data-ex="m10-verify-fixture" data-key="means.1" data-dp="5">0.10535</span></td><td class="num"><span data-ex="m10-verify-fixture" data-key="sds.1" data-dp="5">0.01169</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">Difference in means = <span data-ex="m10-verify-fixture" data-key="diff" data-dp="5">0.01380</span>&nbsp;mm &nbsp; (worn minus replaced)
+      <br>Pooled two-sample t = <span data-ex="m10-verify-fixture" data-key="pooled.t" data-dp="3">3.498</span> on <span data-ex="m10-verify-fixture" data-key="pooled.df" data-dp="0">38</span> degrees of freedom, &nbsp; p = <span data-ex="m10-verify-fixture" data-key="pooled.p" data-dp="6">0.001211</span>
+      <br>95&nbsp;% confidence interval on the difference: <span data-ex="m10-verify-fixture" data-key="pooled.ci.0" data-dp="5">0.00581</span> to <span data-ex="m10-verify-fixture" data-key="pooled.ci.1" data-dp="5">0.02179</span>&nbsp;mm
+      <br>Cohen's d = <span data-ex="m10-verify-fixture" data-key="cohen_d" data-dp="3">1.106</span> &nbsp;&nbsp; Levene's test on the two spreads: p = <span data-ex="m10-verify-fixture" data-key="variance_tests.levene_p" data-dp="4">0.4109</span>
+      <span class="where">Levene's p well above 0.05 means there is no evidence the two groups' spreads differ, so the pooled
+      t-test's equal-variance assumption is reasonable here; Welch's version gives essentially the same answer
+      (p = <span data-ex="m10-verify-fixture" data-key="welch.p" data-dp="6">0.001225</span>). Module 11 explains all of these.</span>
+    </div>
+    <p>Replacing the pin moved the mean gap by <span data-ex="m10-verify-fixture" data-key="diff" data-dp="5">0.01380</span>&nbsp;mm, and the interval says the true effect is somewhere
+    between <span data-ex="m10-verify-fixture" data-key="pooled.ci.0" data-dp="5">0.00581</span> and <span data-ex="m10-verify-fixture" data-key="pooled.ci.1" data-dp="5">0.02179</span>&nbsp;mm. Both the p-value and, more usefully, the effect
+    size say this is a real and substantial change: a bit over one pooled standard deviation. On a characteristic whose
+    working range is a few hundredths of a millimetre, that is worth having. The candidate cause survives.</p>
+    <p>Two honest limits on what has been shown. First, this is a comparison of two groups built at different times, so
+    anything else that changed between them, a different powder lot, a different operator, a different ambient temperature,
+    is confounded with the pin. The stronger version of this experiment randomises the order of the forty builds across the
+    two fixtures, which is Module 13's subject and the reason it exists. Second, the mean gap after the repair is still
+    <span data-ex="m10-verify-fixture" data-key="means.1" data-dp="5">0.10535</span>&nbsp;mm, not zero variation and not necessarily inside the gap window the process needs; the pin was
+    <em>a</em> cause, and the evidence does not say it was the only one. "Verified" means the arrow in the cause-and-effect
+    diagram is now supported by data, not that the problem is finished.</p>
+    <p>This is also the answer to the most common failure of root cause analysis, which is not picking the wrong cause but
+    never checking the one that was picked. A cause that has been turned off and on, with the effect measured both times, is
+    in a different evidential class from a cause that a team found convincing in a meeting, and it costs one afternoon.</p>
 
     <h2 id="mistakes">Common mistakes</h2>
     <ol>

@@ -55,7 +55,8 @@
     <p>A reaction plan answers one specific question: what does the person watching the chart actually do when it signals? A good reaction plan names the trigger (a specific Western Electric or Nelson rule, Module 16), the immediate containment action, who investigates, and the escalation path if the cause is not found within a stated time. What a reaction plan must never say, however phrased, is "adjust the process toward nominal." Module 2's funnel experiment already demonstrated, in a fully controlled simulation, that adjusting a stable process in response to its own ordinary noise (Rules 2, 3, and 4) increases variation rather than reducing it. A control chart's entire purpose is to tell the difference between a point that is ordinary noise (within control limits, no rule triggered: do nothing) and a point that is a real signal (a rule triggered: investigate and find the assignable cause, then decide whether action is needed). An operator who "corrects" every reading that drifts slightly toward a spec limit, chart or no chart, is running the funnel experiment's Rule 2 on a real process, by hand, indefinitely.</p>
 
     <h2 id="ongoing">Ongoing capability monitoring: control limits vs. specification limits, a third time</h2>
-    <p>This course has now made the point that control limits and specification limits are never the same thing, and never belong on the same chart, twice: once when capability indices were introduced (Module 7), once when control charts were built by hand (Module 16). The third angle, here, is what that distinction means <em>over months</em>, not within a single chart. A monthly (or quarterly) capability check produces one Ppk estimate per period, and that estimate has its own sampling uncertainty &mdash; the 95&nbsp;% confidence interval this course has carried on Ppk since Module 7. Two months' point estimates can differ noticeably while their confidence intervals overlap heavily, in which case the honest conclusion is that nothing has necessarily changed; reacting to that difference as if it were a real trend is the same overreaction the funnel experiment warns against, just measured monthly instead of point to point. A real shift is one where the new period's confidence interval no longer overlaps the established band at all. Worked example 3 below shows both patterns on real numbers.</p>
+    <p>This course has now made the point that control limits and specification limits are never the same thing, and never belong on the same chart, twice: once when capability indices were introduced (Module 7), once when control charts were built by hand (Module 16). The third angle, here, is what that distinction means <em>over months</em>, not within a single chart. A monthly (or quarterly) capability check produces one Ppk estimate per period, and that estimate has its own sampling uncertainty &mdash; the 95&nbsp;% confidence interval this course has carried on Ppk since Module 7. Two months' point estimates can differ noticeably while their confidence intervals overlap heavily, in which case the honest conclusion is that nothing has necessarily changed; reacting to that difference as if it were a real trend is the same overreaction the funnel experiment warns against, just measured monthly instead of point to point. A real shift is one where the new period's confidence interval no longer overlaps the established band at all. Worked example 3 below shows both patterns on the computed intervals.</p>
+    <p>A note on the letters, because a monitoring report has to pick one. This module reports Pp and Ppk throughout. Under the current AIAG &amp; VDA convention, the Cp and Cpk labels are reserved for a process that has been demonstrated statistically stable over the period being reported, and Pp and Ppk are used otherwise; one month's snapshot of 30 readings is a performance estimate, not a demonstration of stability across that month.<sup class="cite"><a href="#ref-6">[6]</a></sup> Legacy supplier reports and much software still print the 2005 labels instead, where Cpk is computed from the within-subgroup sigma and Ppk from the overall sample standard deviation (Module 7).<sup class="cite"><a href="#ref-7">[7]</a></sup> Whichever convention your organization uses, state it beside the number, and state which sigma estimate produced it.</p>
 
     <h2 id="closure">Project closure and reporting</h2>
     <p>A DMAIC project closes with a short, specific report, not a retrospective essay: the problem statement and charter (Module 3) restated against what was actually achieved; the verified before-and-after result with its hypothesis test (Module 14); the control plan and reaction plan, handed to the named process owner; and a stated date (typically 3 to 6 months out) for a follow-up capability check, using exactly the confidence-interval comparison this module teaches, to confirm the gain actually held rather than assuming it did because nobody complained.</p>
@@ -114,13 +115,87 @@
     </div>
     <p>Months 1 through 4 wander from 1.029 to 1.237, and it would be easy to read that as a trend (steadily improving, even) if only the point estimates are looked at. Their confidence intervals tell a different story: every one of the four overlaps every other one heavily (month 4's interval alone spans 0.897 to 1.577, comfortably covering all three earlier point estimates). Nothing in months 1 through 4 is distinguishable from a single stable process sampled four times with ordinary noise, and the right reaction to that variation is exactly none. Month 5 is a different case entirely: Ppk drops to 0.517, and its interval, 0.338 to 0.695, does not overlap month 4's lower bound of 0.897 at all &mdash; nor, for that matter, any of the four earlier months' lower bounds, all of which sit at 0.739 or above. That is a real, statistically distinguishable shift (here, both the mean moved further from target and the spread widened, consistent with a tool-wear story), and it is precisely the pattern that should trigger the reaction plan in Worked example 2, not a quiet note in a monthly report.</p>
 
+    <details>
+      <summary>Show the five months of bore-diameter readings (6 subgroups of 5 per month, 150 readings)</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A1. Month 1: bore diameter (mm), six subgroups of five (constructed data).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">11.997</td><td class="num">11.989</td><td class="num">12.007</td><td class="num">12.008</td><td class="num">12.001</td></tr>
+            <tr><td>2</td><td class="num">12.005</td><td class="num">12.014</td><td class="num">12.01</td><td class="num">12.008</td><td class="num">12.007</td></tr>
+            <tr><td>3</td><td class="num">11.997</td><td class="num">12.009</td><td class="num">11.991</td><td class="num">12.0</td><td class="num">12.0</td></tr>
+            <tr><td>4</td><td class="num">11.991</td><td class="num">12.002</td><td class="num">12.014</td><td class="num">12.0</td><td class="num">11.994</td></tr>
+            <tr><td>5</td><td class="num">12.002</td><td class="num">12.009</td><td class="num">12.004</td><td class="num">12.003</td><td class="num">11.993</td></tr>
+            <tr><td>6</td><td class="num">12.006</td><td class="num">12.006</td><td class="num">12.012</td><td class="num">12.013</td><td class="num">12.007</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A2. Month 2: bore diameter (mm), six subgroups of five (constructed data).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">12.017</td><td class="num">11.999</td><td class="num">11.989</td><td class="num">11.998</td><td class="num">12.015</td></tr>
+            <tr><td>2</td><td class="num">12.005</td><td class="num">12.002</td><td class="num">12.005</td><td class="num">12.006</td><td class="num">12.01</td></tr>
+            <tr><td>3</td><td class="num">12.004</td><td class="num">12.012</td><td class="num">12.0</td><td class="num">12.003</td><td class="num">12.0</td></tr>
+            <tr><td>4</td><td class="num">12.004</td><td class="num">12.017</td><td class="num">11.992</td><td class="num">11.993</td><td class="num">11.999</td></tr>
+            <tr><td>5</td><td class="num">12.011</td><td class="num">12.005</td><td class="num">11.998</td><td class="num">12.004</td><td class="num">11.994</td></tr>
+            <tr><td>6</td><td class="num">11.995</td><td class="num">11.998</td><td class="num">12.007</td><td class="num">12.001</td><td class="num">12.004</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A3. Month 3: bore diameter (mm), six subgroups of five (constructed data).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">12.005</td><td class="num">11.992</td><td class="num">11.99</td><td class="num">11.996</td><td class="num">12.002</td></tr>
+            <tr><td>2</td><td class="num">11.991</td><td class="num">12.006</td><td class="num">12.0</td><td class="num">12.002</td><td class="num">11.997</td></tr>
+            <tr><td>3</td><td class="num">12.0</td><td class="num">12.001</td><td class="num">11.979</td><td class="num">12.008</td><td class="num">12.003</td></tr>
+            <tr><td>4</td><td class="num">11.999</td><td class="num">12.014</td><td class="num">12.005</td><td class="num">12.009</td><td class="num">11.998</td></tr>
+            <tr><td>5</td><td class="num">12.008</td><td class="num">12.003</td><td class="num">11.999</td><td class="num">12.006</td><td class="num">12.002</td></tr>
+            <tr><td>6</td><td class="num">11.989</td><td class="num">12.002</td><td class="num">12.003</td><td class="num">12.011</td><td class="num">12.01</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A4. Month 4: bore diameter (mm), six subgroups of five (constructed data).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">11.997</td><td class="num">12.003</td><td class="num">12.009</td><td class="num">11.996</td><td class="num">12.0</td></tr>
+            <tr><td>2</td><td class="num">11.992</td><td class="num">12.008</td><td class="num">12.011</td><td class="num">12.006</td><td class="num">12.003</td></tr>
+            <tr><td>3</td><td class="num">12.014</td><td class="num">12.005</td><td class="num">11.999</td><td class="num">12.004</td><td class="num">11.999</td></tr>
+            <tr><td>4</td><td class="num">12.005</td><td class="num">12.003</td><td class="num">11.993</td><td class="num">12.007</td><td class="num">11.992</td></tr>
+            <tr><td>5</td><td class="num">12.002</td><td class="num">12.005</td><td class="num">12.015</td><td class="num">12.003</td><td class="num">12.008</td></tr>
+            <tr><td>6</td><td class="num">12.005</td><td class="num">12.006</td><td class="num">12.006</td><td class="num">12.005</td><td class="num">12.008</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A5. Month 5: bore diameter (mm), six subgroups of five (constructed data).</caption>
+          <thead><tr><th>Subgroup</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">12.015</td><td class="num">12.009</td><td class="num">12.01</td><td class="num">11.993</td><td class="num">12.027</td></tr>
+            <tr><td>2</td><td class="num">12.022</td><td class="num">12.01</td><td class="num">12.019</td><td class="num">12.015</td><td class="num">12.009</td></tr>
+            <tr><td>3</td><td class="num">12.021</td><td class="num">12.011</td><td class="num">12.01</td><td class="num">12.007</td><td class="num">12.017</td></tr>
+            <tr><td>4</td><td class="num">12.012</td><td class="num">12.017</td><td class="num">12.008</td><td class="num">12.014</td><td class="num">12.006</td></tr>
+            <tr><td>5</td><td class="num">12.02</td><td class="num">12.015</td><td class="num">12.016</td><td class="num">12.016</td><td class="num">12.005</td></tr>
+            <tr><td>6</td><td class="num">12.019</td><td class="num">12.029</td><td class="num">12.0</td><td class="num">11.999</td><td class="num">12.001</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
     <h2 id="mistakes">Common mistakes</h2>
     <ul class="mistakes">
       <li><strong>A control plan with no PFMEA behind it.</strong> Consequence: characteristics get listed because someone remembered them, not because a structured risk analysis identified them, and a genuinely high-risk characteristic can be missing entirely. Fix: build the control plan from the PFMEA's output (Module 10), not from memory.</li>
       <li><strong>A reaction plan that says "adjust toward nominal."</strong> Consequence: Deming's funnel experiment on a real process, run by hand, indefinitely, adding variation that was not there before. Fix: every reaction plan entry investigates a specific assignable cause; adjustment happens only after a cause is found and understood, never as the default first response to a chart signal.</li>
       <li><strong>Treating a control plan as a one-time PPAP deliverable rather than a living document.</strong> Consequence: the plan still describes a process setting that changed months ago, and an operator following it faithfully is now following the wrong instruction. Fix: update the control plan whenever the process changes, with the same discipline as the original release.</li>
       <li><strong>Handing off to whichever shift happened to be running the pilot, not to the process's actual long-term owner.</strong> Consequence: the one team that understands why a setting matters rotates off within months, and the knowledge leaves with them. Fix: name a specific process owner and train every shift that will actually run the process, not just the pilot shift.</li>
-      <li><strong>Reacting to a month-to-month Ppk change without checking whether the confidence intervals actually separate.</strong> Consequence: chasing noise, exactly the point Worked example 3 demonstrates on real numbers &mdash; months 1 through 4's wandering point estimates would trigger unnecessary investigation if read without their intervals. Fix: compare confidence intervals, not point estimates alone, before concluding a real change occurred.</li>
+      <li><strong>Reacting to a month-to-month Ppk change without checking whether the confidence intervals actually separate.</strong> Consequence: chasing noise, exactly the point Worked example 3 demonstrates on the computed intervals &mdash; months 1 through 4's wandering point estimates would trigger unnecessary investigation if read without their intervals. Fix: compare confidence intervals, not point estimates alone, before concluding a real change occurred.</li>
       <li><strong>Recording capability checks but never recording significant process events (a tool change, a material lot change, a setting change) alongside them.</strong> Consequence: a real shift like Worked example 3's month 5 has no candidate cause on record when someone goes looking for one, months later. Fix: log significant events in the control plan itself, at the time they happen, exactly as IATF 16949 clause 9.1.1.1 expects.</li>
       <li><strong>Closing a DMAIC project without a scheduled follow-up capability check.</strong> Consequence: a gain that was real at project closure erodes gradually, and nobody notices until the reject rate is most of the way back to where it started. Fix: schedule the follow-up check as part of project closure, not as an afterthought if someone happens to ask.</li>
     </ul>
@@ -155,6 +230,43 @@
       <p><strong>(a)</strong> Yes: A's interval (0.885 to 1.648) and B's (0.714 to 1.355) overlap substantially. Nothing here is distinguishable from ordinary month-to-month sampling noise on a single stable process; A's higher point estimate (1.266 vs. 1.034) is not evidence of a real difference.</p>
       <p><strong>(b)</strong> No: month C's interval (0.268 to 0.633) sits entirely below month B's lower bound of 0.714, with no overlap at all.</p>
       <p><strong>(c)</strong> Yes. Both the mean (2.4918&nbsp;mm&nbsp;&rarr;&nbsp;2.5421&nbsp;mm) and the spread (s: 0.04568&nbsp;mm&nbsp;&rarr;&nbsp;0.07983&nbsp;mm) moved between B and C, and the non-overlapping confidence intervals confirm this is a real, statistically distinguishable shift, not noise &mdash; exactly the pattern that should trigger an investigation under the reaction plan, the same reasoning Worked example 3 applied to month 5.</p>
+    </details>
+
+    <details>
+      <summary>Show the three months of wall-thickness readings for Exercise 2</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A6. Month A: injection-moulded wall thickness (mm), 25 parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">2.503</td><td class="num">2.56</td><td class="num">2.555</td><td class="num">2.48</td><td class="num">2.489</td><td class="num">2.479</td><td class="num">2.526</td><td class="num">2.5</td><td class="num">2.534</td><td class="num">2.423</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">2.569</td><td class="num">2.498</td><td class="num">2.531</td><td class="num">2.496</td><td class="num">2.486</td><td class="num">2.522</td><td class="num">2.537</td><td class="num">2.493</td><td class="num">2.495</td><td class="num">2.531</td></tr>
+            <tr><td>21&ndash;25</td><td class="num">2.465</td><td class="num">2.437</td><td class="num">2.519</td><td class="num">2.473</td><td class="num">2.419</td><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A7. Month B: injection-moulded wall thickness (mm), 25 parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">2.529</td><td class="num">2.46</td><td class="num">2.485</td><td class="num">2.526</td><td class="num">2.584</td><td class="num">2.437</td><td class="num">2.447</td><td class="num">2.514</td><td class="num">2.443</td><td class="num">2.443</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">2.535</td><td class="num">2.504</td><td class="num">2.463</td><td class="num">2.508</td><td class="num">2.484</td><td class="num">2.467</td><td class="num">2.395</td><td class="num">2.53</td><td class="num">2.465</td><td class="num">2.488</td></tr>
+            <tr><td>21&ndash;25</td><td class="num">2.44</td><td class="num">2.521</td><td class="num">2.54</td><td class="num">2.568</td><td class="num">2.518</td><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A8. Month C: injection-moulded wall thickness (mm), 25 parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">2.531</td><td class="num">2.456</td><td class="num">2.495</td><td class="num">2.672</td><td class="num">2.501</td><td class="num">2.498</td><td class="num">2.523</td><td class="num">2.493</td><td class="num">2.515</td><td class="num">2.449</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">2.575</td><td class="num">2.602</td><td class="num">2.476</td><td class="num">2.577</td><td class="num">2.614</td><td class="num">2.396</td><td class="num">2.49</td><td class="num">2.542</td><td class="num">2.58</td><td class="num">2.62</td></tr>
+            <tr><td>21&ndash;25</td><td class="num">2.683</td><td class="num">2.703</td><td class="num">2.611</td><td class="num">2.43</td><td class="num">2.521</td><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
     </details>
 
     <h2 id="quiz">Quiz</h2>

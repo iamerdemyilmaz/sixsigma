@@ -1,0 +1,18 @@
+{
+ "id": "m12-coat-pooled",
+ "module": "12",
+ "kind": "regression",
+ "title": "Worked example 3: coating thickness vs line speed, both nozzles pooled",
+ "source": "constructed",
+ "setting": "the same 40 panels as m12-coat-nozzle-a and -b, pooled with the nozzle identity discarded",
+ "params": {
+  "alpha": 0.05,
+  "units_x": "m/min",
+  "units_y": "um"
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 40
+}

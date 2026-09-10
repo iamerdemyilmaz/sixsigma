@@ -49,7 +49,7 @@
     <p>John Tukey's box plot draws a five-number summary &mdash; minimum, first quartile, median, third quartile, maximum &mdash; as a box (the interquartile range, Q1 to Q3) with a line at the median and whiskers extending to the most extreme points within a set distance of the box, conventionally 1.5 times the interquartile range; points beyond that are drawn individually as candidate outliers.<sup class="cite"><a href="#ref-3">[3]</a></sup> A box plot's real strength is comparison: several groups' box plots side by side show shifted medians, unequal spreads, and skew, all at once, in a way a table of means and standard deviations does not communicate nearly as quickly.</p>
 
     <h2 id="scatter">Scatter plots</h2>
-    <p>A scatter plot of one variable against another is the single most direct check of whether a linear relationship (Module 12) is even a reasonable model to fit: a plot showing a curve, a broken relationship, or a pattern driven by one or two points warns against trusting a correlation coefficient or a regression line computed blind. Anscombe's quartet is the standing proof that the summary numbers alone cannot tell you this &mdash; only the picture can.</p>
+    <p>A scatter plot of one variable against another is the single most direct check of whether a linear relationship (Module 12) is even a reasonable model to fit: a plot showing a curve, a broken relationship, or a pattern driven by one or two points warns against trusting a correlation coefficient or a regression line computed blind. Anscombe's quartet is the standing proof that the summary numbers alone cannot tell you this &mdash; only the picture can.<sup class="cite"><a href="#ref-5">[5]</a></sup></p>
 
     <h2 id="stratification">Stratification</h2>
     <p>Stratification means splitting a dataset by a suspected source of variation &mdash; shift, machine, operator, lot, cavity &mdash; before drawing a conclusion from the pooled data, rather than after. Module 5's rational subgrouping lesson is stratification applied to control charts specifically; the same discipline applies just as directly to a histogram, a box plot, or a simple average: a pooled histogram that looks unremarkable can be two cleanly separated, non-overlapping distributions once split by the right factor, exactly as Worked example 3 below shows for bore diameter by shift.</p>
@@ -62,6 +62,38 @@
 
     <h2 id="timeseries">Time series plots</h2>
     <p>A simple run chart &mdash; the measured value plotted in time order, nothing more &mdash; is the plot every other graphical tool in this module implicitly depends on being meaningful: it is what confirms (or refutes) that the time order in the data is real and worth stratifying by, and it is the direct precursor to the control chart Modules 16 and 17 build from the same time-ordered data with limits added.</p>
+
+    <h2 id="stop">When to stop looking and start testing</h2>
+    <p>Every tool in this module generates hypotheses. None of them tests one. A box plot that shows shift 3 sitting higher
+    than shifts 1 and 2 is a reason to ask what shift 3 does differently; it is not evidence that the difference is larger
+    than the scatter you would see if all three shifts were identical. That question has an answer, and Module 11 computes it.
+    The order matters in both directions: testing without looking gets you a p-value on a relationship whose shape you never
+    checked, and looking without testing gets you a confident story built on a difference that four more parts would have
+    erased.</p>
+    <p>The practical rule is that a picture earns a test when a decision depends on it. If the box plot sends you to look at
+    shift 3's setup sheet and you find the fixture is different, the picture has done its whole job and no test is needed,
+    because the physical difference is now the evidence. If the picture is going to be the evidence, in a report, in a
+    supplier discussion, or in a decision to spend money, it needs a test and an interval beside it.</p>
+    <h3 id="honest-plots">Reading a plot honestly</h3>
+    <p>Because these plots are so persuasive, the ways they mislead are worth naming. Three come up constantly in real
+    reports:</p>
+    <ul>
+      <li><strong>A truncated vertical axis.</strong> Starting the axis at 11.99 instead of zero is often the right choice for
+        a measured characteristic, because zero is meaningless and the interesting variation is in the fourth decimal. It is
+        the wrong choice for a bar chart of counts, where the bar's length is the whole point and truncating it multiplies an
+        apparent difference. Read the axis before the bars, every time.</li>
+      <li><strong>Two vertical axes on one plot.</strong> Any two series can be made to look correlated by choosing the two
+        scales, and any two can be made to look unrelated the same way. If the relationship between two variables is the
+        point, plot them against each other in a scatter plot, where the reader can see the relationship rather than the
+        scaling.</li>
+      <li><strong>Unequal bins and dropped points.</strong> A histogram with one wide bin at the tail hides the tail; a
+        scatter plot with the "obviously wrong" point removed hides whatever produced it. Outliers are investigated and
+        annotated with a documented cause, never quietly deleted, and a plot that has had points removed says so in its
+        caption.</li>
+    </ul>
+    <p>The same discipline applies to what you plot in the first place. A Pareto chart of defect categories is only as good as
+    the categories, which usually come from an operator's drop-down list rather than from any analysis; a large "other"
+    category or one enormous vague category is a data collection problem (Module 5) surfacing as a chart, not a finding.</p>
 
     <h2 id="examples">Worked examples</h2>
 
@@ -199,6 +231,43 @@
     </figure>
     <p>Pooled into one histogram, these 90 values would show a somewhat wide, slightly right-skewed distribution and nothing more alarming than that. Stratified by shift, shift 3's box sits visibly higher (median <span data-ex="m09-boxplot-shift3" data-key="descriptive.median" data-dp="3">12.008</span>&nbsp;mm against shift 1's <span data-ex="m09-boxplot-shift1" data-key="descriptive.median" data-dp="3">12.000</span>&nbsp;mm) and taller (s = <span data-ex="m09-boxplot-shift3" data-key="descriptive.s" data-dp="4">0.0091</span>&nbsp;mm against shift 1's <span data-ex="m09-boxplot-shift1" data-key="descriptive.s" data-dp="4">0.0064</span>&nbsp;mm), and its single highest reading, 12.028&nbsp;mm, is over the 12.020&nbsp;mm upper specification limit &mdash; a genuine out-of-spec part that the pooled view would have buried in the tail of one wide-looking distribution instead of flagging as "whichever shift this came from is worth a visit."</p>
 
+    <details>
+      <summary>Show the 90 bore diameters behind Table 3 and Figure 3</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A1. Shift 1: bore diameter (mm), 30 consecutive parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">11.99</td><td class="num">11.992</td><td class="num">11.992</td><td class="num">11.998</td><td class="num">11.986</td><td class="num">11.999</td><td class="num">11.994</td><td class="num">12.005</td><td class="num">12.006</td><td class="num">12.008</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">12.005</td><td class="num">12.0</td><td class="num">12.005</td><td class="num">12.009</td><td class="num">11.996</td><td class="num">12.004</td><td class="num">12.0</td><td class="num">12.009</td><td class="num">11.995</td><td class="num">11.998</td></tr>
+            <tr><td>21&ndash;30</td><td class="num">12.002</td><td class="num">12.002</td><td class="num">11.99</td><td class="num">12.002</td><td class="num">11.999</td><td class="num">11.999</td><td class="num">11.999</td><td class="num">12.001</td><td class="num">11.989</td><td class="num">12.009</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A2. Shift 2: bore diameter (mm), 30 consecutive parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">11.996</td><td class="num">11.988</td><td class="num">12.001</td><td class="num">12.01</td><td class="num">11.998</td><td class="num">12.01</td><td class="num">12.01</td><td class="num">11.996</td><td class="num">11.986</td><td class="num">11.994</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">12.008</td><td class="num">11.996</td><td class="num">11.992</td><td class="num">11.993</td><td class="num">12.001</td><td class="num">12.001</td><td class="num">12.006</td><td class="num">12.007</td><td class="num">11.995</td><td class="num">12.0</td></tr>
+            <tr><td>21&ndash;30</td><td class="num">11.994</td><td class="num">12.001</td><td class="num">11.994</td><td class="num">11.994</td><td class="num">12.014</td><td class="num">12.001</td><td class="num">12.005</td><td class="num">12.016</td><td class="num">12.006</td><td class="num">12.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A3. Shift 3: bore diameter (mm), 30 consecutive parts (constructed data).</caption>
+          <thead><tr><th>Part</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;10</td><td class="num">12.006</td><td class="num">11.999</td><td class="num">12.016</td><td class="num">12.003</td><td class="num">12.022</td><td class="num">12.003</td><td class="num">12.003</td><td class="num">12.002</td><td class="num">12.012</td><td class="num">12.008</td></tr>
+            <tr><td>11&ndash;20</td><td class="num">12.018</td><td class="num">12.001</td><td class="num">12.009</td><td class="num">12.023</td><td class="num">12.004</td><td class="num">12.011</td><td class="num">12.02</td><td class="num">12.011</td><td class="num">12.0</td><td class="num">11.987</td></tr>
+            <tr><td>21&ndash;30</td><td class="num">12.028</td><td class="num">12.01</td><td class="num">12.017</td><td class="num">12.002</td><td class="num">12.022</td><td class="num">12.011</td><td class="num">12.006</td><td class="num">11.998</td><td class="num">12.009</td><td class="num">12.002</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
     <h2 id="mistakes">Common mistakes</h2>
     <ol>
       <li><strong>Running a hypothesis test before looking at a plot of the data.</strong> Consequence: Anscombe's quartet &mdash; identical summary statistics, wildly different underlying relationships; a test run blind can confidently answer the wrong question. Fix: plot first, always, no exceptions for data that "looks routine."</li>
@@ -239,6 +308,27 @@
       <summary>Show the worked solution</summary>
       <p><strong>(a)</strong> Positional: the fixture clamps unevenly, so different spots on the same part read differently every time. Cyclical: parts themselves vary (incoming material or a prior process step). Temporal: something drifts over the shift (temperature, fixture wear, operator fatigue).</p>
       <p><strong>(b)</strong> Positional dominates, at nearly two-thirds of the total (<span data-ex="m09-ex2-multivari" data-key="positional.sigma" data-dp="4">0.0198</span>&nbsp;mm of &sigma;&#770;, against <span data-ex="m09-ex2-multivari" data-key="cyclical.sigma" data-dp="4">0.0102</span>&nbsp;mm cyclical and only <span data-ex="m09-ex2-multivari" data-key="temporal.sigma" data-dp="4">0.0018</span>&nbsp;mm temporal). This is the opposite pattern from Worked example 2 (where temporal dominated): the fixture itself, not the furnace or the incoming parts, is where the next investigation should start &mdash; consistent with an unevenly clamping fixture, one of the (a) hypotheses.</p>
+    </details>
+
+    <details>
+      <summary>Show the fixture flatness data (3 time points &times; 3 parts &times; 3 positions)</summary>
+      <div class="table-wrap">
+        <table>
+          <caption>Table A4. Clamp fixture flatness deviation (mm), three positions on each of three parts at each of three time points across a shift (constructed data).</caption>
+          <thead><tr><th>Time point</th><th>Part</th><th>Position 1</th><th>Position 2</th><th>Position 3</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>P1</td><td class="num">0.791</td><td class="num">0.755</td><td class="num">0.831</td></tr>
+            <tr><td>1</td><td>P2</td><td class="num">0.799</td><td class="num">0.819</td><td class="num">0.81</td></tr>
+            <tr><td>1</td><td>P3</td><td class="num">0.816</td><td class="num">0.793</td><td class="num">0.792</td></tr>
+            <tr><td>2</td><td>P1</td><td class="num">0.798</td><td class="num">0.809</td><td class="num">0.789</td></tr>
+            <tr><td>2</td><td>P2</td><td class="num">0.782</td><td class="num">0.813</td><td class="num">0.802</td></tr>
+            <tr><td>2</td><td>P3</td><td class="num">0.806</td><td class="num">0.781</td><td class="num">0.813</td></tr>
+            <tr><td>3</td><td>P1</td><td class="num">0.768</td><td class="num">0.773</td><td class="num">0.815</td></tr>
+            <tr><td>3</td><td>P2</td><td class="num">0.826</td><td class="num">0.82</td><td class="num">0.81</td></tr>
+            <tr><td>3</td><td>P3</td><td class="num">0.804</td><td class="num">0.823</td><td class="num">0.787</td></tr>
+          </tbody>
+        </table>
+      </div>
     </details>
 
     <h2 id="quiz">Quiz</h2>
@@ -364,7 +454,7 @@
       <li id="ref-4">Seder, L. A. (1950). Diagnosis with diagrams, Parts I and II. <em>Industrial Quality Control</em>, 6(4) and 6(5). <a href="https://asq.org/quality-progress/articles/case-studies/the-multi-vari-chart-an-underutilized-quality-tool?id=d23574b44b3d49b88e9dcdddc4785cbb">https://asq.org/quality-progress/articles/case-studies/the-multi-vari-chart-an-underutilized-quality-tool?id=d23574b44b3d49b88e9dcdddc4785cbb</a> <span class="tag">(secondary: the original 1950 articles were not located; the attribution and method description are via this ASQ case study and corroborating sources)</span></li>
       <li id="ref-5">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 4.4.4 "How can I tell if a model fits my data?". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm">https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm</a></li>
       <li id="ref-6">Ishikawa, K. (1976). <em>Guide to Quality Control</em>. Asian Productivity Organization. <a href="https://openlibrary.org/books/OL4595409M/Guide_to_quality_control">https://openlibrary.org/books/OL4595409M/Guide_to_quality_control</a> <span class="tag">(catalogue-level; the seven basic quality tools, of which the Pareto chart is one)</span></li>
-      <li id="ref-7">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+      <li id="ref-7">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a> <span class="tag">(the Green Belt scope this module is written against; no single claim rests on it)</span></li>
     </ol>
 
     <nav class="pager" aria-label="Module navigation" data-pager></nav>
