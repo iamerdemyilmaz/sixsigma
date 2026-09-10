@@ -1015,6 +1015,13 @@ def chisq(cols, params):
            "chi2_crit": float(stats.chi2.ppf(1 - alpha, dof)), "alpha": alpha,
            "cramer_v": math.sqrt(float(chi2) / (n * (min(r, c) - 1))), "min_expected": float(exp.min()),
            "cells_expected_below_5": int((exp < 5).sum())}
+    if r == 2 and c == 2:
+        # Effect size alongside the test (CLAUDE.md rule): relative risk of
+        # column 0 ("the event") in row 1 versus row 0, plus the risk
+        # difference in percentage points. Only defined for a 2x2 table.
+        p0, p1 = out["row_proportions"][0][0], out["row_proportions"][1][0]
+        out["relative_risk"] = p1 / p0
+        out["risk_difference_pct"] = 100.0 * (p1 - p0)
     return out
 
 
@@ -1354,6 +1361,21 @@ def rpn_table(cols, params):
             "total_rpn": int(df["rpn"].sum()), "mean_rpn": float(df["rpn"].mean())}
 
 
+def pugh_matrix(cols, params):
+    criteria = params["criteria"]
+    concepts = cols["concept"]
+    df = pd.DataFrame({c: [int(v) for v in cols[c]] for c in criteria}, index=concepts)
+    pluses = (df == 1).sum(axis=1)
+    minuses = (df == -1).sum(axis=1)
+    sames = (df == 0).sum(axis=1)
+    net = df.sum(axis=1)
+    order = net.sort_values(ascending=False).index.tolist()
+    return {"concepts": concepts, "criteria": criteria,
+            "pluses": [int(pluses[c]) for c in concepts], "minuses": [int(minuses[c]) for c in concepts],
+            "sames": [int(sames[c]) for c in concepts], "net": [int(net[c]) for c in concepts],
+            "ranking": order, "winner": order[0]}
+
+
 def _fault_tree_eval(node, out):
     if node["type"] == "basic":
         p = float(node["p"])
@@ -1505,6 +1527,8 @@ def compute_one(ex_id):
         res = fault_tree(params)
     elif kind == "mregression":
         res = mregression(cols, params)
+    elif kind == "pugh_matrix":
+        res = pugh_matrix(cols, params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

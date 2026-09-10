@@ -1,0 +1,18 @@
+{
+ "id": "m14-smed-changeover",
+ "module": "14",
+ "kind": "ttest2",
+ "title": "Furnace-fixture changeover time before and after SMED, two-sample t",
+ "source": "constructed",
+ "setting": "time (min) to change the braze-furnace fixture between part numbers, 16 changeovers before and 16 after separating internal from external setup steps",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "min"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 32
+}

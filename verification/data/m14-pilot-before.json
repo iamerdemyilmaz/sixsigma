@@ -1,0 +1,17 @@
+{
+ "id": "m14-pilot-before",
+ "module": "14",
+ "kind": "p",
+ "title": "Pilot baseline: leak-test rejects, 15 lots on the pilot cell before the fixture change",
+ "source": "constructed (matches the Module 3 charter baseline of 42 per 1,000)",
+ "setting": "brazed aluminium heat-exchanger cores, 100% helium leak test, one lot per shift, 15 shifts on the pilot cell before the fixture change",
+ "params": {
+  "units": "cores"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 15
+}

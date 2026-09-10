@@ -78,7 +78,9 @@
   "alpha": 0.05,
   "cramer_v": 0.11031371602253659,
   "min_expected": 154.0,
-  "cells_expected_below_5": 0
+  "cells_expected_below_5": 0,
+  "relative_risk": 0.1891891891891892,
+  "risk_difference_pct": -3.478548948153056
  },
  "expected_checks": [],
  "expected_ok": true

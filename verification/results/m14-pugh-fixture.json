@@ -1,0 +1,69 @@
+{
+ "id": "m14-pugh-fixture",
+ "kind": "pugh_matrix",
+ "params": {
+  "criteria": [
+   "gap_repeatability",
+   "changeover_time",
+   "unit_cost",
+   "ergonomics",
+   "maintainability"
+  ],
+  "baseline": "Baseline (current pin fixture)"
+ },
+ "source": "constructed",
+ "results": {
+  "concepts": [
+   "Baseline (current pin fixture)",
+   "Machined locating block",
+   "Spring-loaded clamp",
+   "Modular quick-change",
+   "Ceramic insert"
+  ],
+  "criteria": [
+   "gap_repeatability",
+   "changeover_time",
+   "unit_cost",
+   "ergonomics",
+   "maintainability"
+  ],
+  "pluses": [
+   0,
+   3,
+   3,
+   4,
+   1
+  ],
+  "minuses": [
+   0,
+   1,
+   2,
+   1,
+   3
+  ],
+  "sames": [
+   5,
+   1,
+   0,
+   0,
+   1
+  ],
+  "net": [
+   0,
+   2,
+   1,
+   3,
+   -2
+  ],
+  "ranking": [
+   "Modular quick-change",
+   "Machined locating block",
+   "Spring-loaded clamp",
+   "Baseline (current pin fixture)",
+   "Ceramic insert"
+  ],
+  "winner": "Modular quick-change"
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

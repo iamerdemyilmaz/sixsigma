@@ -1591,6 +1591,102 @@ register(id="m12-ex1-mreg", module="12", kind="mregression",
          columns=["force", "time", "y"], rows=[[float(a), float(b), float(c)] for a, b, c in zip(_m12force, _m12time, _m12py)])
 
 
+# Module 14: Lean improvement tools (prefix m14-)
+# New kind this module: pugh_matrix (concept-selection scoring relative to a
+# baseline, pure summation). SMED before/after reuses the existing ttest2
+# kind; the pilot before/after reuses the existing p kind for each period's
+# own stability plus the existing chisq kind (as m19-before-after already
+# does) for the actual hypothesis test comparing the two periods.
+# ---------------------------------------------------------------------------
+_rng = np.random.default_rng(0)
+_m14_before = _rng.normal(72, 13, 16)
+_m14_after = _rng.normal(27, 6, 16)
+register(id="m14-smed-changeover", module="14", kind="ttest2",
+         title="Furnace-fixture changeover time before and after SMED, two-sample t",
+         source="constructed", setting="time (min) to change the braze-furnace fixture between part numbers, 16 changeovers before and 16 after separating internal from external setup steps",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "min"},
+         columns=["group", "x"], rows=[["before", float(v)] for v in np.round(_m14_before, 1)] + [["after", float(v)] for v in np.round(_m14_after, 1)])
+
+# Pugh matrix: five furnace-fixture concepts (the baseline plus four
+# alternatives aimed at the gap-repeatability root cause from Module 10),
+# scored -1/0/+1 relative to the baseline on five criteria. Pure summation;
+# no seed, since these are expert-judgement ratings, not sampled data
+# (matching m10-pfmea-braze's precedent for the same reason).
+register(id="m14-pugh-fixture", module="14", kind="pugh_matrix",
+         title="Concept selection: five furnace-fixture concepts scored against the baseline",
+         source="constructed", setting="solution-selection workshop following the Module 10 root-cause finding that furnace-braze joint gap drives leak-test rejects",
+         params={"criteria": ["gap_repeatability", "changeover_time", "unit_cost", "ergonomics", "maintainability"], "baseline": "Baseline (current pin fixture)"},
+         columns=["concept", "gap_repeatability", "changeover_time", "unit_cost", "ergonomics", "maintainability"],
+         rows=[
+             ["Baseline (current pin fixture)", 0, 0, 0, 0, 0],
+             ["Machined locating block", 1, -1, 1, 0, 1],
+             ["Spring-loaded clamp", 1, 1, -1, 1, -1],
+             ["Modular quick-change", 1, 1, -1, 1, 1],
+             ["Ceramic insert", 1, 0, -1, -1, -1],
+         ])
+
+# Pilot before/after: the modular quick-change fixture piloted on one cell
+# before a full rollout (the fuller rollout is the capstone's m19-leak-before
+# and m19-leak-after, 30 shifts each; this is the smaller, earlier pilot that
+# would justify committing to that rollout). Before matches the Module 3
+# charter baseline of 4.2% closely; after is a real but partial improvement,
+# deliberately less dramatic than the capstone's eventual 0.8%, since a small
+# pilot is not expected to fully prove out a fix on its own.
+_rng = np.random.default_rng(2)
+_m14bn = _rng.integers(75, 135, 15)
+_m14bd = _rng.binomial(_m14bn, 0.042)
+register(id="m14-pilot-before", module="14", kind="p",
+         title="Pilot baseline: leak-test rejects, 15 lots on the pilot cell before the fixture change",
+         source="constructed (matches the Module 3 charter baseline of 42 per 1,000)",
+         setting="brazed aluminium heat-exchanger cores, 100% helium leak test, one lot per shift, 15 shifts on the pilot cell before the fixture change",
+         params={"units": "cores"}, columns=["lot", "n", "defectives"],
+         rows=[[i + 1, int(n), int(d)] for i, (n, d) in enumerate(zip(_m14bn, _m14bd))])
+
+_rng = np.random.default_rng(900000)
+_m14an = _rng.integers(45, 95, 14)
+_m14ad = _rng.binomial(_m14an, 0.018)
+register(id="m14-pilot-after", module="14", kind="p",
+         title="Pilot after: leak-test rejects, 14 lots on the pilot cell with the modular quick-change fixture",
+         source="constructed", setting="as m14-pilot-before, the 14 shifts on the pilot cell after switching to the modular quick-change fixture",
+         params={"units": "cores"}, columns=["lot", "n", "defectives"],
+         rows=[[i + 1, int(n), int(d)] for i, (n, d) in enumerate(zip(_m14an, _m14ad))])
+
+register(id="m14-pilot-chisq", module="14", kind="chisq",
+         title="Pilot leak results before and after, 2 x 2 chi-square (equivalent to a two-proportion test)",
+         source="constructed (totals of m14-pilot-before and m14-pilot-after)",
+         setting="leak and pass counts over the 15 pilot-cell shifts before and the 14 shifts after the fixture change",
+         params={"columns": ["Leak", "Pass"], "alpha": 0.05},
+         columns=["row", "Leak", "Pass"],
+         rows=[["Before", int(_m14bd.sum()), int(_m14bn.sum() - _m14bd.sum())],
+               ["After", int(_m14ad.sum()), int(_m14an.sum() - _m14ad.sum())]])
+
+# Exercise 1: a second SMED-style before/after, a smaller and less dramatic
+# effect than Worked example 1 (needs an actual t-table lookup, not an
+# obviously-zero p-value).
+_rng = np.random.default_rng(8)
+_m14e1_before = _rng.normal(18, 4, 10)
+_m14e1_after = _rng.normal(9, 2.5, 10)
+register(id="m14-ex1-changeover", module="14", kind="ttest2",
+         title="Exercise 1: pallet-changeover time on a machining cell before and after a locating poka-yoke",
+         source="constructed", setting="time (min) to change the fixture pallet on a CNC machining cell, 10 changeovers before and 10 after fitting a locating pin that only accepts the pallet one way round",
+         params={"alpha": 0.05, "mu0_diff": 0.0, "units": "min"},
+         columns=["group", "x"], rows=[["before", float(v)] for v in np.round(_m14e1_before, 1)] + [["after", float(v)] for v in np.round(_m14e1_after, 1)])
+
+# Exercise 2: a second, smaller Pugh matrix with a deliberate twist -- the
+# concept with the single best error-prevention score is not the net winner.
+register(id="m14-ex2-pugh", module="14", kind="pugh_matrix",
+         title="Exercise 2: concept selection for a connector-orientation poka-yoke",
+         source="constructed", setting="solution-selection for a device that stops an operator inserting a wiring connector backwards",
+         params={"criteria": ["error_prevention", "cost", "cycle_time_impact", "training_burden"], "baseline": "Baseline (visual inspection only)"},
+         columns=["concept", "error_prevention", "cost", "cycle_time_impact", "training_burden"],
+         rows=[
+             ["Baseline (visual inspection only)", 0, 0, 0, 0],
+             ["Mechanical stop pin", 1, 1, 0, 1],
+             ["Optical sensor interlock", 1, -1, -1, 0],
+             ["Asymmetric locating feature", 1, 0, 1, 0],
+         ])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

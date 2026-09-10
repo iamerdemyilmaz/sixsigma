@@ -392,6 +392,9 @@ def check_chisq(ex_id, r):
     in01(r["p"], f"{tag}: p"); check(0 <= r["cramer_v"] <= 1, f"{tag}: Cramer V")
     check((r["p"] < r["alpha"]) == (r["chi2"] > r["chi2_crit"]), f"{tag}: p vs critical value")
     check(r["min_expected"] >= 1, f"{tag}: an expected count below 1")
+    if "relative_risk" in r:
+        check(r["relative_risk"] >= 0, f"{tag}: relative_risk negative")
+        check(near(r["risk_difference_pct"], 100.0 * (r["row_proportions"][1][0] - r["row_proportions"][0][0])), f"{tag}: risk_difference_pct vs row proportions")
 
 
 def check_mw(ex_id, r):
@@ -532,6 +535,22 @@ def check_mregression(ex_id, r):
         check(near(c["t"], c["coef"] / c["se"], 1e-6), f"{tag}: {term} t != coef/se")
 
 
+def check_pugh_matrix(ex_id, r):
+    tag = ex_id
+    n = len(r["concepts"])
+    for i in range(n):
+        check(r["net"][i] == r["pluses"][i] - r["minuses"][i], f"{tag}: net[{i}] != pluses - minuses")
+        check(r["pluses"][i] + r["minuses"][i] + r["sames"][i] == len(r["criteria"]), f"{tag}: pluses+minuses+sames[{i}] != number of criteria")
+    baseline = r["params"]["baseline"]
+    bi = r["concepts"].index(baseline)
+    check(r["net"][bi] == 0, f"{tag}: baseline '{baseline}' net score should be 0")
+    check(r["ranking"][0] == r["winner"], f"{tag}: winner != first entry in ranking")
+    check(set(r["ranking"]) == set(r["concepts"]), f"{tag}: ranking is not a permutation of concepts")
+    ranked_nets = [r["net"][r["concepts"].index(c)] for c in r["ranking"]]
+    check(all(ranked_nets[i] >= ranked_nets[i + 1] for i in range(n - 1)), f"{tag}: ranking not sorted by net descending")
+    check(r["net"][r["concepts"].index(r["winner"])] == max(r["net"]), f"{tag}: winner does not have the maximum net score")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -573,6 +592,7 @@ def check_results():
         elif kind == "rpn": check_rpn(ex_id, r)
         elif kind == "fault_tree": check_fault_tree(ex_id, r)
         elif kind == "mregression": check_mregression(ex_id, r)
+        elif kind == "pugh_matrix": check_pugh_matrix(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

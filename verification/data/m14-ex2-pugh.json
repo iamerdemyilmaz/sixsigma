@@ -1,0 +1,25 @@
+{
+ "id": "m14-ex2-pugh",
+ "module": "14",
+ "kind": "pugh_matrix",
+ "title": "Exercise 2: concept selection for a connector-orientation poka-yoke",
+ "source": "constructed",
+ "setting": "solution-selection for a device that stops an operator inserting a wiring connector backwards",
+ "params": {
+  "criteria": [
+   "error_prevention",
+   "cost",
+   "cycle_time_impact",
+   "training_burden"
+  ],
+  "baseline": "Baseline (visual inspection only)"
+ },
+ "columns": [
+  "concept",
+  "error_prevention",
+  "cost",
+  "cycle_time_impact",
+  "training_burden"
+ ],
+ "n_rows": 4
+}

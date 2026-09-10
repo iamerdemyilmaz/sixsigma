@@ -952,6 +952,10 @@ def r_chisq(meta, cols):
            "chi2": chi2, "df": dof, "p": 1.0 - chi2_cdf(chi2, dof), "chi2_crit": chi2_ppf(1 - alpha, dof),
            "cramer_v": math.sqrt(chi2 / (n * (min(r, c) - 1))), "min_expected": min(min(row) for row in exp),
            "cells_expected_below_5": sum(1 for row in exp for v in row if v < 5)}
+    if r == 2 and c == 2:
+        p0, p1 = out["row_proportions"][0][0], out["row_proportions"][1][0]
+        out["relative_risk"] = p1 / p0
+        out["risk_difference_pct"] = 100.0 * (p1 - p0)
     return out
 
 
@@ -1260,6 +1264,26 @@ def r_rpn(cols):
     return out
 
 
+def r_pugh_matrix(meta, cols):
+    """Independent route: plain dict lookups and loops, no pandas."""
+    criteria = meta["params"]["criteria"]
+    concepts = list(cols["concept"])
+    scores = {c: [int(cols[crit][i]) for crit in criteria] for i, c in enumerate(concepts)}
+    pluses = {c: sum(1 for v in scores[c] if v == 1) for c in concepts}
+    minuses = {c: sum(1 for v in scores[c] if v == -1) for c in concepts}
+    sames = {c: sum(1 for v in scores[c] if v == 0) for c in concepts}
+    net = {c: sum(scores[c]) for c in concepts}
+    # "winner" and "ranking" are strings/string-ordered lists; close() has no
+    # string-handling branch (see the Module 10 rpn lesson), so this route
+    # verifies every concept's numeric pluses/minuses/sames/net instead, which
+    # fully constrains the ranking without comparing the labels themselves.
+    out = {}
+    for i, c in enumerate(concepts):
+        out[f"pluses.{i}"] = pluses[c]; out[f"minuses.{i}"] = minuses[c]
+        out[f"sames.{i}"] = sames[c]; out[f"net.{i}"] = net[c]
+    return out
+
+
 def r_fault_tree_eval(node, out):
     if node["type"] == "basic":
         p = float(node["p"])
@@ -1425,6 +1449,7 @@ def recompute_one(ex_id):
     elif kind == "rpn": mine = r_rpn(cols)
     elif kind == "fault_tree": mine = r_fault_tree(meta)
     elif kind == "mregression": mine = r_mregression(meta, cols)
+    elif kind == "pugh_matrix": mine = r_pugh_matrix(meta, cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

@@ -1,0 +1,27 @@
+{
+ "id": "m14-pugh-fixture",
+ "module": "14",
+ "kind": "pugh_matrix",
+ "title": "Concept selection: five furnace-fixture concepts scored against the baseline",
+ "source": "constructed",
+ "setting": "solution-selection workshop following the Module 10 root-cause finding that furnace-braze joint gap drives leak-test rejects",
+ "params": {
+  "criteria": [
+   "gap_repeatability",
+   "changeover_time",
+   "unit_cost",
+   "ergonomics",
+   "maintainability"
+  ],
+  "baseline": "Baseline (current pin fixture)"
+ },
+ "columns": [
+  "concept",
+  "gap_repeatability",
+  "changeover_time",
+  "unit_cost",
+  "ergonomics",
+  "maintainability"
+ ],
+ "n_rows": 5
+}

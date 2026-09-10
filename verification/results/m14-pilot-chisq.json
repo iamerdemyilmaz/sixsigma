@@ -1,0 +1,87 @@
+{
+ "id": "m14-pilot-chisq",
+ "kind": "chisq",
+ "params": {
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "alpha": 0.05
+ },
+ "source": "constructed (totals of m14-pilot-before and m14-pilot-after)",
+ "results": {
+  "rows": [
+   "Before",
+   "After"
+  ],
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "observed": [
+   [
+    70.0,
+    1516.0
+   ],
+   [
+    20.0,
+    976.0
+   ]
+  ],
+  "expected": [
+   [
+    55.28272656855151,
+    1530.7172734314486
+   ],
+   [
+    34.71727343144849,
+    961.2827265685515
+   ]
+  ],
+  "row_totals": [
+   1586.0,
+   996.0
+  ],
+  "col_totals": [
+   90.0,
+   2492.0
+  ],
+  "n": 2582,
+  "row_proportions": [
+   [
+    0.044136191677175286,
+    0.9558638083228247
+   ],
+   [
+    0.020080321285140562,
+    0.9799196787148594
+   ]
+  ],
+  "col_overall_proportions": [
+   0.034856700232378,
+   0.965143299767622
+  ],
+  "contributions": [
+   [
+    3.9180074989144082,
+    0.14150107339578682
+   ],
+   [
+    6.2389155555002525,
+    0.2253219903671832
+   ]
+  ],
+  "chi2": 10.52374611817763,
+  "df": 1,
+  "p": 0.0011785034605596549,
+  "chi2_crit": 3.841458820694124,
+  "alpha": 0.05,
+  "cramer_v": 0.06384208501912,
+  "min_expected": 34.71727343144849,
+  "cells_expected_below_5": 0,
+  "relative_risk": 0.45496270797475613,
+  "risk_difference_pct": -2.4055870392034726
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

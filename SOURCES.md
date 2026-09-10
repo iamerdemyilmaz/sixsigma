@@ -219,6 +219,7 @@ Publisher pages at tandfonline.com, iso.org, asq.org, and link.springer.com retu
 | S-E35 | Wikipedia. "Anscombe's quartet." | https://en.wikipedia.org/wiki/Anscombe%27s_quartet | secondary | – (2026-09-09, Module 1) | The four data sets (11 rows each) and the shared summary statistics (mean x 9, var x 11, mean y 7.50, var y 4.125 ± 0.003, r 0.816, y = 3.00 + 0.500x, R² 0.67). The original paper (S-C28) is available only as a scanned image; the values typed into `generate.py` reproduce every published property by script, which is the check on the transcription. |
 | S-E36 | R Core Team. "anscombe: Anscombe's Quartet of 'Identical' Simple Linear Regressions." R *datasets* package documentation. | https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/anscombe.html | verified | full (2026-09-09, Module 1) | Cites Anscombe 1973 as the source; states that the four sets share mean, variance, correlation and regression line (mean y 7.5, sd y 2.03) while being quite different when plotted. |
 | S-E37 | Minitab, LLC. "Methods and formulas for Laney P′ Chart." Minitab Statistical Software help. | https://support.minitab.com/en-us/minitab/help-and-how-to/quality-and-process-improvement/control-charts/how-to/attributes-charts/laney-p-chart/methods-and-formulas/methods-and-formulas/ | verified | partial (2026-09-10; the page renders its formulas as images, so only the textual description of σ_z from moving ranges of length 2 with the 1.128 constant was confirmed) | The same construction as implemented in standard software (Module 17). |
+| S-E38 | Lean Enterprise Institute. Lexicon: "Standardized Work." | https://www.lean.org/lexicon-terms/standardized-work/ | verified | full | Three elements: takt time, work sequence, standard inventory (in-process stock); a documented baseline for kaizen, reducing variability and training time. |
 
 ---
 
@@ -354,7 +355,7 @@ Verified sources are counted at any depth (full, abstract, scope, catalog). Cata
 
 ### Module 14. Lean improvement tools
 
-**Verified sources (7):** S-E22, S-E23, S-E2, S-D16, S-D17, S-D18, S-D19. **Secondary:** S-D20, S-C40.
+**Verified sources (8):** S-E22, S-E23, S-E2, S-E38, S-D16, S-D17, S-D18, S-D19. **Secondary:** S-D20, S-C40.
 
 **Outline.** 5S, standard work, poka-yoke, SMED, kaizen events, solution selection with a Pugh matrix, piloting, and proving an improvement with data (before and after with a hypothesis test and a control chart, not a bar chart). 3M as the cautionary story about applying efficiency tools to invention.
 

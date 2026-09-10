@@ -1,0 +1,17 @@
+{
+ "id": "m14-pilot-after",
+ "module": "14",
+ "kind": "p",
+ "title": "Pilot after: leak-test rejects, 14 lots on the pilot cell with the modular quick-change fixture",
+ "source": "constructed",
+ "setting": "as m14-pilot-before, the 14 shifts on the pilot cell after switching to the modular quick-change fixture",
+ "params": {
+  "units": "cores"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 14
+}

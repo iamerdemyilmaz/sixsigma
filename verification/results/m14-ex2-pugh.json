@@ -1,0 +1,61 @@
+{
+ "id": "m14-ex2-pugh",
+ "kind": "pugh_matrix",
+ "params": {
+  "criteria": [
+   "error_prevention",
+   "cost",
+   "cycle_time_impact",
+   "training_burden"
+  ],
+  "baseline": "Baseline (visual inspection only)"
+ },
+ "source": "constructed",
+ "results": {
+  "concepts": [
+   "Baseline (visual inspection only)",
+   "Mechanical stop pin",
+   "Optical sensor interlock",
+   "Asymmetric locating feature"
+  ],
+  "criteria": [
+   "error_prevention",
+   "cost",
+   "cycle_time_impact",
+   "training_burden"
+  ],
+  "pluses": [
+   0,
+   3,
+   1,
+   2
+  ],
+  "minuses": [
+   0,
+   0,
+   2,
+   0
+  ],
+  "sames": [
+   4,
+   1,
+   1,
+   2
+  ],
+  "net": [
+   0,
+   3,
+   -1,
+   2
+  ],
+  "ranking": [
+   "Mechanical stop pin",
+   "Asymmetric locating feature",
+   "Baseline (visual inspection only)",
+   "Optical sensor interlock"
+  ],
+  "winner": "Mechanical stop pin"
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

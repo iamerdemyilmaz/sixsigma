@@ -1,0 +1,18 @@
+{
+ "id": "m14-ex1-changeover",
+ "module": "14",
+ "kind": "ttest2",
+ "title": "Exercise 1: pallet-changeover time on a machining cell before and after a locating poka-yoke",
+ "source": "constructed",
+ "setting": "time (min) to change the fixture pallet on a CNC machining cell, 10 changeovers before and 10 after fitting a locating pin that only accepts the pallet one way round",
+ "params": {
+  "alpha": 0.05,
+  "mu0_diff": 0.0,
+  "units": "min"
+ },
+ "columns": [
+  "group",
+  "x"
+ ],
+ "n_rows": 20
+}

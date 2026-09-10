@@ -1,0 +1,5 @@
+concept,error_prevention,cost,cycle_time_impact,training_burden
+Baseline (visual inspection only),0,0,0,0
+Mechanical stop pin,1,1,0,1
+Optical sensor interlock,1,-1,-1,0
+Asymmetric locating feature,1,0,1,0

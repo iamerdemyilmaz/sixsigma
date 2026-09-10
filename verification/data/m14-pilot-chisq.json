@@ -1,0 +1,21 @@
+{
+ "id": "m14-pilot-chisq",
+ "module": "14",
+ "kind": "chisq",
+ "title": "Pilot leak results before and after, 2 x 2 chi-square (equivalent to a two-proportion test)",
+ "source": "constructed (totals of m14-pilot-before and m14-pilot-after)",
+ "setting": "leak and pass counts over the 15 pilot-cell shifts before and the 14 shifts after the fixture change",
+ "params": {
+  "columns": [
+   "Leak",
+   "Pass"
+  ],
+  "alpha": 0.05
+ },
+ "columns": [
+  "row",
+  "Leak",
+  "Pass"
+ ],
+ "n_rows": 2
+}

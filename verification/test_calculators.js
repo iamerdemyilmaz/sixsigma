@@ -147,7 +147,10 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   rpn: true, fault_tree: true,
   // Module 12: multiple regression has no calculator among the nine
   // required ones either (simple regression has none built for it so far).
-  mregression: true };
+  mregression: true,
+  // Module 14: a Pugh concept-selection matrix is pure summation with no
+  // calculator among the nine required ones.
+  pugh_matrix: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

@@ -24,7 +24,7 @@
     { num: "11", slug: "11-hypothesis-testing", title: "Hypothesis testing", built: true },
     { num: "12", slug: "12-correlation-regression", title: "Correlation and regression", built: true },
     { num: "13", slug: "13-design-of-experiments", title: "Design of experiments", built: true },
-    { num: "14", slug: "14-lean-tools", title: "Lean improvement tools", built: false },
+    { num: "14", slug: "14-lean-tools", title: "Lean improvement tools", built: true },
     { num: "15", slug: "15-variation-and-design", title: "Variation reduction and design", built: false },
     { num: "16", slug: "16-spc-1", title: "Statistical process control I", built: true },
     { num: "17", slug: "17-spc-2", title: "Statistical process control II", built: true },

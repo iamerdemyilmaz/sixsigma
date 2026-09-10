@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 14: Lean improvement tools · Six Sigma Course</title>
+<meta name="description" content="5S and standard work, poka-yoke, SMED, kaizen events, solution selection with a Pugh matrix, and proving a pilot improvement with a hypothesis test and a control chart, not a bar chart.">
+<meta name="examples" content="m14-smed-changeover, m14-pugh-fixture, m14-pilot-before, m14-pilot-after, m14-pilot-chisq, m14-ex1-changeover, m14-ex2-pugh">
+<meta name="allowed-numbers" content="4.41 2.01">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="14">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 14 · Improve</p>
+    <h1>Lean improvement tools</h1>
+    <p class="lead">Analyze (Modules 9 through 12) finds and confirms a cause. Improve turns that finding into a change that actually sticks. This module covers the standard Lean toolkit for doing that on a shop floor: 5S and standard work as the stable foundation everything else depends on, poka-yoke for mistake-proofing, SMED for cutting changeover time, kaizen events for running a focused improvement effort, and a Pugh matrix for choosing among competing concepts. The last section is the one that matters most: how to pilot a change and prove it worked with a hypothesis test and a control chart, not a before-and-after bar chart.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Explain</strong> why 5S and standard work are a precondition for the rest of this toolkit, not an optional first step.</li>
+      <li><strong>Describe</strong> poka-yoke's role in preventing or catching a defect at its source, and connect it to Module 10's PFMEA Detection rating.</li>
+      <li><strong>Apply</strong> SMED's internal/external setup distinction to cut a changeover time, and test the result with a two-sample t-test.</li>
+      <li><strong>Run</strong> a focused kaizen event and explain how it differs from an open-ended suggestion program.</li>
+      <li><strong>Build and interpret</strong> a Pugh matrix to select among improvement concepts.</li>
+      <li><strong>Prove</strong> a pilot improvement with the correct hypothesis test and a control chart of each period, not a before/after average alone.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>In 2007, BusinessWeek reported on what happened when 3M applied Six Sigma discipline broadly across the company under CEO James McNerney, including to research: thousands of scientists trained as Black Belts, standardized stage-gate metrics applied to early-stage research, and, over the same years, the share of 3M's sales coming from products introduced in the previous five years falling from about a third to about a quarter.<sup class="cite"><a href="#ref-1">[1]</a></sup> One 3M scientist told the magazine plainly: "Invention is by its very nature a disorderly process."<sup class="cite"><a href="#ref-1">[1]</a></sup> The article does not claim Six Sigma alone caused the decline &mdash; other explanations were offered too &mdash; but it is a documented, widely cited case for a real distinction this module asks you to keep in mind throughout: 5S, standard work, and SMED are built for stabilizing and speeding up a process that is already supposed to produce the same result every time. Pointed at a repeatable production line, they are close to unambiguously good. Pointed at genuinely exploratory work, the same standardizing instinct can suppress the variation that the work actually needs.</p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real event.</p>
+    <p>Almost every Lean tool in this module can also fail for a much more mundane reason: a team runs a three-day kaizen event, moves some racks, times a changeover, feels good about it, and closes the event with a poster showing a bar chart &mdash; one bar for "before," one shorter bar for "after." Nobody checked whether the drop was bigger than ordinary day-to-day variation would produce anyway, and nobody checked whether either period was itself stable. Three months later, someone asks whether the change is still in effect, and nobody can say for certain, because the "before" and "after" bars were never anything more than two averages. Everything in this module's tool sections is standard and well documented. The last section, on proving an improvement, is where most real kaizen efforts actually go wrong.</p>
+
+    <h2 id="fivestandard">5S and standard work</h2>
+    <p>5S is a workplace organization method in five steps, usually given as Sort (remove what is not needed), Set in order (a place for everything, arranged for the sequence of use), Shine (clean and inspect), Standardize (make the first three a visible, repeatable routine), and Sustain (audit and maintain it).<sup class="cite"><a href="#ref-2">[2]</a></sup> Treated as a one-time cleanup, 5S produces a tidy photo and nothing else; treated as Standardize and Sustain intend, it is a recurring discipline that keeps a workstation in a known state, which is what makes every other tool in this module possible to apply consistently.</p>
+    <p>Standard work is the companion discipline for the process itself rather than the workstation. The Lean Enterprise Institute defines it as establishing precise procedures for each operator's work in a production process, built from three elements: takt time (the rate at which product must be completed to meet demand), work sequence (the exact order of tasks within that time), and standard in-process stock (the minimum units needed to keep the sequence running smoothly).<sup class="cite"><a href="#ref-3">[3]</a></sup> Standard work is also, quietly, a precondition for everything Modules 16 and 17 teach about control charts: a control chart's "common cause" variation is supposed to be the process's inherent noise, not the noise of three operators each doing the job a different way. Skip standard work, and a chart's control limits partly measure method variation you could have eliminated for free.</p>
+
+    <h2 id="pokayoke">Poka-yoke</h2>
+    <p>Poka-yoke (mistake-proofing) is Shigeo Shingo's term for a device or process design that makes a specific human error either physically impossible or immediately self-evident, rather than relying on inspection or attention to catch it afterward.<sup class="cite"><a href="#ref-4">[4]</a></sup> Shingo describes three general mechanisms: a contact method (a physical feature, like an asymmetric locating pin, that only allows correct assembly), a fixed-value method (a counter or a kit that flags a missing or extra step by quantity), and a motion-step method (a sequence sensor that will not let the next step start until the current one is confirmed).<sup class="cite"><a href="#ref-4">[4]</a></sup> This maps directly onto Module 10's PFMEA Detection rating: a poka-yoke that prevents the error is functionally driving Occurrence toward zero, while one that only flags the error after the fact is driving Detection toward 1 (catches it every time) &mdash; both lower RPN, but prevention is the stronger fix.</p>
+
+    <h2 id="smed">SMED: Single-Minute Exchange of Die</h2>
+    <p>SMED, developed by Shingo largely from his consulting work in Toyota-group plants, is a method for cutting equipment changeover time.<sup class="cite"><a href="#ref-5">[5]</a></sup> Its core move is a single distinction, applied rigorously: separate <strong>internal setup</strong> (steps that require the machine or furnace to be stopped) from <strong>external setup</strong> (steps that can be done while it is still running), then (1) convert as much internal work to external as physically possible &mdash; staging tooling, pre-heating a fixture, gathering fasteners, all done before the stop &mdash; and (2) streamline whatever internal work is left, typically with quick-release fasteners, guided locating features, and standardized settings instead of adjustment. Shingo reports changeovers cut from hours to single-digit minutes at several plants using this method; those specific figures come from his own book rather than an independently audited source, so they are presented here as Shingo's reported results, not independently verified facts.<sup class="cite"><a href="#ref-5">[5]</a></sup> Worked example 1 below applies the same two-step method to a furnace-fixture changeover and checks the result with a hypothesis test rather than taking the improvement on faith.</p>
+
+    <h2 id="kaizen">Kaizen events</h2>
+    <p>Kaizen, from Masaaki Imai's book of the same framing, is continuous, incremental improvement as everyone's ongoing responsibility, not a program run by a separate department.<sup class="cite"><a href="#ref-6">[6]</a></sup> A kaizen event (or kaizen blitz) is a specific, time-boxed application of that idea: a small cross-functional team, a single clearly scoped process, typically three to five days, working from data already collected before the event starts rather than opening with a blank-page brainstorm. That last point is the one teams skip most often. An event that starts with "what do we think is wrong" instead of "here is what the data from the last month shows" tends to converge on whoever argues most persuasively in the room, which is a poor substitute for the root-cause work Module 10 already covers.</p>
+
+    <h2 id="pugh">Solution selection: the Pugh matrix</h2>
+    <p>Stuart Pugh's concept-selection matrix compares several candidate solutions against one reference concept (the current state, or the most straightforward candidate) across a shared set of criteria.<sup class="cite"><a href="#ref-7">[7]</a></sup> Each candidate is scored, criterion by criterion, relative to the baseline: better (+), the same (S), or worse (&minus;). The scores for a concept sum to a net total, and concepts can be ranked by that total.</p>
+    <div class="formula">net score = (count of +) &minus; (count of &minus;)
+      <span class="where">The baseline concept is defined as scoring S on every criterion against itself, so its own net score is always 0 &mdash; every other concept is read as better or worse than that reference point, not against an absolute scale.</span>
+    </div>
+    <p>Two cautions matter more than the arithmetic. First, the matrix is a facilitation tool for structuring a conversation among people who often disagree, not an algorithm that removes judgment from the decision: a close net score, or a criterion the team privately weights far more heavily than the others, both argue for discussion rather than mechanically picking the top row. Teams that want criteria weighted unequally can multiply each score by a weight before summing (a weighted Pugh matrix); this course uses the simpler unweighted, pure-summation version throughout. Second, a concept can win on a single important criterion and still lose overall once every criterion is counted &mdash; Worked example 2 below shows this on real numbers, and it is exactly the situation a matrix is built to surface.</p>
+
+    <h2 id="proving">Piloting and proving an improvement with data</h2>
+    <p>A before-and-after comparison built from two averages, or worse, a bar chart with one bar per period, cannot distinguish a real change from ordinary sampling variation. Module 11 covers why in full: even a process with no true change produces two different-looking sample averages essentially every time it is measured twice. A defensible pilot does four things in order. First, pilot the change at a small, contained scale before committing to a full rollout &mdash; a single cell, line, or shift, not the whole plant. Second, collect before and after data under comparable conditions, ideally the same measurement system and the same range of normal operating conditions. Third, test the difference with the hypothesis test that matches the data (a two-sample t-test for a measured quantity, a chi-square or two-proportion test for a defect rate) and report an effect size or a practically meaningful number, such as a relative risk or a mean difference, alongside the p-value &mdash; a p-value alone says a difference is unlikely to be noise, not that the difference is large enough to matter. Fourth, check <em>each period on its own</em> with a control chart (Modules 16 and 17), because a period average can be pulled by one unusual day without the process's actual level having moved at all; a chart is what tells the two apart. Only after a pilot clears all four does a full-scale rollout, re-confirmed the same way, belong on the table &mdash; which is exactly what the capstone (Module 19) will do at full scale, building on the smaller pilot this module's Worked example 3 pilots first.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: furnace-fixture changeover time, before and after SMED</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run. Setting: time in minutes to change the braze-furnace fixture between part numbers, timed to the nearest tenth of a minute, 16 changeovers before and 16 after separating internal from external setup steps (staging the next fixture and pre-heating it externally, and replacing a bolted mount with a quick-release clamp for the one step that has to happen with the furnace stopped).</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Furnace-fixture changeover time (min), 16 changeovers before and 16 after (constructed data).</caption>
+        <thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th></tr></thead>
+        <tbody>
+          <tr><td>Before</td><td>73.6</td><td>70.3</td><td>80.3</td><td>73.4</td><td>65.0</td><td>76.7</td><td>89.0</td><td>84.3</td><td>62.9</td><td>55.5</td><td>63.9</td><td>72.5</td><td>41.8</td><td>69.2</td><td>55.8</td><td>62.5</td></tr>
+          <tr><td>After</td><td>23.7</td><td>25.1</td><td>29.5</td><td>33.3</td><td>26.2</td><td>35.2</td><td>23.0</td><td>29.1</td><td>32.4</td><td>27.6</td><td>22.5</td><td>21.5</td><td>24.3</td><td>28.3</td><td>20.9</td><td>25.7</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Mean before <span data-ex="m14-smed-changeover" data-key="means.0" data-dp="2">68.54</span>&nbsp;min (s = <span data-ex="m14-smed-changeover" data-key="sds.0" data-dp="2">11.80</span>), mean after <span data-ex="m14-smed-changeover" data-key="means.1" data-dp="2">26.77</span>&nbsp;min (s = <span data-ex="m14-smed-changeover" data-key="sds.1" data-dp="2">4.29</span>), a difference of <span data-ex="m14-smed-changeover" data-key="diff" data-dp="2">41.78</span>&nbsp;min. Before testing, check the equal-variance assumption behind the standard pooled t-test: Levene's test gives p&nbsp;=&nbsp;<span data-ex="m14-smed-changeover" data-key="variance_tests.levene_p" data-dp="4">0.0084</span>, well under 0.05, so the two periods' variances are not equal (the after period is both faster and more consistent, which makes sense &mdash; a quick-release clamp removes a source of adjustment-to-adjustment variation along with time). The textbook response is to prefer Welch's t-test, which does not assume equal variances: t&nbsp;=&nbsp;13.31 on <span data-ex="m14-smed-changeover" data-key="welch.df" data-dp="1">18.9</span> degrees of freedom (Welch's own adjusted df, versus 30 for the pooled test), 95&nbsp;% CI on the difference <span data-ex="m14-smed-changeover" data-key="welch.ci.0" data-dp="2">35.20</span> to <span data-ex="m14-smed-changeover" data-key="welch.ci.1" data-dp="2">48.35</span>&nbsp;min, p&nbsp;&lt;&nbsp;0.0001. Cohen's d&nbsp;=&nbsp;<span data-ex="m14-smed-changeover" data-key="cohen_d" data-dp="2">4.70</span>, an enormous effect size by any convention. Here the equal-variance violation changes which test is technically correct but not the practical conclusion, because the effect is so large that both the pooled test (p&nbsp;&lt;&nbsp;0.0001) and Welch's test agree; for a smaller, more marginal effect, checking this assumption before trusting the p-value can matter a great deal more than it does here.</p>
+    <div class="calc" data-calc="tests" id="calc-tests-smed">
+      <h3>Hypothesis tests calculator</h3>
+      <script type="application/json" class="calc-data">{"mode":"ttest2","alpha":0.05,"lines":["before 73.6 70.3 80.3 73.4 65.0 76.7 89.0 84.3 62.9 55.5 63.9 72.5 41.8 69.2 55.8 62.5","after 23.7 25.1 29.5 33.3 26.2 35.2 23.0 29.1 32.4 27.6 22.5 21.5 24.3 28.3 20.9 25.7"]}</script>
+    </div>
+
+    <h3 id="example2">Worked example 2: Pugh matrix, a furnace-fixture redesign</h3>
+    <p class="example-label">Constructed example, not a real selection workshop.</p>
+    <p>Module 10's root-cause work traced leak-test rejects partly to furnace-braze joint gap. A solution-selection workshop scores four fixture-redesign concepts against the current pin fixture on five criteria: how much the concept improves joint-gap repeatability, its effect on changeover time, its unit cost, operator ergonomics, and maintainability.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Pugh matrix, furnace-fixture concepts vs. the baseline pin fixture (constructed data). + better than baseline, S same, &minus; worse than baseline.</caption>
+        <thead><tr><th>Concept</th><th>Gap repeatability</th><th>Changeover time</th><th>Unit cost</th><th>Ergonomics</th><th>Maintainability</th><th>+</th><th>&minus;</th><th>S</th><th>Net</th></tr></thead>
+        <tbody>
+          <tr><td>Baseline (current pin fixture)</td><td>S</td><td>S</td><td>S</td><td>S</td><td>S</td><td class="num"><span data-ex="m14-pugh-fixture" data-key="pluses.0" data-dp="0">0</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="minuses.0" data-dp="0">0</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="sames.0" data-dp="0">5</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="net.0" data-dp="0">0</span></td></tr>
+          <tr><td>Machined locating block</td><td>+</td><td>&minus;</td><td>+</td><td>S</td><td>+</td><td class="num"><span data-ex="m14-pugh-fixture" data-key="pluses.1" data-dp="0">3</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="minuses.1" data-dp="0">1</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="sames.1" data-dp="0">1</span></td><td class="num"><strong>+<span data-ex="m14-pugh-fixture" data-key="net.1" data-dp="0">2</span></strong></td></tr>
+          <tr><td>Spring-loaded clamp</td><td>+</td><td>+</td><td>&minus;</td><td>+</td><td>&minus;</td><td class="num"><span data-ex="m14-pugh-fixture" data-key="pluses.2" data-dp="0">3</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="minuses.2" data-dp="0">2</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="sames.2" data-dp="0">0</span></td><td class="num"><strong>+<span data-ex="m14-pugh-fixture" data-key="net.2" data-dp="0">1</span></strong></td></tr>
+          <tr><td><strong>Modular quick-change</strong></td><td>+</td><td>+</td><td>&minus;</td><td>+</td><td>+</td><td class="num"><span data-ex="m14-pugh-fixture" data-key="pluses.3" data-dp="0">4</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="minuses.3" data-dp="0">1</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="sames.3" data-dp="0">0</span></td><td class="num"><strong>+<span data-ex="m14-pugh-fixture" data-key="net.3" data-dp="0">3</span></strong></td></tr>
+          <tr><td>Ceramic insert</td><td>+</td><td>S</td><td>&minus;</td><td>&minus;</td><td>&minus;</td><td class="num"><span data-ex="m14-pugh-fixture" data-key="pluses.4" data-dp="0">1</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="minuses.4" data-dp="0">3</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="sames.4" data-dp="0">1</span></td><td class="num"><span data-ex="m14-pugh-fixture" data-key="net.4" data-dp="0">-2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The modular quick-change concept wins on net score (+3), and notice what that number is doing: it is not the cheapest option (both it and the spring-loaded clamp cost more than baseline; the machined locating block is actually the only one that is cheaper), and it is not the only concept that improves gap repeatability (all four do &mdash; that was the point of the workshop). It wins because it is the only concept that improves on four of the five criteria at once, trading a higher unit cost for gains everywhere else. The ceramic insert is the instructive failure case: it does improve the one criterion the team most cared about (gap repeatability, since ceramic does not thermally distort at furnace temperature), but it nets to &minus;2 once cost, ergonomics, and maintainability (brittle, harder to inspect, more care needed in handling) are all counted. A team that stopped at "does it fix the gap problem?" would have picked a net loser. This is not a reason to stop asking that question &mdash; it is a reason to also ask the other four.</p>
+
+    <h3 id="example3">Worked example 3: piloting the modular quick-change fixture</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run. Setting: brazed aluminium heat-exchanger cores, 100&nbsp;% helium leak test at final inspection, one lot per shift. The modular quick-change fixture from Worked example 2 was piloted on one cell for 14 shifts, compared against 15 shifts on that same cell immediately before the change. (The full-scale, 30-shift-per-period confirmation after a plant-wide rollout is the capstone, Module 19.)</p>
+    <p>Fifteen lots before the change ran <span data-ex="m14-pilot-before" data-key="pbar" data-dp="4">0.0441</span> (4.41&nbsp;%) leakers on average, close to the Module 3 charter's 4.2&nbsp;% baseline, over an average lot size of <span data-ex="m14-pilot-before" data-key="n_mean" data-dp="1">105.7</span> cores. Fourteen lots after ran <span data-ex="m14-pilot-after" data-key="pbar" data-dp="4">0.0201</span> (2.01&nbsp;%), over a smaller average lot size of <span data-ex="m14-pilot-after" data-key="n_mean" data-dp="1">71.1</span> cores &mdash; smaller because a pilot cell runs less volume than the full line. Both periods, charted individually as p charts, show no rule violation: neither is drifting or unstable on its own. Notice something else about both charts, though: at these lot sizes and this rate, the 3-sigma lower control limit works out to 0.0 on every single point in both periods, simply because the rate is low enough that "mean minus three sigma" goes negative and gets floored at zero. That means the p chart's own 3-sigma rule cannot, by itself, flag the after period as a special-cause improvement over the before period &mdash; a chart of the after period alone would look identical whether the fixture helped or not. This is exactly why step three of piloting (above) calls for a hypothesis test in addition to the charts, not instead of them: the charts confirm each period is internally stable; the test is what actually compares the two periods to each other.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 3. Leak-test rejects by lot, pilot cell, before and after the fixture change (constructed data).</caption>
+        <thead><tr><th>Period</th><th>Lots</th><th>Total cores</th><th>Total leakers</th><th>Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Before</td><td>15</td><td class="num"><span data-ex="m14-pilot-chisq" data-key="row_totals.0" data-dp="0">1586</span></td><td class="num"><span data-ex="m14-pilot-chisq" data-key="observed.0.0" data-dp="0">70</span></td><td class="num">4.41&nbsp;%</td></tr>
+          <tr><td>After</td><td>14</td><td class="num"><span data-ex="m14-pilot-chisq" data-key="row_totals.1" data-dp="0">996</span></td><td class="num"><span data-ex="m14-pilot-chisq" data-key="observed.1.0" data-dp="0">20</span></td><td class="num">2.01&nbsp;%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Treating this as a 2&times;2 table (leak or pass, before or after) and running a chi-square test of independence &mdash; equivalent to a two-proportion test &mdash; gives &chi;&sup2;&nbsp;=&nbsp;<span data-ex="m14-pilot-chisq" data-key="chi2" data-dp="3">10.524</span> on 1 degree of freedom, p&nbsp;=&nbsp;<span data-ex="m14-pilot-chisq" data-key="p" data-dp="4">0.0012</span>: comfortably below 0.05, so the drop is not plausibly just sampling noise. Alongside the p-value, the practical-significance numbers: relative risk (after&nbsp;÷&nbsp;before) = <span data-ex="m14-pilot-chisq" data-key="relative_risk" data-dp="3">0.455</span>, meaning the pilot cell's leak rate is a little under half what it was, and a risk difference of <span data-ex="m14-pilot-chisq" data-key="risk_difference_pct" data-dp="2">-2.41</span> percentage points. Cram&eacute;r's V, a chi-square effect-size measure, comes out small (<span data-ex="m14-pilot-chisq" data-key="cramer_v" data-dp="3">0.064</span>) &mdash; worth flagging as a common trap on its own: V is small here mainly because leaks are rare in both periods (most of both tables is "Pass"), not because the change was unimportant. For a rare-event table like this one, relative risk and risk difference are the practically meaningful numbers; a small Cram&eacute;r's V should not be read as "the effect did not matter." The pilot supports rolling the fixture out further, with the expectation &mdash; not yet the proof &mdash; that a full-scale, longer-running confirmation will show at least as large an improvement; Module 19 shows what that confirmation actually found.</p>
+    <div class="calc" data-calc="control" id="calc-ctrl-pilot-before">
+      <h3>Pilot before, p chart (control chart builder, inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"type":"p","rows":[[125,4],[90,4],[81,4],[92,2],[99,4],[123,6],[102,4],[80,4],[95,8],[111,6],[123,4],[118,3],[134,5],[86,4],[127,8]],"units":"cores","collapsed":true}</script>
+    </div>
+    <div class="calc" data-calc="control" id="calc-ctrl-pilot-after">
+      <h3>Pilot after, p chart (control chart builder, inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"type":"p","rows":[[68,1],[45,1],[93,3],[57,1],[54,2],[79,1],[68,2],[73,1],[84,0],[60,1],[89,4],[71,1],[91,1],[64,1]],"units":"cores","collapsed":true}</script>
+    </div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul class="mistakes">
+      <li><strong>Running a kaizen event with no baseline data.</strong> Consequence: there is nothing to compare "after" against except memory and impression, so the event's outcome cannot be proven or defended later. Fix: pull or collect baseline data (Module 5's rational subgrouping applies here too) before the event starts, not during it.</li>
+      <li><strong>Comparing two averages, or a two-bar chart, without a hypothesis test.</strong> Consequence: a real improvement can look unconvincing next to noisy data, or a difference that is really just sampling variation gets rolled out plant-wide and then quietly reverts. Fix: run the test that matches the data (Module 11) and report it with an effect size, not the averages alone.</li>
+      <li><strong>Applying 5S-style standardization to genuinely exploratory work.</strong> Consequence: 3M's own reported experience above. Fix: match the tool to the work; a first-of-a-kind build or an early-stage development effort is not the same kind of work as a repeatable production line, and does not automatically benefit from the same discipline.</li>
+      <li><strong>Treating a Pugh matrix's net score as the final decision instead of a facilitation aid.</strong> Consequence: a close score, or a criterion the team privately cares about far more than the others, gets rubber-stamped by the arithmetic instead of discussed. Fix: treat a close result as a prompt for discussion, and consider a weighted matrix when criteria are not equally important.</li>
+      <li><strong>Declaring a pilot successful from the period average alone, with no control chart of either period.</strong> Consequence: one unusually good (or bad) day can move a period's average without the process's true level having changed at all, as Worked example 3's discussion of the p chart's floored lower limit shows directly. Fix: chart both periods, not just the two summary rates.</li>
+      <li><strong>Blurring internal and external setup in SMED.</strong> Consequence: staging or preparation that could happen while the machine is still running gets left as part of the stop, so the changeover stays slow even after "doing SMED." Fix: time-and-motion-study one real changeover first and tag every single step internal or external before designing anything.</li>
+      <li><strong>Choosing a poka-yoke that only warns when a design that prevents the error outright is available.</strong> Consequence: an operator habituates to a light or a buzzer and starts ignoring it, so the warning stops functioning within weeks. Fix: prefer a contact or fixed-value method that makes the error physically impossible over one that only flags it after the fact (Module 10's Occurrence vs. Detection distinction again).</li>
+    </ul>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: pallet-changeover time on a machining cell</h3>
+    <p class="example-label">Constructed example, not a real production run. Setting: time (min) to change the fixture pallet on a CNC machining cell, 10 changeovers before and 10 after fitting a locating pin that only accepts the pallet one way round (a contact-method poka-yoke that also happens to speed up the changeover, since the operator no longer has to check alignment by eye).</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Pallet-changeover time (min), 10 before and 10 after (constructed data).</caption>
+        <thead><tr><th>Group</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+        <tbody>
+          <tr><td>Before</td><td>11.0</td><td>12.7</td><td>12.6</td><td>16.6</td><td>8.7</td><td>17.2</td><td>14.2</td><td>21.6</td><td>21.8</td><td>23.6</td></tr>
+          <tr><td>After</td><td>10.9</td><td>8.9</td><td>11.1</td><td>12.8</td><td>7.4</td><td>10.5</td><td>8.9</td><td>12.6</td><td>6.9</td><td>8.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute both group means and standard deviations. (b) Run a two-sample t-test (pooled, equal-variance assumption) and report t, degrees of freedom, and the p-value. (c) Compute Cohen's d and compare its size to Worked example 1's. Why would you expect this pilot's effect size to be smaller than a full SMED redesign's?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Mean before <span data-ex="m14-ex1-changeover" data-key="means.0" data-dp="2">16.00</span>&nbsp;min (s = <span data-ex="m14-ex1-changeover" data-key="sds.0" data-dp="2">5.04</span>), mean after <span data-ex="m14-ex1-changeover" data-key="means.1" data-dp="2">9.82</span>&nbsp;min (s = <span data-ex="m14-ex1-changeover" data-key="sds.1" data-dp="2">2.07</span>), difference <span data-ex="m14-ex1-changeover" data-key="diff" data-dp="2">6.18</span>&nbsp;min.</p>
+      <p><strong>(b)</strong> t&nbsp;=&nbsp;<span data-ex="m14-ex1-changeover" data-key="pooled.t" data-dp="2">3.59</span> on <span data-ex="m14-ex1-changeover" data-key="pooled.df" data-dp="0">18</span> degrees of freedom, p&nbsp;=&nbsp;<span data-ex="m14-ex1-changeover" data-key="pooled.p" data-dp="4">0.0021</span>, 95&nbsp;% CI on the difference <span data-ex="m14-ex1-changeover" data-key="pooled.ci.0" data-dp="2">2.56</span> to <span data-ex="m14-ex1-changeover" data-key="pooled.ci.1" data-dp="2">9.80</span>&nbsp;min. Still comfortably significant, but nowhere near Worked example 1's p&nbsp;&lt;&nbsp;0.0001 &mdash; this one genuinely needed the t-table, not just a glance at the numbers.</p>
+      <p><strong>(c)</strong> Cohen's d&nbsp;=&nbsp;<span data-ex="m14-ex1-changeover" data-key="cohen_d" data-dp="2">1.60</span>, still a large effect by conventional benchmarks, but well under Worked example 1's 4.70. A single locating pin removes one specific source of delay (checking and correcting alignment); a full SMED redesign that separates internal from external setup and redesigns the clamping attacks every source of delay in the changeover at once, so a bigger effect size from the fuller redesign is the expected pattern, not a coincidence.</p>
+    </details>
+
+    <h3 id="ex2">Exercise 2: Pugh matrix for a connector poka-yoke</h3>
+    <p class="example-label">Constructed example, not a real selection workshop.</p>
+    <p>A team is choosing a device to stop an operator inserting a wiring connector backwards, scored against the current baseline (visual inspection only) on four criteria: how well it prevents the error, unit cost, its impact on cycle time, and the training burden it adds.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 5. Pugh matrix, connector poka-yoke concepts vs. visual inspection only (constructed data).</caption>
+        <thead><tr><th>Concept</th><th>Error prevention</th><th>Cost</th><th>Cycle-time impact</th><th>Training burden</th></tr></thead>
+        <tbody>
+          <tr><td>Baseline (visual inspection only)</td><td>S</td><td>S</td><td>S</td><td>S</td></tr>
+          <tr><td>Mechanical stop pin</td><td>+</td><td>+</td><td>S</td><td>+</td></tr>
+          <tr><td>Optical sensor interlock</td><td>+</td><td>&minus;</td><td>&minus;</td><td>S</td></tr>
+          <tr><td>Asymmetric locating feature</td><td>+</td><td>S</td><td>+</td><td>S</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Tasks.</strong> (a) Compute the net score for each concept. (b) Which concept wins? (c) The optical sensor interlock has the same error-prevention score as the two winning concepts. Why does it still net out worst of the three real alternatives?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Mechanical stop pin: net&nbsp;=&nbsp;<span data-ex="m14-ex2-pugh" data-key="net.1" data-dp="0">3</span>. Optical sensor interlock: net&nbsp;=&nbsp;<span data-ex="m14-ex2-pugh" data-key="net.2" data-dp="0">-1</span>. Asymmetric locating feature: net&nbsp;=&nbsp;<span data-ex="m14-ex2-pugh" data-key="net.3" data-dp="0">2</span>.</p>
+      <p><strong>(b)</strong> The mechanical stop pin wins, with a net score of +3, beating every other concept including the baseline.</p>
+      <p><strong>(c)</strong> All three alternatives improve error prevention equally (each scores + there), so that criterion does not distinguish them at all &mdash; the decision is entirely made by the other three criteria. The optical sensor costs more and slows the cycle down (two minuses), while the stop pin and the locating feature cost the same or less than baseline and do not hurt cycle time. Looking only at error prevention, all three would look identical; the matrix's value here is entirely in forcing the other criteria onto the same page.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="14">
+      <fieldset class="q" data-answer="b">
+        <legend>1. In 5S, "Standardize" and "Sustain" matter most because</legend>
+        <label><input type="radio" name="q1" value="a"> they are the first two steps, so the rest depends on doing them first</label>
+        <label><input type="radio" name="q1" value="b"> without them, 5S is a one-time cleanup instead of a recurring discipline</label>
+        <label><input type="radio" name="q1" value="c"> they replace the need for Sort and Set in order</label>
+        <label><input type="radio" name="q1" value="d"> they only apply to office environments</label>
+        <p class="explain" hidden>Sort, Set in order, and Shine done once produce a tidy photo; Standardize and Sustain are what make it repeat.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. Standard work's three elements are</legend>
+        <label><input type="radio" name="q2" value="a"> Sort, Set in order, Shine</label>
+        <label><input type="radio" name="q2" value="b"> Severity, Occurrence, Detection</label>
+        <label><input type="radio" name="q2" value="c"> takt time, work sequence, standard in-process stock</label>
+        <label><input type="radio" name="q2" value="d"> internal setup, external setup, streamlining</label>
+        <p class="explain" hidden>The Lean Enterprise Institute's definition, cited in the Standard work and 5S section.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. A poka-yoke that makes an assembly error physically impossible, versus one that only signals the error after it happens, mainly differs in that the first</legend>
+        <label><input type="radio" name="q3" value="a"> drives Occurrence toward zero rather than only improving Detection</label>
+        <label><input type="radio" name="q3" value="b"> is always cheaper to build</label>
+        <label><input type="radio" name="q3" value="c"> is not a real poka-yoke method</label>
+        <label><input type="radio" name="q3" value="d"> only applies to electronic assemblies</label>
+        <p class="explain" hidden>Prevention attacks Occurrence in the RPN sense; a warning-only device is still just improving Detection.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>4. SMED's core method is to</legend>
+        <label><input type="radio" name="q4" value="a"> eliminate all setup time entirely</label>
+        <label><input type="radio" name="q4" value="b"> replace operators with automation</label>
+        <label><input type="radio" name="q4" value="c"> lengthen the production run between changeovers</label>
+        <label><input type="radio" name="q4" value="d"> separate internal from external setup, convert as much internal work to external as possible, then streamline what is left</label>
+        <p class="explain" hidden>Internal setup requires the machine stopped; external setup can happen while it still runs.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>5. In Worked example 1, Levene's test showing p = 0.0084 led to preferring Welch's t-test over the pooled t-test because</legend>
+        <label><input type="radio" name="q5" value="a"> the sample sizes were unequal</label>
+        <label><input type="radio" name="q5" value="b"> the two groups' variances were shown to be unequal, which the pooled test assumes they are not</label>
+        <label><input type="radio" name="q5" value="c"> Welch's test always gives a smaller p-value</label>
+        <label><input type="radio" name="q5" value="d"> the data were not normally distributed</label>
+        <p class="explain" hidden>The pooled t-test assumes equal variances; Levene's test is exactly the check of that assumption.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>6. A kaizen event that opens with a blank-page brainstorm instead of data already collected beforehand mainly risks</legend>
+        <label><input type="radio" name="q6" value="a"> running too long</label>
+        <label><input type="radio" name="q6" value="b"> being too expensive</label>
+        <label><input type="radio" name="q6" value="c"> converging on whoever argues most persuasively in the room rather than on the actual cause</label>
+        <label><input type="radio" name="q6" value="d"> requiring too many participants</label>
+        <p class="explain" hidden>Without data already in hand, root cause work degrades into opinion.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>7. In a Pugh matrix, a concept's net score is computed as</legend>
+        <label><input type="radio" name="q7" value="a"> the sum of all criteria scores including the baseline's</label>
+        <label><input type="radio" name="q7" value="b"> the single highest-scoring criterion</label>
+        <label><input type="radio" name="q7" value="c"> the average of the plus and minus counts</label>
+        <label><input type="radio" name="q7" value="d"> the count of pluses minus the count of minuses</label>
+        <p class="explain" hidden>Net score = (+) count − (−) count; the baseline scores S on every criterion against itself, so its own net score is 0.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>8. In Worked example 2, the ceramic insert concept improved gap repeatability but still had the worst net score because</legend>
+        <label><input type="radio" name="q8" value="a"> it scored worse than baseline on cost, ergonomics, and maintainability, outweighing its one strong criterion</label>
+        <label><input type="radio" name="q8" value="b"> gap repeatability does not count toward the net score</label>
+        <label><input type="radio" name="q8" value="c"> ceramic fixtures are always rejected by a Pugh matrix</label>
+        <label><input type="radio" name="q8" value="d"> the baseline concept always wins</label>
+        <p class="explain" hidden>One strong criterion does not guarantee a good net score once every criterion is counted.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. In Worked example 3, the p chart's lower control limit was 0.0 for every point in both the before and after periods because</legend>
+        <label><input type="radio" name="q9" value="a"> the data entry was wrong</label>
+        <label><input type="radio" name="q9" value="b"> a p chart never has a lower control limit</label>
+        <label><input type="radio" name="q9" value="c"> at this rate and these lot sizes, mean minus three sigma is negative and gets floored at zero</label>
+        <label><input type="radio" name="q9" value="d"> the fixture change caused it</label>
+        <p class="explain" hidden>A floored-at-zero LCL is common for low defect rates and is exactly why the module also calls for a hypothesis test comparing the two periods.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. In Worked example 3, Cram&eacute;r's V came out small (0.064) even though the leak rate roughly halved, mainly because</legend>
+        <label><input type="radio" name="q10" value="a"> the chi-square test was computed incorrectly</label>
+        <label><input type="radio" name="q10" value="b"> leaks were rare in both periods, which keeps this kind of association measure small regardless of how practically important the change was</label>
+        <label><input type="radio" name="q10" value="c"> the sample sizes were too small to detect anything</label>
+        <label><input type="radio" name="q10" value="d"> relative risk and Cram&eacute;r's V always agree</label>
+        <p class="explain" hidden>For a rare-event table, relative risk and risk difference are the practically meaningful numbers; a small Cramér's V does not mean the effect was unimportant.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>b. Without them, 5S is a one-time cleanup, not a recurring discipline.</li>
+        <li>c. Takt time, work sequence, standard in-process stock.</li>
+        <li>a. Prevention drives Occurrence toward zero, not just Detection.</li>
+        <li>d. Separate internal/external, convert internal to external, streamline what remains.</li>
+        <li>b. The variances were shown unequal, which the pooled test assumes they are not.</li>
+        <li>c. Converges on the most persuasive argument, not the actual cause.</li>
+        <li>d. Count of pluses minus count of minuses.</li>
+        <li>a. It scored worse on three other criteria, outweighing the one strong criterion.</li>
+        <li>c. Mean minus three sigma is negative at this rate and lot size, floored at zero.</li>
+        <li>b. Leaks were rare in both periods, which keeps this measure small regardless of practical importance.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>5S and standard work are the foundation the rest of this toolkit depends on: Standardize and Sustain turn a one-time cleanup into a repeatable state, and standard work's three elements (takt time, work sequence, standard in-process stock) are also a precondition for a control chart's common-cause variation meaning what it is supposed to mean.</li>
+      <li>Poka-yoke that prevents an error outright (a contact or fixed-value method) is a stronger fix than one that only warns after the fact; in PFMEA terms, prevention drives Occurrence down, a warning only improves Detection.</li>
+      <li>SMED separates internal setup (machine stopped) from external setup (can happen while running), converts as much internal work to external as possible, then streamlines what is left.</li>
+      <li>A Pugh matrix's net score (count of + minus count of &minus;, against a baseline scoring 0) is a facilitation tool for structuring a decision, not an algorithm that removes judgment; a concept can win on one important criterion and still lose overall.</li>
+      <li>Lean's standardizing tools are close to unambiguously good on a repeatable production process and can actively hurt genuinely exploratory work &mdash; 3M's documented experience is a real, if contested, case for keeping that distinction in mind.</li>
+      <li>Proving a pilot improvement takes a hypothesis test with an effect size, not just two averages, plus a control chart of each period on its own; a chart's own control limits (for example, a p chart's lower limit flooring at zero) can be structurally unable to flag an improvement by themselves, which is exactly why both are needed together.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-10 unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">Hindo, B. "At 3M, a struggle between efficiency and creativity." <em>BusinessWeek</em>, 11 June 2007. <a href="https://effectuation.org/hubfs/Journal%20Articles/2016/06/3m-struggle-between-efficiency-and-creativity.pdf">https://effectuation.org/hubfs/Journal%20Articles/2016/06/3m-struggle-between-efficiency-and-creativity.pdf</a></li>
+      <li id="ref-2">Hirano, H. (1995). <em>5 Pillars of the Visual Workplace</em>. Productivity Press. <a href="https://www.routledge.com/5-Pillars-of-the-Visual-Workplace/Hirano/p/book/9781563270475">https://www.routledge.com/5-Pillars-of-the-Visual-Workplace/Hirano/p/book/9781563270475</a> <span class="tag">(catalogue-level; the five steps)</span></li>
+      <li id="ref-3">Lean Enterprise Institute. Lexicon: "Standardized Work." <a href="https://www.lean.org/lexicon-terms/standardized-work/">https://www.lean.org/lexicon-terms/standardized-work/</a></li>
+      <li id="ref-4">Shingo, S. (1986). <em>Zero Quality Control: Source Inspection and the Poka-yoke System</em>. Productivity Press. <a href="https://www.routledge.com/Zero-Quality-Control-Source-Inspection-and-the-Poka-Yoke-System/Shingo/p/book/9780915299072">https://www.routledge.com/Zero-Quality-Control-Source-Inspection-and-the-Poka-Yoke-System/Shingo/p/book/9780915299072</a> <span class="tag">(catalogue-level; the three mechanisms)</span></li>
+      <li id="ref-5">Shingo, S. (1985). <em>A Revolution in Manufacturing: The SMED System</em>. Productivity Press. <a href="https://www.routledge.com/A-Revolution-in-Manufacturing-The-SMED-System/Dillon-Shingo/p/book/9780915299034">https://www.routledge.com/A-Revolution-in-Manufacturing-The-SMED-System/Dillon-Shingo/p/book/9780915299034</a> <span class="tag">(catalogue-level; the internal/external distinction is confirmed at this depth, specific numeric changeover-time claims are Shingo's own reported figures, not independently audited, and are presented as such)</span></li>
+      <li id="ref-6">Imai, M. (1986). <em>Kaizen: The Key to Japan's Competitive Success</em>. McGraw-Hill. <a href="https://archive.org/details/kaizen00masa">https://archive.org/details/kaizen00masa</a> <span class="tag">(catalogue-level)</span></li>
+      <li id="ref-7">Pugh, S. (1991). <em>Total Design: Integrated Methods for Successful Product Engineering</em>. Addison-Wesley. <a href="https://en.wikipedia.org/wiki/Stuart_Pugh">https://en.wikipedia.org/wiki/Stuart_Pugh</a> <span class="tag">(secondary: the concept-selection matrix method, via a summary source)</span></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

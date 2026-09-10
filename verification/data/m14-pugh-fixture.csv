@@ -1,0 +1,6 @@
+concept,gap_repeatability,changeover_time,unit_cost,ergonomics,maintainability
+Baseline (current pin fixture),0,0,0,0,0
+Machined locating block,1,-1,1,0,1
+Spring-loaded clamp,1,1,-1,1,-1
+Modular quick-change,1,1,-1,1,1
+Ceramic insert,1,0,-1,-1,-1
