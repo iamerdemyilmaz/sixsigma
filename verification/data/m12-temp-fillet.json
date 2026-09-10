@@ -1,0 +1,18 @@
+{
+ "id": "m12-temp-fillet",
+ "module": "12",
+ "kind": "regression",
+ "title": "Simple regression: braze fillet width vs furnace temperature alone",
+ "source": "constructed",
+ "setting": "braze fillet width (mm) at the header joint vs furnace temperature (deg C), 24 joints, temperature alone",
+ "params": {
+  "alpha": 0.05,
+  "units_x": "degC",
+  "units_y": "mm"
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 24
+}

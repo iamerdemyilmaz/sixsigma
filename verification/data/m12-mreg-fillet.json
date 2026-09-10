@@ -1,0 +1,24 @@
+{
+ "id": "m12-mreg-fillet",
+ "module": "12",
+ "kind": "mregression",
+ "title": "Multiple regression: braze fillet width vs temperature, flux mass, and gap",
+ "source": "constructed",
+ "setting": "braze fillet width (mm) at the header joint, 24 joints: furnace temperature (deg C), flux mass (mg), joint gap (mm)",
+ "params": {
+  "predictors": [
+   "temp",
+   "flux",
+   "gap"
+  ],
+  "alpha": 0.05,
+  "units_y": "mm"
+ },
+ "columns": [
+  "temp",
+  "flux",
+  "gap",
+  "y"
+ ],
+ "n_rows": 24
+}

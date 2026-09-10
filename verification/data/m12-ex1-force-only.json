@@ -1,0 +1,18 @@
+{
+ "id": "m12-ex1-force-only",
+ "module": "12",
+ "kind": "regression",
+ "title": "Exercise 1: simple regression, pull strength vs bond force alone",
+ "source": "constructed",
+ "setting": "the same 20 bonds as m12-ex1-mreg, bond force alone",
+ "params": {
+  "alpha": 0.05,
+  "units_x": "g",
+  "units_y": "N"
+ },
+ "columns": [
+  "x",
+  "y"
+ ],
+ "n_rows": 20
+}

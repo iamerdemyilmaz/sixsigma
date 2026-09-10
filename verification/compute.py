@@ -1379,6 +1379,34 @@ def fault_tree(params):
     return {"top_probability": top_p, "nodes": nodes, "top_name": tree["name"]}
 
 
+# --------------------------------------------------------------------------
+# Module 12: multiple linear regression
+#   mregression  columns: params["predictors"] (list of column names) plus
+#                "y"; a straightforward statsmodels OLS fit. recompute.py's
+#                independent route solves the normal equations by hand.
+# --------------------------------------------------------------------------
+def mregression(cols, params):
+    predictors = params["predictors"]
+    df = pd.DataFrame({p: cols[p] for p in predictors})
+    df["y"] = cols["y"]
+    formula = "y ~ " + " + ".join(predictors)
+    fit = smf.ols(formula, data=df).fit()
+    n = len(df)
+    ci = fit.conf_int(0.05)
+    terms = ["Intercept"] + predictors
+    coefficients = {}
+    for term in terms:
+        coefficients[term] = {"coef": float(fit.params[term]), "se": float(fit.bse[term]),
+                              "t": float(fit.tvalues[term]), "p": float(fit.pvalues[term]),
+                              "ci_lo": float(ci.loc[term, 0]), "ci_hi": float(ci.loc[term, 1])}
+    return {"predictors": predictors, "n": n, "k": len(predictors), "df_resid": int(fit.df_resid),
+            "coefficients": coefficients, "r2": float(fit.rsquared), "r2_adj": float(fit.rsquared_adj),
+            "f": float(fit.fvalue), "p_f": float(fit.f_pvalue), "s": float(math.sqrt(fit.mse_resid)),
+            "ss_regression": float(fit.ess), "ss_residual": float(fit.ssr), "ss_total": float(fit.ess + fit.ssr),
+            "fitted": [float(v) for v in fit.fittedvalues], "residuals": [float(v) for v in fit.resid],
+            "mean_y": float(df["y"].mean())}
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1475,6 +1503,8 @@ def compute_one(ex_id):
         res = rpn_table(cols, params)
     elif kind == "fault_tree":
         res = fault_tree(params)
+    elif kind == "mregression":
+        res = mregression(cols, params)
     elif kind == "pareto":
         res = pareto(cols)
     else:

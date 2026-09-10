@@ -1285,6 +1285,65 @@ def r_fault_tree(meta):
     return out
 
 
+def matrix_inverse(A):
+    """Gauss-Jordan elimination with partial pivoting, plain Python, no numpy."""
+    n = len(A)
+    M = [list(A[i]) + [1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+    for col in range(n):
+        pivot_row = max(range(col, n), key=lambda r: abs(M[r][col]))
+        M[col], M[pivot_row] = M[pivot_row], M[col]
+        pivot = M[col][col]
+        M[col] = [v / pivot for v in M[col]]
+        for r in range(n):
+            if r != col:
+                factor = M[r][col]
+                if factor != 0.0:
+                    M[r] = [M[r][c] - factor * M[col][c] for c in range(2 * n)]
+    return [row[n:] for row in M]
+
+
+def r_mregression(meta, cols):
+    """Independent route: solve the normal equations XtX*beta = Xty by hand
+    (Gauss-Jordan), rather than compute.py's statsmodels OLS fit."""
+    predictors = meta["params"]["predictors"]
+    y = cols["y"]
+    n = len(y)
+    k = len(predictors)
+    p1 = k + 1
+    X = [[1.0] + [cols[pr][i] for pr in predictors] for i in range(n)]
+    XtX = [[sum(X[i][a] * X[i][b] for i in range(n)) for b in range(p1)] for a in range(p1)]
+    Xty = [sum(X[i][a] * y[i] for i in range(n)) for a in range(p1)]
+    XtX_inv = matrix_inverse(XtX)
+    beta = [sum(XtX_inv[a][b] * Xty[b] for b in range(p1)) for a in range(p1)]
+    fitted = [sum(beta[a] * X[i][a] for a in range(p1)) for i in range(n)]
+    resid = [y[i] - fitted[i] for i in range(n)]
+    sse = sum(r * r for r in resid)
+    ybar = mean(y)
+    sst = sum((v - ybar) ** 2 for v in y)
+    ssr = sst - sse
+    r2 = ssr / sst
+    df_resid = n - p1
+    mse = sse / df_resid
+    r2_adj = 1.0 - (1.0 - r2) * (n - 1) / df_resid
+    se_beta = [math.sqrt(mse * XtX_inv[a][a]) for a in range(p1)]
+    t_beta = [beta[a] / se_beta[a] for a in range(p1)]
+    p_beta = [2 * (1.0 - t_cdf(abs(t_beta[a]), df_resid)) for a in range(p1)]
+    tc = t_ppf(0.975, df_resid)
+    F = (ssr / k) / (sse / df_resid)
+    p_F = f_sf(F, k, df_resid)
+    out = {"r2": r2, "r2_adj": r2_adj, "f": F, "p_f": p_F, "s": math.sqrt(mse),
+           "ss_regression": ssr, "ss_residual": sse, "ss_total": sst}
+    terms = ["Intercept"] + predictors
+    for a, term in enumerate(terms):
+        out[f"coefficients.{term}.coef"] = beta[a]; out[f"coefficients.{term}.se"] = se_beta[a]
+        out[f"coefficients.{term}.t"] = t_beta[a]; out[f"coefficients.{term}.p"] = p_beta[a]
+        out[f"coefficients.{term}.ci_lo"] = beta[a] - tc * se_beta[a]
+        out[f"coefficients.{term}.ci_hi"] = beta[a] + tc * se_beta[a]
+    for i in range(n):
+        out[f"fitted.{i}"] = fitted[i]; out[f"residuals.{i}"] = resid[i]
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1365,6 +1424,7 @@ def recompute_one(ex_id):
     elif kind == "multivari": mine = r_multivari(cols)
     elif kind == "rpn": mine = r_rpn(cols)
     elif kind == "fault_tree": mine = r_fault_tree(meta)
+    elif kind == "mregression": mine = r_mregression(meta, cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

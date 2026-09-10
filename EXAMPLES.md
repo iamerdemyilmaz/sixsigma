@@ -181,4 +181,11 @@ The published check example `chk-nist-capability` (NIST 6.1.6) is also declared 
 | m10-ex1-pfmea | 10 | RPN | connector assembly, 5 failure modes; same S-high/RPN-low pattern as the main example; exercise 1 | `m10-ex1-pfmea.csv` | pass | pass | pass | n/a | 10 |
 | m10-ex2-fault-tree | 10 | fault tree | wire-harness continuity escape, 2-level tree: top probability 0.130 %; exercise 2 | none | pass | pass | pass | n/a | 10 |
 
-Totals on 2026-09-10 (after Module 10, both sessions combined): 142 examples; 3,860 quantities agree between Check 1 and Check 2; 8,211 values agree between Check 1 and the JavaScript engines (112 examples with a calculator engine); 1,314 page checks.
+| m12-temp-fillet | 12 | simple regression (existing kind `regression`) | braze fillet width (mm) vs furnace temperature alone, 24 joints: intercept -2.806, slope 0.00670, r 0.690, R² 0.477, p(slope) 0.0002, s 0.0390 mm | `m12-temp-fillet.csv` | pass | pass | pass | pass (`Stats.regression`) | 12 |
+| m12-mreg-fillet | 12 | multiple regression (new kind `mregression`) | same 24 joints, temperature + flux mass + gap: temp coef 0.00853 (p=2.5e-7), flux coef 0.00616 (p=0.1295, not significant once temp and gap are in the model), gap coef -1.083 (p=5.4e-5); R² 0.773, R²adj 0.739, F(3,20)=22.69, s 0.0269 mm — the teaching point for Worked example 2 | `m12-mreg-fillet.csv` | pass | pass | pass | n/a (no calculator) | 12 |
+| m12-ex1-force-only | 12 | simple regression | wire-bond pull strength (N) vs bond force (g) alone, same 20 bonds as m12-ex1-mreg: R² 0.876, slope 0.09691; exercise 1 part (a) | `m12-ex1-force-only.csv` | pass | pass | pass | pass (`Stats.regression`) | 12 |
+| m12-ex1-mreg | 12 | multiple regression | wire-bond pull strength (N) vs bond force (g) and bond time (ms), 20 bonds: force coef 0.09493 (p=9.3e-11), time coef 0.03128 (p=0.00283, both significant — the contrasting case to m12-mreg-fillet's flux mass); R² 0.928, R²adj 0.919, F(2,17)=108.80; exercise 1 part (b)-(c) | `m12-ex1-mreg.csv` | pass | pass | pass | n/a (no calculator) | 12 |
+
+Module 12 also reuses the four Anscombe's quartet datasets (`m01-anscombe-1..4`) registered under Module 1, for a four-panel residual-plot figure (Worked example 1) illustrating that R² and r alone cannot distinguish a good linear fit from a bad one.
+
+Totals on 2026-09-10 (after Module 12, both sessions combined): 146 examples; 4,042 quantities agree between Check 1 and Check 2; 8,339 values agree between Check 1 and the JavaScript engines (114 examples with a calculator engine); 1,357 page checks.

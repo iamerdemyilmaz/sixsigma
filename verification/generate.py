@@ -1539,6 +1539,58 @@ register(id="m10-ex2-fault-tree", module="10", kind="fault_tree",
          params={"tree": _m10_ex2_tree}, columns=None, rows=None)
 
 
+# ---------------------------------------------------------------------------
+# Module 12: Correlation and regression (prefix m12-)
+# New kind this module: mregression (multiple linear regression). Simple
+# regression reuses the existing `regression` kind; Anscombe reuses the
+# existing m01-anscombe-1..4 (redeclared in the page, not re-registered).
+# ---------------------------------------------------------------------------
+def _m12_fillet(seed=19, n=24, b_temp=0.008, b_flux=0.012, b_gap=-1.2, noise_sd=0.02):
+    rng = np.random.default_rng(seed)
+    temp = rng.uniform(590, 610, n)
+    flux = rng.uniform(8, 14, n)
+    gap = rng.uniform(0.05, 0.15, n)
+    y = 1.20 + b_temp * (temp - 600) + b_flux * (flux - 11) + b_gap * (gap - 0.10) + rng.normal(0, noise_sd, n)
+    return (np.round(temp, 1), np.round(flux, 2), np.round(gap, 3), np.round(y, 4))
+
+
+_m12t, _m12f, _m12g, _m12y = _m12_fillet()
+register(id="m12-temp-fillet", module="12", kind="regression",
+         title="Simple regression: braze fillet width vs furnace temperature alone",
+         source="constructed", setting="braze fillet width (mm) at the header joint vs furnace temperature (deg C), 24 joints, temperature alone",
+         params={"alpha": 0.05, "units_x": "degC", "units_y": "mm"},
+         columns=["x", "y"], rows=[[float(t), float(y)] for t, y in zip(_m12t, _m12y)])
+register(id="m12-mreg-fillet", module="12", kind="mregression",
+         title="Multiple regression: braze fillet width vs temperature, flux mass, and gap",
+         source="constructed", setting="braze fillet width (mm) at the header joint, 24 joints: furnace temperature (deg C), flux mass (mg), joint gap (mm)",
+         params={"predictors": ["temp", "flux", "gap"], "alpha": 0.05, "units_y": "mm"},
+         columns=["temp", "flux", "gap", "y"],
+         rows=[[float(t), float(f), float(g), float(y)] for t, f, g, y in zip(_m12t, _m12f, _m12g, _m12y)])
+
+# Exercise 1: wire-bond pull strength vs bond force and bond time, both
+# predictors significant this time (the deliberate contrast to the main
+# example, where flux mass was not significant).
+def _m12_pull(seed=1, n=20, b_force=0.09, b_time=0.015, noise_sd=0.35):
+    rng = np.random.default_rng(seed)
+    force = rng.uniform(30, 60, n)
+    time = rng.uniform(15, 35, n)
+    y = 8.0 + b_force * (force - 45) + b_time * (time - 25) + rng.normal(0, noise_sd, n)
+    return (np.round(force, 1), np.round(time, 1), np.round(y, 2))
+
+
+_m12force, _m12time, _m12py = _m12_pull()
+register(id="m12-ex1-force-only", module="12", kind="regression",
+         title="Exercise 1: simple regression, pull strength vs bond force alone",
+         source="constructed", setting="the same 20 bonds as m12-ex1-mreg, bond force alone",
+         params={"alpha": 0.05, "units_x": "g", "units_y": "N"},
+         columns=["x", "y"], rows=[[float(a), float(c)] for a, c in zip(_m12force, _m12py)])
+register(id="m12-ex1-mreg", module="12", kind="mregression",
+         title="Exercise 1: wire-bond pull strength vs bond force and bond time",
+         source="constructed", setting="wire-bond pull strength (N) vs bond force (g) and bond time (ms), 20 bonds",
+         params={"predictors": ["force", "time"], "alpha": 0.05, "units_y": "N"},
+         columns=["force", "time", "y"], rows=[[float(a), float(b), float(c)] for a, b, c in zip(_m12force, _m12time, _m12py)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

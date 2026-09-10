@@ -22,7 +22,7 @@
     { num: "09", slug: "09-graphical-analysis", title: "Graphical analysis", built: true },
     { num: "10", slug: "10-root-cause", title: "Root cause analysis", built: true },
     { num: "11", slug: "11-hypothesis-testing", title: "Hypothesis testing", built: true },
-    { num: "12", slug: "12-correlation-regression", title: "Correlation and regression", built: false },
+    { num: "12", slug: "12-correlation-regression", title: "Correlation and regression", built: true },
     { num: "13", slug: "13-design-of-experiments", title: "Design of experiments", built: true },
     { num: "14", slug: "14-lean-tools", title: "Lean improvement tools", built: false },
     { num: "15", slug: "15-variation-and-design", title: "Variation reduction and design", built: false },

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 12: Correlation and regression · Six Sigma Course</title>
+<meta name="description" content="Correlation and its traps, simple linear regression by hand and by script, residual analysis, an introduction to multiple regression, and what R² does and does not tell you.">
+<meta name="examples" content="m12-temp-fillet, m12-mreg-fillet, m12-ex1-mreg, m12-ex1-force-only, m01-anscombe-1, m01-anscombe-2, m01-anscombe-3, m01-anscombe-4">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="12">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 12 · Analyze</p>
+    <h1>Correlation and regression</h1>
+    <p class="lead">A scatter plot (Module 9) shows you there might be a relationship. Regression puts a number on it: a slope, an intercept, a measure of how much of the variation the relationship explains, and &mdash; just as important &mdash; a set of diagnostics that tell you whether to trust any of it. This module covers correlation and its traps, simple linear regression by hand and by script, residual analysis, an introduction to multiple regression with more than one predictor, and what R&sup2; does and does not tell you.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Explain</strong> what a correlation coefficient measures and the traps in reading it (linearity only, not causation, sensitive to range).</li>
+      <li><strong>Fit</strong> a simple linear regression by hand from summary sums and reproduce it with a script.</li>
+      <li><strong>Read</strong> a residual plot to check whether a linear model's assumptions hold.</li>
+      <li><strong>Fit and interpret</strong> a multiple regression with more than one predictor, including what "holding the other predictors constant" means.</li>
+      <li><strong>Explain</strong> why R&sup2; alone cannot tell you a model is correct, and what adjusted R&sup2; corrects for.</li>
+    </ul>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Anscombe's quartet, introduced in Module 1 and revisited for its graphical lesson in Module 9, has one more lesson to give here, the most directly relevant to this module: all four datasets produce the identical simple regression line (slope near 0.500, intercept near 3.00) and the identical R&sup2; (0.67), yet only one of the four is a case where that line is actually the right model.<sup class="cite"><a href="#ref-2">[2]</a></sup> A regression's summary numbers &mdash; slope, intercept, R&sup2;, even the slope's own p-value &mdash; cannot tell you this by themselves. Residual analysis is the tool that can, and NIST's e-Handbook is blunt about the limits of the summary statistics alone: "a high R&sup2; value does not guarantee that the model fits the data well."<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+    <p class="example-label">The scenario below is a constructed illustration, not a real incident.</p>
+    <p>A team investigating braze fillet width finds a moderate correlation with furnace temperature and, pleased with an R&sup2; over 0.45, recommends a temperature-only process control limit and closes the investigation. A more complete model, adding two more readily available process variables, very nearly doubles the explained variation &mdash; and reveals that one of the two new variables the team assumed mattered (flux mass) actually does not, once temperature and joint gap are accounted for. Both the celebration after the first model and the assumption behind the second variable were premature; only the fuller regression, checked properly, sorts out which relationships are real.</p>
+
+    <h2 id="correlation">Correlation and its traps</h2>
+    <p>The Pearson correlation coefficient r measures the strength of a <em>linear</em> relationship only, on a scale from &minus;1 (perfect negative) to +1 (perfect positive), with 0 meaning no linear relationship &mdash; not necessarily no relationship at all. Three traps recur constantly in practice: r can be near zero for a strong <em>curved</em> relationship (Anscombe's set 2 again); a real correlation does not establish which variable causes which, or whether a third, unmeasured variable drives both; and computing r over a restricted range of one variable (only the parts of a process that happen to have run recently, say) can understate or overstate the true relationship across the variable's full range.</p>
+
+    <h2 id="simple-regression">Simple linear regression</h2>
+    <div class="formula">&#375; = b&#8320; + b&#8321;x
+      <br>b&#8321; = S<sub>xy</sub> / S<sub>xx</sub> = &Sigma;(x&#8722;x&#772;)(y&#8722;y&#772;) / &Sigma;(x&#8722;x&#772;)&sup2; &nbsp;&nbsp; b&#8320; = y&#772; &minus; b&#8321;x&#772;
+      <span class="where">Least squares: the line that minimizes the sum of squared vertical distances from each point to the line. b&#8321; is the predicted change in y per unit change in x; b&#8320; is where the line crosses x = 0, which may or may not be a meaningful point depending on whether x = 0 falls inside the range of the data.</span>
+    </div>
+    <p>The slope's own standard error, t-statistic and p-value (Module 11's logic applied to one coefficient) test whether the slope is distinguishable from zero &mdash; whether there is a linear relationship at all, not whether the model is a good one.</p>
+
+    <h2 id="residuals">Residual analysis</h2>
+    <p>A residual is the difference between an observed y and the model's fitted value at that x: e = y &minus; &#375;. NIST's e-Handbook treats a plot of residuals against fitted values (or against x) as the primary check of a regression model, ahead of any summary statistic: it should show no pattern &mdash; no curve (a sign the true relationship is not linear), no funnel shape (a sign the variance is not constant), no trend over the order the data was collected (a sign of a missed time-based effect), and residuals that look reasonably close to a normal distribution.<sup class="cite"><a href="#ref-1">[1]</a></sup> Any of these patterns means the model's own assumptions do not hold, and the p-values and confidence intervals it reports are not trustworthy even if R&sup2; looks respectable.</p>
+
+    <h2 id="multiple">Multiple regression</h2>
+    <div class="formula">&#375; = b&#8320; + b&#8321;x&#8321; + b&#8322;x&#8322; + &hellip; + b&#8342;x&#8342;
+      <span class="where">Each coefficient b<sub>i</sub> is the predicted change in y per unit change in x<sub>i</sub>, holding every other predictor in the model constant &mdash; a genuinely different quantity from the slope of a simple regression of y on x<sub>i</sub> alone, because the simple slope does not control for the other predictors at all. Fitting is still least squares, solved from the normal equations X&#7488;Xb = X&#7488;y, where X is the design matrix (a column of 1s for the intercept, plus one column per predictor).</span>
+    </div>
+    <p>Adding a predictor to a model can never decrease R&sup2; (it can only help the least-squares fit, or do nothing), which makes plain R&sup2; a poor way to decide whether a new predictor is worth keeping. Adjusted R&sup2; corrects for this by penalizing extra predictors relative to the residual degrees of freedom, and is the more honest number to watch when comparing models with different numbers of predictors.</p>
+    <div class="formula">R&sup2;<sub>adj</sub> = 1 &minus; (1 &minus; R&sup2;) &times; (n &minus; 1) / (n &minus; k &minus; 1)
+      <span class="where">n = number of observations, k = number of predictors. If a predictor adds essentially nothing, adjusted R&sup2; barely moves or can even fall slightly, even though plain R&sup2; always ticks up by some small amount.</span>
+    </div>
+
+    <h2 id="r2-limits">What R&sup2; does and does not tell you</h2>
+    <p>R&sup2; is the proportion of the variation in y explained by the fitted model. It does not tell you the model's functional form is correct (Anscombe's set 2 again: a curved relationship can still produce a large R&sup2; from a straight-line fit, or a small one, depending on the data). It does not tell you the relationship is causal. It does not by itself tell you whether the effect is practically significant &mdash; a very large sample can make a tiny, unimportant slope statistically significant with a small R&sup2;, and a small sample can leave a practically important relationship statistically inconclusive. And it never falls when a predictor is added, which is exactly why R&sup2; alone is not a valid way to compare a simple model against a fuller one; that comparison needs adjusted R&sup2; or the F-test on the additional predictors, not R&sup2; on its own.</p>
+
+    <h2 id="examples">Worked examples</h2>
+
+    <h3 id="example1">Worked example 1: residual plots, Anscombe's quartet revisited</h3>
+    <p class="example-label">Real data (Module 1, S-C28), the same four datasets, examined here through their residuals.</p>
+    <p>Module 1 introduced these four sets; Module 9 looked at their scatter plots. Here, the same regression line is fitted to each (slope &asymp; 0.500, intercept &asymp; 3.00, R&sup2; &asymp; 0.67 for all four) and the residuals &mdash; what the scatter plot's departure from that line actually looks like, quantified &mdash; are plotted against x.</p>
+    <figure>
+      <svg viewBox="0 0 740 460" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Residual plots for Anscombe's four datasets</title>
+        <desc id="fig1-d">Four small scatter plots of residual against x, one per Anscombe dataset, arranged in a two by two grid, all on the same horizontal and vertical scale with a dashed zero line. Set 1's residuals scatter with no visible pattern. Set 2's residuals trace a clean, symmetric downward-opening parabola, rising then falling as x increases. Set 3's residuals are all small and close to zero except one far above the zero line. Set 4's residuals are a vertical column of points at one x value plus a single point at a much larger x sitting almost exactly on the zero line.</desc>
+        <g class="chart-text"><text x="40" y="20" class="chart-title">Set 1: residuals scatter with no pattern</text></g>
+        <g class="chart-text"><text x="400" y="20" class="chart-title">Set 2: a clear parabola</text></g>
+        <g class="chart-text"><text x="40" y="240" class="chart-title">Set 3: one large outlier</text></g>
+        <g class="chart-text"><text x="400" y="240" class="chart-title">Set 4: one point defines the whole line</text></g>
+        <g class="chart-box" fill="none"><rect x="40" y="40" width="300" height="180"/><rect x="400" y="40" width="300" height="180"/><rect x="40" y="260" width="300" height="180"/><rect x="400" y="260" width="300" height="180"/></g>
+        <g class="chart-zone"><line x1="40" y1="149.3" x2="340" y2="149.3"/><line x1="400" y1="149.3" x2="700" y2="149.3"/><line x1="40" y1="369.3" x2="340" y2="369.3"/><line x1="400" y1="369.3" x2="700" y2="369.3"/></g>
+        <g fill="currentColor">
+          <circle cx="160.0" cy="148.0" r="3"/><circle cx="120.0" cy="150.9" r="3"/><circle cx="220.0" cy="211.0" r="3"/><circle cx="140.0" cy="107.2" r="3"/><circle cx="180.0" cy="154.8" r="3"/><circle cx="240.0" cy="150.6" r="3"/><circle cx="80.0" cy="109.4" r="3"/><circle cx="40.0" cy="173.1" r="3"/><circle cx="200.0" cy="90.2" r="3"/><circle cx="100.0" cy="203.3" r="3"/><circle cx="60.0" cy="143.5" r="3"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="520.0" cy="112.7" r="3"/><circle cx="480.0" cy="112.7" r="3"/><circle cx="580.0" cy="173.7" r="3"/><circle cx="500.0" cy="108.5" r="3"/><circle cx="540.0" cy="124.9" r="3"/><circle cx="600.0" cy="210.4" r="3"/><circle cx="440.0" cy="145.1" r="3"/><circle cx="400.0" cy="210.4" r="3"/><circle cx="560.0" cy="145.1" r="3"/><circle cx="460.0" cy="124.9" r="3"/><circle cx="420.0" cy="173.7" r="3"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="160.0" cy="386.6" r="3"/><circle cx="120.0" cy="376.7" r="3"/><circle cx="220.0" cy="265.1" r="3"/><circle cx="140.0" cy="381.8" r="3"/><circle cx="180.0" cy="391.4" r="3"/><circle cx="240.0" cy="406.5" r="3"/><circle cx="80.0" cy="366.7" r="3"/><circle cx="40.0" cy="356.8" r="3"/><circle cx="200.0" cy="396.6" r="3"/><circle cx="100.0" cy="371.9" r="3"/><circle cx="60.0" cy="361.9" r="3"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="480.0" cy="382.8" r="3"/><circle cx="480.0" cy="409.2" r="3"/><circle cx="480.0" cy="346.5" r="3"/><circle cx="480.0" cy="310.2" r="3"/><circle cx="480.0" cy="322.1" r="3"/><circle cx="480.0" cy="368.0" r="3"/><circle cx="480.0" cy="425.6" r="3"/><circle cx="700.0" cy="369.3" r="3"/><circle cx="480.0" cy="415.6" r="3"/><circle cx="480.0" cy="340.1" r="3"/><circle cx="480.0" cy="372.9" r="3"/>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Residuals (vertical axis, dashed line at zero) against x (horizontal axis), same scale in all four panels, for Anscombe's four datasets fitted with the identical regression line. The summary statistics cannot tell these four apart; the residual plots do it immediately.</figcaption>
+    </figure>
+    <p>Set 1's residuals scatter with no visible structure &mdash; a straight line is a reasonable model. Set 2's residuals trace a clean parabola: the true relationship is curved, and the linear fit's errors are not random noise, they are the shape of the curve the line missed. Set 3 is dominated by a single point (residual <span data-ex="m01-anscombe-3" data-key="residuals.2" data-dp="3">3.241</span>, far above every other point on that panel); without it the remaining ten points would fall almost exactly on a line, and the "0.67 R&sup2;" the summary statistics report is really one outlier's doing. Set 4 shows why: ten points sit at the same x with no information about a slope at all, and the entire regression line &mdash; slope, intercept, R&sup2; &mdash; is determined by the single point at x&nbsp;=&nbsp;19, whose residual is essentially <span data-ex="m01-anscombe-4" data-key="residuals.7" data-dp="1">0.0</span> because the line is, in effect, drawn straight through it and the other ten points' mean. None of this is visible in the slope, the intercept, or R&sup2; alone; all of it is visible in thirty seconds of looking at the residuals.</p>
+
+    <h3 id="example2">Worked example 2: simple vs multiple regression, braze fillet width</h3>
+    <p class="example-label">The data below is a constructed example, not a real production run.</p>
+    <p>Braze fillet width (mm) at the header joint, 24 joints, three candidate predictors: furnace temperature (&deg;C), flux mass (mg), and joint gap (mm). First, temperature alone.</p>
+    <div class="formula">&#375; = <span data-ex="m12-temp-fillet" data-key="intercept" data-dp="3">-2.806</span> + <span data-ex="m12-temp-fillet" data-key="slope" data-dp="5">0.00670</span> &times; temperature
+      <span class="where">r = <span data-ex="m12-temp-fillet" data-key="r" data-dp="3">0.690</span>, R&sup2; = <span data-ex="m12-temp-fillet" data-key="r2" data-dp="3">0.477</span>, slope p-value <span data-ex="m12-temp-fillet" data-key="p_slope" data-dp="4">0.0002</span> (significant), residual s = <span data-ex="m12-temp-fillet" data-key="s" data-dp="4">0.0390</span> mm.</span>
+    </div>
+    <p>Temperature alone explains <span data-ex="m12-temp-fillet" data-key="r2" data-dp="1">0.5</span> &times; 100, i.e. about 48&nbsp;%, of the variation in fillet width. Adding flux mass and joint gap:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 1. Multiple regression, fillet width vs temperature, flux mass, and joint gap (constructed data, n = 24).</caption>
+        <thead><tr><th>Term</th><th>Coefficient</th><th>SE</th><th>t</th><th>p</th><th>95% CI</th></tr></thead>
+        <tbody>
+          <tr><td>Intercept</td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.Intercept.coef" data-dp="3">-3.869</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.Intercept.se" data-dp="3">0.663</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.Intercept.t" data-dp="2">-5.83</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.Intercept.p" data-dp="5">0.00001</span></td><td class="num">&minus;5.253 to &minus;2.486</td></tr>
+          <tr><td>Temperature</td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.temp.coef" data-dp="5">0.00853</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.temp.se" data-dp="5">0.00112</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.temp.t" data-dp="2">7.62</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.temp.p" data-dp="7">0.0000002</span></td><td class="num">0.00619 to 0.01086</td></tr>
+          <tr><td>Flux mass</td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.flux.coef" data-dp="5">0.00616</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.flux.se" data-dp="5">0.00390</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.flux.t" data-dp="2">1.58</span></td><td class="num"><strong><span data-ex="m12-mreg-fillet" data-key="coefficients.flux.p" data-dp="4">0.1295</span></strong></td><td class="num">&minus;0.00197 to 0.01429</td></tr>
+          <tr><td>Gap</td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.gap.coef" data-dp="3">-1.083</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.gap.se" data-dp="3">0.212</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.gap.t" data-dp="2">-5.10</span></td><td class="num"><span data-ex="m12-mreg-fillet" data-key="coefficients.gap.p" data-dp="5">0.00005</span></td><td class="num">&minus;1.525 to &minus;0.640</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">R&sup2; = <span data-ex="m12-mreg-fillet" data-key="r2" data-dp="3">0.773</span> &nbsp;&nbsp; R&sup2;<sub>adj</sub> = <span data-ex="m12-mreg-fillet" data-key="r2_adj" data-dp="3">0.739</span> &nbsp;&nbsp; F(<span data-ex="m12-mreg-fillet" data-key="k" data-dp="0">3</span>, <span data-ex="m12-mreg-fillet" data-key="df_resid" data-dp="0">20</span>) = <span data-ex="m12-mreg-fillet" data-key="f" data-dp="2">22.69</span>, p <span data-ex="m12-mreg-fillet" data-key="p_f" data-dp="6">0.000001</span> &nbsp;&nbsp; s = <span data-ex="m12-mreg-fillet" data-key="s" data-dp="4">0.0269</span> mm</div>
+    <p>Adding two predictors nearly doubles the explained variation, from about 48&nbsp;% to <span data-ex="m12-mreg-fillet" data-key="r2" data-dp="1">0.8</span> &times; 100 (77.3&nbsp;%). Both temperature and gap are highly significant, and gap's coefficient is negative &mdash; a wider gap means a narrower fillet, which matches the physical picture of a fixed amount of filler metal bridging a larger opening. Flux mass, though, has a p-value of <span data-ex="m12-mreg-fillet" data-key="coefficients.flux.p" data-dp="3">0.129</span>: not statistically significant at the conventional 5&nbsp;% level, and its 95&nbsp;% confidence interval comfortably includes zero. A team that measured only flux mass and fillet width, and computed just their simple correlation, could easily have seen a moderate relationship and assumed flux mass mattered; in the full model, controlling for temperature and gap, that apparent effect mostly evaporates. This is precisely what "holding the other predictors constant" buys: a fairer read of whether each variable earns its place, not just how each one looks in isolation.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Fitting a regression without ever looking at the scatter plot first.</strong> Consequence: Anscombe's quartet, again &mdash; identical regression output, at least one of the four datasets is the wrong model for its data. Fix: Module 9's discipline applies here directly; plot before fitting.</li>
+      <li><strong>Trusting R&sup2; alone and skipping the residual plot.</strong> Consequence: a curved relationship, a funnel-shaped variance, or a time trend can all sit underneath a respectable-looking R&sup2; and go unnoticed. Fix: always plot residuals against fitted values before trusting any regression output.</li>
+      <li><strong>Reading a correlation or a regression coefficient as proof of causation.</strong> Consequence: acting on a relationship driven by a third, unmeasured variable, or by reverse causation, produces a "fix" that does not fix anything. Fix: causal claims need a designed experiment (Module 13) or strong process knowledge, not a regression coefficient by itself.</li>
+      <li><strong>Interpreting a multiple regression coefficient the same way as a simple regression slope.</strong> Consequence: reporting "a 1 mg increase in flux mass changes fillet width by b" when b is actually "holding temperature and gap constant" is a different, narrower claim, and conflating the two overstates what the model says. Fix: state the "holding other predictors constant" qualifier every time.</li>
+      <li><strong>Using plain R&sup2; to decide whether an added predictor is worth keeping.</strong> Consequence: R&sup2; can only rise or stay flat when a predictor is added, even a useless one, so it always looks like an improvement. Fix: compare adjusted R&sup2;, or test the added predictor's own coefficient directly.</li>
+      <li><strong>Assuming a predictor matters because its simple correlation with y is large.</strong> Consequence: Worked example 2's flux mass has a real, moderate simple correlation with fillet width, but is not a statistically significant predictor once temperature and gap are in the model &mdash; its apparent effect was substantially explained by its association with the other two variables. Fix: check a predictor's significance in the full model you intend to use, not its marginal correlation alone.</li>
+      <li><strong>Extrapolating a fitted line or surface outside the range of the data used to fit it.</strong> Consequence: the intercept and slope describe the fitted range; nothing guarantees the same relationship holds outside it, and a process pushed to a new operating point can behave completely differently. Fix: state the range the model was fitted over, and treat any prediction outside it as an extrapolation, not a result.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: wire-bond pull strength vs bond force and bond time</h3>
+    <p class="example-label">Constructed example, not a real production run.</p>
+    <p>Wire-bond pull strength (N), 20 bonds, two candidate predictors: bond force (g) and bond time (ms). <strong>Tasks.</strong> (a) A simple regression of pull strength on bond force alone gives R&sup2; = <span data-ex="m12-ex1-force-only" data-key="r2" data-dp="3">0.876</span>. Predict, before computing, whether adding bond time will raise R&sup2; even if bond time turns out to matter very little. (b) Fit the multiple regression and report both coefficients' p-values. (c) Does bond time earn its place in the model, statistically? Compare this result with Worked example 2's flux mass.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> R&sup2; must rise by at least a small amount regardless, because adding any predictor to a least-squares fit can never decrease R&sup2;. The real question is whether it rises by enough to matter, and whether adjusted R&sup2; agrees.</p>
+      <p><strong>(b)</strong> Force: coefficient <span data-ex="m12-ex1-mreg" data-key="coefficients.force.coef" data-dp="4">0.0949</span>, p <span data-ex="m12-ex1-mreg" data-key="coefficients.force.p" data-dp="9">0.000000000</span>. Time: coefficient <span data-ex="m12-ex1-mreg" data-key="coefficients.time.coef" data-dp="4">0.0313</span>, p <span data-ex="m12-ex1-mreg" data-key="coefficients.time.p" data-dp="3">0.003</span>. R&sup2; = <span data-ex="m12-ex1-mreg" data-key="r2" data-dp="3">0.928</span>, R&sup2;<sub>adj</sub> = <span data-ex="m12-ex1-mreg" data-key="r2_adj" data-dp="3">0.919</span>.</p>
+      <p><strong>(c)</strong> Yes: bond time's p-value (0.003) is well under 0.05, and adjusted R&sup2; rose along with plain R&sup2; (from a one-predictor model's adjusted R&sup2; of <span data-ex="m12-ex1-force-only" data-key="r2" data-dp="3">0.876</span>&times;<sup>*</sup> to 0.919), not just plain R&sup2; alone. This is the opposite outcome from Worked example 2's flux mass: there, a second predictor's simple relationship with y turned out not to hold up once the other predictors were in the model; here, bond time's effect is real and statistically supported even after controlling for bond force. The two examples together are the point: adding a predictor always raises R&sup2; a little, but only checking its own coefficient and adjusted R&sup2; tells you whether that rise means anything.</p>
+      <p class="small">* The one-predictor model's own adjusted R&sup2; is not separately reported here; comparing plain R&sup2; (0.876 &rarr; 0.928) alongside the fact that adjusted R&sup2; also rose substantially (to 0.919) is what supports keeping bond time, not the plain-R&sup2; increase by itself.</p>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70&#8201;% or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="12">
+      <fieldset class="q" data-answer="c">
+        <legend>1. A correlation coefficient r near zero means</legend>
+        <label><input type="radio" name="q1" value="a"> there is no relationship of any kind between the two variables</label>
+        <label><input type="radio" name="q1" value="b"> one variable causes the other</label>
+        <label><input type="radio" name="q1" value="c"> there is no strong LINEAR relationship; a real, even strong, curved relationship can still produce r near zero</label>
+        <label><input type="radio" name="q1" value="d"> the data must contain an error</label>
+        <p class="explain" hidden>Anscombe's set 2 pattern: r measures linear association only.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. The primary purpose of a residual plot is to</legend>
+        <label><input type="radio" name="q2" value="a"> compute R&sup2; more precisely</label>
+        <label><input type="radio" name="q2" value="b"> check whether the model's assumptions (linearity, constant variance, independence, normality) actually hold</label>
+        <label><input type="radio" name="q2" value="c"> replace the need for a scatter plot</label>
+        <label><input type="radio" name="q2" value="d"> compute the correlation coefficient</label>
+        <p class="explain" hidden>A pattern in the residuals (curve, funnel, trend) means the model's own assumptions are violated.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>3. In Worked example 1's residual plots, Anscombe's set 2 showed</legend>
+        <label><input type="radio" name="q3" value="a"> no pattern at all</label>
+        <label><input type="radio" name="q3" value="b"> one dominant outlier</label>
+        <label><input type="radio" name="q3" value="c"> a single point determining the entire fit</label>
+        <label><input type="radio" name="q3" value="d"> a clear parabola, revealing that the true relationship is curved, not linear</label>
+        <p class="explain" hidden>Set 2's residuals rise then fall symmetrically as x increases, the signature of a linear fit missing real curvature.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>4. In a multiple regression, a coefficient b&#7522; is interpreted as</legend>
+        <label><input type="radio" name="q4" value="a"> the predicted change in y per unit change in x&#7522;, holding every other predictor in the model constant</label>
+        <label><input type="radio" name="q4" value="b"> identical to the simple-regression slope of y on x&#7522; alone</label>
+        <label><input type="radio" name="q4" value="c"> always positive if the relationship is real</label>
+        <label><input type="radio" name="q4" value="d"> unrelated to the other predictors in the model</label>
+        <p class="explain" hidden>The "holding other predictors constant" qualifier is what makes a multiple-regression coefficient a different quantity from a simple slope.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>5. Adding a predictor to a regression model, even a useless one, causes R&sup2; to</legend>
+        <label><input type="radio" name="q5" value="a"> always decrease</label>
+        <label><input type="radio" name="q5" value="b"> stay exactly the same</label>
+        <label><input type="radio" name="q5" value="c"> never decrease (rise or stay flat)</label>
+        <label><input type="radio" name="q5" value="d"> become undefined</label>
+        <p class="explain" hidden>Least squares can only improve or do nothing as predictors are added; R² alone cannot penalize a useless addition.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>6. Adjusted R&sup2; differs from plain R&sup2; because it</legend>
+        <label><input type="radio" name="q6" value="a"> is always larger than plain R&sup2;</label>
+        <label><input type="radio" name="q6" value="b"> penalizes extra predictors relative to the residual degrees of freedom</label>
+        <label><input type="radio" name="q6" value="c"> only applies to simple regression</label>
+        <label><input type="radio" name="q6" value="d"> measures correlation instead of variance explained</label>
+        <p class="explain" hidden>Adjusted R² can fall or barely move when a predictor adds little, unlike plain R².</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>7. In Worked example 2, flux mass's p-value of 0.129 in the full model means</legend>
+        <label><input type="radio" name="q7" value="a"> flux mass has no relationship with fillet width under any circumstances</label>
+        <label><input type="radio" name="q7" value="b"> the model is invalid</label>
+        <label><input type="radio" name="q7" value="c"> flux mass should be measured more precisely</label>
+        <label><input type="radio" name="q7" value="d"> flux mass is not a statistically significant predictor once temperature and gap are already in the model</label>
+        <p class="explain" hidden>Its apparent simple relationship with fillet width was substantially explained by its association with temperature and gap.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>8. A regression coefficient, however statistically significant, does NOT by itself establish</legend>
+        <label><input type="radio" name="q8" value="a"> that the relationship is causal</label>
+        <label><input type="radio" name="q8" value="b"> the direction of the fitted slope</label>
+        <label><input type="radio" name="q8" value="c"> the units of the coefficient</label>
+        <label><input type="radio" name="q8" value="d"> the sample size used to fit the model</label>
+        <p class="explain" hidden>Causal claims need a designed experiment or strong process knowledge, not a regression coefficient alone.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>9. Using a fitted regression to predict y at an x value well outside the range of the fitting data is</legend>
+        <label><input type="radio" name="q9" value="a"> always valid, since the equation is defined for all x</label>
+        <label><input type="radio" name="q9" value="b"> only a problem for multiple regression, not simple regression</label>
+        <label><input type="radio" name="q9" value="c"> an extrapolation, with no guarantee the same relationship holds there</label>
+        <label><input type="radio" name="q9" value="d"> corrected automatically by R&sup2;</label>
+        <p class="explain" hidden>Nothing in the fit guarantees the relationship continues to hold outside the range the data actually covered.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>10. NIST's e-Handbook (4.4.4) states, on the limits of summary statistics, that</legend>
+        <label><input type="radio" name="q10" value="a"> a high R&sup2; always means the model is correct</label>
+        <label><input type="radio" name="q10" value="b"> a high R&sup2; value does not guarantee that the model fits the data well</label>
+        <label><input type="radio" name="q10" value="c"> R&sup2; is not a meaningful statistic</label>
+        <label><input type="radio" name="q10" value="d"> residual plots are optional once R&sup2; exceeds 0.9</label>
+        <p class="explain" hidden>This is the exact point Anscombe's quartet and Worked example 1 illustrate on real numbers.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. No strong linear relationship; a curve can still exist.</li>
+        <li>b. Check whether the model's assumptions hold.</li>
+        <li>d. A clear parabola.</li>
+        <li>a. Change in y per unit x, holding others constant.</li>
+        <li>c. Never decreases.</li>
+        <li>b. Penalizes extra predictors.</li>
+        <li>d. Not significant once temperature and gap are included.</li>
+        <li>a. Causation.</li>
+        <li>c. An extrapolation.</li>
+        <li>b. A high R² does not guarantee a good fit.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Correlation measures only linear association, does not establish causation, and can be distorted by the range of data examined.</li>
+      <li>Simple linear regression's least-squares line and its slope's significance test are computable by hand from summary sums and reproduced exactly by script.</li>
+      <li>Residual plots (against fitted values or x) are the primary check of a regression model's assumptions; a respectable R&sup2; does not mean the model is correct.</li>
+      <li>Multiple regression coefficients hold the other predictors constant, a genuinely different quantity from a simple-regression slope on the same variable alone.</li>
+      <li>R&sup2; never falls when a predictor is added, even a useless one; adjusted R&sup2; corrects for the number of predictors and is the fairer number for comparing models.</li>
+      <li>A predictor's simple correlation with the outcome can look meaningful and still not be a significant predictor once other, related variables are in the model.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 unless noted.</p>
+    <ol class="references">
+      <li id="ref-1">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>, 4.4.4 "How can I tell if a model fits my data?". NIST. <a href="https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm">https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm</a></li>
+      <li id="ref-2">Anscombe, F. J. (1973). Graphs in statistical analysis. <em>The American Statistician</em>, 27(1), 17&ndash;21. Values as reproduced in Wikipedia and the R <code>datasets</code> package documentation (Module 1, S-E35, S-E36). <a href="https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf">https://www.sjsu.edu/faculty/gerstman/StatPrimer/anscombe1973.pdf</a></li>
+      <li id="ref-3">NIST/SEMATECH. <em>e-Handbook of Statistical Methods</em>. NIST, 2012 (updated). <a href="https://www.itl.nist.gov/div898/handbook/">https://www.itl.nist.gov/div898/handbook/</a></li>
+      <li id="ref-4">Montgomery, D. C. (2019). <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley. <a href="https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308">https://www.wiley.com/en-us/Introduction+to+Statistical+Quality+Control,+8th+Edition-p-9781119399308</a> <span class="tag">(catalogue-level; general regression reference)</span></li>
+      <li id="ref-5">ASQ. <em>Certified Six Sigma Green Belt (CSSGB) Body of Knowledge Map 2014&ndash;2022</em>. ASQ, 2022. <a href="https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf">https://www.asq.org/cert/resource/pdf/certification/2022-CSSGB-BoK-Map.pdf</a></li>
+    </ol>
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

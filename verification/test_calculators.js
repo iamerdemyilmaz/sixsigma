@@ -144,7 +144,10 @@ const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_non
   multivari: true,
   // Module 10: RPN tables and fault trees are pure arithmetic with no
   // calculator among the nine required ones.
-  rpn: true, fault_tree: true };
+  rpn: true, fault_tree: true,
+  // Module 12: multiple regression has no calculator among the nine
+  // required ones either (simple regression has none built for it so far).
+  mregression: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

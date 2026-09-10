@@ -519,6 +519,19 @@ def check_fault_tree(ex_id, r):
     check(near(r["nodes"][r["top_name"]], r["top_probability"]), f"{tag}: top node's own probability != top_probability")
 
 
+def check_mregression(ex_id, r):
+    tag = ex_id
+    check(abs(sum(r["residuals"])) < 1e-6 * max(1.0, abs(r["mean_y"]) * r["n"]), f"{tag}: residuals do not sum to ~0")
+    check(near(r["ss_regression"] + r["ss_residual"], r["ss_total"]), f"{tag}: SS regression + SS residual != SS total")
+    check(0.0 <= r["r2"] <= 1.0, f"{tag}: r2 out of [0,1]")
+    check(r["r2_adj"] <= r["r2"] + 1e-9, f"{tag}: adjusted r2 should not exceed r2")
+    in01(r["p_f"], f"{tag}: overall F p-value")
+    for term, c in r["coefficients"].items():
+        in01(c["p"], f"{tag}: p-value for {term}")
+        check(c["ci_lo"] <= c["coef"] <= c["ci_hi"], f"{tag}: {term} coefficient outside its own CI")
+        check(near(c["t"], c["coef"] / c["se"], 1e-6), f"{tag}: {term} t != coef/se")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -559,6 +572,7 @@ def check_results():
         elif kind == "multivari": check_multivari(ex_id, r)
         elif kind == "rpn": check_rpn(ex_id, r)
         elif kind == "fault_tree": check_fault_tree(ex_id, r)
+        elif kind == "mregression": check_mregression(ex_id, r)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

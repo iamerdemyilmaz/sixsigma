@@ -1,0 +1,22 @@
+{
+ "id": "m12-ex1-mreg",
+ "module": "12",
+ "kind": "mregression",
+ "title": "Exercise 1: wire-bond pull strength vs bond force and bond time",
+ "source": "constructed",
+ "setting": "wire-bond pull strength (N) vs bond force (g) and bond time (ms), 20 bonds",
+ "params": {
+  "predictors": [
+   "force",
+   "time"
+  ],
+  "alpha": 0.05,
+  "units_y": "N"
+ },
+ "columns": [
+  "force",
+  "time",
+  "y"
+ ],
+ "n_rows": 20
+}
