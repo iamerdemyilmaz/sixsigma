@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 17: Statistical process control II · Six Sigma Course</title>
+<meta name="description" content="Attribute charts (p, np, c, u) with the correct limits, over-dispersion and Laney's p′ chart, a chart selection tree, EWMA and CUSUM charts for small shifts, short-run deviation-from-nominal charts, charts for non-normal data, reacting to a signal, and the out-of-control-but-within-specification case.">
+<meta name="examples" content="m17-p-leak, m17-np-connector, m17-c-porosity, m17-u-solder, m17-pprime, m17-drift-imr, m17-drift-ewma, m17-drift-cusum, m17-dnom, m17-flatness-imr, m17-flatness-log-imr, chk-nist-ewma, m17-ex1-u-braze, m17-ex2-imr, m17-ex2-ewma">
+<!-- allowed-numbers: conventions, constants named in the text and hand-arithmetic intermediates not stored in verification/results/.
+     Every intermediate was computed by the build script (m17_inter.py) from the results values before it was printed here. -->
+<meta name="allowed-numbers" content="0.27 0.0027 1.128 3.267 0.05 0.01 0.50 0.20 0.30 0.10 0.25 2.00 3.00 1.00 4.00 5.00 20.00 25.00 32.00 11.54 0.333 9.00 271 6501 0.0149 -0.0030 0.0864 0.0045 0.0789 21 200 3.00 6.52 150 2.236 -1.708 14 2.811 8.43 -0.19 431 296 0.1762 2.7360 0.5214 2.3908 1.94 7 2.7 0.0298 5.74 0.00196 51.38 49.17 2.21 0.88 0.954 1.590 50.0 49.333 8 0.79 6.36 0.15 2.5884 1.5 6 2.0 25.2 50 1298 40 0.1316 80 0.1044 9 78 0.1154 0.1052 3.0 0.0625 11 12.002 12.046 0.8 6.54">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="17">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 17 · Control</p>
+    <h1>Statistical process control II</h1>
+    <p class="lead">Module 16 built the charts for measured data with rational subgroups. This module covers everything else you will meet on a shop floor: counts of rejects and defects, daily proportions on thousands of units, small drifts that a Shewhart chart takes weeks to notice, job shops that never make twenty of anything, characteristics that cannot be normal, and the moment a chart signals and someone has to decide what to do.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Build</strong> p, np, c and u charts with the correct limits, including limits that move with the sample size, and choose between them.</li>
+      <li><strong>Recognise</strong> over-dispersion on a high-volume p chart and apply Laney's p′ correction.</li>
+      <li><strong>Select</strong> the right chart for a given data type, subgroup structure and question, using the selection tree.</li>
+      <li><strong>Set up</strong> an EWMA and a tabular CUSUM chart, explain their parameters, and say when they beat a Shewhart chart.</li>
+      <li><strong>Chart</strong> a short-run, mixed-part process with a deviation-from-nominal chart, and a non-normal characteristic without fooling yourself.</li>
+      <li><strong>React</strong> to a signal in the right order, and handle the case of a process that is out of control while every part is within specification.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three questions on Modules 1 and 16. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="17">
+      <fieldset class="q" data-answer="b">
+        <legend>1. The standard deviation of a binomial count of defectives in n units with proportion p is</legend>
+        <label><input type="radio" name="p1" value="a"> np</label>
+        <label><input type="radio" name="p1" value="b"> √[np(1 − p)]</label>
+        <label><input type="radio" name="p1" value="c"> √n</label>
+        <label><input type="radio" name="p1" value="d"> p(1 − p)</label>
+        <p class="explain" hidden>Module 1; the np chart's limits follow directly.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. The standard deviation of a Poisson count with mean c is</legend>
+        <label><input type="radio" name="p2" value="a"> c</label>
+        <label><input type="radio" name="p2" value="b"> c²</label>
+        <label><input type="radio" name="p2" value="c"> √c</label>
+        <label><input type="radio" name="p2" value="d"> 1/c</label>
+        <p class="explain" hidden>Module 1; the c chart's limits are c̄ ± 3√c̄.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. On an individuals chart, σ̂ is estimated by</legend>
+        <label><input type="radio" name="p3" value="a"> MR̄ / 1.128</label>
+        <label><input type="radio" name="p3" value="b"> the sample standard deviation of all values</label>
+        <label><input type="radio" name="p3" value="c"> the tolerance / 6</label>
+        <label><input type="radio" name="p3" value="d"> R̄ / d₂ with d₂ for n = 5</label>
+        <p class="explain" hidden>Module 16; the same estimate feeds the EWMA and CUSUM charts of this module.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>Most of the data a plant collects every day is not a micrometer reading in a subgroup of five. It is a count: units rejected at a leak test, pores on a radiograph, defects found by optical inspection, cores returned. Those counts deserve a chart with limits that respect how counts vary, and they get one in the first half of this module. The second half is about the situations where the Shewhart chart of Module 16 is the wrong tool: small sustained drifts, which a three-sigma chart takes tens of points to see; high-volume proportions, whose binomial limits are far too tight; short runs of many part numbers; and characteristics that are bounded or skewed by physics.</p>
+    <p>Two of the disagreements in this module are documented ones. On charts for non-normal data, the AIAG &amp; VDA SPC manual states that the charts Shewhart developed require normally distributed data, and recommends larger subgroups, Pearson charts for skewed distributions and extended charts for multimodal ones;<sup class="cite"><a href="#ref-4">[4]</a></sup> Wheeler holds that three-sigma limits bracket nearly all of any homogeneous histogram and that no normality check or transformation is needed before charting.<sup class="cite"><a href="#ref-15">[15]</a></sup> Both are right about something, and the flatness example in this module shows exactly what each is right about. On over-dispersion, the classic p chart's limits assume that the only variation in a day's proportion is binomial sampling, which for thousands of units a day is almost never true; Laney's 2002 correction is now standard in software and the example here shows why.<sup class="cite"><a href="#ref-5">[5]</a></sup> The EWMA and CUSUM charts have their own history, Roberts in 1959 and Page in 1954, and the NIST handbook's worked EWMA example is reproduced by this course's harness as a published check.<sup class="cite"><a href="#ref-8">[8]</a><a href="#ref-11">[11]</a><a href="#ref-10">[10]</a></sup></p>
+    <p><em>The following is an illustrative failure with invented details, not a real program.</em> A connector line tests five thousand units a day. Somebody puts the daily reject proportion on a p chart. The binomial limits for n = 5,000 are a fraction of a percentage point wide; a third of the days fall outside them; the line leader is asked to explain each one; after two weeks the chart is still on the wall and nobody looks at it. The proportion really does vary from day to day, with the material lot, the ambient humidity and the test fixture, and that variation is the process's routine variation at the scale of a day. The chart was told the wrong noise. Worked example 3 fixes it.</p>
+
+    <h2 id="attribute">Attribute charts: p, np, c, u</h2>
+    <p>Attribute charts come in two families, and the first decision is which one you have. If each unit is classified as conforming or not, you are counting <strong>defectives</strong> (nonconforming units), the count is binomial, and the charts are p (proportion, sample size may vary) and np (count, sample size constant). If you are counting <strong>defects</strong> (nonconformities) on a unit or an area, where one unit can carry several, the count is Poisson, and the charts are c (count per constant inspection unit) and u (defects per unit, inspection units may vary).<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-4">[4]</a></sup> The limits follow from the two distributions, and every one of them is a centre line plus and minus three standard deviations of the plotted statistic, exactly as in Module 16.</p>
+    <div class="formula">p chart: &nbsp; p̄ = Σd<sub>i</sub> / Σn<sub>i</sub>; &nbsp; UCL<sub>i</sub>, LCL<sub>i</sub> = p̄ ± 3 √[p̄(1 − p̄)/n<sub>i</sub>] &nbsp; (a separate limit for each sample size)<br>
+      np chart (constant n): &nbsp; np̄ ± 3 √[np̄(1 − p̄)]<br>
+      c chart: &nbsp; c̄ ± 3 √c̄ &nbsp;&nbsp;&nbsp; u chart: &nbsp; ū = Σc<sub>i</sub> / Σn<sub>i</sub>; &nbsp; ū ± 3 √(ū/n<sub>i</sub>)
+      <span class="where">A negative lower limit is set to zero. The formulas are the normal approximation to the binomial and Poisson; the AIAG &amp; VDA manual gives the condition np̂(1 − p̂) ≥ 9 for it and notes that software can compute exact binomial and Poisson limits, which are preferable for small counts.<sup class="cite"><a href="#ref-4">[4]</a></sup> When the sample size varies by less than about 25 % many practitioners use a single limit from the average n; the manual accepts that, and the calculator draws the exact per-sample limits regardless.<sup class="cite"><a href="#ref-4">[4]</a></sup></span>
+    </div>
+    <p>Three things about attribute charts that are not true of variables charts. They cannot warn before nonconformities occur: a chart of zeros has nothing to say, which is why the manual observes that attribute charts do not serve a zero-defect strategy.<sup class="cite"><a href="#ref-4">[4]</a></sup> They need large samples to be useful: with p̄ = 2 % and n = 50 the expected count per sample is one, and the chart can only distinguish very large changes. And the plotted statistic is discrete, so the lower limit is often zero and a fall in the defect rate, which is the change you most want to see, is hard to detect; a run below the centre line (rule 4) is often the only evidence of improvement.</p>
+
+    <h3 id="example1">Worked example 1: a p chart that catches a supplier change</h3>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. Setting: pressed fittings leak-tested 100 %, one lot per shift for 30 shifts, lot sizes 180 to 260; a change of seal supplier took effect at lot 21.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Leak-test rejects by lot (constructed data): fittings tested, rejects, and the lot proportion.</caption><thead><tr><th>Lot</th><th>n</th><th>Rejects</th><th>p</th></tr></thead><tbody>
+<tr><td>1</td><td>257</td><td>8</td><td>0.0311</td></tr>
+<tr><td>2</td><td>247</td><td>9</td><td>0.0364</td></tr>
+<tr><td>3</td><td>228</td><td>7</td><td>0.0307</td></tr>
+<tr><td>4</td><td>180</td><td>7</td><td>0.0389</td></tr>
+<tr><td>5</td><td>211</td><td>4</td><td>0.0190</td></tr>
+<tr><td>6</td><td>198</td><td>11</td><td>0.0556</td></tr>
+<tr><td>7</td><td>186</td><td>3</td><td>0.0161</td></tr>
+<tr><td>8</td><td>189</td><td>7</td><td>0.0370</td></tr>
+<tr><td>9</td><td>217</td><td>7</td><td>0.0323</td></tr>
+<tr><td>10</td><td>237</td><td>3</td><td>0.0127</td></tr>
+<tr><td>11</td><td>229</td><td>7</td><td>0.0306</td></tr>
+<tr><td>12</td><td>205</td><td>6</td><td>0.0293</td></tr>
+<tr><td>13</td><td>213</td><td>11</td><td>0.0516</td></tr>
+<tr><td>14</td><td>226</td><td>6</td><td>0.0265</td></tr>
+<tr><td>15</td><td>245</td><td>5</td><td>0.0204</td></tr>
+<tr><td>16</td><td>184</td><td>5</td><td>0.0272</td></tr>
+<tr><td>17</td><td>225</td><td>5</td><td>0.0222</td></tr>
+<tr><td>18</td><td>203</td><td>6</td><td>0.0296</td></tr>
+<tr><td>19</td><td>201</td><td>9</td><td>0.0448</td></tr>
+<tr><td>20</td><td>257</td><td>4</td><td>0.0156</td></tr>
+<tr><td>21</td><td>248</td><td>10</td><td>0.0403</td></tr>
+<tr><td>22</td><td>253</td><td>19</td><td>0.0751</td></tr>
+<tr><td>23</td><td>200</td><td>21</td><td>0.1050</td></tr>
+<tr><td>24</td><td>208</td><td>10</td><td>0.0481</td></tr>
+<tr><td>25</td><td>185</td><td>15</td><td>0.0811</td></tr>
+<tr><td>26</td><td>235</td><td>10</td><td>0.0426</td></tr>
+<tr><td>27</td><td>185</td><td>13</td><td>0.0703</td></tr>
+<tr><td>28</td><td>216</td><td>14</td><td>0.0648</td></tr>
+<tr><td>29</td><td>212</td><td>15</td><td>0.0708</td></tr>
+<tr><td>30</td><td>221</td><td>14</td><td>0.0633</td></tr>
+</tbody></table></div>
+    <p>p̄ = 271 / 6,501 = <span data-ex="m17-p-leak" data-key="pbar" data-dp="4">0.0417</span>. The standard deviation of a lot proportion depends on the lot: for n = 180 it is √(0.0417 × 0.9583 / 180) = 0.0149 and the limits are −0.0030 (set to zero) and 0.0864; for n = 260 the limits are 0.0045 (zero) and 0.0789. The lower limit is at or below zero for every lot, so this chart can never signal an improvement by rule 1. Lot 23 (21 rejects in 200, p = <span data-ex="m17-p-leak" data-key="p.22" data-dp="4">0.1050</span>) is beyond its limit of <span data-ex="m17-p-leak" data-key="ucl.22" data-dp="4">0.0841</span>: the first signal, two lots after the change. Rule 2 also fires at lots 23 and 25, and rules 3 and 4 at lots 29 and 30 as the run above the centre line builds. The first 20 lots ran at 3.00 % and the last ten at 6.52 %.</p>
+    <p>Two lessons. The chart caught a doubling of the reject rate within two or three lots, which is what a p chart is for. But look at the centre line: p̄ was computed from all 30 lots, so it already contains the higher rate, and the limits are wider than the first 20 lots alone would give. In use, the limits would have been established from the first 20 lots and frozen (the calculator's freeze option shows this), and the signal would have come sooner and more clearly. The response to the signal is in the last section of this module; the short version is that "new seal supplier at lot 21" should be written on the chart before anyone starts a root-cause investigation.</p>
+    <div class="calc" data-calc="control" id="calc-ctrl-p">
+      <h3>Control chart builder: Table 1 as a p chart</h3>
+      <p class="calc-intro">One lot per line: n, then rejects. Try freezing the limits from the first 20 lots.</p>
+      <script type="application/json" class="calc-data">{"type":"p","rows":[[257,8],[247,9],[228,7],[180,7],[211,4],[198,11],[186,3],[189,7],[217,7],[237,3],[229,7],[205,6],[213,11],[226,6],[245,5],[184,5],[225,5],[203,6],[201,9],[257,4],[248,10],[253,19],[200,21],[208,10],[185,15],[235,10],[185,13],[216,14],[212,15],[221,14]],"units":"fittings","rules":["we1","we2","we3","we4"]}</script>
+    </div>
+
+    <h3 id="example2">Worked example 2: a c chart with one special cause, and the np and u charts</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: gas pores counted on the radiograph of a die-cast housing, one casting per hour for 30 hours.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 2. Pores per casting radiograph, 30 castings in order (constructed data).</caption><thead><tr><th>Casting</th><th>Pores</th></tr></thead><tbody>
+<tr><td>1</td><td>3</td></tr>
+<tr><td>2</td><td>3</td></tr>
+<tr><td>3</td><td>4</td></tr>
+<tr><td>4</td><td>7</td></tr>
+<tr><td>5</td><td>7</td></tr>
+<tr><td>6</td><td>5</td></tr>
+<tr><td>7</td><td>7</td></tr>
+<tr><td>8</td><td>6</td></tr>
+<tr><td>9</td><td>5</td></tr>
+<tr><td>10</td><td>4</td></tr>
+<tr><td>11</td><td>6</td></tr>
+<tr><td>12</td><td>7</td></tr>
+<tr><td>13</td><td>2</td></tr>
+<tr><td>14</td><td>6</td></tr>
+<tr><td>15</td><td>3</td></tr>
+<tr><td>16</td><td>7</td></tr>
+<tr><td>17</td><td>14</td></tr>
+<tr><td>18</td><td>1</td></tr>
+<tr><td>19</td><td>5</td></tr>
+<tr><td>20</td><td>3</td></tr>
+<tr><td>21</td><td>10</td></tr>
+<tr><td>22</td><td>4</td></tr>
+<tr><td>23</td><td>3</td></tr>
+<tr><td>24</td><td>2</td></tr>
+<tr><td>25</td><td>4</td></tr>
+<tr><td>26</td><td>3</td></tr>
+<tr><td>27</td><td>4</td></tr>
+<tr><td>28</td><td>7</td></tr>
+<tr><td>29</td><td>5</td></tr>
+<tr><td>30</td><td>3</td></tr>
+</tbody></table></div>
+    <p>c̄ = 150 / 30 = <span data-ex="m17-c-porosity" data-key="cbar" data-dp="3">5.000</span> pores per casting; √c̄ = 2.236; UCL = 5.000 + 3 × 2.236 = <span data-ex="m17-c-porosity" data-key="ucl" data-dp="3">11.708</span>; the lower limit, −1.708, is negative and set to zero. Casting 17, with 14 pores, is beyond the limit; no run rule fires elsewhere. One special cause (the log recorded a die-spray interruption that hour), documented and excluded, and the chart continues.</p>
+    <p><span class="example-label">Two more constructed sets, shown for the limits only.</span> An np chart of rejects in fixed samples of 200 connectors from an automatic gauge, 25 hourly samples: np̄ = <span data-ex="m17-np-connector" data-key="npbar" data-dp="2">8.24</span>, p̄ = <span data-ex="m17-np-connector" data-key="pbar" data-dp="4">0.0412</span>, √[np̄(1 − p̄)] = 2.811, UCL = 8.24 + 8.43 = <span data-ex="m17-np-connector" data-key="ucl" data-dp="2">16.67</span>, LCL −0.19 → 0; stable, no rule fires. A u chart of solder defects found by optical inspection on lots of 8 to 15 boards, 25 lots: ū = 431 / 296 = <span data-ex="m17-u-solder" data-key="ubar" data-dp="4">1.4561</span> defects per board; for a lot of 8 boards the limits are 0.1762 to 2.7360 and for 15 boards 0.5214 to 2.3908, moving with the lot size; stable. The u chart's lower limits are positive here because ū × n is large enough, so this chart <em>could</em> signal an improvement.</p>
+    <div class="calc" data-calc="control" id="calc-ctrl-c">
+      <h3>Table 2 as a c chart (inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"type":"c","rows":[[3],[3],[4],[7],[7],[5],[7],[6],[5],[4],[6],[7],[2],[6],[3],[7],[14],[1],[5],[3],[10],[4],[3],[2],[4],[3],[4],[7],[5],[3]],"units":"pores per casting","collapsed":true}</script>
+    </div>
+
+    <h2 id="laney">Over-dispersion and Laney's p′ chart</h2>
+    <p>The p chart's limits assume that if the true proportion were constant, a day's proportion would vary only by binomial sampling: standard deviation √[p̄(1 − p̄)/n]. For n in the thousands that standard deviation is tiny, and any genuine day-to-day variation in the true proportion, which every real process has, puts most days outside the limits. The chart is not detecting special causes; it is detecting that the day is the wrong subgroup for binomial noise. Laney's 2002 correction measures the actual day-to-day variation and scales the limits by it.<sup class="cite"><a href="#ref-5">[5]</a></sup></p>
+    <div class="formula">z<sub>i</sub> = (p<sub>i</sub> − p̄) / σ<sub>p,i</sub>, &nbsp; σ<sub>p,i</sub> = √[p̄(1 − p̄)/n<sub>i</sub>]; &nbsp; σ<sub>z</sub> = MR̄(z) / 1.128 (moving range of the z-scores, as on an individuals chart)<br>
+      p′ chart limits: &nbsp; p̄ ± 3 σ<sub>p,i</sub> σ<sub>z</sub>
+      <span class="where">σ<sub>z</sub> = 1 means the days vary exactly as binomial sampling predicts and the p′ chart is the p chart. σ<sub>z</sub> &gt; 1 is over-dispersion and the limits widen by that factor; σ<sub>z</sub> &lt; 1 (under-dispersion, rarer) narrows them. The formulas follow Laney as implemented in Minitab and as written out in Arafah's 2022 application paper.<sup class="cite"><a href="#ref-6">[6]</a><a href="#ref-7">[7]</a></sup> The same construction gives the u′ chart for defect rates.</span>
+    </div>
+
+    <h3 id="example3">Worked example 3: a high-volume line</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: an automated end-of-line test on a high-volume connector line, 4,000 to 6,000 units a day for 25 days; the data were constructed with a true daily proportion that varies from day to day around 2 %, as material lots change.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Daily units tested and rejects (constructed data), with the daily proportion.</caption><thead><tr><th>Day</th><th>n</th><th>Rejects</th><th>p</th></tr></thead><tbody>
+<tr><td>1</td><td>4946</td><td>86</td><td>0.0174</td></tr>
+<tr><td>2</td><td>5024</td><td>84</td><td>0.0167</td></tr>
+<tr><td>3</td><td>5511</td><td>130</td><td>0.0236</td></tr>
+<tr><td>4</td><td>5901</td><td>120</td><td>0.0203</td></tr>
+<tr><td>5</td><td>4069</td><td>84</td><td>0.0206</td></tr>
+<tr><td>6</td><td>4288</td><td>81</td><td>0.0189</td></tr>
+<tr><td>7</td><td>5646</td><td>95</td><td>0.0168</td></tr>
+<tr><td>8</td><td>5898</td><td>129</td><td>0.0219</td></tr>
+<tr><td>9</td><td>4498</td><td>75</td><td>0.0167</td></tr>
+<tr><td>10</td><td>4623</td><td>121</td><td>0.0262</td></tr>
+<tr><td>11</td><td>5738</td><td>171</td><td>0.0298</td></tr>
+<tr><td>12</td><td>4847</td><td>35</td><td>0.0072</td></tr>
+<tr><td>13</td><td>4546</td><td>49</td><td>0.0108</td></tr>
+<tr><td>14</td><td>5656</td><td>89</td><td>0.0157</td></tr>
+<tr><td>15</td><td>4514</td><td>65</td><td>0.0144</td></tr>
+<tr><td>16</td><td>4818</td><td>94</td><td>0.0195</td></tr>
+<tr><td>17</td><td>5288</td><td>102</td><td>0.0193</td></tr>
+<tr><td>18</td><td>5099</td><td>130</td><td>0.0255</td></tr>
+<tr><td>19</td><td>4171</td><td>64</td><td>0.0153</td></tr>
+<tr><td>20</td><td>4055</td><td>73</td><td>0.0180</td></tr>
+<tr><td>21</td><td>5732</td><td>159</td><td>0.0277</td></tr>
+<tr><td>22</td><td>5507</td><td>119</td><td>0.0216</td></tr>
+<tr><td>23</td><td>5676</td><td>141</td><td>0.0248</td></tr>
+<tr><td>24</td><td>5076</td><td>84</td><td>0.0165</td></tr>
+<tr><td>25</td><td>5635</td><td>75</td><td>0.0133</td></tr>
+</tbody></table></div>
+    <p>p̄ = <span data-ex="m17-pprime" data-key="d_total" data-dp="0">2,455</span> / <span data-ex="m17-pprime" data-key="n_total" data-dp="0">126,762</span> = <span data-ex="m17-pprime" data-key="pbar" data-dp="5">0.01937</span>, that is 1.94 %. The binomial standard deviation of a day's proportion is about <span data-ex="m17-pprime" data-key="mean_sigma_p" data-dp="5">0.00195</span>; the classic p chart's limits for day 1 (n = 5,070 on average) are <span data-ex="m17-pprime" data-key="classic_lcl.0" data-dp="4">0.0135</span> to <span data-ex="m17-pprime" data-key="classic_ucl.0" data-dp="4">0.0252</span>, and <strong>7 of the 25 days</strong> fall outside their limits: days <span data-ex="m17-pprime" data-key="classic_beyond.0" data-dp="0">10</span>, <span data-ex="m17-pprime" data-key="classic_beyond.1" data-dp="0">11</span>, <span data-ex="m17-pprime" data-key="classic_beyond.2" data-dp="0">12</span>, <span data-ex="m17-pprime" data-key="classic_beyond.3" data-dp="0">13</span> and three more. The observed standard deviation of the 25 daily proportions is <span data-ex="m17-pprime" data-key="sd_of_p" data-dp="5">0.00528</span>, 2.7 times the binomial value. The days vary far more than sampling explains.</p>
+    <p>The z-scores make it explicit: day 11 has p = 0.0298 and z = 5.74. The moving range of the z-scores averages <span data-ex="m17-pprime" data-key="mrbar_z" data-dp="3">2.733</span>, so σ<sub>z</sub> = 2.733/1.128 = <span data-ex="m17-pprime" data-key="sigma_z" data-dp="3">2.423</span>. The p′ limits for day 1 become p̄ ± 3 × 0.00196 × 2.423 = <span data-ex="m17-pprime" data-key="lcl.0" data-dp="4">0.0051</span> to <span data-ex="m17-pprime" data-key="ucl.0" data-dp="4">0.0336</span>, and <strong>no day</strong> is outside them; no runs rule fires on the z-scores either. The line is stable at the scale of a day, with a day-to-day variation about 2.7 times what a binomial would give. That is the correct description, and it is also a finding: the routine variation of this process includes something that changes daily, which a Module 10 root-cause study or a Module 13 experiment might reduce. The p′ chart did not hide the variation. It stopped calling it a special cause 25 times a month.</p>
+    <p>Use the p′ chart when subgroups are large (hundreds to thousands) and the classic chart signals on most points; check σ<sub>z</sub> first, because a value near 1 means the classic chart was right. Do not use it to silence a chart on small samples, where over-dispersion cannot be estimated from a moving range, and do not use it to hide a genuine trend: a run of z-scores rising over weeks is still a signal, and the p′ chart keeps the runs rules to find it.</p>
+
+    <h2 id="tree">Which chart? A selection tree</h2>
+    <figure>
+      <svg viewBox="0 0 700 420" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">Control chart selection tree</title>
+        <desc id="fig1-d">A decision tree. First question: is the data measured or counted? Measured data with rational subgroups of 2 to 10 gives an X-bar-R chart, larger subgroups an X-bar-S chart, single readings an I-MR chart; if small sustained shifts matter, add an EWMA or CUSUM; if many part numbers in short runs, a deviation-from-nominal chart. Counted data: units classified as defective or not give a p chart (variable n) or np chart (constant n), with the p-prime correction when n is in the thousands and the p chart over-signals; defects counted on units give a c chart (constant inspection unit) or u chart (variable).</desc>
+        <g class="chart-box">
+          <rect x="270" y="10" width="160" height="40" rx="6"/>
+          <rect x="60" y="90" width="200" height="40" rx="6"/><rect x="440" y="90" width="200" height="40" rx="6"/>
+          <rect x="20" y="170" width="110" height="52" rx="6"/><rect x="140" y="170" width="110" height="52" rx="6"/><rect x="260" y="170" width="110" height="52" rx="6"/>
+          <rect x="400" y="170" width="130" height="52" rx="6"/><rect x="545" y="170" width="130" height="52" rx="6"/>
+          <rect x="20" y="260" width="170" height="52" rx="6"/><rect x="200" y="260" width="170" height="52" rx="6"/>
+          <rect x="400" y="260" width="130" height="52" rx="6"/><rect x="545" y="260" width="130" height="52" rx="6"/>
+          <rect x="400" y="350" width="275" height="52" rx="6"/>
+        </g>
+        <g class="chart-axis">
+          <path d="M350 50 V70 H160 V90 M350 70 H540 V90"/>
+          <path d="M160 130 V150 H75 V170 M160 150 H195 V170 M160 150 H315 V170"/>
+          <path d="M540 130 V150 H465 V170 M540 150 H610 V170"/>
+          <path d="M465 222 V260 M610 222 V260"/>
+          <path d="M105 222 V240 H105 V260 M285 222 V240 H285 V260"/>
+          <path d="M465 312 V350"/>
+        </g>
+        <g class="chart-text small">
+          <text x="350" y="35" text-anchor="middle" class="chart-title">What kind of data?</text>
+          <text x="160" y="115" text-anchor="middle" class="chart-title">Measured (variables)</text>
+          <text x="540" y="115" text-anchor="middle" class="chart-title">Counted (attributes)</text>
+          <text x="75" y="190" text-anchor="middle">subgroups of 2–10</text><text x="75" y="208" text-anchor="middle" class="chart-text accent small">X̄-R</text>
+          <text x="195" y="190" text-anchor="middle">subgroups above 10</text><text x="195" y="208" text-anchor="middle" class="chart-text accent small">X̄-S</text>
+          <text x="315" y="190" text-anchor="middle">single readings</text><text x="315" y="208" text-anchor="middle" class="chart-text accent small">I-MR</text>
+          <text x="465" y="190" text-anchor="middle">units defective or not</text><text x="465" y="208" text-anchor="middle">(binomial)</text>
+          <text x="610" y="190" text-anchor="middle">defects counted</text><text x="610" y="208" text-anchor="middle">(Poisson)</text>
+          <text x="105" y="280" text-anchor="middle">small sustained shifts matter</text><text x="105" y="298" text-anchor="middle" class="chart-text accent small">add EWMA or CUSUM</text>
+          <text x="285" y="280" text-anchor="middle">many part numbers, short runs</text><text x="285" y="298" text-anchor="middle" class="chart-text accent small">deviation from nominal</text>
+          <text x="465" y="280" text-anchor="middle">n varies: p; n constant: np</text><text x="465" y="298" text-anchor="middle" class="chart-text accent small">p / np</text>
+          <text x="610" y="280" text-anchor="middle">unit constant: c; varies: u</text><text x="610" y="298" text-anchor="middle" class="chart-text accent small">c / u</text>
+          <text x="537" y="370" text-anchor="middle">n in the thousands and the chart over-signals</text><text x="537" y="388" text-anchor="middle" class="chart-text accent small">Laney p′ (or u′)</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. Chart selection. Measured data go to the Module 16 charts, with EWMA or CUSUM added when small drifts matter and a deviation-from-nominal chart for short runs. Counted data split by what is counted (defective units, binomial; defects, Poisson) and by whether the sample size is constant; very large samples call for Laney's correction.</figcaption>
+    </figure>
+    <p>Two questions the tree does not show but which come first: is the measurement system adequate (Module 4), and is the subgroup rational (Modules 5 and 16)? No chart survives a bad answer to either. And one question that comes last: what will be done when the chart signals? A chart without a reaction plan is decoration (Module 18).</p>
+
+    <h2 id="memory">Charts with memory: EWMA and CUSUM</h2>
+    <p>A Shewhart chart judges each point on its own; that is what makes it fast on large changes and slow on small ones (Module 16, Table 5: a one-sigma shift takes 44 points on average with rule 1). Two charts accumulate evidence across points instead. Roberts' exponentially weighted moving average (1959) plots a running average that weights recent points most;<sup class="cite"><a href="#ref-8">[8]</a></sup> Page's cumulative sum (1954) accumulates the deviations from target above and below a small allowance and signals when the accumulation exceeds a decision interval.<sup class="cite"><a href="#ref-11">[11]</a></sup> Both detect a half-sigma to one-sigma shift in a fraction of the Shewhart chart's time, and both are slower on a large jump, which is why the AIAG &amp; VDA manual recommends running a Shewhart chart alongside.<sup class="cite"><a href="#ref-4">[4]</a></sup> ISO 7870-4 and 7870-6 standardise the two charts.<sup class="cite"><a href="#ref-16">[16]</a></sup></p>
+    <div class="formula">EWMA: &nbsp; z<sub>i</sub> = λ x<sub>i</sub> + (1 − λ) z<sub>i−1</sub>, z₀ = target; &nbsp; limits target ± L σ̂ √[ λ/(2 − λ) × (1 − (1 − λ)<sup>2i</sup>) ], which tend to target ± L σ̂ √[λ/(2 − λ)]
+      <span class="where">λ between 0.2 and 0.3 is typical (NIST); smaller λ remembers longer and is more sensitive to small shifts. L is usually 3, or slightly less for small λ, chosen from the ARL tables of Lucas and Saccucci to give an in-control ARL near that of the Shewhart chart.<sup class="cite"><a href="#ref-10">[10]</a><a href="#ref-9">[9]</a></sup> σ̂ is the routine standard deviation of x (MR̄/1.128 for individuals, σ̂/√n for subgroup means).</span>
+    </div>
+    <div class="formula">Tabular CUSUM (standardised): &nbsp; C⁺<sub>i</sub> = max(0, C⁺<sub>i−1</sub> + (x<sub>i</sub> − target)/σ̂ − k); &nbsp; C⁻<sub>i</sub> = max(0, C⁻<sub>i−1</sub> − (x<sub>i</sub> − target)/σ̂ − k); signal when either exceeds h
+      <span class="where">k is half the shift (in σ units) the chart is tuned to catch, so k = 0.5 for a one-sigma shift; h is 4 or 5 (NIST's rule of thumb), giving an in-control ARL in the hundreds.<sup class="cite"><a href="#ref-12">[12]</a></sup> The AIAG &amp; VDA manual's CUSUM example tabulates the ARL for its parameters as 370.4 in control falling to 163.6, 54.5 and 24.6 for shifts of 0.2, 0.4 and 0.6σ, which is the shape of the trade every memory chart makes.<sup class="cite"><a href="#ref-4">[4]</a></sup></span>
+    </div>
+
+    <h3 id="example4">Worked example 4: a 0.7σ drift on three charts</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: the etch depth of a wafer in µm from a profilometer to 0.1 µm, one wafer per hour for 60 hours; a gas-flow controller drifted from hour 31. The data were constructed with a standard deviation of 2.0 µm and a shift of 1.4 µm, 0.7 standard deviations, from reading 31; the first 30 readings are the baseline for every chart.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 4. Etch depth, µm, 60 hourly readings in order (constructed data).</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>50.0</td><td>50.6</td><td>49.5</td><td>48.2</td><td>49.1</td><td>48.0</td><td>50.1</td><td>52.7</td><td>49.0</td><td>48.8</td></tr>
+<tr><td>11–20</td><td>51.0</td><td>50.7</td><td>50.2</td><td>48.1</td><td>49.9</td><td>51.4</td><td>47.3</td><td>49.1</td><td>46.2</td><td>47.4</td></tr>
+<tr><td>21–30</td><td>46.3</td><td>49.5</td><td>47.5</td><td>50.5</td><td>50.3</td><td>49.6</td><td>45.0</td><td>48.9</td><td>49.9</td><td>50.2</td></tr>
+<tr><td>31–40</td><td>48.3</td><td>50.4</td><td>49.4</td><td>49.8</td><td>53.5</td><td>49.8</td><td>51.3</td><td>53.2</td><td>50.2</td><td>51.2</td></tr>
+<tr><td>41–50</td><td>51.6</td><td>51.5</td><td>48.9</td><td>51.6</td><td>54.1</td><td>48.3</td><td>53.1</td><td>51.6</td><td>50.1</td><td>55.4</td></tr>
+<tr><td>51–60</td><td>52.9</td><td>49.0</td><td>51.5</td><td>52.6</td><td>51.0</td><td>52.8</td><td>51.3</td><td>52.7</td><td>54.3</td><td>50.0</td></tr>
+</tbody></table></div>
+    <p><strong>Baseline.</strong> From the first 30 readings, target = <span data-ex="m17-drift-ewma" data-key="target" data-dp="3">49.167</span> µm and σ̂ = MR̄/1.128 = <span data-ex="m17-drift-ewma" data-key="sigma" data-dp="3">1.590</span> µm. The readings after hour 30 average 51.38 µm against 49.17 before, an observed shift of 2.21 µm, about 0.88 σ̂.</p>
+    <p><strong>Individuals chart</strong> (limits from all 60 readings, <span data-ex="m17-drift-imr" data-key="lcl_x" data-dp="2">44.79</span> to <span data-ex="m17-drift-imr" data-key="ucl_x" data-dp="2">55.75</span> µm): rule 1 never fires in the 30 shifted readings. Rules 2 and 3 fire at readings 21 and 23, <em>before</em> the drift began, which on this record is a false alarm and, in real life, a reminder that the story of "a drift from hour 31" is itself a hypothesis the chart cannot confirm.</p>
+    <p><strong>EWMA</strong>, λ = 0.2, L = 3: the limits start narrow (target ± 0.954 at the first point, since (1 − 0.8²) = 0.36) and settle at target ± 3 × 1.590 × √(0.2/1.8) = target ± 1.590, that is <span data-ex="m17-drift-ewma" data-key="lcl_asymptotic" data-dp="2">47.58</span> to <span data-ex="m17-drift-ewma" data-key="ucl_asymptotic" data-dp="2">50.76</span> µm. The first EWMA value is 0.2 × 50.0 + 0.8 × 49.167 = 49.333. After the drift the EWMA climbs: <span data-ex="m17-drift-ewma" data-key="ewma.30" data-dp="2">48.86</span>, <span data-ex="m17-drift-ewma" data-key="ewma.32" data-dp="2">49.22</span>, <span data-ex="m17-drift-ewma" data-key="ewma.34" data-dp="2">50.17</span>, <span data-ex="m17-drift-ewma" data-key="ewma.36" data-dp="2">50.33</span> at readings 31, 33, 35 and 37, and crosses the upper limit at reading <span data-ex="m17-drift-ewma" data-key="signals.0" data-dp="0">38</span>, 8 readings after the change, staying above it for most of the rest of the record.</p>
+    <p><strong>CUSUM</strong>, k = 0.5, h = 4 (in σ̂ units: an allowance of 0.79 µm and a decision interval of 6.36 µm): C⁺ sits at zero or near it through the baseline (it is 0.15 at reading 30), then accumulates: <span data-ex="m17-drift-cusum" data-key="c_plus.34" data-dp="2">2.23</span> at reading 35, <span data-ex="m17-drift-cusum" data-key="c_plus.36" data-dp="2">2.97</span> at 37, and <span data-ex="m17-drift-cusum" data-key="c_plus.37" data-dp="2">5.00</span> at reading <span data-ex="m17-drift-cusum" data-key="signals_plus.0" data-dp="0">38</span>, beyond h = 4: a signal 8 readings after the change, the same hour as the EWMA. C⁻ never exceeds 0.5h.</p>
+    <p>Eight readings to catch a 0.7σ shift, against a Shewhart chart that had not caught it after 30. That is the case for memory charts, and the price is visible in the same record: the EWMA's first values are dominated by the target and would be slow to see a jump at hour 3, and neither chart says anything about the shot-to-shot spread. Run them beside a Shewhart chart, not instead of one. A useful by-product of the CUSUM: counting back from the signal to where C⁺ last touched zero (reading 34 here) estimates when the shift began, which is where the investigation should start.</p>
+
+    <h3 id="nist">A published check: the NIST EWMA example</h3>
+    <p>The NIST handbook's EWMA example (20 values, λ = 0.3, target 50, σ = 2.0539) gives asymptotic limits of <span data-ex="chk-nist-ewma" data-key="lcl_asymptotic" data-dp="4">47.4116</span> and <span data-ex="chk-nist-ewma" data-key="ucl_asymptotic" data-dp="4">52.5884</span> (3 × 2.0539 × √(0.3/1.7) = 2.5884 either side of 50) and an EWMA sequence starting 50.60, 49.52; the course's harness reproduces the limits and every value of the sequence the handbook prints.<sup class="cite"><a href="#ref-10">[10]</a></sup></p>
+
+    <h2 id="shortrun">Short runs: the deviation-from-nominal chart</h2>
+    <p>A job shop that turns three part numbers on one lathe, ten of each in a mixed order, never has twenty subgroups of one part to set limits from. If the process is the same (same machine, same tooling, same operator, same routine variation) and only the nominal differs, chart the deviation of each part from its own nominal, x − nominal, on one I-MR chart. This is the deviation-from-nominal (DNOM) technique of ISO 7870-8 and of Wheeler's <em>Short Run SPC</em>, and the AIAG &amp; VDA manual points to that standard for the high-mix, low-volume case.<sup class="cite"><a href="#ref-13">[13]</a><a href="#ref-14">[14]</a><a href="#ref-4">[4]</a></sup> The assumption to check is that the routine variation is the same for every part number; if a 32 mm diameter varies twice as much as a 20 mm one, divide each deviation by its part's own σ̂ instead and chart the standardised value (Wheeler's Zed chart), which needs a σ̂ per part number from history.</p>
+
+    <h3 id="example5">Worked example 5: three diameters on one lathe</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: three part numbers with nominal diameters 20.00, 25.00 and 32.00 mm turned on one lathe in the order the jobs arrived, 30 parts, micrometer to 0.001 mm.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 5. Thirty turned parts in machining order (constructed data). The chart plots measured minus nominal.</caption><thead><tr><th>Part no.</th><th>Part number</th><th>Nominal (mm)</th><th>Measured (mm)</th></tr></thead><tbody>
+<tr><td>1</td><td>P32</td><td>32.00</td><td>32.008</td></tr>
+<tr><td>2</td><td>P25</td><td>25.00</td><td>25.001</td></tr>
+<tr><td>3</td><td>P32</td><td>32.00</td><td>31.999</td></tr>
+<tr><td>4</td><td>P20</td><td>20.00</td><td>19.992</td></tr>
+<tr><td>5</td><td>P32</td><td>32.00</td><td>32.020</td></tr>
+<tr><td>6</td><td>P20</td><td>20.00</td><td>19.998</td></tr>
+<tr><td>7</td><td>P20</td><td>20.00</td><td>20.010</td></tr>
+<tr><td>8</td><td>P25</td><td>25.00</td><td>25.008</td></tr>
+<tr><td>9</td><td>P32</td><td>32.00</td><td>31.993</td></tr>
+<tr><td>10</td><td>P20</td><td>20.00</td><td>20.004</td></tr>
+<tr><td>11</td><td>P25</td><td>25.00</td><td>24.988</td></tr>
+<tr><td>12</td><td>P25</td><td>25.00</td><td>24.999</td></tr>
+<tr><td>13</td><td>P32</td><td>32.00</td><td>31.989</td></tr>
+<tr><td>14</td><td>P25</td><td>25.00</td><td>24.982</td></tr>
+<tr><td>15</td><td>P32</td><td>32.00</td><td>31.989</td></tr>
+<tr><td>16</td><td>P20</td><td>20.00</td><td>20.007</td></tr>
+<tr><td>17</td><td>P25</td><td>25.00</td><td>25.002</td></tr>
+<tr><td>18</td><td>P20</td><td>20.00</td><td>19.974</td></tr>
+<tr><td>19</td><td>P32</td><td>32.00</td><td>32.003</td></tr>
+<tr><td>20</td><td>P32</td><td>32.00</td><td>32.005</td></tr>
+<tr><td>21</td><td>P20</td><td>20.00</td><td>19.998</td></tr>
+<tr><td>22</td><td>P25</td><td>25.00</td><td>24.992</td></tr>
+<tr><td>23</td><td>P32</td><td>32.00</td><td>32.017</td></tr>
+<tr><td>24</td><td>P32</td><td>32.00</td><td>31.994</td></tr>
+<tr><td>25</td><td>P25</td><td>25.00</td><td>25.015</td></tr>
+<tr><td>26</td><td>P20</td><td>20.00</td><td>19.997</td></tr>
+<tr><td>27</td><td>P25</td><td>25.00</td><td>25.005</td></tr>
+<tr><td>28</td><td>P20</td><td>20.00</td><td>20.005</td></tr>
+<tr><td>29</td><td>P32</td><td>32.00</td><td>32.005</td></tr>
+<tr><td>30</td><td>P32</td><td>32.00</td><td>32.020</td></tr>
+</tbody></table></div>
+    <p>The deviations have mean <span data-ex="m17-dnom" data-key="chart.xbar" data-dp="4">0.0006</span> mm and MR̄ = <span data-ex="m17-dnom" data-key="chart.mrbar" data-dp="4">0.0125</span> mm, so σ̂ = <span data-ex="m17-dnom" data-key="chart.sigma_within" data-dp="4">0.0111</span> mm and the I chart limits are <span data-ex="m17-dnom" data-key="chart.lcl_x" data-dp="4">−0.0326</span> to <span data-ex="m17-dnom" data-key="chart.ucl_x" data-dp="4">0.0338</span> mm; the MR limit is <span data-ex="m17-dnom" data-key="chart.ucl_mr" data-dp="4">0.0408</span> mm. No deviation or moving range crosses a limit. Rule 3 (four of five beyond 1σ) fires at part 15: parts 11, 13, 14 and 15 all ran 0.011 to 0.018 mm small, two P25 and two P32 parts in a row, which is the kind of pattern worth a glance at the tool (a chipped insert cuts small on every part number). Per part number, the deviations average −0.0017, −0.0009 and 0.0035 mm for P20, P25 and P32 with standard deviations of 0.0107, 0.0103 and 0.0113 mm; the largest is <span data-ex="m17-dnom" data-key="sd_ratio_max_min" data-dp="2">1.10</span> times the smallest, close enough to pool. Had P32's spread been double the others', the chart would need standardising.</p>
+    <p>The DNOM chart also answers a question the three separate charts could not: the lathe as a process, across everything it makes, is stable with a routine standard deviation of about 0.011 mm. That is the number to compare with each part's tolerance (Module 7), and the number the next job's quotation should be based on.</p>
+
+    <h2 id="nonnormal">Charts for non-normal data</h2>
+    <p>Module 8 met the flatness data, 200 values from a lognormal process bounded at zero, and saw that a normal-based capability index was wrong by orders of magnitude. What does an individuals chart do with the same data?</p>
+    <p><span class="example-label">Constructed data: the Module 1 flatness values, µm, in production order.</span> On the raw values, x̄ = <span data-ex="m17-flatness-imr" data-key="xbar" data-dp="3">7.875</span>, MR̄ = <span data-ex="m17-flatness-imr" data-key="mrbar" data-dp="3">3.711</span>, σ̂ = <span data-ex="m17-flatness-imr" data-key="sigma_within" data-dp="3">3.289</span>, and the limits are <span data-ex="m17-flatness-imr" data-key="lcl_x" data-dp="2">−1.99</span> (impossible for a flatness) and <span data-ex="m17-flatness-imr" data-key="ucl_x" data-dp="2">17.74</span> µm. Three readings exceed the upper limit (112, 168 and 181), 1.5 % of the record against the 0.27 % a normal process would give, about 6 times the expected false-alarm rate, all of them in the long tail; rules 2, 3 and 4 fire as well at 121, 133 and 135 to 137, and seven moving ranges cross their limit. On ln x the limits are <span data-ex="m17-flatness-log-imr" data-key="lcl_x" data-dp="3">0.715</span> to <span data-ex="m17-flatness-log-imr" data-key="ucl_x" data-dp="3">3.226</span>, which is 2.0 to 25.2 µm, one reading (181) is beyond, one moving range, and the same runs rules still fire around 121 to 137.</p>
+    <p>Read this against the two positions quoted at the start. The manual is right that a symmetric three-sigma chart on a strongly skewed characteristic gives more tail signals than the nominal rate, and that a lower limit below zero is meaningless; its remedies, larger subgroups (X̄ charts of skewed data are close to normal for n of 4 or 5, Module 1), a transformation, or limits from a fitted skewed distribution, all work here.<sup class="cite"><a href="#ref-4">[4]</a></sup> Wheeler is right that the raw chart still bracketed 197 of 200 values, that the excursions are in the direction the physics predicts, and that no transformation was needed to see the runs around 121 to 137, which are the more interesting feature: something happened over those fifteen parts that both charts agree on.<sup class="cite"><a href="#ref-15">[15]</a></sup> The practical rule for a Green Belt: chart bounded, skewed characteristics on subgroup means when you can; when you must chart individuals, expect a few extra tail signals and read them with the physics in mind, and use a log scale when the tail signals drown the runs.</p>
+
+    <h2 id="react">Reacting to a signal</h2>
+    <p>A chart signal is a question, not a verdict, and the order of the answer matters.</p>
+    <ol>
+      <li><strong>Check the measurement and the entry.</strong> A transposed digit, a gauge left on the wrong range, a part measured twice. Half of first signals end here.</li>
+      <li><strong>Note what changed.</strong> Time, operator, lot, tool change, maintenance, ambient. Write it on the chart. The seal supplier of worked example 1 goes here, before any analysis.</li>
+      <li><strong>Contain.</strong> If the signal could mean nonconforming product, hold what was made since the last good point and sort or re-test as the control plan says (Module 18).</li>
+      <li><strong>Find the cause</strong> with the Module 10 tools, on the process, not on the chart.</li>
+      <li><strong>Correct and verify.</strong> Remove the cause, then show on the chart that the process has returned: several points inside the limits with no pattern, not one.</li>
+      <li><strong>Decide about the limits.</strong> A documented, removed special cause is excluded from the limit calculation; an unexplained signal stays in the data. Limits change only after a deliberate, verified process change.</li>
+      <li><strong>Record</strong> the signal, the cause and the action. The record is what a later engineer, or a customer audit under IATF 16949, will ask for (Module 18).</li>
+    </ol>
+    <p>Every one of these steps belongs in a written reaction plan (an out-of-control action plan) attached to the chart, so that the operator on the night shift does not have to invent it. What the plan must never say is "adjust toward nominal": that is the funnel experiment again.</p>
+
+    <h3 id="ooc-in-spec">Out of control, but every part within specification</h3>
+    <p>This is the third and last treatment of the limits question in this course, and it is the case that confuses production most. A p chart signals a doubled reject rate that is still under the customer's ceiling; an X̄ chart signals a shift of 0.010 mm inside a ±0.025 mm tolerance; a CUSUM says the etch depth has drifted by 1.4 µm on a process whose specification is ±10 µm. Nothing is nonconforming. Is there a problem?</p>
+    <p>Yes, and it is a different problem from a nonconforming part. The chart has detected that the process is not the one whose capability was established. Its future output is no longer predictable from the study; the next shift of the same size may cross the specification; the cause, whatever it is, is now in the process and will stay there until found. The right response is the seven steps above, at the urgency the control plan assigns, and the wrong responses are the two obvious ones: to ignore the signal because the parts are good, and to adjust the process back by the amount of the shift without knowing why it moved. The AIAG &amp; VDA manual's framing is useful: a process can be stable and not capable (Module 7's case, a capability problem for engineering), capable and not stable (this case, a control problem for the line), or, the goal, both.<sup class="cite"><a href="#ref-4">[4]</a></sup> Specification limits tell you about the part in your hand. Control limits tell you about the parts you have not made yet.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>A p chart on tiny samples.</strong> Consequence: expected counts below one, a chart of zeros and an occasional 1 that means nothing. Fix: samples large enough for np̄ of at least 5, or an np chart on a fixed large sample, or a variables measurement instead.</li>
+      <li><strong>A c chart for defectives, or a p chart for defects.</strong> Consequence: the wrong distribution and the wrong limits. Fix: units conforming or not → binomial (p, np); defects counted on units → Poisson (c, u).</li>
+      <li><strong>Binomial limits on thousands of units a day.</strong> Consequence: most days flagged, chart ignored. Fix: check σ<sub>z</sub>; use the p′ chart when it is well above 1.</li>
+      <li><strong>An EWMA with no Shewhart chart beside it.</strong> Consequence: a large sudden jump is seen late. Fix: run both; the Shewhart chart owns the big changes.</li>
+      <li><strong>CUSUM parameters chosen by default.</strong> Consequence: k tuned to the wrong shift, h giving false alarms every few dozen points. Fix: k = half the shift that matters, h = 4 or 5, and check the in-control ARL against the tables.</li>
+      <li><strong>A DNOM chart pooling parts with different spreads.</strong> Consequence: the loose part's variation sets limits that the tight part can never violate. Fix: compare the per-part standard deviations; standardise when they differ.</li>
+      <li><strong>Transforming data before checking homogeneity.</strong> Consequence: the runs that both charts of the flatness example saw are attributed to "non-normality". Fix: look for the pattern first; transform for the tails, not for the runs.</li>
+      <li><strong>"The parts are in spec, so ignore the signal."</strong> Consequence: an unexplained shift stays in the process until it is large enough to make scrap. Fix: the seven steps, at the urgency the control plan assigns.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: defects per joint on brazed cores of different sizes</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: braze-joint defects found by pressure decay and dye check on heat-exchanger cores, one core per shift for 20 shifts; the cores are of different models with 40 to 80 joints each.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 6. Braze-joint defects per core (constructed data).</caption><thead><tr><th>Core</th><th>Joints</th><th>Defects</th></tr></thead><tbody>
+<tr><td>1</td><td>76</td><td>2</td></tr>
+<tr><td>2</td><td>75</td><td>3</td></tr>
+<tr><td>3</td><td>73</td><td>1</td></tr>
+<tr><td>4</td><td>75</td><td>2</td></tr>
+<tr><td>5</td><td>42</td><td>4</td></tr>
+<tr><td>6</td><td>73</td><td>2</td></tr>
+<tr><td>7</td><td>78</td><td>2</td></tr>
+<tr><td>8</td><td>50</td><td>2</td></tr>
+<tr><td>9</td><td>46</td><td>1</td></tr>
+<tr><td>10</td><td>43</td><td>0</td></tr>
+<tr><td>11</td><td>72</td><td>4</td></tr>
+<tr><td>12</td><td>78</td><td>9</td></tr>
+<tr><td>13</td><td>64</td><td>2</td></tr>
+<tr><td>14</td><td>65</td><td>2</td></tr>
+<tr><td>15</td><td>72</td><td>3</td></tr>
+<tr><td>16</td><td>40</td><td>3</td></tr>
+<tr><td>17</td><td>74</td><td>2</td></tr>
+<tr><td>18</td><td>77</td><td>3</td></tr>
+<tr><td>19</td><td>45</td><td>0</td></tr>
+<tr><td>20</td><td>80</td><td>3</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Which chart, and why not a c chart? (b) Compute ū and the limits for the smallest and largest cores. (c) Which core signals, and how would you check that it is not the model rather than the shift? (d) After the cause is found and fixed, what should the limits be based on?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> Defects counted on units of varying size: a u chart. A c chart assumes a constant inspection unit; an 80-joint core will show more defects than a 40-joint one at the same rate, and a c chart would flag the big models.</p>
+      <p><strong>(b)</strong> ū = 50 / 1,298 = <span data-ex="m17-ex1-u-braze" data-key="ubar" data-dp="4">0.0385</span> defects per joint. For the smallest core (40 joints) the upper limit is 0.0385 + 3√(0.0385/40) = 0.1316; for the largest (80 joints) 0.1044. Lower limits are negative and set to zero.</p>
+      <p><strong>(c)</strong> Core 12: 9 defects on 78 joints, u = 0.1154, against a limit of 0.1052 (the expected count at the average rate would be 3.0). No other rule fires. To separate model from shift, look at the other cores of the same model on the chart: if they sit at the centre line, the model is not the cause; if they are all high, the u chart needs a separate centre line per model, or a DNOM-style standardisation.</p>
+      <p><strong>(d)</strong> Document the cause and exclude core 12 from the centre line; the limits are then established from the remaining cores and frozen. If the fix also changes the routine rate (a better flux, say), start a fresh baseline after it.</p>
+      <div class="calc" data-calc="control" id="calc-ctrl-ex1">
+        <h3>Exercise 1 as a u chart (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"type":"u","rows":[[76,2],[75,3],[73,1],[75,2],[42,4],[73,2],[78,2],[50,2],[46,1],[43,0],[72,4],[78,9],[64,2],[65,2],[72,3],[40,3],[74,2],[77,3],[45,0],[80,3]],"units":"defects per joint","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: a half-sigma shift, two charts</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: plating thickness in µm by XRF to 0.01 µm, one panel per hour for 40 hours; a bath concentration change from hour 21. The data were constructed with a shift of half a standard deviation from reading 21; the first 20 readings are the baseline.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 7. Plating thickness, µm, 40 hourly readings in order (constructed data).</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>12.03</td><td>12.08</td><td>12.03</td><td>11.87</td><td>12.09</td><td>12.04</td><td>11.95</td><td>12.06</td><td>12.04</td><td>12.03</td></tr>
+<tr><td>11–20</td><td>12.00</td><td>12.05</td><td>11.93</td><td>11.98</td><td>11.95</td><td>12.06</td><td>12.00</td><td>11.97</td><td>11.92</td><td>11.97</td></tr>
+<tr><td>21–30</td><td>12.05</td><td>12.02</td><td>12.18</td><td>12.15</td><td>11.78</td><td>11.86</td><td>12.03</td><td>12.01</td><td>12.07</td><td>12.07</td></tr>
+<tr><td>31–40</td><td>12.26</td><td>11.94</td><td>12.01</td><td>12.25</td><td>12.11</td><td>12.12</td><td>12.00</td><td>11.89</td><td>12.07</td><td>12.06</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Build the I-MR chart on all 40 readings; does it signal? (b) Build an EWMA with λ = 0.2 and L = 3 from the first 20 readings; when does it signal? (c) Why does the EWMA see what the I chart does not? (d) Would you act on the EWMA signal if the specification were ±0.5 µm?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> x̄ = <span data-ex="m17-ex2-imr" data-key="xbar" data-dp="4">12.0245</span>, MR̄ = <span data-ex="m17-ex2-imr" data-key="mrbar" data-dp="4">0.0956</span>, limits <span data-ex="m17-ex2-imr" data-key="lcl_x" data-dp="3">11.770</span> to <span data-ex="m17-ex2-imr" data-key="ucl_x" data-dp="3">12.279</span> µm. No point is beyond the limits and no Western Electric rule fires; two moving ranges (at 24 and 31) exceed the MR limit of <span data-ex="m17-ex2-imr" data-key="ucl_mr" data-dp="3">0.312</span>, single large steps that are not sustained. On the I chart the record looks like noise.</p>
+      <p><strong>(b)</strong> Baseline target <span data-ex="m17-ex2-ewma" data-key="target" data-dp="4">12.0025</span> µm, σ̂ = <span data-ex="m17-ex2-ewma" data-key="sigma" data-dp="4">0.0625</span> µm; asymptotic limits target ± 0.0625, that is <span data-ex="m17-ex2-ewma" data-key="lcl_asymptotic" data-dp="3">11.940</span> to <span data-ex="m17-ex2-ewma" data-key="ucl_asymptotic" data-dp="3">12.065</span> µm. The EWMA reaches <span data-ex="m17-ex2-ewma" data-key="ewma.30" data-dp="3">12.067</span> at reading <span data-ex="m17-ex2-ewma" data-key="signals.0" data-dp="0">31</span>, beyond the limit, 11 readings after the change, and signals again at 34 to 37. The readings before the change average 12.002 and after it 12.046 µm; the shift is about 0.8 σ̂.</p>
+      <p><strong>(c)</strong> A half-sigma shift moves each reading by half a standard deviation, far inside three-sigma limits; the I chart sees each reading alone. The EWMA averages the last several readings with decreasing weights, so the noise averages down while the shift accumulates, and its limits are correspondingly narrower (√(0.2/1.8) ≈ 0.33 of the individuals limits).</p>
+      <p><strong>(d)</strong> Yes, at the urgency the control plan gives it. A 0.05 µm shift inside a ±0.5 µm specification makes no nonconforming panel, but the bath has changed and the change has not been explained; the next change may be larger. Confirm the reading, note what changed at hour 21, find the cause, and do not "correct" the bath by 0.05 µm.</p>
+      <div class="calc" data-calc="control" id="calc-ctrl-ex2">
+        <h3>Exercise 2 as an I-MR chart (inputs collapsed; the EWMA is a hand computation here)</h3>
+        <script type="application/json" class="calc-data">{"type":"imr","x":[12.03,12.08,12.03,11.87,12.09,12.04,11.95,12.06,12.04,12.03,12.0,12.05,11.93,11.98,11.95,12.06,12.0,11.97,11.92,11.97,12.05,12.02,12.18,12.15,11.78,11.86,12.03,12.01,12.07,12.07,12.26,11.94,12.01,12.25,12.11,12.12,12.0,11.89,12.07,12.06],"subgroup_size":1,"units":"µm","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="17">
+      <fieldset class="q" data-answer="c">
+        <legend>1. Defects found on assembled boards, with lots of different sizes, are charted on</legend>
+        <label><input type="radio" name="q1" value="a"> a p chart</label>
+        <label><input type="radio" name="q1" value="b"> a c chart</label>
+        <label><input type="radio" name="q1" value="c"> a u chart</label>
+        <label><input type="radio" name="q1" value="d"> an X̄-R chart</label>
+        <p class="explain" hidden>Defects (Poisson) per unit with varying inspection units.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="11.54" data-tolerance="0.05">
+        <legend>2. An np chart has n = 100 and p̄ = 0.05. What is its upper control limit (two decimals)?</legend>
+        <input type="number" name="q2" step="any">
+        <p class="explain" hidden>5 + 3√(100 × 0.05 × 0.95) = 5 + 6.54 = 11.54.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="18" data-tolerance="0.1">
+        <legend>3. A c chart has c̄ = 9. What is its upper control limit?</legend>
+        <input type="number" name="q3" step="any">
+        <p class="explain" hidden>9 + 3√9 = 18.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>4. On a p chart of 5,000 units a day, a third of the days are outside the limits and σ<sub>z</sub> from the moving range of the z-scores is 2.4. The best reading is</legend>
+        <label><input type="radio" name="q4" value="a"> the process has a special cause every third day</label>
+        <label><input type="radio" name="q4" value="b"> the daily proportion varies more than binomial sampling explains (over-dispersion); use a p′ chart with limits widened by 2.4</label>
+        <label><input type="radio" name="q4" value="c"> the sample size is too small</label>
+        <label><input type="radio" name="q4" value="d"> the chart should be replaced by a c chart</label>
+        <p class="explain" hidden>Laney's correction; σ<sub>z</sub> near 1 would have meant the classic chart was right.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="0.333" data-tolerance="0.005">
+        <legend>5. For an EWMA with λ = 0.2, the asymptotic limits are target ± L σ̂ times what factor (three decimals)?</legend>
+        <input type="number" name="q5" step="any">
+        <p class="explain" hidden>√(λ/(2 − λ)) = √(0.2/1.8) = 0.333.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>6. In a tabular CUSUM, k = 0.5 means</legend>
+        <label><input type="radio" name="q6" value="a"> the chart signals at 0.5σ</label>
+        <label><input type="radio" name="q6" value="b"> half the points are used</label>
+        <label><input type="radio" name="q6" value="c"> the decision interval is 0.5</label>
+        <label><input type="radio" name="q6" value="d"> the chart is tuned to detect a shift of about 1σ (k is half the shift of interest)</label>
+        <p class="explain" hidden>NIST's rule of thumb: k = δ/2, h = 4 or 5.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>7. An EWMA or CUSUM should run alongside a Shewhart chart because</legend>
+        <label><input type="radio" name="q7" value="a"> the memory charts are slow to see a large sudden jump and say nothing about the spread</label>
+        <label><input type="radio" name="q7" value="b"> the standards require two charts</label>
+        <label><input type="radio" name="q7" value="c"> the Shewhart chart is more sensitive to small shifts</label>
+        <label><input type="radio" name="q7" value="d"> the memory charts need normal data</label>
+        <p class="explain" hidden>AIAG &amp; VDA recommendation; each chart covers the other's weakness.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>8. A deviation-from-nominal chart pools several part numbers on one chart. Its key assumption is</legend>
+        <label><input type="radio" name="q8" value="a"> the parts have the same nominal</label>
+        <label><input type="radio" name="q8" value="b"> the tolerances are equal</label>
+        <label><input type="radio" name="q8" value="c"> the routine variation is the same for every part number; otherwise standardise by each part's σ̂</label>
+        <label><input type="radio" name="q8" value="d"> at least 20 of each part are made</label>
+        <p class="explain" hidden>ISO 7870-8 / Wheeler: compare the per-part standard deviations first.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>9. An individuals chart of a bounded, right-skewed characteristic shows three of 200 points above the upper limit, all in the tail, and a run of fifteen points above the centre line. The best reading is</legend>
+        <label><input type="radio" name="q9" value="a"> the process is out of control three times; investigate each tail point</label>
+        <label><input type="radio" name="q9" value="b"> the tail points are the expected excess of a symmetric limit on a skewed characteristic; the run is the real signal to investigate</label>
+        <label><input type="radio" name="q9" value="c"> the data must be transformed before anything can be said</label>
+        <label><input type="radio" name="q9" value="d"> control charts cannot be used on skewed data</label>
+        <p class="explain" hidden>The flatness example: both the raw and the log chart agree on the run.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. A control chart signals a shift, but every part is well within specification. The right response is</legend>
+        <label><input type="radio" name="q10" value="a"> nothing; the parts are good</label>
+        <label><input type="radio" name="q10" value="b"> adjust the process back by the size of the shift</label>
+        <label><input type="radio" name="q10" value="c"> widen the control limits to the specification</label>
+        <label><input type="radio" name="q10" value="d"> follow the reaction plan: confirm, note what changed, find the cause; the process is no longer the one whose capability was established</label>
+        <p class="explain" hidden>Control limits speak about the parts not yet made.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. u chart.</li>
+        <li>11.54.</li>
+        <li>18.</li>
+        <li>b. Over-dispersion; p′ chart.</li>
+        <li>0.333.</li>
+        <li>d. Half the shift of interest.</li>
+        <li>a. Memory charts miss large jumps.</li>
+        <li>c. Equal routine variation.</li>
+        <li>b. The run is the signal.</li>
+        <li>d. Follow the reaction plan.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Defective units are binomial (p, np charts); defects are Poisson (c, u charts). Every limit is the centre ± 3 standard deviations of the plotted statistic, and the limits move with the sample size on p and u charts.</li>
+      <li>Attribute charts cannot warn before nonconformities occur and need large samples; a fall in the rate usually shows only as a run below the centre line.</li>
+      <li>On thousands of units a day the binomial limits are far too tight. Compute σ<sub>z</sub> from the moving range of the z-scores; if it is well above 1, use Laney's p′ chart.</li>
+      <li>Choose the chart by data type, subgroup structure and the shift size that matters; Figure 1 is the tree. Measurement system and rational subgrouping come before any of it.</li>
+      <li>EWMA (λ ≈ 0.2, L ≈ 3) and CUSUM (k = half the shift, h = 4 to 5) detect a half- to one-sigma shift in a fraction of a Shewhart chart's time and are slow on large jumps; run them beside a Shewhart chart.</li>
+      <li>Short runs: chart the deviation from nominal across part numbers on one I-MR chart when the routine variation is the same; standardise when it is not.</li>
+      <li>Bounded, skewed characteristics give extra tail signals on a symmetric individuals chart; chart subgroup means or a log scale, and read tail signals with the physics in mind. Runs are the signal both views agree on.</li>
+      <li>A signal with every part in specification is still a signal: the process is no longer the one whose capability was established. Follow the reaction plan; never adjust toward nominal.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09 or 2026-09-10. Sources marked "secondary" or "catalogue" were not read in full by the course author; the claim is taken from the part shown. Standards and books are paraphrased.</p>
+    <ol class="references">
+      <li id="ref-1">NIST/SEMATECH. "6.3.3. What are Attributes Control Charts?" and "6.3.3.2. Proportions Control Charts." <em>e-Handbook of Statistical Methods</em>. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc33.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc33.htm</a></li>
+      <li id="ref-2">NIST/SEMATECH. "6.3.3.1. Counts Control Charts." <em>e-Handbook of Statistical Methods</em>. The c chart and its Poisson basis. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc331.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc331.htm</a></li>
+      <li id="ref-3">NIST/SEMATECH. "6.3.3.2. Proportions Control Charts." <em>e-Handbook of Statistical Methods</em>. The p chart formulas. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc332.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc332.htm</a></li>
+      <li id="ref-4">AIAG &amp; VDA. <em>Statistical Process Control (SPC) Manual: Process Management, Performance and Capability, Control Charts</em>, 1st ed. AIAG and VDA QMC, February 2026 (AIAG catalogue SPCAV-1). Sections 10.3.2.5 to 10.3.2.9 (pp. 88 to 92: charts with memory, non-normal characteristics, short runs), 10.3.5.4 to 10.3.5.5 (pp. 111 to 116: CUSUM with its ARL example, EWMA and the recommendation to run a Shewhart chart alongside), 10.3.6 (pp. 117 to 118: attribute charts, the binomial and Poisson basis, np̂(1 − p̂) ≥ 9, sample-size fluctuation below 25 %). <a href="https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1">https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1</a> <span class="tag">(licensed copy read by the author)</span></li>
+      <li id="ref-5">Laney, D. B. "Improved Control Charts for Attributes." <em>Quality Engineering</em> 14(4):531 to 537, 2002. <a href="https://www.tandfonline.com/doi/abs/10.1081/QEN-120003555">https://www.tandfonline.com/doi/abs/10.1081/QEN-120003555</a> <span class="tag">(abstract read; the p′ and u′ charts for over-dispersed data)</span></li>
+      <li id="ref-6">Arafah, M. "Using the Laney p′ Control Chart for Monitoring COVID-19 Cases in Jordan." <em>Journal of Healthcare Engineering</em>, 2022. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9553754/">https://pmc.ncbi.nlm.nih.gov/articles/PMC9553754/</a> <span class="tag">(open access; the source read for the z-score, σ<sub>z</sub> = MR̄/1.128 and limit formulas as implemented here)</span></li>
+      <li id="ref-7">Minitab, LLC. "Methods and formulas for Laney P′ Chart." Minitab Statistical Software help. <a href="https://support.minitab.com/en-us/minitab/help-and-how-to/quality-and-process-improvement/control-charts/how-to/attributes-charts/laney-p-chart/methods-and-formulas/methods-and-formulas/">https://support.minitab.com/.../laney-p-chart/methods-and-formulas/</a> <span class="tag">(the same construction as implemented in software; page read, formulas rendered as images)</span></li>
+      <li id="ref-8">Roberts, S. W. "Control Chart Tests Based on Geometric Moving Averages." <em>Technometrics</em> 1(3):239 to 250, 1959. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1959.10489860">https://www.tandfonline.com/doi/abs/10.1080/00401706.1959.10489860</a> <span class="tag">(catalogue; origin of the EWMA chart)</span></li>
+      <li id="ref-9">Lucas, J. M., and Saccucci, M. S. "Exponentially Weighted Moving Average Control Schemes: Properties and Enhancements." <em>Technometrics</em> 32(1):1 to 12, 1990. <a href="https://www.tandfonline.com/doi/abs/10.1080/00401706.1990.10484583">https://www.tandfonline.com/doi/abs/10.1080/00401706.1990.10484583</a> <span class="tag">(catalogue; the ARL tables for choosing λ and L)</span></li>
+      <li id="ref-10">NIST/SEMATECH. "6.3.2.4. EWMA Control Charts." <em>e-Handbook of Statistical Methods</em>. Formulas, the typical λ of 0.2 to 0.3, and the worked example reproduced by this course. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc324.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc324.htm</a></li>
+      <li id="ref-11">Page, E. S. "Continuous Inspection Schemes." <em>Biometrika</em> 41(1/2):100 to 115, 1954. <a href="https://doi.org/10.1093/biomet/41.1-2.100">https://doi.org/10.1093/biomet/41.1-2.100</a> <span class="tag">(catalogue; origin of the CUSUM)</span></li>
+      <li id="ref-12">NIST/SEMATECH. "6.3.2.3. Cusum Control Charts" and "6.3.2.3.1. Cusum Average Run Length." <em>e-Handbook of Statistical Methods</em>. The tabular CUSUM and the k = δ/2, h = 4 or 5 guidance. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc323.htm">https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc323.htm</a></li>
+      <li id="ref-13">ISO 7870-8:2017. <em>Control charts. Part 8: Charting techniques for short runs and small mixed batches</em>. International Organization for Standardization. <a href="https://cdn.standards.iteh.ai/samples/67410/0471b1bd8dc9472aaa07c7ce99c3249a/ISO-7870-8-2017.pdf">https://cdn.standards.iteh.ai/samples/67410/.../ISO-7870-8-2017.pdf</a> <span class="tag">(scope and structure read from the public preview)</span></li>
+      <li id="ref-14">Wheeler, D. J. <em>Short Run SPC</em>. SPC Press, 1991. <a href="https://www.amazon.com/Short-Run-SPC-Donald-Wheeler/dp/0945320124">https://www.amazon.com/Short-Run-SPC-Donald-Wheeler/dp/0945320124</a> <span class="tag">(catalogue; difference and Zed charts)</span></li>
+      <li id="ref-15">Wheeler, D. J. "Problems with Skewness and Kurtosis, Part Two." <em>Quality Digest</em>, 2 August 2011 (SPC Press manuscript 232). <a href="https://www.spcpress.com/pdf/DJW232.pdf">https://www.spcpress.com/pdf/DJW232.pdf</a></li>
+      <li id="ref-16">ISO 7870-4:2021, <em>Control charts. Part 4: Cumulative sum charts</em>; ISO 7870-6:2016, <em>Control charts. Part 6: EWMA control charts</em>. International Organization for Standardization. <a href="https://www.iso.org/standard/74101.html">https://www.iso.org/standard/74101.html</a> ; <a href="https://www.iso.org/standard/40173.html">https://www.iso.org/standard/40173.html</a> <span class="tag">(secondary: existence and scope from catalogue listings; not read)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>Montgomery, D. C. <em>Introduction to Statistical Quality Control</em>, 8th ed. Wiley, 2019. Chapters on attribute charts, CUSUM and EWMA with ARL tables and design guidance.</li>
+      <li>Module 18 for control plans and reaction plans; Module 8 for the flatness data's capability; Module 16 for the Shewhart charts and their false-alarm arithmetic.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a p chart on a high-volume line that everyone stopped reading, or a CUSUM that caught a drift early, without employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-10. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>

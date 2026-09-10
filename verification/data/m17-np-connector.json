@@ -1,0 +1,17 @@
+{
+ "id": "m17-np-connector",
+ "module": "17",
+ "kind": "np",
+ "title": "Rejects in fixed samples of 200 connectors, 25 samples, np chart, stable",
+ "source": "constructed",
+ "setting": "200 connectors per hour through an automatic go/no-go gauge, 25 hourly samples",
+ "params": {
+  "n": 200,
+  "units": "connectors"
+ },
+ "columns": [
+  "sample",
+  "defectives"
+ ],
+ "n_rows": 25
+}

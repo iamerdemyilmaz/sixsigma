@@ -1,0 +1,16 @@
+{
+ "id": "m17-flatness-imr",
+ "module": "17",
+ "kind": "imr",
+ "title": "The Module 1 flatness data (lognormal) on an individuals chart: three tail points beyond the limit",
+ "source": "constructed",
+ "setting": "the 200 flatness values of Module 1 (\u00b5m) in production order",
+ "params": {
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 200
+}

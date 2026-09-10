@@ -1,0 +1,17 @@
+{
+ "id": "m17-p-leak",
+ "module": "17",
+ "kind": "p",
+ "title": "Leak-test rejects per lot, 30 lots of 180 to 260, rate change at lot 21",
+ "source": "constructed",
+ "setting": "pressed fittings leak-tested 100 %, one lot per shift; a seal supplier change took effect at lot 21",
+ "params": {
+  "units": "fittings"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 30
+}

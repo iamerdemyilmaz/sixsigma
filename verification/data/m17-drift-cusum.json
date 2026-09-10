@@ -1,0 +1,19 @@
+{
+ "id": "m17-drift-cusum",
+ "module": "17",
+ "kind": "cusum",
+ "title": "The same series on a tabular CUSUM, k 0.5, h 4, parameters from the first 30 readings",
+ "source": "constructed",
+ "setting": "as m17-drift-imr",
+ "params": {
+  "k": 0.5,
+  "h": 4.0,
+  "baseline": 30,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 60
+}

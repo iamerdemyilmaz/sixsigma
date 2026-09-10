@@ -1,0 +1,20 @@
+{
+ "id": "m17-drift-ewma",
+ "module": "17",
+ "kind": "ewma",
+ "title": "The same series on an EWMA chart, lambda 0.2, L 3, limits from the first 30 readings",
+ "source": "constructed",
+ "setting": "as m17-drift-imr",
+ "params": {
+  "lambda": 0.2,
+  "L": 3.0,
+  "limits": "exact",
+  "baseline": 30,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 60
+}

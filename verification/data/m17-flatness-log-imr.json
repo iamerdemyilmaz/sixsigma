@@ -1,0 +1,16 @@
+{
+ "id": "m17-flatness-log-imr",
+ "module": "17",
+ "kind": "imr",
+ "title": "The same flatness data charted as ln(x)",
+ "source": "constructed",
+ "setting": "natural logarithm of the Module 1 flatness values, to 4 decimals",
+ "params": {
+  "units": "ln \u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 200
+}

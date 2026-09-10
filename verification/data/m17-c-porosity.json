@@ -1,0 +1,16 @@
+{
+ "id": "m17-c-porosity",
+ "module": "17",
+ "kind": "c",
+ "title": "Pores per casting on the radiograph, 30 castings, one special cause",
+ "source": "constructed",
+ "setting": "gas pores counted on the radiograph of a die-cast housing, one casting per hour for 30 hours",
+ "params": {
+  "units": "pores per casting"
+ },
+ "columns": [
+  "sample",
+  "defects"
+ ],
+ "n_rows": 30
+}

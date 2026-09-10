@@ -1,0 +1,17 @@
+{
+ "id": "m17-pprime",
+ "module": "17",
+ "kind": "p_prime",
+ "title": "Daily reject proportion on thousands of units, 25 days: classic p chart vs Laney p'",
+ "source": "constructed (Laney 2002 method, formulas as in Minitab's methods page and Arafah 2022)",
+ "setting": "automated end-of-line test on a high-volume connector line, 4,000 to 6,000 units per day for 25 days; the true daily rate varies with material lot",
+ "params": {
+  "units": "units"
+ },
+ "columns": [
+  "day",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 25
+}

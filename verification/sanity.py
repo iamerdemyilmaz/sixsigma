@@ -422,6 +422,28 @@ def check_arl(ex_id, r):
             check(all(v <= b + 1e-9 for v, b in zip(vals, base)), f"{tag}: {key} has a longer ARL than rule 1 alone")
 
 
+def check_p_prime(ex_id, r, data):
+    tag = ex_id
+    check(near(r["pbar"], sum(data["defectives"]) / sum(data["n"])), f"{tag}: pbar")
+    check(r["sigma_z"] > 0 and near(r["sigma_z"], r["mrbar_z"] / 1.128), f"{tag}: sigma_z")
+    for i in range(r["k"]):
+        check(r["lcl"][i] <= r["pbar"] <= r["ucl"][i], f"{tag}: p' limits at {i + 1}")
+        if r["sigma_z"] >= 1:
+            check(r["ucl"][i] >= r["classic_ucl"][i] - 1e-12, f"{tag}: p' limit narrower than p limit despite sigma_z >= 1")
+    if r["sigma_z"] >= 1:
+        check(set(r["beyond"]) <= set(r["classic_beyond"]), f"{tag}: p' flags a point the p chart does not")
+    check_rules(r["rules_z"], r["k"], tag)
+
+
+def check_dnom(ex_id, r, data):
+    tag = ex_id
+    dev = [data["x"][i] - data["nominal"][i] for i in range(len(data["x"]))]
+    check(all(near(a, b) for a, b in zip(dev, r["deviations"])), f"{tag}: deviations")
+    check_chart(ex_id, r["chart"], "imr")
+    check(r["sd_ratio_max_min"] is None or r["sd_ratio_max_min"] >= 1, f"{tag}: sd ratio")
+    check(sum(v["n"] for v in r["parts"].values()) == len(dev), f"{tag}: part counts")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -455,6 +477,8 @@ def check_results():
         elif kind == "mannwhitney": check_mw(ex_id, r)
         elif kind == "power": check_power(ex_id, r)
         elif kind == "arl": check_arl(ex_id, r)
+        elif kind == "p_prime": check_p_prime(ex_id, r, data)
+        elif kind == "dnom": check_dnom(ex_id, r, data)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

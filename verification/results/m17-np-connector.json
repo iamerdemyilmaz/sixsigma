@@ -1,0 +1,31 @@
+{
+ "id": "m17-np-connector",
+ "kind": "np",
+ "params": {
+  "n": 200,
+  "units": "connectors"
+ },
+ "source": "constructed",
+ "results": {
+  "k": 25,
+  "n": 200,
+  "npbar": 8.24,
+  "pbar": 0.0412,
+  "ucl": 16.67235483124376,
+  "lcl": 0.0,
+  "rules": {
+   "we1": [],
+   "we2": [],
+   "we3": [],
+   "we4": [],
+   "n2": [],
+   "n3": [],
+   "n4": [],
+   "n7": [],
+   "n8": []
+  },
+  "beyond": []
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}

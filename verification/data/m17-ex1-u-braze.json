@@ -1,0 +1,17 @@
+{
+ "id": "m17-ex1-u-braze",
+ "module": "17",
+ "kind": "u",
+ "title": "Exercise 1: braze-joint defects per core, 20 cores of 40 to 80 joints, u chart with one special cause",
+ "source": "constructed",
+ "setting": "joint defects found by pressure decay and dye check on brazed heat-exchanger cores of different sizes, one core per shift",
+ "params": {
+  "units": "defects per joint"
+ },
+ "columns": [
+  "sample",
+  "n",
+  "defects"
+ ],
+ "n_rows": 20
+}

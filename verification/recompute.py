@@ -1076,6 +1076,44 @@ def r_arl(meta):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 17: Laney p' chart and DNOM chart, closed form
+# --------------------------------------------------------------------------
+def r_p_prime(cols):
+    n = cols["n"]; d = cols["defectives"]
+    base = r_p(cols)
+    pbar = base["pbar"]; p = base["p"]
+    sig = [math.sqrt(pbar * (1 - pbar) / ni) for ni in n]
+    z = [(p[i] - pbar) / sig[i] for i in range(len(n))]
+    mr = [abs(z[i] - z[i - 1]) for i in range(1, len(z))]
+    mrbar = sum(mr) / len(mr)
+    sz = mrbar / 1.128
+    ucl = [pbar + 3 * s * sz for s in sig]; lcl = [max(0.0, pbar - 3 * s * sz) for s in sig]
+    out = {"pbar": pbar, "p": p, "z": z, "mrbar_z": mrbar, "sigma_z": sz, "ucl": ucl, "lcl": lcl,
+           "beyond": [i + 1 for i in range(len(n)) if p[i] > ucl[i] or p[i] < lcl[i]],
+           "classic_ucl": base["ucl"], "classic_lcl": base["lcl"], "classic_beyond": base["beyond"],
+           "n_mean": sum(n) / len(n), "n_total": sum(n), "d_total": sum(d), "sd_of_p": sd(p), "mean_sigma_p": sum(sig) / len(sig)}
+    for k, v in run_rules(z, 0.0, sz).items(): out[f"rules_z.{k}"] = v
+    return out
+
+
+def r_dnom(cols):
+    parts = [str(v) for v in cols["part"]]
+    dev = [cols["x"][i] - cols["nominal"][i] for i in range(len(cols["x"]))]
+    out = {"deviations": dev}
+    ch, _ = r_imr(dev, "chart.")
+    out.update(ch)
+    sds = []
+    for pn in dict.fromkeys(parts):
+        vals = [dev[i] for i in range(len(dev)) if parts[i] == pn]
+        out[f"parts.{pn}.n"] = len(vals); out[f"parts.{pn}.mean_dev"] = mean(vals)
+        if len(vals) > 1:
+            out[f"parts.{pn}.sd_dev"] = sd(vals); sds.append(sd(vals))
+    out["sd_ratio_max_min"] = max(sds) / min(sds) if sds else None
+    out["n_parts"] = len(dict.fromkeys(parts))
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -1148,6 +1186,8 @@ def recompute_one(ex_id):
     elif kind == "mannwhitney": mine = r_mannwhitney(meta, cols)
     elif kind == "power": mine = r_power(meta)
     elif kind == "arl": mine = r_arl(meta)
+    elif kind == "p_prime": mine = r_p_prime(cols)
+    elif kind == "dnom": mine = r_dnom(cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

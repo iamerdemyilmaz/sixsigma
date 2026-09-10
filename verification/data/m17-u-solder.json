@@ -1,0 +1,17 @@
+{
+ "id": "m17-u-solder",
+ "module": "17",
+ "kind": "u",
+ "title": "Solder defects per board, 25 lots of 8 to 15 boards, u chart, stable",
+ "source": "constructed",
+ "setting": "defects found by automated optical inspection on a lot of assembled boards, one lot per shift",
+ "params": {
+  "units": "defects per board"
+ },
+ "columns": [
+  "sample",
+  "n",
+  "defects"
+ ],
+ "n_rows": 25
+}

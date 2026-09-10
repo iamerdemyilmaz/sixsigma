@@ -1,0 +1,17 @@
+{
+ "id": "m17-ex2-imr",
+ "module": "17",
+ "kind": "imr",
+ "title": "Exercise 2: plating thickness, 40 readings with a 0.5-sigma shift at reading 21, individuals chart",
+ "source": "constructed",
+ "setting": "plating thickness in \u00b5m by XRF to 0.01 \u00b5m, one panel per hour; a bath concentration change from hour 21",
+ "params": {
+  "units": "\u00b5m",
+  "shift_at": 21
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

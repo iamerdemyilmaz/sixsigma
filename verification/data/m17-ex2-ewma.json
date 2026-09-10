@@ -1,0 +1,20 @@
+{
+ "id": "m17-ex2-ewma",
+ "module": "17",
+ "kind": "ewma",
+ "title": "Exercise 2: the same readings on an EWMA chart, lambda 0.2, L 3, baseline 20",
+ "source": "constructed",
+ "setting": "as m17-ex2-imr",
+ "params": {
+  "lambda": 0.2,
+  "L": 3.0,
+  "limits": "exact",
+  "baseline": 20,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 40
+}

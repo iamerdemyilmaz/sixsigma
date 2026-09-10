@@ -1,0 +1,18 @@
+{
+ "id": "m17-dnom",
+ "module": "17",
+ "kind": "dnom",
+ "title": "Short-run deviation-from-nominal chart: three shaft diameters on one lathe, 30 parts",
+ "source": "constructed",
+ "setting": "three part numbers (nominal diameters 20.00, 25.00 and 32.00 mm) turned on one lathe in mixed order, micrometer to 0.001 mm; the chart plots the deviation from each part's nominal",
+ "params": {
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "part",
+  "nominal",
+  "x"
+ ],
+ "n_rows": 30
+}

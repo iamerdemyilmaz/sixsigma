@@ -128,7 +128,11 @@ const SKIP = { info_power_nct: true };
 // rules) is a static table; the CLT/detection simulator is the interactive
 // counterpart and is checked separately by its seeded simulation.
 const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_nonnormal: true, attribute_capability: true,
-  chisq: true, mannwhitney: true, power: true, arl: true };
+  chisq: true, mannwhitney: true, power: true, arl: true,
+  // Module 17: the Laney p' chart and the short-run DNOM chart are taught as
+  // hand computations (the control-chart builder draws the classic p chart and
+  // an I-MR chart of pasted deviations, which is the DNOM chart's mechanics).
+  p_prime: true, dnom: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

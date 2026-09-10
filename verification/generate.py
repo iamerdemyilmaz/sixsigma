@@ -931,6 +931,119 @@ register(id="m16-ex2-trend", module="16", kind="imr",
          params={"units": "%"}, columns=["i", "x"], rows=[[i + 1, float(v)] for i, v in enumerate(_cc)])
 
 
+# ---------------------------------------------------------------------------
+# Module 17: Statistical process control II (prefix m17-; chk-nist-ewma is the
+# published EWMA check and the Module 1 flatness rows return for the
+# non-normal individuals chart)
+# ---------------------------------------------------------------------------
+# p chart: leak-test rejects per lot, 30 lots of 180 to 260, rate doubling from lot 21.
+_rng = np.random.default_rng(72)
+_pn = [int(v) for v in _rng.integers(180, 261, 30)]
+_pd = [int(_rng.binomial(_pn[i], 0.03 if i < 20 else 0.07)) for i in range(30)]
+register(id="m17-p-leak", module="17", kind="p",
+         title="Leak-test rejects per lot, 30 lots of 180 to 260, rate change at lot 21",
+         source="constructed", setting="pressed fittings leak-tested 100 %, one lot per shift; a seal supplier change took effect at lot 21",
+         params={"units": "fittings"}, columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_pn, _pd))])
+
+# np chart: rejects in fixed samples of 200 connectors from an automatic gauge, 25 samples, stable.
+_rng = np.random.default_rng(1)
+register(id="m17-np-connector", module="17", kind="np",
+         title="Rejects in fixed samples of 200 connectors, 25 samples, np chart, stable",
+         source="constructed", setting="200 connectors per hour through an automatic go/no-go gauge, 25 hourly samples",
+         params={"n": 200, "units": "connectors"}, columns=["sample", "defectives"],
+         rows=[[i + 1, int(_rng.binomial(200, 0.04))] for i in range(25)])
+
+# c chart: pores per casting radiograph, 30 castings, one special cause at casting 17.
+_rng = np.random.default_rng(3)
+_cp = [int(v) for v in _rng.poisson(4.5, 30)]; _cp[16] += 9
+register(id="m17-c-porosity", module="17", kind="c",
+         title="Pores per casting on the radiograph, 30 castings, one special cause",
+         source="constructed", setting="gas pores counted on the radiograph of a die-cast housing, one casting per hour for 30 hours",
+         params={"units": "pores per casting"}, columns=["sample", "defects"], rows=[[i + 1, v] for i, v in enumerate(_cp)])
+
+# u chart: solder defects per board on lots of 8 to 15 boards, 25 lots, stable.
+_rng = np.random.default_rng(1)
+_un = [int(v) for v in _rng.integers(8, 16, 25)]
+_uc = [int(_rng.poisson(1.4 * ni)) for ni in _un]
+register(id="m17-u-solder", module="17", kind="u",
+         title="Solder defects per board, 25 lots of 8 to 15 boards, u chart, stable",
+         source="constructed", setting="defects found by automated optical inspection on a lot of assembled boards, one lot per shift",
+         params={"units": "defects per board"}, columns=["sample", "n", "defects"], rows=[[i + 1, n, c] for i, (n, c) in enumerate(zip(_un, _uc))])
+
+# Laney p' chart: daily reject proportion on 4,000 to 6,000 units with genuine day-to-day variation (over-dispersion).
+_rng = np.random.default_rng(1)
+_ln2 = [int(v) for v in _rng.integers(4000, 6001, 25)]
+_pt = np.clip(_rng.normal(0.020, 0.004, 25), 0.005, 0.05)
+_ld2 = [int(_rng.binomial(_ln2[i], _pt[i])) for i in range(25)]
+register(id="m17-pprime", module="17", kind="p_prime",
+         title="Daily reject proportion on thousands of units, 25 days: classic p chart vs Laney p'",
+         source="constructed (Laney 2002 method, formulas as in Minitab's methods page and Arafah 2022)",
+         setting="automated end-of-line test on a high-volume connector line, 4,000 to 6,000 units per day for 25 days; the true daily rate varies with material lot",
+         params={"units": "units"}, columns=["day", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_ln2, _ld2))])
+
+# EWMA and CUSUM on one series: 60 readings, a 0.7-sigma shift from reading 31, baseline 30.
+_rng = np.random.default_rng(7)
+_ts2 = [round(float(v), 1) for v in np.concatenate([_rng.normal(50.0, 2.0, 30), _rng.normal(51.4, 2.0, 30)])]
+register(id="m17-drift-imr", module="17", kind="imr",
+         title="Etch depth, 60 readings, a 0.7-sigma shift from reading 31: the individuals chart",
+         source="constructed", setting="etch depth in µm from a profilometer to 0.1 µm, one wafer per hour for 60 hours; a gas-flow controller drifted from hour 31",
+         params={"units": "µm", "shift_at": 31}, columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ts2)])
+register(id="m17-drift-ewma", module="17", kind="ewma",
+         title="The same series on an EWMA chart, lambda 0.2, L 3, limits from the first 30 readings",
+         source="constructed", setting="as m17-drift-imr",
+         params={"lambda": 0.2, "L": 3.0, "limits": "exact", "baseline": 30, "units": "µm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ts2)])
+register(id="m17-drift-cusum", module="17", kind="cusum",
+         title="The same series on a tabular CUSUM, k 0.5, h 4, parameters from the first 30 readings",
+         source="constructed", setting="as m17-drift-imr",
+         params={"k": 0.5, "h": 4.0, "baseline": 30, "units": "µm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ts2)])
+
+# Short-run DNOM chart: three part numbers on one lathe, 30 parts in the order machined.
+_rng = np.random.default_rng(7)
+_pnoms = [["P20", 20.00], ["P25", 25.00], ["P32", 32.00]]
+_dn = []
+for _i in range(30):
+    _pn2, _nom = _pnoms[_rng.integers(0, 3)]
+    _dn.append([_i + 1, _pn2, _nom, round(float(_nom + 0.004 + _rng.normal(0, 0.012)), 3)])
+register(id="m17-dnom", module="17", kind="dnom",
+         title="Short-run deviation-from-nominal chart: three shaft diameters on one lathe, 30 parts",
+         source="constructed", setting="three part numbers (nominal diameters 20.00, 25.00 and 32.00 mm) turned on one lathe in mixed order, micrometer to 0.001 mm; the chart plots the deviation from each part's nominal",
+         params={"units": "mm"}, columns=["i", "part", "nominal", "x"], rows=_dn)
+
+# Non-normal individuals: the Module 1 flatness data charted raw and after a log transformation.
+register(id="m17-flatness-imr", module="17", kind="imr",
+         title="The Module 1 flatness data (lognormal) on an individuals chart: three tail points beyond the limit",
+         source="constructed", setting="the 200 flatness values of Module 1 (µm) in production order",
+         params={"units": "µm"}, columns=["i", "x"], rows=_flat)
+register(id="m17-flatness-log-imr", module="17", kind="imr",
+         title="The same flatness data charted as ln(x)",
+         source="constructed", setting="natural logarithm of the Module 1 flatness values, to 4 decimals",
+         params={"units": "ln µm"}, columns=["i", "x"], rows=[[i + 1, round(float(np.log(v)), 4)] for i, v in _flat])
+
+# Exercise 1: u chart of braze-joint defects per core, 20 cores of 40 to 80 joints, one special cause at core 12.
+_rng = np.random.default_rng(13)
+_en = [int(v) for v in _rng.integers(40, 81, 20)]
+_ec = [int(_rng.poisson(0.03 * ni * (2.5 if i == 11 else 1))) for i, ni in enumerate(_en)]
+register(id="m17-ex1-u-braze", module="17", kind="u",
+         title="Exercise 1: braze-joint defects per core, 20 cores of 40 to 80 joints, u chart with one special cause",
+         source="constructed", setting="joint defects found by pressure decay and dye check on brazed heat-exchanger cores of different sizes, one core per shift",
+         params={"units": "defects per joint"}, columns=["sample", "n", "defects"], rows=[[i + 1, n, c] for i, (n, c) in enumerate(zip(_en, _ec))])
+
+# Exercise 2: a 0.5-sigma shift at reading 21 of 40 that the I chart misses and an EWMA catches.
+_rng = np.random.default_rng(1)
+_e2 = [round(float(v), 2) for v in np.concatenate([_rng.normal(12.00, 0.10, 20), _rng.normal(12.05, 0.10, 20)])]
+register(id="m17-ex2-imr", module="17", kind="imr",
+         title="Exercise 2: plating thickness, 40 readings with a 0.5-sigma shift at reading 21, individuals chart",
+         source="constructed", setting="plating thickness in µm by XRF to 0.01 µm, one panel per hour; a bath concentration change from hour 21",
+         params={"units": "µm", "shift_at": 21}, columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_e2)])
+register(id="m17-ex2-ewma", module="17", kind="ewma",
+         title="Exercise 2: the same readings on an EWMA chart, lambda 0.2, L 3, baseline 20",
+         source="constructed", setting="as m17-ex2-imr",
+         params={"lambda": 0.2, "L": 3.0, "limits": "exact", "baseline": 20, "units": "µm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_e2)])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

@@ -1150,6 +1150,50 @@ def arl_table(params):
     return out
 
 
+# --------------------------------------------------------------------------
+# Module 17: Laney p' chart for over-dispersed proportions (Laney 2002;
+# formulas as in Minitab's methods page and Arafah 2022) and the short-run
+# deviation-from-nominal (DNOM) chart (ISO 7870-8; Wheeler, Short Run SPC).
+#   p_prime  columns n, defectives: classic p chart plus z-scores, sigma_z
+#            from the moving range of z, and limits pbar +/- 3 sigma_pi sigma_z
+#   dnom     columns part, nominal, x: I-MR chart of (x - nominal) with a
+#            per-part summary and the ratio of part standard deviations
+# --------------------------------------------------------------------------
+def p_prime_chart(n, d):
+    base = p_chart(n, d)
+    n = [int(v) for v in n]
+    pbar, p = base["pbar"], base["p"]
+    sig = [math.sqrt(pbar * (1 - pbar) / ni) for ni in n]
+    z = [(p[i] - pbar) / sig[i] for i in range(len(n))]
+    mr = [abs(z[i] - z[i - 1]) for i in range(1, len(z))]
+    mrbar = float(np.mean(mr))
+    sigma_z = mrbar / D2_MR
+    ucl = [pbar + 3 * s * sigma_z for s in sig]
+    lcl = [max(0.0, pbar - 3 * s * sigma_z) for s in sig]
+    out = {"k": len(n), "pbar": pbar, "p": p, "z": z, "mrbar_z": mrbar, "sigma_z": sigma_z, "ucl": ucl, "lcl": lcl,
+           "beyond": [i + 1 for i in range(len(n)) if p[i] > ucl[i] or p[i] < lcl[i]],
+           "classic_ucl": base["ucl"], "classic_lcl": base["lcl"], "classic_beyond": base["beyond"],
+           "n_mean": float(np.mean(n)), "n_total": int(sum(n)), "d_total": int(sum(d)),
+           "sd_of_p": float(np.std(p, ddof=1)), "mean_sigma_p": float(np.mean(sig))}
+    out["rules_z"] = run_rules(z, 0.0, sigma_z)
+    return out
+
+
+def dnom_chart(cols):
+    parts = [str(v) for v in cols["part"]]
+    nominal = [float(v) for v in cols["nominal"]]; x = [float(v) for v in cols["x"]]
+    dev = [x[i] - nominal[i] for i in range(len(x))]
+    out = {"deviations": dev, "chart": imr_chart(dev), "parts": {}}
+    for pn in dict.fromkeys(parts):
+        vals = [dev[i] for i in range(len(dev)) if parts[i] == pn]
+        out["parts"][pn] = {"n": len(vals), "nominal": nominal[parts.index(pn)], "mean_dev": float(np.mean(vals)),
+                            "sd_dev": float(np.std(vals, ddof=1)) if len(vals) > 1 else None}
+    sds = [v["sd_dev"] for v in out["parts"].values() if v["sd_dev"]]
+    out["sd_ratio_max_min"] = max(sds) / min(sds) if sds else None
+    out["n_parts"] = len(out["parts"])
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -1232,6 +1276,10 @@ def compute_one(ex_id):
         res = power(params)
     elif kind == "arl":
         res = arl_table(params)
+    elif kind == "p_prime":
+        res = p_prime_chart(cols["n"], cols["defectives"])
+    elif kind == "dnom":
+        res = dnom_chart(cols)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

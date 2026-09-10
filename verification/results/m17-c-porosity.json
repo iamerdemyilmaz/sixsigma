@@ -1,0 +1,32 @@
+{
+ "id": "m17-c-porosity",
+ "kind": "c",
+ "params": {
+  "units": "pores per casting"
+ },
+ "source": "constructed",
+ "results": {
+  "k": 30,
+  "cbar": 5.0,
+  "ucl": 11.70820393249937,
+  "lcl": 0.0,
+  "rules": {
+   "we1": [
+    17
+   ],
+   "we2": [],
+   "we3": [],
+   "we4": [],
+   "n2": [],
+   "n3": [],
+   "n4": [],
+   "n7": [],
+   "n8": []
+  },
+  "beyond": [
+   17
+  ]
+ },
+ "expected_checks": [],
+ "expected_ok": true
+}
