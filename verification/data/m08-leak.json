@@ -1,0 +1,18 @@
+{
+ "id": "m08-leak",
+ "module": "08",
+ "kind": "attribute_capability",
+ "title": "Leak-test rejects, 24 lots of 150 to 250 fittings, p about 2.3 %",
+ "source": "constructed",
+ "setting": "pressed seal fittings, 100 % leak test at the end of the line, one lot per shift for 24 shifts, lot sizes 150 to 250",
+ "params": {
+  "precision_e": 0.005,
+  "units": "fittings"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 24
+}

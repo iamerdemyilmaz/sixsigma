@@ -838,6 +838,141 @@ def sigma_table(params):
 # --------------------------------------------------------------------------
 # Driver
 # --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# Module 8: capability of non-normal data and attribute capability
+#   capability_nonnormal  x with usl/lsl (natural_lower/upper optional):
+#     normal.*     the naive normal-based Pp/Ppk and PPM (what software prints
+#                  if nobody looks at the histogram)
+#     lognormal.*  fitted lognormal (mean and n-1 sd of ln x), AD test on ln x,
+#                  the 0.135 %, 50 % and 99.865 % quantiles, the ISO 22514-2 /
+#                  AIAG & VDA 2026 pp. 46-47 general geometric indices (Pp.G,
+#                  Ppk.G), the tail areas and the p. 49 z-score index (Ppk.Z)
+#     boxcox.*     Box-Cox lambda by maximum likelihood (scipy), rounded to
+#                  two decimals for use; normal indices on the transformed
+#                  scale; quantiles transformed back; geometric indices
+#     empirical.*  NIST 6.1.6 nonparametric percentiles (Weibull plotting
+#                  position, as the descriptive quartiles) and Cnp/Cnpk
+#     chart_raw, chart_log   I-MR charts of x and of ln x
+#   attribute_capability  columns n, defectives: p chart, overall p, Wilson and
+#     exact binomial 95 % intervals (NIST 7.2.4.1), DPMO, Z and sigma level.
+# --------------------------------------------------------------------------
+def _pct_weibull(x, p):
+    return float(np.percentile(np.asarray(x, float), 100.0 * p, method="weibull"))
+
+
+def _geometric(x0135, x50, x99865, usl, lsl):
+    """General geometric (quantile) method, AIAG & VDA 2026 pp. 46-47 / ISO 22514-2."""
+    out = {"x0135": x0135, "x50": x50, "x99865": x99865, "spread_9973": x99865 - x0135}
+    out["Ppu_G"] = (usl - x50) / (x99865 - x50) if usl is not None else None
+    out["Ppl_G"] = (x50 - lsl) / (x50 - x0135) if lsl is not None else None
+    both = [v for v in (out["Ppu_G"], out["Ppl_G"]) if v is not None]
+    out["Ppk_G"] = min(both) if both else None
+    out["Pp_G"] = (usl - lsl) / (x99865 - x0135) if (usl is not None and lsl is not None) else None
+    return out
+
+
+def _zscore(pu, pl, usl, lsl):
+    """z-score method, AIAG & VDA 2026 p. 49: tail areas of the fitted
+    distribution converted to the Z of a normal with the same tail."""
+    out = {"ppm_upper": pu * 1e6, "ppm_lower": pl * 1e6, "ppm_total": (pu + pl) * 1e6}
+    out["zU"] = float(stats.norm.isf(pu)) if usl is not None else None
+    out["zL"] = float(stats.norm.isf(pl)) if lsl is not None else None
+    both = [v for v in (out["zU"], out["zL"]) if v is not None]
+    out["Ppk_Z"] = min(both) / 3.0 if both else None
+    return out
+
+
+def capability_nonnormal(x, params):
+    from scipy import optimize, special
+    x = np.asarray(x, float)
+    n = len(x)
+    usl, lsl = params.get("usl"), params.get("lsl")
+    nl = params.get("natural_lower")
+    d = descriptive(x)
+    out = {"descriptive": d, "histogram": histogram(x), "chart_raw": imr_chart(x)}
+    # naive normal-based indices (the software default)
+    nv = indices(d["mean"], d["s"], usl, lsl)
+    out["normal"] = {"mean": d["mean"], "s": d["s"], "Pp": nv["p"], "Ppu": nv["u"], "Ppl": nv["l"], "Ppk": nv["k_index"],
+                     "ppm_upper": nv["ppm_upper"], "ppm_lower": nv["ppm_lower"], "ppm_total": nv["ppm_total"],
+                     "lower_3s": d["mean"] - 3 * d["s"], "upper_3s": d["mean"] + 3 * d["s"]}
+    if nl is not None:
+        out["normal"]["lower_3s_below_natural_limit"] = bool(d["mean"] - 3 * d["s"] < nl)
+    # lognormal fit (requires x > 0)
+    if np.all(x > 0):
+        lx = np.log(x)
+        ld = descriptive(lx)
+        mu, sg = ld["mean"], ld["s"]
+        ln_block = {"mu": mu, "sigma": sg, "ad_A2": ld.get("ad_A2"), "ad_p": ld.get("ad_p"), "skewness_log": ld["skewness"]}
+        ln_block.update(_geometric(math.exp(mu - 3 * sg), math.exp(mu), math.exp(mu + 3 * sg), usl, lsl))
+        pu = float(stats.norm.sf((math.log(usl) - mu) / sg)) if usl is not None else 0.0
+        pl = float(stats.norm.cdf((math.log(lsl) - mu) / sg)) if (lsl is not None and lsl > 0) else 0.0
+        ln_block.update(_zscore(pu, pl, usl, lsl if (lsl is not None and lsl > 0) else None))
+        ln_block["mean_fitted"] = math.exp(mu + sg ** 2 / 2)
+        out["lognormal"] = ln_block
+        out["chart_log"] = imr_chart(lx)
+        # Box-Cox: lambda by maximum likelihood, refined, then rounded to 2 dp for use
+        lam0 = float(stats.boxcox_normmax(x, method="mle"))
+        r = optimize.minimize_scalar(lambda l: -float(stats.boxcox_llf(l, x)), bounds=(lam0 - 0.25, lam0 + 0.25),
+                                     method="bounded", options={"xatol": 1e-10})
+        lam_mle = float(r.x)
+        lam = round(lam_mle, 2)
+        y = special.boxcox(x, lam) if lam != 0 else lx
+        yd = descriptive(y)
+        bc = {"lambda_mle": lam_mle, "lambda_used": lam, "llf_at_lambda": float(stats.boxcox_llf(lam, x)),
+              "mean_y": yd["mean"], "s_y": yd["s"], "ad_A2": yd.get("ad_A2"), "ad_p": yd.get("ad_p"),
+              "skewness_y": yd["skewness"]}
+        yU = float(special.boxcox(usl, lam)) if usl is not None else None
+        yL = None
+        if lsl is not None and (lsl > 0 or lam > 0):
+            yL = float(special.boxcox(lsl, lam)) if lam != 0 else math.log(lsl)
+        bc["usl_transformed"], bc["lsl_transformed"] = yU, yL
+        bv = indices(yd["mean"], yd["s"], yU, yL)
+        bc.update({"Pp_y": bv["p"], "Ppu_y": bv["u"], "Ppl_y": bv["l"], "Ppk_y": bv["k_index"],
+                   "ppm_upper": bv["ppm_upper"], "ppm_lower": bv["ppm_lower"], "ppm_total": bv["ppm_total"]})
+
+        def back(v):
+            if lam == 0:
+                return math.exp(v)
+            t = lam * v + 1.0
+            return float(t ** (1.0 / lam)) if t > 0 else 0.0
+        bc.update(_geometric(back(yd["mean"] - 3 * yd["s"]), back(yd["mean"]), back(yd["mean"] + 3 * yd["s"]), usl, lsl))
+        out["boxcox"] = bc
+    # nonparametric percentiles (NIST 6.1.6), Weibull plotting position
+    emp = _geometric(_pct_weibull(x, 0.00135), _pct_weibull(x, 0.5), _pct_weibull(x, 0.99865), usl, lsl)
+    emp["Cnp"], emp["Cnpk"] = emp["Pp_G"], emp["Ppk_G"]
+    emp["note"] = "AIAG & VDA 2026 p. 47: empirical quantiles need about 2000 observations"
+    out["empirical"] = emp
+    obs_out = int(np.sum((x > usl) if usl is not None else 0) + np.sum((x < lsl) if lsl is not None else 0))
+    out["observed"] = {"n_out": obs_out, "ppm_observed": obs_out * 1e6 / n}
+    out["stable_raw"] = out["chart_raw"]["stable"]
+    if "chart_log" in out:
+        out["stable_log"] = out["chart_log"]["stable"]
+    return out
+
+
+def attribute_capability(n, d, params):
+    n = [int(v) for v in n]; d = [int(v) for v in d]
+    out = {"chart": p_chart(n, d)}
+    N, D = sum(n), sum(d)
+    pbar = D / N
+    z = float(stats.norm.ppf(0.975))
+    centre = (pbar + z * z / (2 * N)) / (1 + z * z / N)
+    half = z * math.sqrt(pbar * (1 - pbar) / N + z * z / (4 * N * N)) / (1 + z * z / N)
+    lo = float(stats.beta.ppf(0.025, D, N - D + 1)) if D > 0 else 0.0
+    hi = float(stats.beta.ppf(0.975, D + 1, N - D)) if D < N else 1.0
+    zl = float(stats.norm.isf(pbar))
+    out.update({"k": len(n), "n_total": N, "d_total": D, "pbar": pbar, "pct": 100 * pbar, "dpmo": pbar * 1e6,
+                "yield": 1 - pbar, "wilson_ci95": [centre - half, centre + half], "exact_ci95": [lo, hi],
+                "dpmo_ci95": [1e6 * (centre - half), 1e6 * (centre + half)],
+                "z_long_term": zl, "sigma_level_shifted": zl + 1.5,
+                "stable": len(out["chart"]["beyond"]) == 0, "n_mean": N / len(n)})
+    e = params.get("precision_e")
+    if e:
+        out["precision_e"] = e
+        out["n_for_precision"] = int(math.ceil(z * z * pbar * (1 - pbar) / (e * e)))
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.replace("]", "").replace("[", ".").split("."):
@@ -908,6 +1043,10 @@ def compute_one(ex_id):
         res = funnel_sim(cols["e"], params)
     elif kind == "funnel_growth":
         res = funnel_growth(cols, params)
+    elif kind == "capability_nonnormal":
+        res = capability_nonnormal(cols["x"], params)
+    elif kind == "attribute_capability":
+        res = attribute_capability(cols["n"], cols["defectives"], params)
     else:
         raise ValueError(f"unknown kind {kind}")
     checks = []

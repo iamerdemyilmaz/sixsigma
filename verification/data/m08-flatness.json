@@ -1,0 +1,19 @@
+{
+ "id": "m08-flatness",
+ "module": "08",
+ "kind": "capability_nonnormal",
+ "title": "Flatness, 200 individuals, lognormal, maximum 25 \u00b5m: four capability methods compared",
+ "source": "constructed",
+ "setting": "the Module 1 flatness data (milled face, \u00b5m, CMM to 0.1 \u00b5m, 200 consecutive parts) with a drawing maximum of 25 \u00b5m and a natural lower bound of zero",
+ "params": {
+  "usl": 25.0,
+  "lsl": null,
+  "natural_lower": 0.0,
+  "units": "\u00b5m"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 200
+}

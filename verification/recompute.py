@@ -780,6 +780,141 @@ def r_sigma_table(meta):
 # --------------------------------------------------------------------------
 # Comparison
 # --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# Module 8: non-normal and attribute capability, closed form
+# --------------------------------------------------------------------------
+def _geo(x0135, x50, x99865, usl, lsl, pre):
+    out = {pre + "x0135": x0135, pre + "x50": x50, pre + "x99865": x99865, pre + "spread_9973": x99865 - x0135}
+    cu = (usl - x50) / (x99865 - x50) if usl is not None else None
+    cl = (x50 - lsl) / (x50 - x0135) if lsl is not None else None
+    out[pre + "Ppu_G"] = cu; out[pre + "Ppl_G"] = cl
+    both = [v for v in (cu, cl) if v is not None]
+    out[pre + "Ppk_G"] = min(both) if both else None
+    out[pre + "Pp_G"] = (usl - lsl) / (x99865 - x0135) if (usl is not None and lsl is not None) else None
+    return out
+
+
+def _boxcox_llf(lam, x, slx):
+    n = len(x)
+    y = [math.log(v) for v in x] if lam == 0 else [(v ** lam - 1.0) / lam for v in x]
+    m = sum(y) / n
+    var = sum((v - m) ** 2 for v in y) / n
+    return (lam - 1.0) * slx - 0.5 * n * math.log(var)
+
+
+def r_capability_nonnormal(meta, cols):
+    p = meta["params"]; x = cols["x"]
+    usl, lsl, nl = p.get("usl"), p.get("lsl"), p.get("natural_lower")
+    n = len(x); m = mean(x); s = sd(x)
+    out = r_descriptive(x)
+    ch, _ = r_imr(x, "chart_raw.")
+    out.update(ch)
+    cu = (usl - m) / (3 * s) if usl is not None else None
+    cl = (m - lsl) / (3 * s) if lsl is not None else None
+    out["normal.Ppu"] = cu; out["normal.Ppl"] = cl; out["normal.Ppk"] = min(v for v in (cu, cl) if v is not None)
+    out["normal.Pp"] = (usl - lsl) / (6 * s) if (usl is not None and lsl is not None) else None
+    pu, pl, pt = ppm(m, s, usl, lsl)
+    out["normal.ppm_upper"] = pu; out["normal.ppm_lower"] = pl; out["normal.ppm_total"] = pt
+    out["normal.lower_3s"] = m - 3 * s; out["normal.upper_3s"] = m + 3 * s
+    if nl is not None: out["normal.lower_3s_below_natural_limit"] = (m - 3 * s) < nl
+    if all(v > 0 for v in x):
+        lx = [math.log(v) for v in x]
+        mu, sg = mean(lx), sd(lx)
+        out["lognormal.mu"] = mu; out["lognormal.sigma"] = sg
+        a2, a2s, adp = ad_normal(lx)
+        out["lognormal.ad_A2"] = a2; out["lognormal.ad_p"] = adp
+        out.update(_geo(math.exp(mu - 3 * sg), math.exp(mu), math.exp(mu + 3 * sg), usl, lsl, "lognormal."))
+        pU = norm_sf((math.log(usl) - mu) / sg) if usl is not None else 0.0
+        pL = norm_cdf((math.log(lsl) - mu) / sg) if (lsl is not None and lsl > 0) else 0.0
+        out["lognormal.ppm_upper"] = pU * 1e6; out["lognormal.ppm_lower"] = pL * 1e6; out["lognormal.ppm_total"] = (pU + pL) * 1e6
+        zU = norm_ppf(1 - pU) if usl is not None else None
+        zL = norm_ppf(1 - pL) if (lsl is not None and lsl > 0) else None
+        out["lognormal.zU"] = zU; out["lognormal.zL"] = zL
+        out["lognormal.Ppk_Z"] = min(v for v in (zU, zL) if v is not None) / 3.0
+        out["lognormal.mean_fitted"] = math.exp(mu + sg ** 2 / 2)
+        chl, _ = r_imr(lx, "chart_log.")
+        out.update(chl)
+        # Box-Cox lambda by golden-section search on the profile log-likelihood
+        slx = sum(lx)
+        a, b = -3.0, 3.0
+        gr = (math.sqrt(5.0) - 1) / 2
+        c = b - gr * (b - a); dd = a + gr * (b - a)
+        fc = _boxcox_llf(c, x, slx); fd = _boxcox_llf(dd, x, slx)
+        for _ in range(200):
+            if fc > fd:
+                b, dd, fd = dd, c, fc
+                c = b - gr * (b - a); fc = _boxcox_llf(c, x, slx)
+            else:
+                a, c, fc = c, dd, fd
+                dd = a + gr * (b - a); fd = _boxcox_llf(dd, x, slx)
+            if b - a < 1e-11: break
+        lam_mle = 0.5 * (a + b)
+        lam = round(lam_mle, 2)
+        out["boxcox.lambda_mle"] = lam_mle; out["boxcox.lambda_used"] = lam
+        out["boxcox.llf_at_lambda"] = _boxcox_llf(lam, x, slx)
+        y = lx if lam == 0 else [(v ** lam - 1.0) / lam for v in x]
+        my, sy = mean(y), sd(y)
+        out["boxcox.mean_y"] = my; out["boxcox.s_y"] = sy
+        a2, a2s, adp = ad_normal(y)
+        out["boxcox.ad_A2"] = a2; out["boxcox.ad_p"] = adp
+        tf = (lambda v: math.log(v)) if lam == 0 else (lambda v: (v ** lam - 1.0) / lam)
+        yU = tf(usl) if usl is not None else None
+        yL = tf(lsl) if (lsl is not None and (lsl > 0 or lam > 0)) else None
+        out["boxcox.usl_transformed"] = yU; out["boxcox.lsl_transformed"] = yL
+        bu = (yU - my) / (3 * sy) if yU is not None else None
+        bl = (my - yL) / (3 * sy) if yL is not None else None
+        out["boxcox.Ppu_y"] = bu; out["boxcox.Ppl_y"] = bl; out["boxcox.Ppk_y"] = min(v for v in (bu, bl) if v is not None)
+        out["boxcox.Pp_y"] = (yU - yL) / (6 * sy) if (yU is not None and yL is not None) else None
+        pu, pl, pt = ppm(my, sy, yU, yL)
+        out["boxcox.ppm_upper"] = pu; out["boxcox.ppm_lower"] = pl; out["boxcox.ppm_total"] = pt
+
+        def back(v):
+            if lam == 0: return math.exp(v)
+            t = lam * v + 1.0
+            return t ** (1.0 / lam) if t > 0 else 0.0
+        out.update(_geo(back(my - 3 * sy), back(my), back(my + 3 * sy), usl, lsl, "boxcox."))
+    out.update(_geo(quantile_weibull(x, 0.00135), quantile_weibull(x, 0.5), quantile_weibull(x, 0.99865), usl, lsl, "empirical."))
+    out["empirical.Cnp"] = out["empirical.Pp_G"]; out["empirical.Cnpk"] = out["empirical.Ppk_G"]
+    nout = sum(1 for v in x if (usl is not None and v > usl) or (lsl is not None and v < lsl))
+    out["observed.n_out"] = nout; out["observed.ppm_observed"] = nout * 1e6 / n
+    return out
+
+
+def _binom_cdf(k, N, pp):
+    if k < 0: return 0.0
+    if k >= N: return 1.0
+    return betainc(N - k, k + 1, 1.0 - pp)
+
+
+def r_attribute_capability(meta, cols):
+    n = cols["n"]; d = cols["defectives"]
+    out = {"chart." + k: v for k, v in r_p({"n": n, "defectives": d}).items()}
+    N, D = sum(n), sum(d)
+    pbar = D / N
+    z = norm_ppf(0.975)
+    centre = (pbar + z * z / (2 * N)) / (1 + z * z / N)
+    half = z * math.sqrt(pbar * (1 - pbar) / N + z * z / (4 * N * N)) / (1 + z * z / N)
+
+    def solve(f, target):
+        lo, hi = 0.0, 1.0
+        for _ in range(200):
+            mid = 0.5 * (lo + hi)
+            if f(mid) > target: lo = mid
+            else: hi = mid
+        return 0.5 * (lo + hi)
+    pL = solve(lambda q: _binom_cdf(D - 1, N, q), 0.975) if D > 0 else 0.0
+    pU = solve(lambda q: _binom_cdf(D, N, q), 0.025) if D < N else 1.0
+    zl = norm_ppf(1 - pbar)
+    out.update({"k": len(n), "n_total": N, "d_total": D, "pbar": pbar, "pct": 100 * pbar, "dpmo": pbar * 1e6,
+                "yield": 1 - pbar, "wilson_ci95": [centre - half, centre + half], "exact_ci95": [pL, pU],
+                "dpmo_ci95": [1e6 * (centre - half), 1e6 * (centre + half)],
+                "z_long_term": zl, "sigma_level_shifted": zl + 1.5, "n_mean": N / len(n)})
+    e = meta["params"].get("precision_e")
+    if e:
+        out["precision_e"] = e; out["n_for_precision"] = math.ceil(z * z * pbar * (1 - pbar) / (e * e))
+    return out
+
+
 def resolve(obj, path):
     cur = obj
     for part in path.split("."):
@@ -796,6 +931,11 @@ def close(a, b, path):
         return len(a) == len(b) and all(close(x, y, path) for x, y in zip(a, b))
     if a is None or b is None: return a is None and b is None
     tol = 1e-6 if (".p" in path or "_p" in path or path.endswith("p")) else 1e-9
+    if path.endswith("lambda_mle"):
+        # two different optimisers of a flat log-likelihood agree only to
+        # the resolution of the likelihood; the value used downstream is
+        # lambda_used = round(lambda_mle, 2), which is compared exactly
+        tol = 1e-5
     return abs(a - b) <= tol * max(1.0, abs(a), abs(b))
 
 
@@ -835,6 +975,8 @@ def recompute_one(ex_id):
     elif kind == "vsm": mine = r_vsm(meta)
     elif kind == "funnel": mine = r_funnel(meta, cols)
     elif kind == "funnel_growth": mine = r_funnel_growth(meta, cols)
+    elif kind == "capability_nonnormal": mine = r_capability_nonnormal(meta, cols)
+    elif kind == "attribute_capability": mine = r_attribute_capability(meta, cols)
     else: raise ValueError(kind)
     bad = []
     for path, v in mine.items():

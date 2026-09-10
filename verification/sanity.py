@@ -305,6 +305,68 @@ def check_tests(ex_id, r, kind):
             check(0.4 < ratio < 2.5, f"{tag}: {name} should stay roughly flat between checkpoints, ratio {ratio:.2f}")
 
 
+def check_nonnormal(ex_id, r, data):
+    tag = ex_id
+    x = data["x"]; n = len(x)
+    usl, lsl = r["params"].get("usl"), r["params"].get("lsl")
+    nv = r["normal"]
+    if nv.get("Ppu") is not None:
+        check(near(nv["ppm_upper"], norm_sf(3 * nv["Ppu"]) * 1e6, 1e-9), f"{tag}: normal ppm_upper vs Z")
+    check(near(nv["ppm_total"], nv["ppm_upper"] + nv["ppm_lower"]), f"{tag}: normal ppm_total")
+
+    def geo(blk, name):
+        check(blk["x0135"] < blk["x50"] < blk["x99865"], f"{tag}: {name} quantiles not ordered")
+        both = [v for v in (blk.get("Ppu_G"), blk.get("Ppl_G")) if v is not None]
+        check(near(blk["Ppk_G"], min(both)), f"{tag}: {name} Ppk_G != min")
+        if blk.get("Pp_G") is not None:
+            check(blk["Ppk_G"] <= blk["Pp_G"] + 1e-12, f"{tag}: {name} Ppk_G > Pp_G")
+    if "lognormal" in r:
+        ln = r["lognormal"]
+        geo(ln, "lognormal")
+        check(near(ln["x50"], math.exp(ln["mu"])), f"{tag}: lognormal median")
+        if usl is not None:
+            check(near(ln["ppm_upper"], norm_sf((math.log(usl) - ln["mu"]) / ln["sigma"]) * 1e6, 1e-9), f"{tag}: lognormal tail")
+            check(near(ln["zU"], (math.log(usl) - ln["mu"]) / ln["sigma"], 1e-6), f"{tag}: lognormal zU")
+        in01(ln["ad_p"], f"{tag}: lognormal AD p")
+        check(abs(ln["skewness_log"]) < abs(r["descriptive"]["skewness"]), f"{tag}: log did not reduce skewness")
+        check(ln["mean_fitted"] > ln["x50"], f"{tag}: lognormal mean below median")
+    if "boxcox" in r:
+        bc = r["boxcox"]
+        check(-3 < bc["lambda_mle"] < 3, f"{tag}: Box-Cox lambda out of range")
+        check(near(bc["lambda_used"], round(bc["lambda_mle"], 2)), f"{tag}: lambda_used is not the rounded MLE")
+        in01(bc["ad_p"], f"{tag}: Box-Cox AD p")
+        geo(bc, "boxcox")
+        check(abs(bc["skewness_y"]) < abs(r["descriptive"]["skewness"]), f"{tag}: Box-Cox did not reduce skewness")
+        if bc.get("Ppu_y") is not None:
+            check(near(bc["ppm_upper"], norm_sf(3 * bc["Ppu_y"]) * 1e6, 1e-9), f"{tag}: Box-Cox ppm vs Z")
+    emp = r["empirical"]
+    geo(emp, "empirical")
+    check(min(x) <= emp["x0135"] and emp["x99865"] <= max(x), f"{tag}: empirical quantiles outside data")
+    nout = sum(1 for v in x if (usl is not None and v > usl) or (lsl is not None and v < lsl))
+    check(nout == r["observed"]["n_out"], f"{tag}: observed count")
+    check_rules(r["chart_raw"]["rules_x"], n, tag + " raw")
+    check(r["stable_raw"] == r["chart_raw"]["stable"], f"{tag}: stable_raw flag")
+    check(sum(r["histogram"]["counts"]) == n, f"{tag}: histogram counts")
+
+
+def check_attribute(ex_id, r, data):
+    tag = ex_id
+    n, d = data["n"], data["defectives"]
+    N, D = sum(n), sum(d)
+    check(r["n_total"] == N and r["d_total"] == D, f"{tag}: totals")
+    check(near(r["pbar"], D / N) and near(r["dpmo"], r["pbar"] * 1e6), f"{tag}: pbar / DPMO")
+    for key in ("wilson_ci95", "exact_ci95"):
+        lo, hi = r[key]
+        check(0 <= lo < r["pbar"] < hi <= 1, f"{tag}: {key} does not bracket pbar")
+    check(near(norm_sf(r["z_long_term"]), r["pbar"], 1e-6), f"{tag}: Z vs pbar")
+    check(near(r["sigma_level_shifted"] - r["z_long_term"], 1.5), f"{tag}: shift is 1.5")
+    check(near(r["chart"]["pbar"], r["pbar"]), f"{tag}: chart centre line")
+    check(r["stable"] == (len(r["chart"]["beyond"]) == 0), f"{tag}: stable flag")
+    if "n_for_precision" in r:
+        check(r["n_for_precision"] > 0, f"{tag}: precision n")
+    check_chart(ex_id, r["chart"], "p")
+
+
 def load_data(ex_id):
     p = os.path.join(DATA, ex_id + ".csv")
     cols = {}
@@ -332,6 +394,8 @@ def check_results():
         elif kind in ("imr", "p", "np", "c", "u", "ewma", "cusum"): check_chart(ex_id, r, kind)
         elif kind in ("grr", "grr_summary"): check_grr(ex_id, r)
         elif kind == "factorial": check_factorial(ex_id, r, data)
+        elif kind == "capability_nonnormal": check_nonnormal(ex_id, r, data)
+        elif kind == "attribute_capability": check_attribute(ex_id, r, data)
         else: check_tests(ex_id, r, kind)
         n += 1
     return n

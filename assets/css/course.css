@@ -370,9 +370,9 @@ td.flag { color: var(--bad); font-weight: 600; }
 .chart-title { font-family: inherit; font-size: 12px; font-weight: 600; fill: var(--fg); }
 
 /* Key-value result lists */
-.kv { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 1rem; font-size: 0.92rem; margin: 0.6rem 0; max-width: var(--max); }
-.kv dt { color: var(--muted); }
-.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kv { display: grid; grid-template-columns: fit-content(65%) minmax(0, 1fr); gap: 0.2rem 1rem; font-size: 0.92rem; margin: 0.6rem 0; max-width: var(--max); }
+.kv dt { color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 
 /* Two-column comparison on wide screens */
 .cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; max-width: calc(var(--max) + 3rem); }

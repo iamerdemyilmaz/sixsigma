@@ -1,0 +1,18 @@
+{
+ "id": "m08-ex2-paint",
+ "module": "08",
+ "kind": "attribute_capability",
+ "title": "Exercise 2: cosmetic rejects on painted covers, 20 lots of 360 to 440, p about 1.3 %",
+ "source": "constructed",
+ "setting": "painted covers inspected 100 % at the end of the paint line, one lot per day for 20 days",
+ "params": {
+  "precision_e": 0.004,
+  "units": "covers"
+ },
+ "columns": [
+  "lot",
+  "n",
+  "defectives"
+ ],
+ "n_rows": 20
+}

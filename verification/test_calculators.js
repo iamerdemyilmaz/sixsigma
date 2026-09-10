@@ -116,7 +116,12 @@ function run(meta, cols) {
 
 const SKIP = { info_power_nct: true };
 // Kinds with no in-page calculator (see the file header): not run here.
-const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true };
+// Module 8's capability_nonnormal (lognormal, Box-Cox and empirical
+// percentile capability) and attribute_capability (binomial intervals) are
+// static page computations as well: the capability calculator covers the
+// normal case and the DPMO converter the p-to-sigma step, but no calculator
+// fits distributions, so Checks 1 to 3 carry these kinds.
+const SKIP_KIND = { vsm: true, funnel: true, funnel_growth: true, capability_nonnormal: true, attribute_capability: true };
 function compare(ref, got, pth, id) {
   let n = 0;
   if (ref === null || ref === undefined) {

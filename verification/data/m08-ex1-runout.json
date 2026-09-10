@@ -1,0 +1,19 @@
+{
+ "id": "m08-ex1-runout",
+ "module": "08",
+ "kind": "capability_nonnormal",
+ "title": "Exercise 1: radial runout, 80 individuals, bounded at zero, maximum 0.030 mm",
+ "source": "constructed",
+ "setting": "radial runout of a turned shaft on a dial indicator to 0.001 mm, 80 consecutive parts, drawing maximum 0.030 mm; constructed as the length of a two-dimensional eccentricity vector with 0.008 mm noise on each axis",
+ "params": {
+  "usl": 0.03,
+  "lsl": null,
+  "natural_lower": 0.0,
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 80
+}

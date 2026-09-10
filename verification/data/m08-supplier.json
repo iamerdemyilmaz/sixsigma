@@ -1,0 +1,21 @@
+{
+ "id": "m08-supplier",
+ "module": "08",
+ "kind": "capability",
+ "title": "Supplier report: pin diameter, 30 parts from a tote, Ppk 1.38 with 95 % CI 1.00 to 1.75",
+ "source": "constructed",
+ "setting": "ground pin \u00d85.000 \u00b1 0.012 mm, 30 parts taken from a tote and measured with a micrometer to 0.001 mm in the order they were picked",
+ "params": {
+  "usl": 5.012,
+  "lsl": 4.988,
+  "target": 5.0,
+  "subgroup_size": 1,
+  "chart": "imr",
+  "units": "mm"
+ },
+ "columns": [
+  "i",
+  "x"
+ ],
+ "n_rows": 30
+}

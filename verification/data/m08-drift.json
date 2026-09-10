@@ -1,0 +1,21 @@
+{
+ "id": "m08-drift",
+ "module": "08",
+ "kind": "capability",
+ "title": "Shaft journal with tool-wear drift, 25 x 5: Cwk 1.37 but Ppk 0.97, not stable",
+ "source": "constructed",
+ "setting": "turned shaft journal \u00d820.000 \u00b1 0.020 mm, micrometer to 0.001 mm, 5 consecutive parts every 20 min, mean drifting upward with tool wear",
+ "params": {
+  "usl": 20.02,
+  "lsl": 19.98,
+  "target": 20.0,
+  "subgroup_size": 5,
+  "chart": "xbar_r",
+  "units": "mm"
+ },
+ "columns": [
+  "subgroup",
+  "x"
+ ],
+ "n_rows": 125
+}

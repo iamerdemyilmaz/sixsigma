@@ -636,6 +636,74 @@ register(id="m03-charter-goal", module="03", kind="dpmo",
          source="constructed", setting="same line, the charter's stated goal state",
          params={"defects": 10, "units": 1000, "opportunities": 1}, columns=None, rows=None)
 
+
+# ---------------------------------------------------------------------------
+# Module 8: Process capability II (prefix m08-)
+# ---------------------------------------------------------------------------
+# A turned shaft journal whose mean creeps upward through the study (tool
+# wear): every subgroup is tight, the X-bar chart is not stable, and the
+# within-sigma index looks fine while the overall index does not.
+_rng = np.random.default_rng(2)
+_dr = []
+for g in range(1, 26):
+    mu = 19.996 + 0.014 * (g - 1) / 24
+    for _ in range(5):
+        _dr.append([g, round(float(_rng.normal(mu, 0.004)), 3)])
+register(id="m08-drift", module="08", kind="capability",
+         title="Shaft journal with tool-wear drift, 25 x 5: Cwk 1.37 but Ppk 0.97, not stable",
+         source="constructed", setting="turned shaft journal Ø20.000 ± 0.020 mm, micrometer to 0.001 mm, 5 consecutive parts every 20 min, mean drifting upward with tool wear",
+         params={"usl": 20.020, "lsl": 19.980, "target": 20.000, "subgroup_size": 5, "chart": "xbar_r", "units": "mm"},
+         columns=["subgroup", "x"], rows=_dr)
+
+# The Module 1 flatness data (lognormal, bounded at zero) against a maximum
+# of 25 µm: normal-based, lognormal, Box-Cox and empirical capability compared.
+register(id="m08-flatness", module="08", kind="capability_nonnormal",
+         title="Flatness, 200 individuals, lognormal, maximum 25 µm: four capability methods compared",
+         source="constructed", setting="the Module 1 flatness data (milled face, µm, CMM to 0.1 µm, 200 consecutive parts) with a drawing maximum of 25 µm and a natural lower bound of zero",
+         params={"usl": 25.0, "lsl": None, "natural_lower": 0.0, "units": "µm"},
+         columns=["i", "x"], rows=_flat)
+
+# Leak-test rejects on a pressed seal fitting, 24 lots of 150 to 250: attribute capability.
+_rng = np.random.default_rng(1)
+_ln = [int(v) for v in _rng.integers(150, 251, 24)]
+_ld = [int(_rng.binomial(v, 0.021)) for v in _ln]
+register(id="m08-leak", module="08", kind="attribute_capability",
+         title="Leak-test rejects, 24 lots of 150 to 250 fittings, p about 2.3 %",
+         source="constructed", setting="pressed seal fittings, 100 % leak test at the end of the line, one lot per shift for 24 shifts, lot sizes 150 to 250",
+         params={"precision_e": 0.005, "units": "fittings"},
+         columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_ln, _ld))])
+
+# A supplier's 30-part report: pin diameter, parts picked from a tote and
+# measured in the order they came out. Ppk 1.38 with a 95 % interval of 1.00 to 1.75.
+_rng = np.random.default_rng(30)
+register(id="m08-supplier", module="08", kind="capability",
+         title="Supplier report: pin diameter, 30 parts from a tote, Ppk 1.38 with 95 % CI 1.00 to 1.75",
+         source="constructed", setting="ground pin Ø5.000 ± 0.012 mm, 30 parts taken from a tote and measured with a micrometer to 0.001 mm in the order they were picked",
+         params={"usl": 5.012, "lsl": 4.988, "target": 5.000, "subgroup_size": 1, "chart": "imr", "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, round(float(v), 3)] for i, v in enumerate(_rng.normal(5.0005, 0.0028, 30))])
+
+# Exercise 1: radial runout of a turned shaft (a Rayleigh-type characteristic:
+# the length of a two-dimensional eccentricity vector), maximum 0.030 mm.
+_rng = np.random.default_rng(1)
+_e1 = _rng.normal(0, 0.008, 80); _e2 = _rng.normal(0, 0.008, 80)
+_ro = [round(float(v), 3) for v in np.sqrt(_e1 ** 2 + _e2 ** 2)]
+register(id="m08-ex1-runout", module="08", kind="capability_nonnormal",
+         title="Exercise 1: radial runout, 80 individuals, bounded at zero, maximum 0.030 mm",
+         source="constructed", setting="radial runout of a turned shaft on a dial indicator to 0.001 mm, 80 consecutive parts, drawing maximum 0.030 mm; constructed as the length of a two-dimensional eccentricity vector with 0.008 mm noise on each axis",
+         params={"usl": 0.030, "lsl": None, "natural_lower": 0.0, "units": "mm"},
+         columns=["i", "x"], rows=[[i + 1, v] for i, v in enumerate(_ro)])
+
+# Exercise 2: cosmetic rejects on painted covers, 20 lots of about 400.
+_rng = np.random.default_rng(1)
+_cn = [int(v) for v in _rng.integers(360, 441, 20)]
+_cd = [int(_rng.binomial(v, 0.012)) for v in _cn]
+register(id="m08-ex2-paint", module="08", kind="attribute_capability",
+         title="Exercise 2: cosmetic rejects on painted covers, 20 lots of 360 to 440, p about 1.3 %",
+         source="constructed", setting="painted covers inspected 100 % at the end of the paint line, one lot per day for 20 days",
+         params={"precision_e": 0.004, "units": "covers"},
+         columns=["lot", "n", "defectives"], rows=[[i + 1, n, d] for i, (n, d) in enumerate(zip(_cn, _cd))])
+
+
 def main():
     for ex in EXAMPLES:
         meta = {k: v for k, v in ex.items() if k not in ("rows",)}

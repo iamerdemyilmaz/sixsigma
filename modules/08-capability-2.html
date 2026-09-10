@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 8: Process capability II · Six Sigma Course</title>
+<meta name="description" content="Stability before capability, capability of non-normal and bounded characteristics (fitted distributions, Box-Cox, percentile methods), one-sided specifications, attribute capability, how indices are misused, and how to read a supplier's capability report.">
+<meta name="examples" content="m08-drift, m08-flatness, m08-leak, m08-supplier, m08-ex1-runout, m08-ex2-paint">
+<!-- allowed-numbers: conventions, specification values and hand-arithmetic intermediates that are not stored in verification/results/.
+     Every intermediate was computed by the build script (m08_inter.py) from the results values before it was printed here. -->
+<meta name="allowed-numbers" content="1.33 1.67 0.05 0.00135 0.99865 0.135 99.865 99.73 0.27 1.96 1.128 3.267 20.000 20.020 19.980 0.040 5.000 5.012 4.988 0.024 0.030 25.0 0.001 0.50 0.25 2.00 1.00 3.00 1.50 0.0027 0.10 0.90 2.33 3.4 0.005 0.004 1.19 0.80 0.67 0.00552 19.9971 20.0095 0.0124 1.42 0.02466 0.01693 0.01233 0.03495 0.01747 98 2.0 25.2 17.125 10.697 0.666 3.274 17.83 19.25 3.2189 0.41 1.3813 1.4105 17.8 18.0 0.0121 0.0591 0.0509 -0.0056 1.88 2.72 0.67 3.8415 0.02214 17 0.0111 0.00803 0.00370 0.03273 0.37 0.02102 0.01426 0.24595 0.2484 0.24397 0.09 1.04 1.54 0.75 6339 0.01252 7.5">
+<link rel="stylesheet" href="../assets/css/course.css">
+</head>
+<body data-root="../" data-module="08">
+
+<header class="site-header">
+  <a class="brand" href="../index.html">Six Sigma Course <span>· Capability, SPC, and DMAIC</span></a>
+  <a class="home-link" href="https://erdemyilmaz.me/">Back to erdemyilmaz.me</a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course navigation" data-nav></nav>
+
+  <main id="main">
+    <p class="kicker">Module 8 · Measure</p>
+    <h1>Process capability II</h1>
+    <p class="lead">Module 7 built the indices for the easy case: a stable process, a normal distribution, two-sided limits. This module is about everything else, which is most of what you will meet. A process that drifts, a flatness that cannot go below zero, a leak test that only says pass or fail, and a supplier's report that says "Cpk = 1.38" and nothing more.</p>
+
+    <h2 id="objectives">Learning objectives</h2>
+    <ul class="objectives">
+      <li><strong>Decide</strong> from a control chart whether a capability index is a prediction or only a description, and report it accordingly.</li>
+      <li><strong>Diagnose</strong> why a histogram is not normal before doing anything about it, and recognise the cases where transformation is the wrong response.</li>
+      <li><strong>Compute</strong> capability for a non-normal characteristic by the ISO 22514 general geometric (percentile) method and the z-score method, from a fitted distribution and from a Box-Cox transformation, and state the limits of each.</li>
+      <li><strong>Handle</strong> one-sided specifications and characteristics bounded by a natural limit, such as flatness and runout.</li>
+      <li><strong>Express</strong> an attribute (pass/fail) result as a proportion with a confidence interval, a DPMO and a sigma level, and say how many units it takes to tell two proportions apart.</li>
+      <li><strong>Read</strong> a supplier's capability report and ask the six questions that decide whether the number means anything.</li>
+    </ul>
+
+    <h2 id="precheck">Before you start</h2>
+    <p>Three questions on Modules 1 and 7. They do not count toward completion.</p>
+    <form class="quiz quiz-pre" data-pre data-module="08">
+      <fieldset class="q" data-answer="b">
+        <legend>1. A lognormal characteristic is one whose</legend>
+        <label><input type="radio" name="p1" value="a"> values are symmetric about the mean</label>
+        <label><input type="radio" name="p1" value="b"> natural logarithm is normally distributed</label>
+        <label><input type="radio" name="p1" value="c"> values can be negative</label>
+        <label><input type="radio" name="p1" value="d"> mean equals its median</label>
+        <p class="explain" hidden>Module 1: ln x is normal; the raw values are right-skewed and bounded below by zero.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>2. Under the 2026 AIAG &amp; VDA convention, an index computed on a process whose control chart shows a special cause is called</legend>
+        <label><input type="radio" name="p2" value="a"> Cpk, because the formula is the same</label>
+        <label><input type="radio" name="p2" value="b"> Cwk</label>
+        <label><input type="radio" name="p2" value="c"> Ppk, a performance index; the C is reserved for a process shown to be stable</label>
+        <label><input type="radio" name="p2" value="d"> Cpm</label>
+        <p class="explain" hidden>Module 7, Table A: same formula, and the letter records whether stability was demonstrated.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>3. The predicted PPM from a Cpk of 1.00 on the governing side is about</legend>
+        <label><input type="radio" name="p3" value="a"> 1,350 (the normal tail beyond Z = 3)</label>
+        <label><input type="radio" name="p3" value="b"> 3.4</label>
+        <label><input type="radio" name="p3" value="c"> 0</label>
+        <label><input type="radio" name="p3" value="d"> 10,000</label>
+        <p class="explain" hidden>Z = 3 × 1.00 = 3; the one-sided normal tail beyond 3 is 0.00135, or 1,350 PPM.</p>
+      </fieldset>
+      <button type="submit">Check</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <h2 id="why">Why this matters</h2>
+    <p>The hard cases are not rare. Form tolerances (flatness, runout, position, roughness) are bounded at zero and skewed by their geometry. Pull strengths and leak rates have a physical floor. Anything measured after a sort or a rework has a truncated histogram. Anything measured over a week on a machine with tool wear has a drifting mean. And a large share of what a quality engineer signs off is not a measurement at all but a count of rejects. If you apply the Module 7 formulas to these without looking, the index is not slightly wrong; it can be off by an order of magnitude in the PPM it predicts. Kotz and Johnson's review of the capability literature lists the non-normal case as one of the main lines of work since the indices were introduced, and the papers it surveys (Somerville and Montgomery among them) document how large the PPM errors get.<sup class="cite"><a href="#ref-9">[9]</a><a href="#ref-10">[10]</a></sup></p>
+    <p>The <em>real</em> example in this module is the controversy itself, because it is documented and it matters to how you report. On one side, the current AIAG &amp; VDA SPC manual states that Cp and Cpk must only be used if the process is stable,<sup class="cite"><a href="#ref-1">[1]</a></sup> the NIST handbook defines capability for an in-control process,<sup class="cite"><a href="#ref-2">[2]</a></sup> and Wheeler argues that for an unpredictable process the indices describe the past and cannot predict.<sup class="cite"><a href="#ref-4">[4]</a></sup> On the other side, the same AIAG &amp; VDA manual and ISO 22514-2 provide time-dependent distribution models precisely for processes that are not in statistical control in the Shewhart sense, and allow a capability statement for a "controlled stable" process under stated conditions.<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-12">[12]</a></sup> On the question of shape, the manual and NIST both describe transformations and fitted distributions as legitimate routes,<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-2">[2]</a></sup> while Wheeler holds that a process behaviour chart needs neither a normality check nor a transformation, and that the urge to transform usually comes from data that are not homogeneous in the first place.<sup class="cite"><a href="#ref-5">[5]</a></sup> None of these positions is foolish. This module gives you the methods of all of them, the numbers they produce on the same data, and a way to decide which to report.</p>
+    <p><em>The following is an illustrative failure with invented details, not a real program.</em> A supplier's PPAP submission for a ground pin carries "Cpk = 1.38" against a requirement of 1.33. The sample was 30 parts. They were taken from a tote. The report does not say which sigma was used or whether a chart was drawn. The pin goes into a valve where an oversize diameter causes a sticking fault in the field. Worked example 4 takes this report apart, and the answer is that the 1.38 is compatible with a true index anywhere from 1.00 to 1.75, which is the difference between an acceptable process and a warranty problem.</p>
+
+    <h2 id="stability">Stability first, and what to do when it fails</h2>
+    <p>Module 7 said that a control chart comes before the index. Here is what the index looks like when the chart fails, so that you can recognise it on a report that has no chart.</p>
+
+    <h3 id="example1">Worked example 1: a journal that drifts with tool wear</h3>
+    <p class="example-label">The data below is a constructed example generated by a seeded script, not a real production run. Setting: a turned shaft journal of Ø20.000 ± 0.020 mm, measured with a micrometer to 0.001 mm, five consecutive parts every 20 minutes, 25 subgroups over a shift. The insert wears during the shift and the diameter creeps upward.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 1. Journal diameter, mm, 25 subgroups of 5 consecutive parts (constructed data). Subgroup means and ranges computed from the values.</caption><thead><tr><th>Subgroup</th><th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>x<sub>3</sub></th><th>x<sub>4</sub></th><th>x<sub>5</sub></th><th>Mean x̄</th><th>Range R</th></tr></thead><tbody>
+<tr><td>1</td><td>19.997</td><td>19.994</td><td>19.994</td><td>19.986</td><td>20.003</td><td>19.9948</td><td>0.017</td></tr>
+<tr><td>2</td><td>20.001</td><td>19.995</td><td>20.000</td><td>19.998</td><td>19.994</td><td>19.9976</td><td>0.007</td></tr>
+<tr><td>3</td><td>20.001</td><td>19.996</td><td>19.996</td><td>19.994</td><td>19.999</td><td>19.9972</td><td>0.007</td></tr>
+<tr><td>4</td><td>19.997</td><td>20.000</td><td>19.995</td><td>19.998</td><td>19.994</td><td>19.9968</td><td>0.006</td></tr>
+<tr><td>5</td><td>20.002</td><td>19.999</td><td>20.000</td><td>20.000</td><td>19.994</td><td>19.9990</td><td>0.008</td></tr>
+<tr><td>6</td><td>20.002</td><td>20.007</td><td>19.992</td><td>19.992</td><td>19.993</td><td>19.9972</td><td>0.015</td></tr>
+<tr><td>7</td><td>20.003</td><td>20.000</td><td>20.004</td><td>20.002</td><td>20.000</td><td>20.0018</td><td>0.004</td></tr>
+<tr><td>8</td><td>20.001</td><td>19.999</td><td>20.004</td><td>19.996</td><td>19.998</td><td>19.9996</td><td>0.008</td></tr>
+<tr><td>9</td><td>20.002</td><td>20.008</td><td>19.998</td><td>19.996</td><td>19.998</td><td>20.0004</td><td>0.012</td></tr>
+<tr><td>10</td><td>20.005</td><td>20.000</td><td>20.007</td><td>19.994</td><td>20.006</td><td>20.0024</td><td>0.013</td></tr>
+<tr><td>11</td><td>20.006</td><td>19.996</td><td>20.002</td><td>20.007</td><td>20.002</td><td>20.0026</td><td>0.011</td></tr>
+<tr><td>12</td><td>20.006</td><td>20.012</td><td>20.004</td><td>20.001</td><td>19.999</td><td>20.0044</td><td>0.013</td></tr>
+<tr><td>13</td><td>20.006</td><td>20.002</td><td>20.002</td><td>20.003</td><td>20.006</td><td>20.0038</td><td>0.004</td></tr>
+<tr><td>14</td><td>19.999</td><td>19.997</td><td>19.994</td><td>20.008</td><td>20.004</td><td>20.0004</td><td>0.014</td></tr>
+<tr><td>15</td><td>20.010</td><td>20.004</td><td>20.001</td><td>20.006</td><td>20.004</td><td>20.0050</td><td>0.009</td></tr>
+<tr><td>16</td><td>20.000</td><td>20.001</td><td>20.012</td><td>20.006</td><td>20.006</td><td>20.0050</td><td>0.012</td></tr>
+<tr><td>17</td><td>20.004</td><td>20.003</td><td>20.009</td><td>20.005</td><td>20.002</td><td>20.0046</td><td>0.007</td></tr>
+<tr><td>18</td><td>20.005</td><td>20.002</td><td>20.007</td><td>20.010</td><td>20.003</td><td>20.0054</td><td>0.008</td></tr>
+<tr><td>19</td><td>20.012</td><td>20.004</td><td>20.007</td><td>20.003</td><td>20.006</td><td>20.0064</td><td>0.009</td></tr>
+<tr><td>20</td><td>20.007</td><td>20.005</td><td>20.004</td><td>20.004</td><td>20.004</td><td>20.0048</td><td>0.003</td></tr>
+<tr><td>21</td><td>20.001</td><td>20.007</td><td>20.009</td><td>20.011</td><td>20.010</td><td>20.0076</td><td>0.010</td></tr>
+<tr><td>22</td><td>20.018</td><td>20.010</td><td>20.006</td><td>20.016</td><td>20.004</td><td>20.0108</td><td>0.014</td></tr>
+<tr><td>23</td><td>20.013</td><td>20.005</td><td>20.010</td><td>20.001</td><td>20.012</td><td>20.0082</td><td>0.012</td></tr>
+<tr><td>24</td><td>20.009</td><td>20.006</td><td>20.016</td><td>20.012</td><td>20.010</td><td>20.0106</td><td>0.010</td></tr>
+<tr><td>25</td><td>20.007</td><td>20.010</td><td>20.009</td><td>20.013</td><td>20.013</td><td>20.0104</td><td>0.006</td></tr>
+</tbody></table></div>
+    <p><strong>The chart.</strong> With n = 5, A₂ = 0.577 and D₄ = 2.114. The grand mean is x̄̄ = <span data-ex="m08-drift" data-key="chart.xbarbar" data-dp="4">20.0031</span> mm and R̄ = <span data-ex="m08-drift" data-key="chart.rbar" data-dp="5">0.00956</span> mm, so UCL<sub>x̄</sub> = 20.0031 + 0.577 × 0.00956 = 20.0031 + 0.00552 = <span data-ex="m08-drift" data-key="chart.ucl_x" data-dp="4">20.0086</span> and LCL<sub>x̄</sub> = <span data-ex="m08-drift" data-key="chart.lcl_x" data-dp="4">19.9976</span>; UCL<sub>R</sub> = <span data-ex="m08-drift" data-key="chart.ucl_r" data-dp="4">0.0202</span>. The R chart is clean: no range exceeds its limit, because within any 20-minute window the process is as tight as ever. The X̄ chart is not. Subgroup means fall below the lower limit at subgroups 1, 3, 4 and 6, and above the upper limit at 22, 24 and 25; the eight-in-a-row rule fires on both sides as well. The first five subgroup means average 19.9971 mm and the last five 20.0095 mm, a drift of 0.0124 mm across the shift, close to a third of the 0.040 mm tolerance.</p>
+    <p><strong>The two sigmas.</strong> σ̂<sub>within</sub> = R̄/d₂ = 0.00956 / 2.326 = <span data-ex="m08-drift" data-key="within.sigma" data-dp="5">0.00411</span> mm. The overall s = <span data-ex="m08-drift" data-key="overall.s" data-dp="5">0.00582</span> mm. The ratio is 1.42: the pooled data are 40 % wider than any subgroup, and the difference is the drift.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 2. Capability of the drifting journal. Every figure is computed from Table 1; the arithmetic uses rounded intermediates.</caption>
+        <thead><tr><th>Index</th><th>Sigma used</th><th>Arithmetic</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Cw (legacy Cp)</td><td>within, 0.00411</td><td>0.040 / 0.02466</td><td class="num"><span data-ex="m08-drift" data-key="within.Cw" data-dp="2">1.62</span></td></tr>
+          <tr><td><strong>Cwk (legacy Cpk)</strong></td><td>within</td><td>(0.01693) / 0.01233, the upper side governs</td><td class="num"><strong><span data-ex="m08-drift" data-key="within.Cwk" data-dp="2">1.37</span></strong></td></tr>
+          <tr><td>Pp</td><td>overall s = 0.00582</td><td>0.040 / 0.03495</td><td class="num"><span data-ex="m08-drift" data-key="overall.Pp" data-dp="2">1.14</span></td></tr>
+          <tr><td><strong>Ppk</strong></td><td>overall s</td><td>0.01693 / 0.01747</td><td class="num"><strong><span data-ex="m08-drift" data-key="overall.Ppk" data-dp="2">0.97</span></strong></td></tr>
+          <tr><td>PPM predicted, within sigma</td><td>within</td><td>tail beyond Z = 3 × 1.37</td><td class="num"><span data-ex="m08-drift" data-key="within.ppm_total" data-dp="0">19</span></td></tr>
+          <tr><td>PPM predicted, overall s</td><td>overall</td><td>tail beyond Z = 3 × 0.97</td><td class="num"><span data-ex="m08-drift" data-key="overall.ppm_total" data-dp="0">1,865</span></td></tr>
+          <tr><td>Observed out of tolerance</td><td>–</td><td>count in 125</td><td class="num"><span data-ex="m08-drift" data-key="observed.n_out" data-dp="0">0</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Read the two bold rows. A report built on the within sigma, which is what older software prints as Cpk, says 1.37 and about 19 PPM. The overall index says 0.97 and about 1,865 PPM, a factor of 98 apart, on the same 125 numbers. Neither is a lie. The within sigma describes the machine over 20 minutes. The overall sigma describes the shift. The customer receives the shift.</p>
+    <p><strong>What to report.</strong> Under the 2026 convention this is a performance study: Ppk = 0.97, with the chart attached and the statement that the X̄ chart is out of control with an upward trend.<sup class="cite"><a href="#ref-1">[1]</a></sup> The 95 % interval on Ppk is <span data-ex="m08-drift" data-key="overall.Ppk_ci95.0" data-dp="2">0.83</span> to <span data-ex="m08-drift" data-key="overall.Ppk_ci95.1" data-dp="2">1.10</span>, but that interval assumes a single stable distribution, which the chart has just shown is not what you have, so treat it as a formality. The useful part of the report is the diagnosis: the within-subgroup spread would support Cwk = 1.37 if the drift were removed. That is a statement about what a tool-offset compensation or a shorter insert change interval could achieve, and it is worth more than the index.</p>
+    <p><strong>The nuance.</strong> A tool-wear drift is not a random special cause; it is a systematic, known, repeatable pattern. ISO 22514-2 and the AIAG &amp; VDA manual describe time-dependent distribution models for exactly this kind of process, where the location moves in a known way and the total distribution over time is what the customer sees, and they permit a capability statement for such a "controlled stable" process under stated conditions.<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-12">[12]</a></sup> Wheeler's objection is that a chart which keeps signalling is telling you the process is not predictable, and that no amount of modelling changes that.<sup class="cite"><a href="#ref-4">[4]</a></sup> The practical resolution: if the drift is understood, bounded and compensated by a rule (an offset every k parts, a tool change at a set count), the process with its rule is the process, and you chart <em>that</em> and study its capability. If the drift is not understood, you have a Ppk and a job to do.</p>
+
+    <h3 id="calc-drift">Calculator: process capability with the stability check</h3>
+    <p>Pre-loaded with Table 1. The verdict line names the convention it applies and why. Change the subgroup size, or paste a stable dataset, and watch the label change.</p>
+    <div class="calc" data-calc="capability" id="calc-cap-drift">
+      <h3>Process capability calculator</h3>
+      <p class="calc-intro">Data in time order, one subgroup per line. Limits and constants come from the data and the subgroup size; specification limits are used only for the indices and the histogram.</p>
+      <script type="application/json" class="calc-data">{"x":[19.997,19.994,19.994,19.986,20.003,20.001,19.995,20.0,19.998,19.994,20.001,19.996,19.996,19.994,19.999,19.997,20.0,19.995,19.998,19.994,20.002,19.999,20.0,20.0,19.994,20.002,20.007,19.992,19.992,19.993,20.003,20.0,20.004,20.002,20.0,20.001,19.999,20.004,19.996,19.998,20.002,20.008,19.998,19.996,19.998,20.005,20.0,20.007,19.994,20.006,20.006,19.996,20.002,20.007,20.002,20.006,20.012,20.004,20.001,19.999,20.006,20.002,20.002,20.003,20.006,19.999,19.997,19.994,20.008,20.004,20.01,20.004,20.001,20.006,20.004,20.0,20.001,20.012,20.006,20.006,20.004,20.003,20.009,20.005,20.002,20.005,20.002,20.007,20.01,20.003,20.012,20.004,20.007,20.003,20.006,20.007,20.005,20.004,20.004,20.004,20.001,20.007,20.009,20.011,20.01,20.018,20.01,20.006,20.016,20.004,20.013,20.005,20.01,20.001,20.012,20.009,20.006,20.016,20.012,20.01,20.007,20.01,20.009,20.013,20.013],"usl":20.02,"lsl":19.98,"target":20.0,"subgroup_size":5,"chart":"xbar_r","units":"mm","label":"m08-drift"}</script>
+    </div>
+
+    <h2 id="nonnormal">Non-normal data</h2>
+    <p>The capability formulas of Module 7 convert a Z into a tail area with the normal distribution. If the distribution is not normal, the Z is still a number but the tail area is wrong, and the PPM prediction with it. Before deciding what to do about that, find out <em>why</em> the histogram is not normal. Most of the time the answer is not "this characteristic has a skewed distribution" but one of these:</p>
+    <ul>
+      <li><strong>A mixture.</strong> Two machines, two cavities, two lots of material, two operators. The histogram is two normal humps, or one wide flat one. The cure is stratification (Module 9), not a transformation.</li>
+      <li><strong>Drift or a shift</strong> during the study, as in worked example 1. The pooled histogram of a drifting process is a smear. The cure is the control chart.</li>
+      <li><strong>Sorting or rework before measurement.</strong> The tails have been cut off. No index is meaningful for the process; it describes the sort.</li>
+      <li><strong>Gauge resolution</strong> that is coarse relative to the spread, so the data pile up on a few values. Fix the gauge (Module 4).</li>
+      <li><strong>A natural bound.</strong> Flatness, runout, roughness, concentricity, leak rate, particle counts, time to fail. These cannot go below zero and their physics pushes them toward it. The distribution is genuinely skewed, and this is the case the rest of this section is about.</li>
+    </ul>
+    <p>Wheeler's argument, and the reason this list comes first, is that the first four causes are failures of homogeneity, and a transformation applied to inhomogeneous data hides the very thing you needed to find. His further point is that the process behaviour chart does not require normality: when data are homogeneous, three-sigma limits bracket almost all of the histogram whatever its shape, so the chart can be drawn on the raw values without a normality check.<sup class="cite"><a href="#ref-5">[5]</a></sup> That is a statement about the <em>chart</em>. The capability index converts a distance into a PPM, and for that step the shape does matter, which is why the methods below exist.</p>
+
+    <figure>
+      <svg viewBox="0 0 660 260" role="img" aria-labelledby="fig1-t fig1-d">
+        <title id="fig1-t">A normal curve fitted to a bounded, right-skewed characteristic</title>
+        <desc id="fig1-d">A histogram of a right-skewed characteristic bounded at zero, with a long right tail crossing an upper specification limit. A normal curve with the same mean and standard deviation is drawn over it: its left tail extends below zero, which is impossible, and its right tail is thinner than the histogram's, so it understates the fraction beyond the limit.</desc>
+        <g class="chart-axis"><path d="M60 210 H620"/><path d="M60 210 V30"/></g>
+        <text x="340" y="240" text-anchor="middle" class="chart-text muted">Flatness (µm); the process cannot produce a value below 0</text>
+        <text x="16" y="120" text-anchor="middle" transform="rotate(-90 16 120)" class="chart-text muted">Frequency</text>
+        <g class="chart-bar">
+          <rect x="60" y="150" width="28" height="60"/><rect x="88" y="70" width="28" height="140"/><rect x="116" y="40" width="28" height="170"/>
+          <rect x="144" y="60" width="28" height="150"/><rect x="172" y="95" width="28" height="115"/><rect x="200" y="125" width="28" height="85"/>
+          <rect x="228" y="150" width="28" height="60"/><rect x="256" y="168" width="28" height="42"/><rect x="284" y="180" width="28" height="30"/>
+          <rect x="312" y="190" width="28" height="20"/><rect x="340" y="196" width="28" height="14"/><rect x="368" y="200" width="28" height="10"/>
+          <rect x="396" y="203" width="28" height="7"/><rect x="424" y="205" width="28" height="5"/><rect x="452" y="207" width="28" height="3"/>
+          <rect x="480" y="208" width="28" height="2"/><rect x="508" y="209" width="28" height="1"/>
+        </g>
+        <g class="chart-curve bad">
+          <path d="M20 209 C 60 205, 90 150, 130 90 S 170 45, 175 45 S 215 90, 250 150 S 330 205, 390 209"/>
+        </g>
+        <g class="chart-spec"><path d="M440 40 V210"/></g>
+        <text x="444" y="52" class="chart-text bad small">USL</text>
+        <text x="60" y="224" text-anchor="middle" class="chart-text small">0</text>
+        <g class="chart-text small">
+          <text x="30" y="200" text-anchor="start">normal curve continues below zero</text>
+          <text x="470" y="180" text-anchor="start">real tail beyond USL</text>
+          <text x="470" y="194" text-anchor="start">normal tail: almost nothing</text>
+        </g>
+      </svg>
+      <figcaption>Figure 1. A normal curve (red) with the same mean and standard deviation as a bounded, right-skewed histogram. It puts probability below zero, where no part can exist, and it puts almost none beyond the upper limit, where the real tail lives. A normal-based Cpk on such data is optimistic on the side that matters and meaningless on the other.</figcaption>
+    </figure>
+
+    <h3 id="iso-methods">The two ISO methods: quantiles and z-scores</h3>
+    <p>ISO 22514-2 and the AIAG &amp; VDA manual define the indices for any distribution in two equivalent-looking but different ways, and the manual marks them with a suffix so that a reader knows which was used.<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-12">[12]</a></sup></p>
+    <div class="formula">General geometric (quantile) method, suffix G:<br>
+      Pp.G = (U − L) / (X<sub>99.865 %</sub> − X<sub>0.135 %</sub>) &nbsp;&nbsp;&nbsp; PpU.G = (U − X<sub>50 %</sub>) / (X<sub>99.865 %</sub> − X<sub>50 %</sub>) &nbsp;&nbsp;&nbsp; PpL.G = (X<sub>50 %</sub> − L) / (X<sub>50 %</sub> − X<sub>0.135 %</sub>) &nbsp;&nbsp;&nbsp; Ppk.G = min(PpU.G, PpL.G)
+      <span class="where">X<sub>p</sub> is the p-quantile of the distribution fitted to the data. The 0.135 % and 99.865 % quantiles enclose 99.73 % of the distribution, the same coverage as ±3σ for a normal, and the median X<sub>50 %</sub> replaces the mean. For a normal distribution the formulas reduce exactly to (U − L)/6s and (U − x̄)/3s. The same formulas give Cp.G and Cpk.G when stability has been shown.</span>
+    </div>
+    <div class="formula">z-score method, suffix Z:<br>
+      p<sub>U</sub> = fraction of the fitted distribution above U; &nbsp; p<sub>L</sub> = fraction below L; &nbsp; z<sub>U</sub> = Φ<sup>−1</sup>(1 − p<sub>U</sub>); &nbsp; z<sub>L</sub> = Φ<sup>−1</sup>(1 − p<sub>L</sub>); &nbsp; Ppk.Z = min(z<sub>U</sub>, z<sub>L</sub>) / 3
+      <span class="where">The tail areas of the fitted distribution are converted to the Z of a normal distribution with the same tail, so that the index keeps its usual meaning: Ppk.Z = 1.00 always corresponds to 1,350 PPM beyond the governing limit, whatever the shape.</span>
+    </div>
+    <p>The quantile method keeps the geometric picture (how does the 99.73 % core of the process sit inside the tolerance?) and the z-score method keeps the PPM meaning. For a normal distribution they coincide; for a skewed one they do not, and the difference is a measure of how far the tail beyond the limit departs from the tail of a normal. Both need a fitted distribution or a transformation to supply the quantiles and tail areas, and the manual says plainly that the empirical quantiles of the raw data are an option only with very large samples, of the order of 2,000 observations.<sup class="cite"><a href="#ref-1">[1]</a></sup></p>
+
+    <h3 id="routes">Four ways to get the quantiles, and what each assumes</h3>
+    <ol>
+      <li><strong>Fit a named distribution.</strong> Lognormal for bounded, right-skewed characteristics; Weibull for strengths and lifetimes; folded normal or Rayleigh for characteristics that are the magnitude of a signed error (runout, position). ISO 22514-2 lists the distribution models it accepts.<sup class="cite"><a href="#ref-12">[12]</a></sup> You must justify the fit, with a probability plot and a goodness-of-fit test (Module 11), and the physics should agree with the choice. The lognormal fit for flatness below is defended on both counts. <em>Limitation:</em> the 0.135 % and 99.865 % quantiles are extrapolations into tails the data barely touch; two distributions that both fit the middle can differ by a factor of two in the tail.</li>
+      <li><strong>Transform to normality.</strong> Box and Cox's power family, y = (x<sup>λ</sup> − 1)/λ with y = ln x at λ = 0, chosen by maximum likelihood,<sup class="cite"><a href="#ref-7">[7]</a></sup> or Johnson's three families of translation curves.<sup class="cite"><a href="#ref-8">[8]</a></sup> Compute the normal indices on the transformed scale with the transformed limits, and transform quantiles back to report them in engineering units.<sup class="cite"><a href="#ref-1">[1]</a><a href="#ref-2">[2]</a></sup> <em>Limitation:</em> the transformation is chosen by the data, so it fits the sample rather than the process; a λ of 0.04 is a log transformation with a rounding error, and should be reported as such, not as a precise finding. And a transformation applied to a mixture or a drift hides the mixture or the drift.</li>
+      <li><strong>Clements' Pearson-curve method.</strong> Use the sample mean, standard deviation, skewness and kurtosis to pick a Pearson curve and read its quantiles from tables.<sup class="cite"><a href="#ref-6">[6]</a></sup> It was the standard non-normal method for a decade and appears in older software. <em>Limitation:</em> sample skewness and kurtosis are extremely noisy statistics, dominated by a handful of tail values, so the fitted curve moves with each new sample; Wheeler's column makes this case in detail.<sup class="cite"><a href="#ref-5">[5]</a></sup> This course describes it and does not compute it.</li>
+      <li><strong>Empirical percentiles.</strong> Read X<sub>0.135 %</sub>, X<sub>50 %</sub> and X<sub>99.865 %</sub> from the sorted data, as in the NIST handbook's nonparametric C<sub>np</sub> and C<sub>npk</sub>.<sup class="cite"><a href="#ref-2">[2]</a></sup> No model, no assumption. <em>Limitation:</em> with 200 values the 0.135 % point is the minimum and the 99.865 % point is the maximum, so the "index" is the ratio of the tolerance to the sample range and says nothing about the next lot. This is why the manual asks for about 2,000 observations.<sup class="cite"><a href="#ref-1">[1]</a></sup></li>
+    </ol>
+    <p>Whichever route you take, report the observed count out of tolerance alongside the predicted PPM. It is the one number that does not depend on a model.</p>
+
+    <h3 id="example2">Worked example 2: flatness, four answers to one question</h3>
+    <p class="example-label">Constructed data, not a real production run: the 200 flatness values of a milled face from Module 1 (CMM, µm, to 0.1 µm, 200 consecutive parts), which were generated as a lognormal characteristic. The drawing maximum is 25 µm; there is no lower limit, and no flatness can be negative.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 3. Flatness of the milled face, µm, 200 consecutive parts in production order (constructed data), read across each row.</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>4.9</td><td>5.8</td><td>5.6</td><td>9.0</td><td>7.2</td><td>8.5</td><td>11.7</td><td>11.8</td><td>9.9</td><td>6.5</td></tr>
+<tr><td>11–20</td><td>5.7</td><td>5.5</td><td>6.9</td><td>7.8</td><td>5.2</td><td>4.8</td><td>9.2</td><td>3.5</td><td>7.4</td><td>9.7</td></tr>
+<tr><td>21–30</td><td>5.1</td><td>4.8</td><td>5.7</td><td>10.7</td><td>7.5</td><td>3.4</td><td>6.6</td><td>12.6</td><td>12.5</td><td>10.6</td></tr>
+<tr><td>31–40</td><td>7.2</td><td>3.5</td><td>8.6</td><td>7.4</td><td>8.3</td><td>16.0</td><td>8.7</td><td>9.1</td><td>10.5</td><td>7.1</td></tr>
+<tr><td>41–50</td><td>5.9</td><td>5.7</td><td>11.3</td><td>10.0</td><td>6.4</td><td>13.4</td><td>8.7</td><td>4.4</td><td>10.5</td><td>7.5</td></tr>
+<tr><td>51–60</td><td>4.4</td><td>10.1</td><td>6.9</td><td>6.7</td><td>10.4</td><td>3.0</td><td>4.5</td><td>6.6</td><td>8.9</td><td>5.9</td></tr>
+<tr><td>61–70</td><td>5.1</td><td>5.0</td><td>7.6</td><td>10.8</td><td>4.2</td><td>3.1</td><td>7.0</td><td>6.7</td><td>5.3</td><td>10.5</td></tr>
+<tr><td>71–80</td><td>11.5</td><td>6.2</td><td>6.9</td><td>10.3</td><td>6.6</td><td>4.3</td><td>7.8</td><td>5.3</td><td>9.3</td><td>6.4</td></tr>
+<tr><td>81–90</td><td>7.3</td><td>10.1</td><td>7.6</td><td>6.0</td><td>5.1</td><td>17.4</td><td>13.2</td><td>4.1</td><td>5.0</td><td>10.4</td></tr>
+<tr><td>91–100</td><td>6.1</td><td>8.1</td><td>11.5</td><td>8.5</td><td>7.5</td><td>6.5</td><td>7.7</td><td>9.5</td><td>17.5</td><td>12.9</td></tr>
+<tr><td>101–110</td><td>7.3</td><td>12.1</td><td>8.4</td><td>4.1</td><td>7.6</td><td>12.5</td><td>6.1</td><td>12.2</td><td>7.0</td><td>8.1</td></tr>
+<tr><td>111–120</td><td>4.7</td><td>20.3</td><td>9.8</td><td>12.6</td><td>6.5</td><td>4.1</td><td>13.8</td><td>5.8</td><td>16.8</td><td>7.4</td></tr>
+<tr><td>121–130</td><td>16.6</td><td>5.8</td><td>3.6</td><td>11.0</td><td>7.8</td><td>8.0</td><td>12.8</td><td>5.4</td><td>4.5</td><td>4.7</td></tr>
+<tr><td>131–140</td><td>3.8</td><td>3.5</td><td>4.5</td><td>5.2</td><td>6.5</td><td>4.6</td><td>7.5</td><td>11.1</td><td>7.1</td><td>9.5</td></tr>
+<tr><td>141–150</td><td>5.2</td><td>8.9</td><td>9.6</td><td>5.8</td><td>3.9</td><td>7.0</td><td>7.6</td><td>14.4</td><td>6.3</td><td>15.6</td></tr>
+<tr><td>151–160</td><td>2.6</td><td>6.5</td><td>6.0</td><td>6.2</td><td>5.8</td><td>7.2</td><td>15.3</td><td>6.9</td><td>12.5</td><td>7.0</td></tr>
+<tr><td>161–170</td><td>7.7</td><td>2.5</td><td>7.6</td><td>9.6</td><td>4.4</td><td>5.6</td><td>5.0</td><td>18.8</td><td>4.7</td><td>5.3</td></tr>
+<tr><td>171–180</td><td>2.2</td><td>3.6</td><td>8.0</td><td>4.1</td><td>2.1</td><td>6.4</td><td>7.6</td><td>8.2</td><td>8.6</td><td>5.5</td></tr>
+<tr><td>181–190</td><td>25.2</td><td>5.7</td><td>8.8</td><td>4.1</td><td>5.5</td><td>3.7</td><td>8.0</td><td>6.1</td><td>4.7</td><td>3.0</td></tr>
+<tr><td>191–200</td><td>9.3</td><td>10.5</td><td>10.5</td><td>7.0</td><td>9.9</td><td>10.9</td><td>9.2</td><td>13.9</td><td>6.8</td><td>8.1</td></tr>
+</tbody></table></div>
+    <p><strong>Step 1, look.</strong> Mean <span data-ex="m08-flatness" data-key="descriptive.mean" data-dp="3">7.875</span> µm, median <span data-ex="m08-flatness" data-key="descriptive.median" data-dp="1">7.2</span> µm, s = <span data-ex="m08-flatness" data-key="descriptive.s" data-dp="3">3.566</span> µm, minimum <span data-ex="m08-flatness" data-key="descriptive.min" data-dp="1">2.1</span>, maximum <span data-ex="m08-flatness" data-key="descriptive.max" data-dp="1">25.2</span>. The mean is above the median and the standard deviation is nearly half the mean: a right-skewed, bounded characteristic. Sample skewness <span data-ex="m08-flatness" data-key="descriptive.skewness" data-dp="2">1.40</span>, Anderson-Darling A² = <span data-ex="m08-flatness" data-key="descriptive.ad_A2" data-dp="2">3.92</span> with p &lt; 0.001. Nobody needed the test; the histogram in the calculator below shows it. Since the data are consecutive parts from one machine and one fixture, a mixture is unlikely; the physics (a milled face is flat unless something lifts it, and nothing pushes it negative) says the skew is real.</p>
+    <p><strong>Step 2, is it stable?</strong> An I-MR chart on the raw values has x̄ = <span data-ex="m08-flatness" data-key="chart_raw.xbar" data-dp="3">7.875</span>, MR̄ = <span data-ex="m08-flatness" data-key="chart_raw.mrbar" data-dp="3">3.711</span>, so UCL = <span data-ex="m08-flatness" data-key="chart_raw.ucl_x" data-dp="2">17.74</span> µm and a lower limit of <span data-ex="m08-flatness" data-key="chart_raw.lcl_x" data-dp="2">−1.99</span> µm, which is below zero and therefore meaningless. Three points (parts 112, 168 and 181) exceed the upper limit and seven moving ranges exceed theirs. On a skewed distribution that is what a symmetric ±3σ limit does: the long tail crosses it a few times in 200 even when nothing has changed, and the limit on the short side falls off the end of the scale. Here Wheeler's point cuts the other way from the usual reading: the chart still bracketed 197 of 200 values, and the three signals are all in the tail direction, which is what homogeneous skewed data look like; but you cannot tell from this chart alone whether part 181 (25.2 µm) is a special cause or the tail. The same chart on ln x has limits <span data-ex="m08-flatness" data-key="chart_log.lcl_x" data-dp="2">0.71</span> to <span data-ex="m08-flatness" data-key="chart_log.ucl_x" data-dp="2">3.23</span> in log units (2.0 to 25.2 µm), one point above the upper limit (part 181 again) and one moving range above its limit. One excursion just past a 3σ limit in 200 points is close to the false-alarm rate of the chart (about one in 370). Investigate part 181; absent a finding, this is a stable, skewed process, and we proceed on that basis, reporting it as such.</p>
+    <p><strong>Step 3, the naive normal answer.</strong> Treat the data as normal: PpU = (25 − 7.875) / (3 × 3.566) = 17.125 / 10.697 = <span data-ex="m08-flatness" data-key="normal.Ppu" data-dp="2">1.60</span>, predicting <span data-ex="m08-flatness" data-key="normal.ppm_total" data-dp="1">0.8</span> PPM above 25 µm, about one part per million. The same model puts x̄ − 3s at <span data-ex="m08-flatness" data-key="normal.lower_3s" data-dp="2">−2.82</span> µm, below zero. One of the 200 parts is actually above 25 µm, which is 5,000 PPM observed. The normal model is wrong by more than three orders of magnitude on the side that matters.</p>
+    <p><strong>Step 4, fit the lognormal.</strong> On ln x: mean μ = <span data-ex="m08-flatness" data-key="lognormal.mu" data-dp="4">1.9702</span>, standard deviation σ = <span data-ex="m08-flatness" data-key="lognormal.sigma" data-dp="4">0.4346</span> (n − 1), Anderson-Darling A² = <span data-ex="m08-flatness" data-key="lognormal.ad_A2" data-dp="2">0.14</span>, p = <span data-ex="m08-flatness" data-key="lognormal.ad_p" data-dp="2">0.98</span>: no evidence against the lognormal. The quantiles are exp(μ ± 3σ) and exp(μ): X<sub>0.135 %</sub> = exp(0.666) = <span data-ex="m08-flatness" data-key="lognormal.x0135" data-dp="2">1.95</span> µm, X<sub>50 %</sub> = <span data-ex="m08-flatness" data-key="lognormal.x50" data-dp="2">7.17</span> µm, X<sub>99.865 %</sub> = exp(3.274) = <span data-ex="m08-flatness" data-key="lognormal.x99865" data-dp="2">26.42</span> µm. Then:</p>
+    <div class="formula">PpU.G = (25 − 7.17) / (26.42 − 7.17) = 17.83 / 19.25 = <span data-ex="m08-flatness" data-key="lognormal.Ppu_G" data-dp="2">0.93</span><br>
+      z<sub>U</sub> = (ln 25 − μ) / σ = (3.2189 − 1.9702) / 0.4346 = <span data-ex="m08-flatness" data-key="lognormal.zU" data-dp="3">2.873</span>; &nbsp; Ppk.Z = 2.873 / 3 = <span data-ex="m08-flatness" data-key="lognormal.Ppk_Z" data-dp="2">0.96</span>; &nbsp; predicted PPM above 25 µm = 10⁶ × Φ(−2.873) = <span data-ex="m08-flatness" data-key="lognormal.ppm_total" data-dp="0">2,032</span>
+    </div>
+    <p>The two ISO indices are close to each other (0.93 and 0.96) and both are near 1: the fitted lognormal says about 2,032 PPM, or 0.41 parts expected in 200, and one was seen. That is consistent. The naive normal said one in a million. The fitted lognormal also predicts a mean of <span data-ex="m08-flatness" data-key="lognormal.mean_fitted" data-dp="3">7.883</span> µm against the observed 7.875, a small check that the fit is honest in the middle as well as the tail.</p>
+    <p><strong>Step 5, Box-Cox.</strong> Maximum likelihood gives λ̂ = <span data-ex="m08-flatness" data-key="boxcox.lambda_mle" data-dp="4">0.0356</span>, which we round to <span data-ex="m08-flatness" data-key="boxcox.lambda_used" data-dp="2">0.04</span> for use. This is a log transformation in all but name, which is what a lognormal characteristic should return, so the two routes are the same route. On the transformed scale the mean is <span data-ex="m08-flatness" data-key="boxcox.mean_y" data-dp="4">2.0540</span> and s = <span data-ex="m08-flatness" data-key="boxcox.s_y" data-dp="4">0.4702</span>; the transformed limit is (25<sup>0.04</sup> − 1)/0.04 = <span data-ex="m08-flatness" data-key="boxcox.usl_transformed" data-dp="4">3.4353</span>; PpU on that scale is (1.3813) / 1.4105 = <span data-ex="m08-flatness" data-key="boxcox.Ppu_y" data-dp="2">0.98</span>, predicting <span data-ex="m08-flatness" data-key="boxcox.ppm_total" data-dp="0">1,652</span> PPM. Transforming the ±3s points back gives quantiles of <span data-ex="m08-flatness" data-key="boxcox.x0135" data-dp="2">1.89</span>, <span data-ex="m08-flatness" data-key="boxcox.x50" data-dp="2">7.20</span> and <span data-ex="m08-flatness" data-key="boxcox.x99865" data-dp="2">25.65</span> µm and PpU.G = <span data-ex="m08-flatness" data-key="boxcox.Ppu_G" data-dp="2">0.96</span>. Anderson-Darling on the transformed values: p = <span data-ex="m08-flatness" data-key="boxcox.ad_p" data-dp="2">0.98</span>.</p>
+    <p><strong>Step 6, the empirical percentiles.</strong> With 200 values, the 0.135 % point is the minimum (<span data-ex="m08-flatness" data-key="empirical.x0135" data-dp="1">2.1</span> µm) and the 99.865 % point is the maximum (<span data-ex="m08-flatness" data-key="empirical.x99865" data-dp="1">25.2</span> µm); the median is <span data-ex="m08-flatness" data-key="empirical.x50" data-dp="1">7.2</span> µm. C<sub>npk</sub> = (25 − 7.2) / (25.2 − 7.2) = 17.8 / 18.0 = <span data-ex="m08-flatness" data-key="empirical.Cnpk" data-dp="2">0.99</span>. It happens to land near the fitted answers, but only because the largest of 200 values happened to fall where the lognormal's 99.865 % quantile is. Another 200 parts would move it.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Table 4. Four answers for the flatness data against a maximum of 25 µm. The observed count is the only model-free line.</caption>
+        <thead><tr><th>Method</th><th>Assumes</th><th>Upper index</th><th>Predicted PPM above 25 µm</th><th>Comment</th></tr></thead>
+        <tbody>
+          <tr><td>Normal on raw data</td><td>normal shape</td><td class="num">1.60</td><td class="num">0.8</td><td>puts x̄ − 3s at −2.82 µm; wrong by three orders of magnitude</td></tr>
+          <tr><td>Fitted lognormal, quantile method (G)</td><td>lognormal fits (AD p = 0.98)</td><td class="num">0.93</td><td class="num">2,032</td><td>the PPM comes from the tail area; the G index from the quantiles</td></tr>
+          <tr><td>Fitted lognormal, z-score method (Z)</td><td>as above</td><td class="num">0.96</td><td class="num">2,032</td><td>same tail, expressed as a normal-equivalent Z/3</td></tr>
+          <tr><td>Box-Cox λ = 0.04, normal on transformed scale</td><td>a power transformation makes it normal (AD p = 0.98)</td><td class="num">0.98</td><td class="num">1,652</td><td>effectively the log route again</td></tr>
+          <tr><td>Empirical percentiles (C<sub>npk</sub>)</td><td>nothing, but n = 200 is far too few</td><td class="num">0.99</td><td class="num">–</td><td>ratio of tolerance to sample range; not a prediction</td></tr>
+          <tr><td><strong>Observed</strong></td><td>–</td><td>–</td><td class="num"><span data-ex="m08-flatness" data-key="observed.ppm_observed" data-dp="0">5,000</span></td><td><span data-ex="m08-flatness" data-key="observed.n_out" data-dp="0">1</span> of 200 above 25 µm</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>What to report: "Flatness, 200 consecutive parts, I-MR chart on ln x stable apart from part 181 (investigated, no cause found); lognormal fit accepted (A² = 0.14, p = 0.98); Ppk.Z = 0.96, Ppk.G = 0.93, predicted 2,032 PPM above 25 µm, one observed." Compare that with "Cpk = 1.60", which is what the software prints if nobody looks.</p>
+
+    <h3 id="calc-flat">Calculator: histogram with a normal fit</h3>
+    <p>Pre-loaded with Table 3 and the 25 µm limit. The fitted normal curve is the red one in Figure 1, drawn on the real data: watch where its left tail goes.</p>
+    <div class="calc" data-calc="descriptive" id="calc-desc-flat">
+      <h3>Descriptive statistics and histogram</h3>
+      <script type="application/json" class="calc-data">{"x":[4.9,5.8,5.6,9.0,7.2,8.5,11.7,11.8,9.9,6.5,5.7,5.5,6.9,7.8,5.2,4.8,9.2,3.5,7.4,9.7,5.1,4.8,5.7,10.7,7.5,3.4,6.6,12.6,12.5,10.6,7.2,3.5,8.6,7.4,8.3,16.0,8.7,9.1,10.5,7.1,5.9,5.7,11.3,10.0,6.4,13.4,8.7,4.4,10.5,7.5,4.4,10.1,6.9,6.7,10.4,3.0,4.5,6.6,8.9,5.9,5.1,5.0,7.6,10.8,4.2,3.1,7.0,6.7,5.3,10.5,11.5,6.2,6.9,10.3,6.6,4.3,7.8,5.3,9.3,6.4,7.3,10.1,7.6,6.0,5.1,17.4,13.2,4.1,5.0,10.4,6.1,8.1,11.5,8.5,7.5,6.5,7.7,9.5,17.5,12.9,7.3,12.1,8.4,4.1,7.6,12.5,6.1,12.2,7.0,8.1,4.7,20.3,9.8,12.6,6.5,4.1,13.8,5.8,16.8,7.4,16.6,5.8,3.6,11.0,7.8,8.0,12.8,5.4,4.5,4.7,3.8,3.5,4.5,5.2,6.5,4.6,7.5,11.1,7.1,9.5,5.2,8.9,9.6,5.8,3.9,7.0,7.6,14.4,6.3,15.6,2.6,6.5,6.0,6.2,5.8,7.2,15.3,6.9,12.5,7.0,7.7,2.5,7.6,9.6,4.4,5.6,5.0,18.8,4.7,5.3,2.2,3.6,8.0,4.1,2.1,6.4,7.6,8.2,8.6,5.5,25.2,5.7,8.8,4.1,5.5,3.7,8.0,6.1,4.7,3.0,9.3,10.5,10.5,7.0,9.9,10.9,9.2,13.9,6.8,8.1],"usl":25.0,"lsl":null,"units":"µm"}</script>
+    </div>
+
+    <h2 id="onesided">One-sided specifications and natural limits</h2>
+    <p>Module 7 handled a lower limit alone (the fill weight). Bounded form characteristics are the other common one-sided case: a maximum only, and a natural lower limit of zero that is not a specification. Three points:</p>
+    <ul>
+      <li><strong>Only the existing side is an index.</strong> Cpk is CpU alone. Do not invent a lower limit of zero to compute a Cp: the distance from the mean to zero says nothing about conformance. The AIAG &amp; VDA manual allows a Cp "for information" against the natural limit, and notes that with a natural limit Cpk can exceed that Cp, which is impossible with two specification limits.<sup class="cite"><a href="#ref-1">[1]</a></sup> The Module 7 harness reproduces the manual's own example of this.</li>
+      <li><strong>The shape is almost never normal.</strong> A characteristic pressed against a bound is skewed away from it. Everything in the previous section applies, and the naive normal index is optimistic on the specification side.</li>
+      <li><strong>Improving it means moving the whole distribution toward zero</strong>, which shrinks the spread as well, because for these characteristics location and spread are tied together (a lognormal's standard deviation scales with its median). A capability study on flatness is really a study of the median.</li>
+    </ul>
+    <p>Geometrical characteristics under GD&amp;T (position, profile, runout with datums) raise further questions, such as bonus tolerance under maximum material condition, that ISO/TR 22514-9 addresses;<sup class="cite"><a href="#ref-13">[13]</a></sup> the safe practice for a Green Belt is to study the underlying measured deviations (the x and y offsets behind a position) rather than the derived magnitude where the drawing allows it.</p>
+
+    <h2 id="attribute">Attribute capability</h2>
+    <p>A leak test, a go/no-go gauge, a visual inspection: the output is a proportion nonconforming, p, and there is no sigma to divide by. Capability for attribute data is the proportion itself, with three things attached: a chart to show it is stable, an interval to show how well it is known, and, if the customer wants one, a conversion to DPMO and a sigma level (Module 6). The steps:</p>
+    <ol>
+      <li><strong>p chart first</strong> (Module 17 builds them in full). Centre line p̄ = total rejects / total inspected; limits p̄ ± 3√[p̄(1 − p̄)/n<sub>i</sub>], which move with the lot size.</li>
+      <li><strong>Estimate and interval.</strong> p̂ = p̄. The NIST handbook recommends the Wilson interval for essentially all n and p, and the exact binomial interval when counts are very small.<sup class="cite"><a href="#ref-3">[3]</a></sup></li>
+      <li><strong>Conversion.</strong> DPMO = 10⁶ p̂ (one opportunity per unit; Module 6 on why the opportunity count is a lever for gaming). Z<sub>long-term</sub> = Φ<sup>−1</sup>(1 − p̂); the "sigma level" adds 1.5 by convention, and Module 6 explains why that convention is contested. Some customers ask for a "Cpk-equivalent" Z/3; it is the z-score index of the previous section applied to a proportion, and it inherits every caveat of the shift.</li>
+      <li><strong>Precision.</strong> The interval half-width shrinks with √N. State how many more units it would take to tell the current p from the target.</li>
+    </ol>
+    <div class="formula">Wilson 95 % interval: &nbsp; [ p̂ + z²/2N ± z √( p̂(1 − p̂)/N + z²/4N² ) ] / (1 + z²/N), &nbsp; z = 1.96
+      <span class="where">N is the total number inspected. For N in the thousands the interval is close to the familiar p̂ ± 1.96 √[p̂(1 − p̂)/N]; the Wilson form keeps the interval inside [0, 1] and behaves correctly for small counts.</span>
+    </div>
+
+    <h3 id="example3">Worked example 3: leak-test rejects on a pressed fitting</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: pressed seal fittings, 100 % leak-tested at the end of the line; one lot per shift for 24 shifts, lot sizes 150 to 250.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 5. Leak-test results by lot (constructed data): fittings tested, rejects, and the lot proportion.</caption><thead><tr><th>Lot</th><th>n</th><th>Rejects</th><th>p</th></tr></thead><tbody>
+<tr><td>1</td><td>197</td><td>3</td><td>0.0152</td></tr>
+<tr><td>2</td><td>201</td><td>6</td><td>0.0299</td></tr>
+<tr><td>3</td><td>226</td><td>4</td><td>0.0177</td></tr>
+<tr><td>4</td><td>245</td><td>5</td><td>0.0204</td></tr>
+<tr><td>5</td><td>153</td><td>1</td><td>0.0065</td></tr>
+<tr><td>6</td><td>164</td><td>3</td><td>0.0183</td></tr>
+<tr><td>7</td><td>233</td><td>3</td><td>0.0129</td></tr>
+<tr><td>8</td><td>245</td><td>4</td><td>0.0163</td></tr>
+<tr><td>9</td><td>175</td><td>5</td><td>0.0286</td></tr>
+<tr><td>10</td><td>181</td><td>3</td><td>0.0166</td></tr>
+<tr><td>11</td><td>237</td><td>5</td><td>0.0211</td></tr>
+<tr><td>12</td><td>192</td><td>9</td><td>0.0469</td></tr>
+<tr><td>13</td><td>177</td><td>7</td><td>0.0395</td></tr>
+<tr><td>14</td><td>233</td><td>6</td><td>0.0258</td></tr>
+<tr><td>15</td><td>175</td><td>4</td><td>0.0229</td></tr>
+<tr><td>16</td><td>191</td><td>3</td><td>0.0157</td></tr>
+<tr><td>17</td><td>215</td><td>2</td><td>0.0093</td></tr>
+<tr><td>18</td><td>205</td><td>9</td><td>0.0439</td></tr>
+<tr><td>19</td><td>158</td><td>3</td><td>0.0190</td></tr>
+<tr><td>20</td><td>152</td><td>1</td><td>0.0066</td></tr>
+<tr><td>21</td><td>237</td><td>6</td><td>0.0253</td></tr>
+<tr><td>22</td><td>226</td><td>6</td><td>0.0265</td></tr>
+<tr><td>23</td><td>234</td><td>5</td><td>0.0214</td></tr>
+<tr><td>24</td><td>204</td><td>7</td><td>0.0343</td></tr>
+</tbody></table></div>
+    <p><strong>Chart.</strong> Total <span data-ex="m08-leak" data-key="d_total" data-dp="0">110</span> rejects in <span data-ex="m08-leak" data-key="n_total" data-dp="0">4,856</span> fittings: p̄ = <span data-ex="m08-leak" data-key="pbar" data-dp="4">0.0227</span>. For a lot of 150 the limit is 0.0227 + 3 × √(0.0227 × 0.9773 / 150) = 0.0227 + 3 × 0.0121 = 0.0591; for a lot of 250 it is 0.0509; the lower limits are −0.0056 or below, so they are set to zero. The worst lot, lot 12 at 0.0469, is inside its limit of 0.0549. No point is beyond a limit and no run rule fires. The reject rate is stable, which is the depressing kind of stable: the process reliably makes about 2 % leakers.</p>
+    <p><strong>Estimate.</strong> p̂ = <span data-ex="m08-leak" data-key="pct" data-dp="2">2.27</span> %. Wilson 95 % interval: <span data-ex="m08-leak" data-key="wilson_ci95.0" data-dp="4">0.0188</span> to <span data-ex="m08-leak" data-key="wilson_ci95.1" data-dp="4">0.0272</span>, that is 1.88 % to 2.72 %; the exact binomial interval is <span data-ex="m08-leak" data-key="exact_ci95.0" data-dp="4">0.0187</span> to <span data-ex="m08-leak" data-key="exact_ci95.1" data-dp="4">0.0272</span>, nearly the same at this N. In DPMO terms, <span data-ex="m08-leak" data-key="dpmo" data-dp="0">22,652</span> with an interval of <span data-ex="m08-leak" data-key="dpmo_ci95.0" data-dp="0">18,829</span> to <span data-ex="m08-leak" data-key="dpmo_ci95.1" data-dp="0">27,230</span>. Z<sub>long-term</sub> = Φ<sup>−1</sup>(1 − 0.0227) = <span data-ex="m08-leak" data-key="z_long_term" data-dp="2">2.00</span>; with the 1.5 shift the "sigma level" is <span data-ex="m08-leak" data-key="sigma_level_shifted" data-dp="2">3.50</span>; the Cpk-equivalent Z/3 is 0.67.</p>
+    <p><strong>Precision.</strong> Suppose the target after an improvement is 1.5 %, and you want to know the rate to within ±0.5 percentage points. N = z² p̂(1 − p̂) / e² = 3.8415 × 0.02214 / 0.005² = <span data-ex="m08-leak" data-key="n_for_precision" data-dp="0">3,402</span> fittings, about 17 lots of the current size. This study already has more than that, which is why its interval is only about ±0.4 points wide. To show a drop from 2.3 % to 1.5 % convincingly you need a similar count <em>after</em> the change and a two-proportion test (Module 11); a bar chart of two weeks is not evidence.</p>
+    <p>An attribute capability statement, then, reads: "Leak-test reject rate, 24 lots, p chart stable, p̂ = 2.27 % (95 % interval 1.88 to 2.72 %), 22,652 DPMO." The sigma level, if a customer wants it, goes in a footnote with the convention named.</p>
+    <div class="calc" data-calc="control" id="calc-p-leak">
+      <h3>The p chart of Table 5 (control chart builder, inputs collapsed)</h3>
+      <script type="application/json" class="calc-data">{"type":"p","rows":[[197,3],[201,6],[226,4],[245,5],[153,1],[164,3],[233,3],[245,4],[175,5],[181,3],[237,5],[192,9],[177,7],[233,6],[175,4],[191,3],[215,2],[205,9],[158,3],[152,1],[237,6],[226,6],[234,5],[204,7]],"units":"fittings","collapsed":true}</script>
+    </div>
+    <div class="calc" data-calc="dpmo" id="calc-dpmo-leak">
+      <h3>The same rejects as DPMO and sigma level</h3>
+      <script type="application/json" class="calc-data">{"defects":110,"units":4856,"opportunities":1,"collapsed":true}</script>
+    </div>
+
+    <h2 id="misuse">How capability indices get misused</h2>
+    <p>Every one of these has appeared on a report somewhere. They are listed so that you can recognise them, on other people's reports and on your own.</p>
+    <ol>
+      <li><strong>The tote sample.</strong> Parts taken from a bin, with no production order, so no chart and no within sigma. The report then calls the sample standard deviation "Cpk". You have a Ppk from a sample of unknown provenance.</li>
+      <li><strong>The 30-piece study.</strong> Small enough that the interval spans a factor of two, presented as if it were exact. Worked example 4.</li>
+      <li><strong>Choosing the sigma.</strong> On a drifting process the within sigma gives a better number (worked example 1). A report that shows one index and does not name its sigma has often chosen the flattering one.</li>
+      <li><strong>Transformation shopping.</strong> Trying Box-Cox, then Johnson, then Weibull, and reporting the one that clears 1.33. The fit must be defended by physics and a goodness-of-fit test before the index is computed, not after.</li>
+      <li><strong>Dropping outliers.</strong> Removing the points that fell outside the limits and then declaring the process stable. A point removed needs an assignable cause and a corrective action documented; otherwise it is data.</li>
+      <li><strong>Widening the tolerance.</strong> A drawing change that raises Cpk from 1.1 to 1.4 with no change to the parts. Sometimes legitimate (the tolerance was wrong), often not, and always a design decision rather than a capability result (Module 15).</li>
+      <li><strong>Inventing a lower limit</strong> for a form tolerance so that a two-sided Cp can be quoted.</li>
+      <li><strong>Centring on paper.</strong> Reporting Cp, or a Cpk "after offset", for a process that has not been offset yet.</li>
+      <li><strong>Averaging the sigma level.</strong> Combining a 4.2σ characteristic and a 2.9σ one into a "3.6σ process". Sigma levels do not average; PPM does, weighted by volume, and even that hides which characteristic is failing.</li>
+    </ol>
+
+    <h2 id="report">Reading a supplier's capability report</h2>
+    <h3 id="example4">Worked example 4: "Cpk = 1.38"</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: a ground pin of Ø5.000 ± 0.012 mm; the supplier's report lists 30 diameters measured with a micrometer to 0.001 mm, taken from a tote and recorded in the order they were picked.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 6. The 30 pin diameters on the supplier's report, mm (constructed data), in the order listed.</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>5.005</td><td>5.003</td><td>4.998</td><td>5.000</td><td>5.000</td><td>5.007</td><td>4.998</td><td>5.004</td><td>5.001</td><td>5.003</td></tr>
+<tr><td>11–20</td><td>5.000</td><td>5.002</td><td>5.002</td><td>5.001</td><td>5.002</td><td>5.001</td><td>5.004</td><td>5.006</td><td>5.000</td><td>5.000</td></tr>
+<tr><td>21–30</td><td>5.002</td><td>4.996</td><td>5.001</td><td>4.999</td><td>4.998</td><td>4.996</td><td>5.000</td><td>5.002</td><td>4.999</td><td>4.998</td></tr>
+</tbody></table></div>
+    <p>The report gives x̄ = <span data-ex="m08-supplier" data-key="overall.mean" data-dp="4">5.0009</span> mm, s = <span data-ex="m08-supplier" data-key="overall.s" data-dp="5">0.00268</span> mm, and Cpk = 1.38. First reproduce it: (5.012 − 5.0009) / (3 × 0.00268) = 0.0111 / 0.00803 = <span data-ex="m08-supplier" data-key="overall.Ppk" data-dp="2">1.38</span>. So the 1.38 is the overall-sigma index, which in either convention should have been called Ppk on a sample with no subgroups. Then ask the six questions.</p>
+    <ol>
+      <li><strong>Is there a control chart, and is it stable?</strong> None was supplied. Charting the 30 values in the order given as an I-MR chart (limits <span data-ex="m08-supplier" data-key="chart.lcl_x" data-dp="4">4.9933</span> to <span data-ex="m08-supplier" data-key="chart.ucl_x" data-dp="4">5.0085</span>) shows nothing beyond the limits and no rule firing, but the order is the order they came out of a tote, not the order they were made, so the chart tests nothing about the process over time. A stable-looking chart on scrambled data is not evidence of stability.</li>
+      <li><strong>Which sigma, and which convention?</strong> The overall s, unstated. With subgroups the supplier could have reported Cwk; without them the within sigma from moving ranges (<span data-ex="m08-supplier" data-key="within.sigma" data-dp="5">0.00254</span>) is nearly the same as s, which is what scrambled data always give.</li>
+      <li><strong>How big is the sample, and what is the interval?</strong> n = 30. The 95 % interval on Ppk is 1.38 ± 1.96 × √[1/(9 × 30) + 1.38²/(2 × 29)] = 1.38 ± 1.96 × √(0.00370 + 0.03273) = 1.38 ± 0.37, that is <span data-ex="m08-supplier" data-key="overall.Ppk_ci95.0" data-dp="2">1.00</span> to <span data-ex="m08-supplier" data-key="overall.Ppk_ci95.1" data-dp="2">1.75</span>. The requirement of 1.33 is inside the interval, and so is 1.00.</li>
+      <li><strong>Is the distribution reasonable?</strong> Anderson-Darling p = <span data-ex="m08-supplier" data-key="descriptive.ad_p" data-dp="2">0.51</span>; nothing against normality in 30 values, which is also not much evidence for it.</li>
+      <li><strong>What gauge, and what is its R&amp;R?</strong> A micrometer to 0.001 mm on a 0.024 mm tolerance; the report does not say. If the gauge's %R&amp;R is 30 % of the tolerance, a large part of the s is the gauge (Module 4), and the true process may be better than the number, or the gauge may be hiding a worse one.</li>
+      <li><strong>Where is the process centred, and where is the risk?</strong> The mean is 0.0111 mm below the upper limit and k = <span data-ex="m08-supplier" data-key="overall.k" data-dp="3">0.078</span>; the upper side governs, and oversize is the failure mode that matters in the valve. Predicted PPM from the overall sigma: <span data-ex="m08-supplier" data-key="overall.ppm_total" data-dp="0">19</span>; from the lower end of the interval it would be over a thousand.</li>
+    </ol>
+    <p>The answer to the supplier is not "rejected" and not "accepted". It is a request: 125 parts in 25 consecutive subgroups, in production order, with the chart, the gauge R&amp;R reference, and both sigma estimates named. If the process is what the 30 parts suggest, that study will show Cpk near 1.4 with an interval of about ±0.2 and everyone can sign. If it is not, you have found out before the field did.</p>
+    <div class="calc" data-calc="capability" id="calc-cap-supplier">
+      <h3>The supplier's 30 values in the calculator (inputs collapsed; expand to edit)</h3>
+      <script type="application/json" class="calc-data">{"x":[5.005,5.003,4.998,5.0,5.0,5.007,4.998,5.004,5.001,5.003,5.0,5.002,5.002,5.001,5.002,5.001,5.004,5.006,5.0,5.0,5.002,4.996,5.001,4.999,4.998,4.996,5.0,5.002,4.999,4.998],"usl":5.012,"lsl":4.988,"target":5.0,"subgroup_size":1,"chart":"imr","units":"mm","label":"m08-supplier","collapsed":true}</script>
+    </div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol>
+      <li><strong>Transforming before diagnosing.</strong> Consequence: a mixture of two cavities becomes a "lognormal process" with a Cpk, and the cavity that is out of tolerance is never found. Fix: stratify and chart first; transform only a homogeneous, physically bounded characteristic.</li>
+      <li><strong>Reading the within-sigma index on a drifting process as the capability.</strong> Consequence: Cwk = 1.37 goes on the report, the customer receives 1,900 PPM. Fix: chart first; on an unstable process report Ppk, the chart, and the diagnosis.</li>
+      <li><strong>Computing a normal Cpk on a form tolerance.</strong> Consequence: 1 PPM predicted, 5,000 observed. Fix: fit a defended distribution or transform, use the ISO quantile or z-score method, and report the observed count.</li>
+      <li><strong>Using empirical percentiles on a small sample.</strong> Consequence: the "index" is the tolerance divided by the sample range and changes with every lot. Fix: reserve it for thousands of values; otherwise fit.</li>
+      <li><strong>Inventing a lower limit of zero.</strong> Consequence: a Cp and a Cpl that describe nothing. Fix: one-sided characteristics get one-sided indices.</li>
+      <li><strong>Reporting a proportion without an interval.</strong> Consequence: 2.3 % before and 1.9 % after are declared an improvement when the intervals overlap almost entirely. Fix: Wilson interval and a two-proportion test; plan the sample size for the precision you need.</li>
+      <li><strong>Accepting "Cpk = 1.38" from 30 tote parts.</strong> Consequence: the true index may be 1.0. Fix: the six questions; ask for 125 in order.</li>
+      <li><strong>Treating the ISO time-dependent models as a licence.</strong> Consequence: an unexplained drift is modelled instead of fixed. Fix: a systematic, understood, compensated drift can be modelled; an unexplained one is a special cause with a job attached.</li>
+    </ol>
+
+    <h2 id="exercises">Exercises</h2>
+    <h3 id="ex1">Exercise 1: radial runout, bounded at zero</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: radial runout of a turned shaft on a dial indicator reading to 0.001 mm, 80 consecutive parts, drawing maximum 0.030 mm. Runout is the length of a two-dimensional eccentricity vector, so it is bounded at zero and skewed by geometry; the data were constructed that way.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 7. Radial runout, mm, 80 consecutive parts (constructed data), read across each row.</caption><thead><tr><th>Parts</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+<tr><td>1–10</td><td>0.007</td><td>0.007</td><td>0.013</td><td>0.014</td><td>0.010</td><td>0.007</td><td>0.007</td><td>0.005</td><td>0.005</td><td>0.004</td></tr>
+<tr><td>11–20</td><td>0.007</td><td>0.005</td><td>0.006</td><td>0.002</td><td>0.009</td><td>0.019</td><td>0.001</td><td>0.002</td><td>0.013</td><td>0.003</td></tr>
+<tr><td>21–30</td><td>0.005</td><td>0.007</td><td>0.010</td><td>0.010</td><td>0.024</td><td>0.015</td><td>0.007</td><td>0.013</td><td>0.014</td><td>0.002</td></tr>
+<tr><td>31–40</td><td>0.018</td><td>0.009</td><td>0.003</td><td>0.018</td><td>0.005</td><td>0.005</td><td>0.007</td><td>0.014</td><td>0.008</td><td>0.005</td></tr>
+<tr><td>41–50</td><td>0.016</td><td>0.013</td><td>0.020</td><td>0.009</td><td>0.020</td><td>0.008</td><td>0.010</td><td>0.006</td><td>0.008</td><td>0.008</td></tr>
+<tr><td>51–60</td><td>0.004</td><td>0.008</td><td>0.007</td><td>0.005</td><td>0.007</td><td>0.011</td><td>0.008</td><td>0.008</td><td>0.010</td><td>0.009</td></tr>
+<tr><td>61–70</td><td>0.009</td><td>0.012</td><td>0.008</td><td>0.009</td><td>0.004</td><td>0.005</td><td>0.003</td><td>0.007</td><td>0.013</td><td>0.009</td></tr>
+<tr><td>71–80</td><td>0.012</td><td>0.005</td><td>0.011</td><td>0.009</td><td>0.004</td><td>0.015</td><td>0.010</td><td>0.012</td><td>0.017</td><td>0.004</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Summarise the data and say whether a normal model is plausible. (b) Compute the naive normal PpU and its predicted PPM. (c) Fit a lognormal (compute the statistics of ln x and test the fit) and say whether it is acceptable. (d) Find the Box-Cox λ (any software, or use λ = 0.4), compute PpU on the transformed scale and the predicted PPM. (e) Compute C<sub>npk</sub> from the empirical percentiles and say why it should not be reported. (f) Write the one-paragraph capability statement, including the observed count.</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> n = 80, mean <span data-ex="m08-ex1-runout" data-key="descriptive.mean" data-dp="5">0.00898</span> mm, median <span data-ex="m08-ex1-runout" data-key="descriptive.median" data-dp="3">0.008</span>, s = <span data-ex="m08-ex1-runout" data-key="descriptive.s" data-dp="5">0.00475</span>, minimum <span data-ex="m08-ex1-runout" data-key="descriptive.min" data-dp="3">0.001</span>, maximum <span data-ex="m08-ex1-runout" data-key="descriptive.max" data-dp="3">0.024</span>. Skewness <span data-ex="m08-ex1-runout" data-key="descriptive.skewness" data-dp="2">0.86</span>; Anderson-Darling A² = <span data-ex="m08-ex1-runout" data-key="descriptive.ad_A2" data-dp="2">1.37</span>, p = <span data-ex="m08-ex1-runout" data-key="descriptive.ad_p" data-dp="4">0.0014</span>. Not normal, and the physics says it should not be. The raw I-MR chart (UCL <span data-ex="m08-ex1-runout" data-key="chart_raw.ucl_x" data-dp="4">0.0222</span>, a lower limit below zero) flags part 25 and one moving range, the tail crossing a symmetric limit as in the flatness example; the log-scale chart flags part 17, the smallest value at 0.001 mm, which is the resolution floor of the indicator rather than a process event. No evidence of a change over the 80 parts.</p>
+      <p><strong>(b)</strong> PpU = (0.030 − 0.00898) / (3 × 0.00475) = 0.02102 / 0.01426 = <span data-ex="m08-ex1-runout" data-key="normal.Ppu" data-dp="2">1.47</span>, predicting <span data-ex="m08-ex1-runout" data-key="normal.ppm_total" data-dp="1">4.8</span> PPM. The same model puts x̄ − 3s at <span data-ex="m08-ex1-runout" data-key="normal.lower_3s" data-dp="5">−0.00528</span> mm.</p>
+      <p><strong>(c)</strong> ln x: μ = <span data-ex="m08-ex1-runout" data-key="lognormal.mu" data-dp="4">−4.8662</span>, σ = <span data-ex="m08-ex1-runout" data-key="lognormal.sigma" data-dp="4">0.5937</span>; Anderson-Darling A² = <span data-ex="m08-ex1-runout" data-key="lognormal.ad_A2" data-dp="2">0.80</span>, p = <span data-ex="m08-ex1-runout" data-key="lognormal.ad_p" data-dp="3">0.036</span>; the log values are left-skewed (skewness <span data-ex="m08-ex1-runout" data-key="lognormal.skewness_log" data-dp="2">−0.75</span>). The lognormal over-corrects: it fits a heavier right tail than the data have, and its 99.865 % quantile of <span data-ex="m08-ex1-runout" data-key="lognormal.x99865" data-dp="4">0.0457</span> mm gives PpU.G = <span data-ex="m08-ex1-runout" data-key="lognormal.Ppu_G" data-dp="2">0.59</span> and <span data-ex="m08-ex1-runout" data-key="lognormal.ppm_total" data-dp="0">11,010</span> PPM, which nobody should believe on a p of 0.036. Reject the lognormal. (A Rayleigh or a folded normal is the physically right family for a vector magnitude; the point of the exercise is that "skewed" does not mean "lognormal".)</p>
+      <p><strong>(d)</strong> λ̂ = <span data-ex="m08-ex1-runout" data-key="boxcox.lambda_mle" data-dp="3">0.395</span>, used as <span data-ex="m08-ex1-runout" data-key="boxcox.lambda_used" data-dp="1">0.4</span>. Transformed values have mean <span data-ex="m08-ex1-runout" data-key="boxcox.mean_y" data-dp="4">−2.1335</span> and s = <span data-ex="m08-ex1-runout" data-key="boxcox.s_y" data-dp="5">0.08132</span>; Anderson-Darling p = <span data-ex="m08-ex1-runout" data-key="boxcox.ad_p" data-dp="2">0.39</span>, acceptable. Transformed limit (0.030<sup>0.4</sup> − 1)/0.4 = (0.24595 − 1)/0.4 = <span data-ex="m08-ex1-runout" data-key="boxcox.usl_transformed" data-dp="4">−1.8851</span>. PpU on that scale = (0.2484) / 0.24397 = <span data-ex="m08-ex1-runout" data-key="boxcox.Ppu_y" data-dp="2">1.02</span>, predicting <span data-ex="m08-ex1-runout" data-key="boxcox.ppm_total" data-dp="0">1,127</span> PPM, or 0.09 parts in 80. Quantiles transformed back: <span data-ex="m08-ex1-runout" data-key="boxcox.x0135" data-dp="5">0.00053</span>, <span data-ex="m08-ex1-runout" data-key="boxcox.x50" data-dp="5">0.00823</span>, <span data-ex="m08-ex1-runout" data-key="boxcox.x99865" data-dp="5">0.02946</span> mm; PpU.G = <span data-ex="m08-ex1-runout" data-key="boxcox.Ppu_G" data-dp="2">1.03</span>.</p>
+      <p><strong>(e)</strong> Median <span data-ex="m08-ex1-runout" data-key="empirical.x50" data-dp="3">0.008</span>, maximum <span data-ex="m08-ex1-runout" data-key="empirical.x99865" data-dp="3">0.024</span>: C<sub>npk</sub> = (0.030 − 0.008)/(0.024 − 0.008) = <span data-ex="m08-ex1-runout" data-key="empirical.Cnpk" data-dp="2">1.38</span>. With 80 values the 99.865 % point is the largest value seen, and the index is the tolerance over the sample range: it will fall the first time an 0.029 mm part appears.</p>
+      <p><strong>(f)</strong> "Radial runout, 80 consecutive parts, I-MR chart on the transformed values stable; normal model rejected (A² = 1.37), lognormal rejected (p = 0.036), Box-Cox λ = 0.4 accepted (p = 0.39); PpU = 1.02 on the transformed scale (PpU.G = 1.03), predicted 1,127 PPM above 0.030 mm, <span data-ex="m08-ex1-runout" data-key="observed.n_out" data-dp="0">0</span> of 80 observed. The naive normal figure of 1.47 overstates the margin." The spread of answers, 0.59 to 1.47 for the same 80 numbers, is the reason the method has to be named.</p>
+      <div class="calc" data-calc="descriptive" id="calc-desc-ex1">
+        <h3>Exercise 1 histogram (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"x":[0.007,0.007,0.013,0.014,0.01,0.007,0.007,0.005,0.005,0.004,0.007,0.005,0.006,0.002,0.009,0.019,0.001,0.002,0.013,0.003,0.005,0.007,0.01,0.01,0.024,0.015,0.007,0.013,0.014,0.002,0.018,0.009,0.003,0.018,0.005,0.005,0.007,0.014,0.008,0.005,0.016,0.013,0.02,0.009,0.02,0.008,0.01,0.006,0.008,0.008,0.004,0.008,0.007,0.005,0.007,0.011,0.008,0.008,0.01,0.009,0.009,0.012,0.008,0.009,0.004,0.005,0.003,0.007,0.013,0.009,0.012,0.005,0.011,0.009,0.004,0.015,0.01,0.012,0.017,0.004],"usl":0.03,"lsl":null,"units":"mm","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h3 id="ex2">Exercise 2: cosmetic rejects on painted covers</h3>
+    <p class="example-label">Constructed data, not a real production run. Setting: painted covers inspected 100 % at the end of the paint line for cosmetic defects, one lot per day for 20 days.</p>
+    <div class="table-wrap"><table class="data"><caption>Table 8. Cosmetic rejects by daily lot (constructed data).</caption><thead><tr><th>Day</th><th>n</th><th>Rejects</th><th>p</th></tr></thead><tbody>
+<tr><td>1</td><td>398</td><td>6</td><td>0.0151</td></tr>
+<tr><td>2</td><td>401</td><td>5</td><td>0.0125</td></tr>
+<tr><td>3</td><td>421</td><td>4</td><td>0.0095</td></tr>
+<tr><td>4</td><td>436</td><td>7</td><td>0.0161</td></tr>
+<tr><td>5</td><td>362</td><td>3</td><td>0.0083</td></tr>
+<tr><td>6</td><td>371</td><td>4</td><td>0.0108</td></tr>
+<tr><td>7</td><td>426</td><td>3</td><td>0.0070</td></tr>
+<tr><td>8</td><td>436</td><td>5</td><td>0.0115</td></tr>
+<tr><td>9</td><td>380</td><td>3</td><td>0.0079</td></tr>
+<tr><td>10</td><td>385</td><td>3</td><td>0.0078</td></tr>
+<tr><td>11</td><td>430</td><td>7</td><td>0.0163</td></tr>
+<tr><td>12</td><td>394</td><td>3</td><td>0.0076</td></tr>
+<tr><td>13</td><td>382</td><td>4</td><td>0.0105</td></tr>
+<tr><td>14</td><td>427</td><td>10</td><td>0.0234</td></tr>
+<tr><td>15</td><td>380</td><td>9</td><td>0.0237</td></tr>
+<tr><td>16</td><td>393</td><td>6</td><td>0.0153</td></tr>
+<tr><td>17</td><td>412</td><td>5</td><td>0.0121</td></tr>
+<tr><td>18</td><td>404</td><td>3</td><td>0.0074</td></tr>
+<tr><td>19</td><td>366</td><td>2</td><td>0.0055</td></tr>
+<tr><td>20</td><td>362</td><td>9</td><td>0.0249</td></tr>
+</tbody></table></div>
+    <p><strong>Tasks.</strong> (a) Build the p chart and state whether the reject rate is stable. (b) Give p̂, its Wilson 95 % interval, the DPMO and the long-term Z. (c) The plant target is 0.6 % (half the current rate). Can these 20 days distinguish the current rate from the target? (d) How many covers must be inspected after an improvement to know the rate to within ±0.4 percentage points?</p>
+    <details>
+      <summary>Show the worked solution</summary>
+      <p><strong>(a)</strong> <span data-ex="m08-ex2-paint" data-key="d_total" data-dp="0">101</span> rejects in <span data-ex="m08-ex2-paint" data-key="n_total" data-dp="0">7,966</span> covers, p̄ = <span data-ex="m08-ex2-paint" data-key="pbar" data-dp="4">0.0127</span>. The limits run from about 0.0288 to 0.0303 depending on the day's lot size, with lower limits at zero. The worst day, day 20 at 0.0249, is inside its limit. No rule fires: stable.</p>
+      <p><strong>(b)</strong> p̂ = <span data-ex="m08-ex2-paint" data-key="pct" data-dp="2">1.27</span> %; Wilson interval <span data-ex="m08-ex2-paint" data-key="wilson_ci95.0" data-dp="4">0.0104</span> to <span data-ex="m08-ex2-paint" data-key="wilson_ci95.1" data-dp="4">0.0154</span> (1.04 % to 1.54 %); DPMO <span data-ex="m08-ex2-paint" data-key="dpmo" data-dp="0">12,679</span> (<span data-ex="m08-ex2-paint" data-key="dpmo_ci95.0" data-dp="0">10,446</span> to <span data-ex="m08-ex2-paint" data-key="dpmo_ci95.1" data-dp="0">15,381</span>); Z<sub>long-term</sub> = <span data-ex="m08-ex2-paint" data-key="z_long_term" data-dp="2">2.24</span>, sigma level with the shift <span data-ex="m08-ex2-paint" data-key="sigma_level_shifted" data-dp="2">3.74</span>, Z/3 = 0.75.</p>
+      <p><strong>(c)</strong> Yes: the target of 0.6 % (6,339 DPMO) lies well below the lower end of the interval (1.04 %). The current process is not at target, and the data are sufficient to say so.</p>
+      <p><strong>(d)</strong> N = 1.96² × 0.01252 / 0.004² = <span data-ex="m08-ex2-paint" data-key="n_for_precision" data-dp="0">3,006</span> covers, about 7.5 days at the current lot size. Plan the confirmation run for that length before declaring the improvement.</p>
+      <div class="calc" data-calc="control" id="calc-p-ex2">
+        <h3>Exercise 2 p chart (inputs collapsed)</h3>
+        <script type="application/json" class="calc-data">{"type":"p","rows":[[398,6],[401,5],[421,4],[436,7],[362,3],[371,4],[426,3],[436,5],[380,3],[385,3],[430,7],[394,3],[382,4],[427,10],[380,9],[393,6],[412,5],[404,3],[366,2],[362,9]],"units":"covers","collapsed":true}</script>
+      </div>
+    </details>
+
+    <h2 id="quiz">Quiz</h2>
+    <p>Ten questions. Score 70 % or more to mark the module complete on this device.</p>
+    <form class="quiz" data-module="08">
+      <fieldset class="q" data-answer="c">
+        <legend>1. On a process whose X̄ chart shows a steady upward drift, the within-sigma index (Cwk, legacy Cpk) is 1.37 and the overall index (Ppk) is 0.97. The customer will receive parts according to</legend>
+        <label><input type="radio" name="q1" value="a"> 1.37, because the machine is capable</label>
+        <label><input type="radio" name="q1" value="b"> the average of the two</label>
+        <label><input type="radio" name="q1" value="c"> 0.97 at best, because the drift is part of what ships, and the process is not predictable</label>
+        <label><input type="radio" name="q1" value="d"> neither, because capability cannot be computed on drifting data</label>
+        <p class="explain" hidden>The overall spread includes the drift; the index is descriptive (Ppk) and the drift is the job.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>2. The first thing to do with a histogram that is not normal is</legend>
+        <label><input type="radio" name="q2" value="a"> apply a Box-Cox transformation</label>
+        <label><input type="radio" name="q2" value="b"> find out why: mixture, drift, sorting, resolution, or a natural bound</label>
+        <label><input type="radio" name="q2" value="c"> compute Cpk anyway; the index is robust</label>
+        <label><input type="radio" name="q2" value="d"> discard the tail values</label>
+        <p class="explain" hidden>Most non-normal histograms are inhomogeneous data; transforming them hides the cause.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="1.19" data-tolerance="0.02">
+        <legend>3. A fitted distribution has median 7.2 µm and 99.865 % quantile 26.4 µm; the maximum allowed is 30 µm. What is PpU by the general geometric method (two decimals)?</legend>
+        <input type="number" name="q3" step="any">
+        <p class="explain" hidden>(30 − 7.2) / (26.4 − 7.2) = 22.8 / 19.2 = 1.19.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="0.80" data-tolerance="0.01">
+        <legend>4. The fitted distribution puts a fraction above the limit equal to the normal tail beyond Z = 2.4. What is Ppk by the z-score method?</legend>
+        <input type="number" name="q4" step="any">
+        <p class="explain" hidden>Ppk.Z = z/3 = 2.4/3 = 0.80.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>5. The AIAG &amp; VDA manual's guideline for using the empirical 0.135 % and 99.865 % quantiles of the raw data is</legend>
+        <label><input type="radio" name="q5" value="a"> at least 30 values</label>
+        <label><input type="radio" name="q5" value="b"> at least 125 values in 25 subgroups</label>
+        <label><input type="radio" name="q5" value="c"> at least 200 values</label>
+        <label><input type="radio" name="q5" value="d"> of the order of 2,000 observations</label>
+        <p class="explain" hidden>With fewer, the extreme quantiles are just the sample minimum and maximum.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="a">
+        <legend>6. A flatness characteristic has a maximum of 25 µm and no minimum. Its capability index is</legend>
+        <label><input type="radio" name="q6" value="a"> the upper one-sided index alone, on a distribution that is probably not normal</label>
+        <label><input type="radio" name="q6" value="b"> Cp with a lower limit of zero</label>
+        <label><input type="radio" name="q6" value="c"> min(Cpu, Cpl) with LSL = 0</label>
+        <label><input type="radio" name="q6" value="d"> undefined</label>
+        <p class="explain" hidden>Zero is a natural bound, not a specification; only the existing side is an index.</p>
+      </fieldset>
+      <fieldset class="q" data-type="numeric" data-answer="0.67" data-tolerance="0.02">
+        <legend>7. A naive analyst computes a "Cpl" for a runout with mean 6.0 µm and s = 3.0 µm against an invented lower limit of 0. What number do they get, and (think about it) what does it mean?</legend>
+        <input type="number" name="q7" step="any">
+        <p class="explain" hidden>(6.0 − 0)/(3 × 3.0) = 0.67, which predicts 2.3 % of parts with negative runout. It means nothing.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="c">
+        <legend>8. Fifty rejects in 2,000 units gives p̂ = 2.5 %. The most useful next number on the report is</legend>
+        <label><input type="radio" name="q8" value="a"> the sigma level with the 1.5 shift</label>
+        <label><input type="radio" name="q8" value="b"> Cpk = Z/3</label>
+        <label><input type="radio" name="q8" value="c"> a 95 % interval on p̂ and a p chart showing the rate is stable</label>
+        <label><input type="radio" name="q8" value="d"> the DPMO with six opportunities per unit</label>
+        <p class="explain" hidden>Stability and precision are what make a proportion a capability statement; the conversions are optional.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="b">
+        <legend>9. A supplier reports Cpk = 1.38 from 30 parts. The 95 % interval on that estimate is roughly</legend>
+        <label><input type="radio" name="q9" value="a"> 1.35 to 1.41</label>
+        <label><input type="radio" name="q9" value="b"> 1.00 to 1.75</label>
+        <label><input type="radio" name="q9" value="c"> 1.30 to 1.46</label>
+        <label><input type="radio" name="q9" value="d"> it cannot be computed without the raw data</label>
+        <p class="explain" hidden>±1.96 √[1/(9n) + Ĉpk²/(2(n − 1))] with n = 30 is about ±0.37.</p>
+      </fieldset>
+      <fieldset class="q" data-answer="d">
+        <legend>10. Which of these is a legitimate reason for the Cpk on a report to differ from the one you compute from the same raw data?</legend>
+        <label><input type="radio" name="q10" value="a"> the supplier removed two outliers without documented cause</label>
+        <label><input type="radio" name="q10" value="b"> the supplier tried three transformations and kept the best</label>
+        <label><input type="radio" name="q10" value="c"> the supplier widened the tolerance on their copy of the drawing</label>
+        <label><input type="radio" name="q10" value="d"> the supplier used the within-subgroup sigma from rational subgroups and said so</label>
+        <p class="explain" hidden>A named sigma from real subgroups is a different, legitimate estimate; the other three are the misuses of this module.</p>
+      </fieldset>
+      <button type="submit">Check answers</button>
+      <button type="reset" class="secondary">Clear</button>
+      <output class="quiz-score" aria-live="polite"></output>
+    </form>
+
+    <details>
+      <summary>Answer key</summary>
+      <ol>
+        <li>c. The drift ships; Ppk 0.97 is descriptive.</li>
+        <li>b. Diagnose first.</li>
+        <li>1.19.</li>
+        <li>0.80.</li>
+        <li>d. About 2,000 observations.</li>
+        <li>a. Upper one-sided index only.</li>
+        <li>0.67, and it means nothing.</li>
+        <li>c. Interval and p chart.</li>
+        <li>b. 1.00 to 1.75.</li>
+        <li>d. A named within sigma from rational subgroups.</li>
+      </ol>
+    </details>
+
+    <h2 id="takeaways">Key takeaways</h2>
+    <ul class="takeaways">
+      <li>Chart first. On an unstable process the index is Ppk, a description of the sample; the useful output is the diagnosis (drift, shift, mixture) and what the within-subgroup spread could support if it were fixed.</li>
+      <li>A non-normal histogram is a question, not a distribution. Mixtures, drift, sorting and gauge resolution are cured by stratifying, charting and fixing the gauge, not by transforming. Only a homogeneous, physically bounded characteristic gets a fitted distribution or a transformation.</li>
+      <li>ISO 22514 and the AIAG &amp; VDA manual define capability for any shape by the 0.135 %, 50 % and 99.865 % quantiles (the G method) or by the tail areas converted to a normal Z (the Z method). Name the method and the fitted distribution on the report.</li>
+      <li>The naive normal index on a bounded characteristic can be wrong by orders of magnitude on the side that matters. The flatness data gave 1 PPM by the normal model and about 2,000 by the lognormal, with one part in 200 actually out.</li>
+      <li>Empirical percentiles need thousands of values; with hundreds they are the sample range in disguise. Report the observed count out of tolerance next to every prediction.</li>
+      <li>One-sided characteristics get one-sided indices. Zero is a natural bound, not a specification.</li>
+      <li>Attribute capability is p̂ with a stable p chart, a Wilson interval and a planned sample size; the DPMO and sigma-level conversions are optional and carry Module 6's caveats.</li>
+      <li>A capability report you cannot reproduce is not a report. Ask for the chart, the sigma, the sample size and its order, the gauge R&amp;R, the distribution check, and the interval.</li>
+    </ul>
+
+    <h2 id="references">References</h2>
+    <p class="small">All web sources accessed 2026-09-09. Sources marked "secondary" were not read in the original by the course author; the claim is taken from the source shown. Standards are paraphrased, never quoted at length.</p>
+    <ol class="references">
+      <li id="ref-1">AIAG &amp; VDA. <em>Statistical Process Control (SPC) Manual: Process Management, Performance and Capability, Control Charts</em>, 1st ed. AIAG and VDA QMC, February 2026 (AIAG catalogue SPCAV-1). Section 7.4 (p. 38, Cp and Cpk only for a stable process); Sections 7.8.1 to 7.8.2 (pp. 45 to 50: distribution models, Box-Cox and Johnson transformations, the general geometric method, the z-score method, the 2,000-observation guideline for empirical quantiles); p. 48 (natural limits); Sections 9.3 to 9.5 (pp. 67 to 75, time-dependent process models). <a href="https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1">https://www.aiag.org/training-and-resources/manuals/details/SPCAV-1</a> <span class="tag">(licensed copy read by the author)</span></li>
+      <li id="ref-2">NIST/SEMATECH. "6.1.6. What is Process Capability?" <em>e-Handbook of Statistical Methods</em>. Capability for an in-control process; Box-Cox transformation; nonparametric C<sub>np</sub>, C<sub>npk</sub> and C<sub>npm</sub> from the 0.135 % and 99.865 % percentiles. <a href="https://www.itl.nist.gov/div898/handbook/pmc/section1/pmc16.htm">https://www.itl.nist.gov/div898/handbook/pmc/section1/pmc16.htm</a></li>
+      <li id="ref-3">NIST/SEMATECH. "7.2.4.1. Confidence intervals" (for a proportion). <em>e-Handbook of Statistical Methods</em>. Wilson interval recommended for essentially all n and p; exact binomial interval for very small counts. <a href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm">https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm</a></li>
+      <li id="ref-4">Wheeler, D. J. "The Keys to Quality Assurance: It Takes More Than a Good Capability Ratio." <em>Quality Digest</em>, 4 March 2019 (SPC Press manuscript 345). <a href="https://spcpress.com/pdf/DJW345.pdf">https://spcpress.com/pdf/DJW345.pdf</a></li>
+      <li id="ref-5">Wheeler, D. J. "Problems with Skewness and Kurtosis, Part One" and "Part Two." <em>Quality Digest</em>, 1 and 2 August 2011 (SPC Press manuscripts 231 and 232). Part One on what the shape parameters measure (the tails); Part Two on the uncertainty of the sample statistics, the robustness of three-sigma limits for homogeneous data of any shape, and the argument against transforming data before charting. <a href="https://spcpress.com/pdf/DJW231.pdf">https://spcpress.com/pdf/DJW231.pdf</a> ; <a href="https://spcpress.com/pdf/DJW232.pdf">https://spcpress.com/pdf/DJW232.pdf</a></li>
+      <li id="ref-6">Clements, J. A. "Process Capability Calculations for Non-Normal Distributions." <em>Quality Progress</em> 22(9):95 to 100, 1989. <a href="https://asq.org/quality-progress/articles/column-qualityware-process-capability-calculations-for-non-normal-distributions?id=236610e130d446d783460aa0debc745f">https://asq.org/quality-progress/articles/...</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-7">Box, G. E. P., and Cox, D. R. "An Analysis of Transformations." <em>Journal of the Royal Statistical Society, Series B</em> 26(2):211 to 252, 1964. <a href="https://academic.oup.com/jrsssb/article/26/2/211/7028064">https://academic.oup.com/jrsssb/article/26/2/211/7028064</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-8">Johnson, N. L. "Systems of Frequency Curves Generated by Methods of Translation." <em>Biometrika</em> 36(1/2):149 to 176, 1949. <a href="https://academic.oup.com/biomet/article-abstract/36/1-2/149/200775">https://academic.oup.com/biomet/article-abstract/36/1-2/149/200775</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-9">Kotz, S., and Johnson, N. L. "Process Capability Indices: A Review, 1992 to 2000 (with discussion)." <em>Journal of Quality Technology</em> 34(1):2 to 19, 2002. <a href="http://asq.org/qic/display-item/index.html?item=20422">http://asq.org/qic/display-item/index.html?item=20422</a> <span class="tag">(abstract read)</span></li>
+      <li id="ref-10">Somerville, S. E., and Montgomery, D. C. "Process Capability Indices and Non-Normal Distributions." <em>Quality Engineering</em> 9(2):305 to 316, 1996. <a href="https://www.tandfonline.com/doi/abs/10.1080/08982119608919047">https://www.tandfonline.com/doi/abs/10.1080/08982119608919047</a> <span class="tag">(secondary: cited through [9]; the claim that normal-based PPM predictions err badly on non-normal data is also demonstrated by this module's own examples)</span></li>
+      <li id="ref-11">ISO 22514-1:2014. <em>Statistical methods in process management. Capability and performance. Part 1: General principles and concepts</em>. International Organization for Standardization. <a href="https://www.iso.org/standard/64135.html">https://www.iso.org/standard/64135.html</a> <span class="tag">(scope and structure read from the public preview)</span></li>
+      <li id="ref-12">ISO 22514-2:2026. <em>Statistical methods in process management. Capability and performance. Part 2: Process capability and performance of time-dependent process models</em>, 3rd ed. International Organization for Standardization, 2026. <a href="https://www.dinmedia.de/en/standard/iso-22514-2/400044429">https://www.dinmedia.de/en/standard/iso-22514-2/400044429</a> <span class="tag">(catalogue entry read: edition, the eight time-dependent distribution models, and the extension to processes not always in statistical control; the standard's text was not read)</span></li>
+      <li id="ref-13">ISO/TR 22514-9:2023. <em>Statistical methods in process management. Capability and performance. Part 9: Process capability statistics for characteristics defined by geometrical specifications</em>. <a href="https://www.iso.org/standard/69643.html">https://www.iso.org/standard/69643.html</a> <span class="tag">(secondary: existence and scope from the catalogue listing; not read)</span></li>
+    </ol>
+    <h3>Further reading</h3>
+    <ul class="small">
+      <li>Bothe, D. R. <em>Measuring Process Capability</em>. McGraw-Hill, 1997. The most complete single treatment of non-normal, one-sided and attribute capability calculations.</li>
+      <li>Module 11 for the goodness-of-fit tests used here, Module 17 for p charts in full, Module 6 for DPMO and the sigma-level conventions.</li>
+    </ul>
+    <!-- AUTHOR: optional personal note here (a supplier capability report you had to send back, or a form tolerance that was "not capable" until someone looked at the histogram; no employer-specific detail) -->
+
+    <nav class="pager" aria-label="Module navigation" data-pager></nav>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>© <span data-year>2026</span> Erdem Yilmaz. <!-- AUTHOR: confirm name and copyright line --></p>
+  <p>Content licence: CC BY-NC-SA 4.0. Code: MIT.</p>
+  <p>Last updated 2026-09-09. Part of <a href="https://erdemyilmaz.me/">erdemyilmaz.me</a>.</p>
+</footer>
+
+<script src="../assets/js/stats.js"></script>
+<script src="../assets/js/course.js"></script>
+<script src="../assets/js/calculators.js"></script>
+</body>
+</html>
